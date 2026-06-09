@@ -388,7 +388,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 const PROXY = 'https://ipd-proxy-server.onrender.com';
-let SHEET_URL = localStorage.getItem('ipd_sheet_url') || '';
+let SHEET_URL = localStorage.getItem('ipd_sheet_url') || 'https://script.google.com/macros/s/AKfycbwuEeByI5LVi2TuS2R41CBdioM5BT2R4jp-BuT7tCk52ZFfe5-QsTaLFLMUO-rP5tIh/exec';
 
 // ── STOCK DATA ────────────────────────────────────────────────────────────────
 const initialStock = [
@@ -589,18 +589,14 @@ let searchTimer = null, aiTimer = null;
 function init() {
   const saved = localStorage.getItem('ipd_sm8_key');
   if (saved) document.getElementById('sm8-key-input').value = saved;
-  const savedUrl = localStorage.getItem('ipd_sheet_url') || '';
+  const savedUrl = localStorage.getItem('ipd_sheet_url') || SHEET_URL;
   document.getElementById('sheet-url-input').value = savedUrl;
   SHEET_URL = savedUrl;
   buildStockCats();
   renderStock();
   setupVoice();
   setupAiVoice();
-  if (SHEET_URL) loadQuoteData();
-  else {
-    document.getElementById('q-sdot').className = 's-dot warn';
-    document.getElementById('q-stext').textContent = 'No Sheet URL — add it in Settings';
-  }
+  loadQuoteData();
 }
 
 // ── NAVIGATION ────────────────────────────────────────────────────────────────
