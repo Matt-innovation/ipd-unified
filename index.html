@@ -1050,11 +1050,11 @@ function renderKB() {
 
   if (!filtered.length) { c.innerHTML = chipHtml + '<div class="state-box"><p>No results found.</p></div>'; return; }
 
-  const itemsHtml = filtered.map(k => {
+ return `<div class="kb-item" onclick="${hasCode ? `tapKbArticle('${esc(searchCode)}','${esc(k.title)}','${esc(k.url||'')}')` : ''}" const itemsHtml = filtered.map(k => {
     const hasCode = k.reeceCode && k.reeceCode.trim();
     // Strip REC prefix for searching in Reece tab
     const searchCode = hasCode ? k.reeceCode.trim().replace(/^REC/i,'') : '';
-    return `<div class="kb-item" onclick="${hasCode ? `tapKbArticle('${esc(searchCode)}','${esc(k.title)}')` : ''}" style="${hasCode?'cursor:pointer':''}">
+    style="${hasCode?'cursor:pointer':''}">
       <div class="kb-icon">${hasCode ? '🏪' : '📄'}</div>
       <div style="flex:1;min-width:0">
         <div class="kb-title">${esc(k.title)}</div>
@@ -1072,16 +1072,17 @@ function renderKB() {
 }
 
 function setKbCat(cat) { window._kbCat = cat; renderKB(); }
-
-function tapKbArticle(code, title) {
-  // Switch to search screen and search for the Reece code
-  goScreen('search');
-  const input = document.getElementById('q-search');
-  input.value = code;
-  window._kbCat = 'All';
-  quoteCat = 'All';
-  onQSearch();
-  showToast('Searching Reece for ' + title);
+function tapKbArticle(code, title, url) {
+  if (url && url.trim()) {
+    window.open(url, '_blank');
+  } else {
+    goScreen('search');
+    document.getElementById('q-search').value = code;
+    window._kbCat = 'All';
+    quoteCat = 'All';
+    onQSearch();
+    showToast('Searching Reece for ' + title);
+  }
 }
 
 // ── VOICE ─────────────────────────────────────────────────────────────────────
