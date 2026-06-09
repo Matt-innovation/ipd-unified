@@ -1,6 +1,7 @@
-
-<!DOCTYPE html>
-<!-- IPD Unified App v2.0 — Stock + Quotes -->
+OK Matt — let's just get it working. I'm going to paste the complete code in two halves. Copy Part 1, then immediately paste Part 2 right after it in GitHub. Don't put anything between them.
+Go to GitHub → ipd-unified → index.html → pencil ✏️ → select all → delete → then paste both parts.
+Here is Part 1:
+html<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -16,11 +17,11 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --orange:#f97316;--orange-dk:#ea6c0a;--orange-glow:rgba(249,115,22,0.15);
+  --orange:#f97316;--orange-dk:#ea6c0a;
   --blue:#3b82f6;--blue-lt:rgba(59,130,246,0.15);
   --red:#f87171;--red-lt:rgba(248,113,113,0.15);
   --green:#4ade80;--green-lt:rgba(74,222,128,0.15);
-  --purple:#a78bfa;--purple-lt:rgba(167,139,250,0.15);
+  --purple:#a78bfa;
   --bg:#0f1115;--surface:#161921;--surface2:#1c2130;--surface3:#212840;
   --border:#1e2535;--border2:#252d3d;
   --text:#e8edf5;--text-mid:#8494a8;--text-dim:#3d4d61;
@@ -28,23 +29,17 @@
   --nav-h:60px;--top-h:54px;--radius:12px;--radius-sm:8px;
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);-webkit-tap-highlight-color:transparent}
-#app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;background:var(--bg);position:relative}
-
-/* ── Top bar ── */
-.top-bar{height:var(--top-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;position:relative}
+#app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;background:var(--bg)}
+.top-bar{height:var(--top-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0}
 .top-logo{display:flex;align-items:center;gap:9px}
 .top-logo-mark{width:30px;height:30px;background:var(--orange);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
-.top-logo-text{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.top-logo-text{font-size:15px;font-weight:700;color:var(--text)}
 .top-logo-sub{font-size:10px;color:var(--text-mid)}
-.top-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.top-right{margin-left:auto}
 .quote-pill{background:rgba(249,115,22,.15);color:var(--orange);border:1px solid rgba(249,115,22,.3);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px}
-
-/* ── Screens ── */
 .screens{flex:1;overflow:hidden;position:relative}
 .screen{position:absolute;inset:0;overflow-y:auto;display:none;flex-direction:column}
 .screen.active{display:flex}
-
-/* ── Bottom nav ── */
 .bottom-nav{height:var(--nav-h);background:var(--surface);border-top:1px solid var(--border);display:flex;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom)}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border:none;background:none;color:var(--text-dim);font-family:var(--font);padding:6px 0;position:relative;transition:color .15s}
 .nav-btn.active{color:var(--orange)}
@@ -52,14 +47,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .nav-btn .nav-label{font-size:9px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
 .nav-badge{position:absolute;top:6px;right:calc(50% - 16px);background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:999px;padding:1px 5px;display:none;min-width:16px;text-align:center}
 .nav-badge.show{display:block}
-
-/* ── Stock screen stats bar ── */
 .stats-bar{display:flex;padding:10px 16px;gap:4px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
 .stat-pill{flex:1;text-align:center;background:var(--surface2);border-radius:var(--radius-sm);padding:6px 4px}
 .stat-num{font-size:16px;font-weight:700;line-height:1}
 .stat-label{font-size:8px;color:var(--text-dim);letter-spacing:.8px;margin-top:2px;text-transform:uppercase}
-
-/* ── Search bar ── */
 .search-wrap{padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
 .search-row{display:flex;gap:8px;align-items:center}
 .search-box{flex:1;position:relative}
@@ -67,25 +58,19 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .search-box input{width:100%;padding:9px 10px 9px 34px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:14px;font-family:var(--font);color:var(--text);background:var(--surface2);outline:none;transition:border-color .15s}
 .search-box input:focus{border-color:var(--orange)}
 .search-box input::placeholder{color:var(--text-dim)}
-.mic-btn{width:40px;height:40px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:18px;color:var(--text-mid);transition:all .15s}
+.mic-btn{width:40px;height:40px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:18px;color:var(--text-mid)}
 .mic-btn.listening{background:var(--red);border-color:var(--red);color:#fff;animation:mic-pulse 1.2s ease-in-out infinite}
 .voice-hint{font-size:11px;color:var(--red);margin-top:5px;display:none;align-items:center;gap:5px}
 .voice-hint.show{display:flex}
 .voice-dot{width:5px;height:5px;background:var(--red);border-radius:50%;animation:mic-pulse 1s infinite}
 @keyframes mic-pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(248,113,113,.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(248,113,113,0)}}
-
-/* ── Category chips ── */
 .cat-row{display:flex;gap:5px;padding:8px 16px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border)}
 .cat-row::-webkit-scrollbar{display:none}
 .cat-chip{padding:4px 11px;border-radius:999px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text-mid);white-space:nowrap;transition:all .15s;flex-shrink:0}
 .cat-chip.active{background:var(--orange);color:#fff;border-color:var(--orange)}
-
-/* ── List items ── */
 .list-body{flex:1;overflow-y:auto}
 .section-hd{padding:7px 16px;font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;background:var(--bg);border-bottom:1px solid var(--border);border-top:1px solid var(--border);position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:6px}
 .section-hd::before{content:'';width:6px;height:6px;border-radius:2px;background:currentColor;flex-shrink:0}
-
-/* Stock item */
 .stock-row{display:flex;align-items:center;padding:10px 16px;border-bottom:1px solid var(--border);gap:10px;background:var(--surface)}
 .stock-row:active{background:var(--surface2)}
 .stock-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
@@ -94,14 +79,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .stock-code{font-size:10px;color:var(--text-dim);font-family:var(--mono);margin-top:1px}
 .stock-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
 .stock-target{font-size:10px;color:var(--text-dim)}
-.stock-input{width:52px;height:32px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:15px;font-weight:600;font-family:var(--font);text-align:center;outline:none;transition:border-color .15s}
-.stock-input:focus{border-color:var(--orange)}
+.stock-input{width:52px;height:32px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:15px;font-weight:600;font-family:var(--font);text-align:center;outline:none}
 .stock-input.need{border-color:var(--red);background:rgba(248,113,113,.08)}
 .stock-input.good{border-color:var(--green);background:rgba(74,222,128,.08)}
 .order-badge{font-size:9px;font-weight:700;background:rgba(248,113,113,.15);color:var(--red);padding:2px 6px;border-radius:4px}
-
-/* Quote/search item */
-.item-card{display:flex;align-items:flex-start;padding:11px 16px;border-bottom:1px solid var(--border);gap:10px;background:var(--surface);transition:background .1s}
+.item-card{display:flex;align-items:flex-start;padding:11px 16px;border-bottom:1px solid var(--border);gap:10px;background:var(--surface)}
 .item-card:active{background:var(--surface2)}
 .item-icon{width:34px;height:34px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .item-icon.bundle{background:var(--blue-lt);color:var(--blue)}
@@ -114,20 +96,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .item-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
 .item-price{font-size:14px;font-weight:700;color:var(--text)}
 .item-price.dim{font-size:11px;font-weight:400;color:var(--text-dim)}
-.add-btn{width:28px;height:28px;border-radius:var(--radius-sm);background:var(--orange);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;line-height:1;transition:background .15s}
-.add-btn:active{background:var(--orange-dk)}
+.add-btn{width:28px;height:28px;border-radius:var(--radius-sm);background:var(--orange);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;line-height:1}
 .qty-ctrl{display:flex;align-items:center;gap:4px}
-.qty-btn{width:26px;height:26px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
-.qty-btn:active{background:var(--border2)}
+.qty-btn{width:26px;height:26px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .qty-num{font-size:13px;font-weight:700;min-width:18px;text-align:center;color:var(--orange)}
-
-/* AI inline */
 .ai-band{background:linear-gradient(135deg,rgba(59,130,246,.08) 0%,rgba(167,139,250,.08) 100%);border-bottom:1px solid var(--border);padding:10px 16px;flex-shrink:0}
 .ai-band-hd{display:flex;align-items:center;gap:6px;margin-bottom:8px}
 .ai-band-hd span{font-size:11px;font-weight:600;color:var(--blue)}
-.ai-chips{display:flex;flex-wrap:wrap;gap:5px}
-.ai-chip{padding:5px 10px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border2);font-size:11px;color:var(--text-mid);cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s}
-.ai-chip:active{background:var(--surface3);border-color:var(--orange)}
+.ai-chip{padding:5px 10px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border2);font-size:11px;color:var(--text-mid);cursor:pointer;display:flex;align-items:center;gap:5px;margin:2px}
 .ai-chip .chip-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px}
 .ai-chip .chip-badge.b{background:var(--blue-lt);color:var(--blue)}
 .ai-chip .chip-badge.r{background:var(--red-lt);color:var(--red)}
@@ -135,8 +111,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .mini-load{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text-dim)}
 .spin{width:12px;height:12px;border:2px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* AI Screen */
 .ai-wrap{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
 .ai-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden}
 .ai-card-hd{padding:10px 14px;background:linear-gradient(135deg,var(--blue) 0%,var(--purple) 100%);display:flex;align-items:center;gap:8px}
@@ -144,10 +118,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .ai-textarea{width:100%;padding:12px 14px;font-size:14px;font-family:var(--font);color:var(--text);background:var(--surface);border:none;outline:none;resize:none;min-height:88px;line-height:1.5}
 .ai-card-ft{padding:8px 14px;border-top:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between}
 .ai-card-ft .hint{font-size:11px;color:var(--text-dim)}
-.ai-go{padding:7px 16px;background:var(--orange);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;gap:5px}
+.ai-go{padding:7px 16px;background:var(--orange);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer}
 .ai-mic-btn{width:38px;height:38px;border-radius:var(--radius-sm);background:rgba(248,113,113,.15);border:1px solid var(--red);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:var(--red)}
-.ai-mic-btn.listening{background:var(--red);color:#fff;animation:mic-pulse 1.2s infinite}
-.ai-result-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:11px 13px;display:flex;align-items:flex-start;gap:10px}
+.ai-mic-btn.listening{background:var(--red);color:#fff}
+.ai-result-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:11px 13px;display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
 .ai-result-body{flex:1;min-width:0}
 .ai-result-name{font-size:13px;font-weight:500;color:var(--text)}
 .ai-result-why{font-size:11px;color:var(--text-mid);margin-top:3px;line-height:1.4}
@@ -155,8 +129,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .type-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px}
 .type-badge.b{background:var(--blue-lt);color:var(--blue)}
 .type-badge.r{background:var(--red-lt);color:var(--red)}
-
-/* Quote screen */
 .quote-item{padding:11px 16px;border-bottom:1px solid var(--border);background:var(--surface)}
 .qi-top{display:flex;justify-content:space-between;gap:8px;margin-bottom:5px}
 .qi-name{font-size:13px;font-weight:500;color:var(--text);line-height:1.3}
@@ -164,15 +136,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .qi-bot{display:flex;align-items:center;justify-content:space-between}
 .qi-meta{font-size:10px;color:var(--text-dim)}
 .qi-rm{background:none;border:none;color:var(--text-dim);cursor:pointer;padding:3px;font-size:16px}
-.qi-rm:active{color:var(--red)}
 .totals-box{padding:14px 16px;background:var(--surface2);border-top:2px solid var(--border2)}
 .total-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text-mid);padding:2px 0}
 .total-row.grand{font-size:16px;font-weight:700;color:var(--text);padding-top:9px;margin-top:7px;border-top:1px solid var(--border2)}
 .quote-actions{padding:10px 16px;display:flex;gap:8px;background:var(--surface)}
 .q-btn{flex:1;padding:11px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text-mid);display:flex;align-items:center;justify-content:center;gap:6px}
 .q-btn.primary{background:var(--orange);color:#fff;border-color:var(--orange)}
-
-/* Review screen */
 .review-wrap{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
 .review-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:14px}
 .review-card h3{font-size:13px;font-weight:600;color:var(--text-mid);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
@@ -184,15 +153,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .status-msg{padding:12px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;text-align:center}
 .status-msg.success{background:var(--green-lt);color:var(--green)}
 .status-msg.error{background:var(--red-lt);color:var(--red)}
-
-/* KB Screen */
 .kb-item{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px;background:var(--surface)}
 .kb-icon{width:32px;height:32px;background:rgba(74,222,128,.12);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--green);flex-shrink:0}
 .kb-title{font-size:13px;font-weight:500;color:var(--text)}
 .kb-desc{font-size:11px;color:var(--text-dim);margin-top:2px}
 .kb-cat{font-size:9px;background:var(--surface2);color:var(--text-mid);padding:2px 5px;border-radius:3px;margin-top:4px;display:inline-block;text-transform:uppercase;letter-spacing:.4px}
-
-/* Settings screen */
 .settings-wrap{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
 .settings-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden}
 .settings-card-hd{padding:10px 14px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px}
@@ -202,8 +167,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .settings-input:focus{border-color:var(--orange)}
 .settings-btn{padding:9px 16px;border-radius:var(--radius-sm);background:var(--orange);color:#fff;border:none;font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;align-self:flex-start}
 .settings-hint{font-size:11px;color:var(--text-dim);line-height:1.5}
-
-/* Shared states */
 .state-box{padding:36px 20px;text-align:center;color:var(--text-dim)}
 .state-box .state-icon{font-size:36px;margin-bottom:10px;display:block;opacity:.4}
 .state-box p{font-size:13px;line-height:1.6}
@@ -233,10 +196,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       </div>
     </div>
   </div>
-
   <div class="screens">
-
-    <!-- ── STOCK SCREEN ── -->
     <div class="screen active" id="screen-stock">
       <div class="stats-bar">
         <div class="stat-pill"><div class="stat-num" id="s-checked" style="color:#60a5fa">0</div><div class="stat-label">Checked</div></div>
@@ -252,15 +212,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <div class="cat-row" id="stock-cats"></div>
       <div class="list-body" id="stock-list"></div>
     </div>
-
-    <!-- ── REVIEW SCREEN ── -->
     <div class="screen" id="screen-review">
       <div class="review-wrap" id="review-wrap">
-        <div class="state-box"><span class="state-icon">🤖</span><p>Go to Stock, count your items,<br>then tap Review to get AI analysis.</p></div>
+        <div class="state-box"><span class="state-icon">🤖</span><p>Go to Stock, count your items, then tap Review.</p></div>
       </div>
     </div>
-
-    <!-- ── SEARCH/QUOTE SEARCH SCREEN ── -->
     <div class="screen" id="screen-search">
       <div class="status-bar"><div class="s-dot warn" id="q-sdot"></div><span id="q-stext">Loading data...</span></div>
       <div class="search-wrap">
@@ -273,19 +229,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <div class="cat-row" id="q-cats"></div>
       <div id="ai-band" style="display:none" class="ai-band">
         <div class="ai-band-hd"><span>✨</span><span>AI Suggestions</span></div>
-        <div id="ai-band-content"><div class="mini-load"><div class="spin"></div>Finding matches...</div></div>
+        <div id="ai-band-content" style="display:flex;flex-wrap:wrap"><div class="mini-load"><div class="spin"></div>Finding matches...</div></div>
       </div>
       <div id="q-list" class="list-body">
         <div class="state-box"><span class="state-icon">🔍</span><p>Search for a bundle or Reece product<br>or tap the mic and speak</p></div>
       </div>
     </div>
-
-    <!-- ── AI ASSIST SCREEN ── -->
     <div class="screen" id="screen-ai">
       <div class="ai-wrap">
         <div class="ai-card">
           <div class="ai-card-hd"><span>✨</span><span>Describe the job — I'll find the right items</span></div>
-          <textarea class="ai-textarea" id="ai-textarea" placeholder="e.g. Replace toilet suite and basin mixer, customer supplying the fixtures..."></textarea>
+          <textarea class="ai-textarea" id="ai-textarea" placeholder="e.g. Replace toilet suite and basin mixer..."></textarea>
           <div class="ai-card-ft">
             <span class="hint">Be as specific as you like</span>
             <div style="display:flex;gap:8px;align-items:center">
@@ -295,12 +249,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
           </div>
         </div>
         <div id="ai-results">
-          <div class="state-box" style="padding:16px 0"><span class="state-icon">💡</span><p>Describe the job above<br>and I'll suggest matching bundles and Reece products</p></div>
+          <div class="state-box" style="padding:16px 0"><span class="state-icon">💡</span><p>Describe the job above and I'll suggest matching bundles and Reece products</p></div>
         </div>
       </div>
     </div>
-
-    <!-- ── QUOTE SCREEN ── -->
     <div class="screen" id="screen-quote">
       <div id="quote-list" class="list-body">
         <div class="state-box"><span class="state-icon">📋</span><p>No items yet.<br>Add bundles or products from Search.</p></div>
@@ -315,21 +267,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
         <button class="q-btn primary" onclick="exportQuote()">⬇ Export</button>
       </div>
     </div>
-
-    <!-- ── KNOWLEDGE SCREEN ── -->
     <div class="screen" id="screen-kb">
       <div class="search-wrap">
-        <div class="search-box"><span class="s-icon">🔍</span><input type="text" id="kb-search" placeholder="Search by name, product or Reece code..." oninput="renderKB()"></div>
+        <div class="search-box"><span class="s-icon">🔍</span><input type="text" id="kb-search" placeholder="Search knowledge base..." oninput="renderKB()"></div>
       </div>
       <div style="padding:8px 16px;font-size:11px;color:var(--text-dim);background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0">
-        Tap any 🏪 article to instantly search that Reece product
+        Tap any 🏪 article to open on Reece website
       </div>
-      <div id="kb-list" class="list-body">
-        <div class="state-box"><div class="big-spin"></div><p>Loading...</p></div>
-      </div>
+      <div id="kb-list" class="list-body"></div>
     </div>
-
-    <!-- ── SETTINGS SCREEN ── -->
     <div class="screen" id="screen-settings">
       <div class="settings-wrap">
         <div class="settings-card">
@@ -337,7 +283,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
           <div class="settings-row">
             <div class="settings-label">Google Apps Script Web App URL</div>
             <input class="settings-input" id="sheet-url-input" type="url" placeholder="https://script.google.com/macros/s/...">
-            <div class="settings-hint">Paste your deployed Web App URL here. Get it from Extensions → Apps Script → Deploy → Manage Deployments.</div>
             <button class="settings-btn" onclick="saveSheetUrl()">Save & Reload</button>
           </div>
         </div>
@@ -352,796 +297,514 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
         <div class="settings-card">
           <div class="settings-card-hd">ℹ️ App Info</div>
           <div class="settings-row">
-            <div class="settings-hint">IPD Unified App v2.0<br>Stock + Field Quoting<br>Innovation Plumbing & Design · 3073 2666</div>
+            <div class="settings-hint">IPD Unified App v3.0<br>Stock + Field Quoting<br>Innovation Plumbing & Design · 3073 2666</div>
           </div>
         </div>
       </div>
     </div>
-
   </div>
-
-  <!-- Bottom nav -->
   <div class="bottom-nav">
-    <button class="nav-btn active" id="nav-stock" onclick="goScreen('stock')">
-      <div class="nav-icon">📦</div><div class="nav-label">Stock</div>
-    </button>
-    <button class="nav-btn" id="nav-search" onclick="goScreen('search')">
-      <div class="nav-icon">🔍</div><div class="nav-label">Search</div>
-    </button>
-    <button class="nav-btn" id="nav-ai" onclick="goScreen('ai')">
-      <div class="nav-icon">✨</div><div class="nav-label">AI Assist</div>
-    </button>
-    <button class="nav-btn" id="nav-quote" onclick="goScreen('quote')">
-      <div class="nav-icon">📋</div>
-      <div class="nav-badge" id="quote-badge">0</div>
-      <div class="nav-label">Quote</div>
-    </button>
-    <button class="nav-btn" id="nav-kb" onclick="goScreen('kb')">
-      <div class="nav-icon">📚</div><div class="nav-label">Knowledge</div>
-    </button>
-    <button class="nav-btn" id="nav-settings" onclick="goScreen('settings')">
-      <div class="nav-icon">⚙️</div><div class="nav-label">Settings</div>
-    </button>
+    <button class="nav-btn active" id="nav-stock" onclick="goScreen('stock')"><div class="nav-icon">📦</div><div class="nav-label">Stock</div></button>
+    <button class="nav-btn" id="nav-search" onclick="goScreen('search')"><div class="nav-icon">🔍</div><div class="nav-label">Search</div></button>
+    <button class="nav-btn" id="nav-ai" onclick="goScreen('ai')"><div class="nav-icon">✨</div><div class="nav-label">AI Assist</div></button>
+    <button class="nav-btn" id="nav-quote" onclick="goScreen('quote')"><div class="nav-icon">📋</div><div class="nav-badge" id="quote-badge">0</div><div class="nav-label">Quote</div></button>
+    <button class="nav-btn" id="nav-kb" onclick="goScreen('kb')"><div class="nav-icon">📚</div><div class="nav-label">Knowledge</div></button>
+    <button class="nav-btn" id="nav-settings" onclick="goScreen('settings')"><div class="nav-icon">⚙️</div><div class="nav-label">Settings</div></button>
   </div>
 </div>
-<div class="toast" id="toast"></div>
-
-<script>
-// ── CONFIG ────────────────────────────────────────────────────────────────────
-const PROXY = 'https://ipd-proxy-server.onrender.com';
-let SHEET_URL = localStorage.getItem('ipd_sheet_url') || 'https://script.google.com/macros/s/AKfycbwuEeByI5LVi2TuS2R41CBdioM5BT2R4jp-BuT7tCk52ZFfe5-QsTaLFLMUO-rP5tIh/exec';
-
-// ── STOCK DATA ────────────────────────────────────────────────────────────────
-const initialStock = [
-  { code: "416065", category: "BRASSWARE", name: "15mm Compression Tee", target: 3 },
-  { code: "208315", category: "BRASSWARE", name: "15mm Hex Nipple", target: 6 },
-  { code: "606900", category: "BRASSWARE", name: "15mm Compression Nuts", target: 20 },
-  { code: "415930", category: "BRASSWARE", name: "15mm Compression Elbows", target: 4 },
-  { code: "415960", category: "BRASSWARE", name: "15mm Female Compression Elbow", target: 4 },
-  { code: "208560", category: "BRASSWARE", name: "20mm x 15mm Reducing Nipple", target: 3 },
-  { code: "606905", category: "BRASSWARE", name: "20mm Compression Nut", target: 4 },
-  { code: "208320", category: "BRASSWARE", name: "20mm Hex Nipple", target: 2 },
-  { code: "209120", category: "BRASSWARE", name: "20mm Brass Plug", target: 2 },
-  { code: "207515", category: "BRASSWARE", name: "15mm Brass Cap", target: 5 },
-  { code: "209115", category: "BRASSWARE", name: "15mm Brass Plugs", target: 6 },
-  { code: "207715", category: "BRASSWARE", name: "15mm Female Brass Elbow", target: 1 },
-  { code: "209715", category: "BRASSWARE", name: "15mm Female Brass Tee", target: 1 },
-  { code: "415945", category: "BRASSWARE", name: "15mm Male Compression Elbow", target: 1 },
-  { code: "209500", category: "BRASSWARE", name: "15mm MF Brass Socket", target: 6 },
-  { code: "209365", category: "BRASSWARE", name: "15mm Brass Socket", target: 4 },
-  { code: "1006796", category: "BRASSWARE", name: "15mm Vacuum Breaker", target: 2 },
-  { code: "106210", category: "BRASSWARE", name: "15mm Female Hose Tap", target: 2 },
-  { code: "106160", category: "BRASSWARE", name: "15mm Male Hose Tap", target: 2 },
-  { code: "106206", category: "BRASSWARE", name: "15mm Lugged Male Hose Tap", target: 2 },
-  { code: "605904", category: "BRASSWARE", name: "20mm Nylon Olive", target: 6 },
-  { code: "605900", category: "BRASSWARE", name: "15mm Nylon Olive", target: 100 },
-  { code: "415125", category: "BRASSWARE", name: "15mm Eziplug End Cap", target: 10 },
-  { code: "415955", category: "BRASSWARE", name: "Rheem Elbow", target: 2 },
-  { code: "1702035", category: "BRASSWARE", name: "15mm Copper Cover Plate Flat", target: 6 },
-  { code: "1702040", category: "BRASSWARE", name: "15mm Copper Cover Plate Raised", target: 6 },
-  { code: "1702030", category: "BRASSWARE", name: "15mm BSP Cover Plate Flat", target: 10 },
-  { code: "1702010", category: "BRASSWARE", name: "15mm BSP Cover Plate Raised", target: 10 },
-  { code: "404661", category: "B-PRESS FITTINGS", name: "15mm B-Press Water Slip Coupling", target: 2 },
-  { code: "404662", category: "B-PRESS FITTINGS", name: "20mm B-Press Water Slip Coupling", target: 2 },
-  { code: "404691", category: "B-PRESS FITTINGS", name: "15mm B-Press Water End Cap", target: 2 },
-  { code: "404692", category: "B-PRESS FITTINGS", name: "20mm B-Press Water End Cap", target: 2 },
-  { code: "404606", category: "B-PRESS FITTINGS", name: "15mm B-Press Water Elbow", target: 4 },
-  { code: "404607", category: "B-PRESS FITTINGS", name: "20mm B-Press Water Elbow", target: 4 },
-  { code: "404631", category: "B-PRESS FITTINGS", name: "20mm x 15mm B-Press Water Reducer", target: 2 },
-  { code: "1534017", category: "AUSPEX FITTINGS", name: "16mm Lugged Elbow", target: 6 },
-  { code: "1534002", category: "AUSPEX FITTINGS", name: "16mm Tee", target: 8 },
-  { code: "1534000", category: "AUSPEX FITTINGS", name: "16mm Elbow", target: 8 },
-  { code: "1534006", category: "AUSPEX FITTINGS", name: "16mm Coupling", target: 4 },
-  { code: "1534045", category: "AUSPEX FITTINGS", name: "16mm Male Elbow", target: 6 },
-  { code: "1534013", category: "AUSPEX FITTINGS", name: "16mm Male Coupling", target: 6 },
-  { code: "1544580", category: "AUSPEX FITTINGS", name: "16mm Auspex to B-Press Adaptor", target: 2 },
-  { code: "1534038", category: "AUSPEX FITTINGS", name: "16mm Red Ring Adaptor", target: 2 },
-  { code: "1534040", category: "AUSPEX FITTINGS", name: "16mm Auspex to Polybute Adaptor", target: 2 },
-  { code: "1544581", category: "AUSPEX FITTINGS", name: "20mm Auspex to B-Press Adaptor", target: 2 },
-  { code: "1534039", category: "AUSPEX FITTINGS", name: "20mm Red Ring Adaptor", target: 2 },
-  { code: "1544537", category: "AUSPEX FITTINGS", name: "20mm Auspex to Polybute Adaptor", target: 2 },
-  { code: "1534003", category: "AUSPEX FITTINGS", name: "20mm Tee", target: 2 },
-  { code: "1534001", category: "AUSPEX FITTINGS", name: "20mm Elbow", target: 6 },
-  { code: "1534007", category: "AUSPEX FITTINGS", name: "20mm Coupling", target: 4 },
-  { code: "1534008", category: "AUSPEX FITTINGS", name: "20mm x 16mm Reducer", target: 4 },
-  { code: "1534004", category: "AUSPEX FITTINGS", name: "20x20x16 Tee", target: 6 },
-  { code: "1533999", category: "AUSPEX FITTINGS", name: "20x16x16 Tee", target: 2 },
-  { code: "103510", category: "ISOLATION VALVES", name: "Mini Stop", target: 4 },
-  { code: "1120077", category: "ISOLATION VALVES", name: "Capstan Washing Machine Stop", target: 2 },
-  { code: "107757", category: "FLEX HOSES", name: "300mm Pex Flex Hose", target: 2 },
-  { code: "107758", category: "FLEX HOSES", name: "450mm Pex Flex Hose", target: 4 },
-  { code: "107759", category: "FLEX HOSES", name: "600mm Pex Flex Hose", target: 2 },
-  { code: "2299904", category: "FLEX HOSES", name: "Mixer Tails", target: 1 },
-  { code: "1403810", category: "50mm PVC FITTINGS", name: "50mm Coupling", target: 4 },
-  { code: "1409117", category: "50mm PVC FITTINGS", name: "50mm SP Trap", target: 1 },
-  { code: "1405875", category: "50mm PVC FITTINGS", name: "50mm Floor Flange", target: 2 },
-  { code: "1403120", category: "50mm PVC FITTINGS", name: "50mm 90deg Bend", target: 10 },
-  { code: "1403110", category: "50mm PVC FITTINGS", name: "50mm 45deg Bend", target: 6 },
-  { code: "1403715", category: "50mm PVC FITTINGS", name: "50mm 90deg MF Bend", target: 1 },
-  { code: "1403710", category: "50mm PVC FITTINGS", name: "50mm 45 Bend MF", target: 4 },
-  { code: "1405510", category: "50mm PVC FITTINGS", name: "50mm MI Adaptor", target: 1 },
-  { code: "1405530", category: "50mm PVC FITTINGS", name: "50mm FI Adaptor", target: 1 },
-  { code: "1405650", category: "50mm PVC FITTINGS", name: "50mm MI Connector", target: 1 },
-  { code: "1405610", category: "50mm PVC FITTINGS", name: "50mm FI Connector", target: 1 },
-  { code: "1405455", category: "50mm PVC FITTINGS", name: "50mm Cap", target: 2 },
-  { code: "1409118", category: "50mm PVC FITTINGS", name: "50mm Double Bowl Connector", target: 1 },
-  { code: "1405710", category: "50mm PVC FITTINGS", name: "50mm x 40mm LIT", target: 2 },
-  { code: "1409116", category: "40mm PVC FITTINGS", name: "40mm SP Trap", target: 2 },
-  { code: "1403030", category: "40mm PVC FITTINGS", name: "40mm 90deg Bend", target: 6 },
-  { code: "1403020", category: "40mm PVC FITTINGS", name: "40mm 45deg Bend", target: 6 },
-  { code: "1403704", category: "40mm PVC FITTINGS", name: "40mm 90deg MF Bend", target: 1 },
-  { code: "1403705", category: "40mm PVC FITTINGS", name: "40mm 45deg MF Bend", target: 4 },
-  { code: "1403706", category: "40mm PVC FITTINGS", name: "40mm 90deg Inpipe Bend", target: 1 },
-  { code: "1409120", category: "40mm PVC FITTINGS", name: "40mm x 32mm Trap Adaptor", target: 2 },
-  { code: "1405505", category: "40mm PVC FITTINGS", name: "40mm MI Adaptor", target: 1 },
-  { code: "1405525", category: "40mm PVC FITTINGS", name: "40mm FI Adaptor", target: 1 },
-  { code: "1405645", category: "40mm PVC FITTINGS", name: "40mm MI Connector", target: 1 },
-  { code: "1405605", category: "40mm PVC FITTINGS", name: "40mm FI Connector", target: 1 },
-  { code: "1403805", category: "40mm PVC FITTINGS", name: "40mm Coupling", target: 4 },
-  { code: "1405870", category: "40mm PVC FITTINGS", name: "40mm Floor Flange", target: 2 },
-  { code: "506241", category: "CLIPS + FIXINGS", name: "20mm Pex Clip Masonry Nail", target: 50 },
-  { code: "506240", category: "CLIPS + FIXINGS", name: "16mm Pex Clip Masonry Nail", target: 50 },
-  { code: "506292", category: "CLIPS + FIXINGS", name: "15mm Copper Clip Masonry Nail", target: 50 },
-  { code: "508600", category: "CLIPS + FIXINGS", name: "15mm Copper Clip Head", target: 6 },
-  { code: "508605", category: "CLIPS + FIXINGS", name: "20mm Copper Clip Head", target: 6 },
-  { code: "540012", category: "CLIPS + FIXINGS", name: "15mm Copper Saddle", target: 10 },
-  { code: "509105", category: "CLIPS + FIXINGS", name: "Stand Off Brackets", target: 6 },
-  { code: "509055", category: "CLIPS + FIXINGS", name: "Adjustable Stand Off Bracket", target: 2 },
-  { code: "506000", category: "CLIPS + FIXINGS", name: "40mm Flush Clip", target: 2 },
-  { code: "506050", category: "CLIPS + FIXINGS", name: "40mm Stand Off Clip", target: 2 },
-  { code: "506005", category: "CLIPS + FIXINGS", name: "50mm Flush Clip", target: 4 },
-  { code: "506055", category: "CLIPS + FIXINGS", name: "50mm Stand Off Clip", target: 2 },
-  { code: "1906000", category: "CONSUMABLES", name: "Silver Duct Tape", target: 2 },
-  { code: "6802522", category: "CONSUMABLES", name: "MAPP Gas", target: 1 },
-  { code: "1903591", category: "CONSUMABLES", name: "Clear Priming Fluid", target: 2 },
-  { code: "1903602", category: "CONSUMABLES", name: "Clear Glue", target: 2 },
-  { code: "1903577", category: "CONSUMABLES", name: "Clear Silicone (RG)", target: 2 },
-  { code: "1903783", category: "CONSUMABLES", name: "Loxeal", target: 1 },
-  { code: "7900051", category: "CONSUMABLES", name: "Pocket Knife Blades", target: 1 },
-  { code: "1842866", category: "CONSUMABLES", name: "Soft Turn Tap Washers", target: 25 },
-  { code: "1842781", category: "CONSUMABLES", name: "Fibre Body Washers", target: 10 },
-  { code: "4913019", category: "CONSUMABLES", name: "Blue Expandit Plugs", target: 1 },
-  { code: "7101520", category: "CONSUMABLES", name: "Drain Solvent", target: 1 },
-  { code: "1906014", category: "CONSUMABLES", name: "Black Duct Tape", target: 1 },
-  { code: "4913097", category: "CONSUMABLES", name: "Zinc WallMates", target: 6 },
-  { code: "108398", category: "CONSUMABLES", name: "Reseating Tool Head", target: 1 },
-  { code: "1903694", category: "CONSUMABLES", name: "Grey Thread Tape", target: 10 },
-  { code: "1903582", category: "CONSUMABLES", name: "White Silicone", target: 1 },
-  { code: "1903625", category: "CONSUMABLES", name: "Ferropre", target: 1 },
-  { code: "3405052", category: "CONSUMABLES", name: "Marking Paint (Pink)", target: 1 },
-  { code: "BUNNINGS-WD40", category: "CONSUMABLES", name: "WD40", target: 1 },
-  { code: "1903025", category: "CONSUMABLES", name: "Silver Solder 5%", target: 2 },
-  { code: "108374", category: "CONSUMABLES", name: "Hydroseal Tap Grease", target: 1 },
-  { code: "8028078", category: "CONSUMABLES", name: "Disposable Gloves", target: 1 },
-  { code: "1003046", category: "CONSUMABLES", name: "Water Main Lubricant", target: 1 },
-  { code: "9508811", category: "TAPWARE", name: "Posh Solus MK3 Sink Mixer", target: 2 },
-  { code: "1700672", category: "TAPWARE", name: "Standard Shower Rose + Arm", target: 2 },
-  { code: "1842803", category: "TAP SPARES", name: "15mm Stainless Tap Seat (Packet)", target: 6 },
-  { code: "1842342", category: "TAP SPARES", name: "9LPM Female Aerator", target: 2 },
-  { code: "1842344", category: "TAP SPARES", name: "9LPM Male Aerator", target: 2 },
-  { code: "1843035", category: "TAP SPARES", name: "8.5LPM Water Saving Discs", target: 2 },
-  { code: "1403737", category: "TOILET HARDWARE", name: "100mm x 20mm Offset Flexifin Pan Collar", target: 1 },
-  { code: "1403727", category: "TOILET HARDWARE", name: "100mm x 40mm Offset Flexifin Pan Collar", target: 1 },
-  { code: "1409970", category: "TOILET HARDWARE", name: "Pan Collar Rubber", target: 1 },
-  { code: "1409950", category: "TOILET HARDWARE", name: "Pan Collar Rubber (Lipped)", target: 1 },
-  { code: "1403736", category: "TOILET HARDWARE", name: "100mm Straight Flexifin Pan Collar", target: 1 },
-  { code: "1842173", category: "TOILET HARDWARE", name: "Fluidmaster", target: 2 },
-  { code: "1842326", category: "TOILET HARDWARE", name: "50mm Keeseal", target: 1 },
-  { code: "405006",  category: "TOILET HARDWARE", name: "Caroma Cistern Outlet Washer (Red)", target: 4 },
-  { code: "1908476", category: "TOILET HARDWARE", name: "50mm Pan Cone", target: 1 },
-  { code: "1842816", category: "TOILET HARDWARE", name: "Cistern Pan Screws (12pk)", target: 1 },
-  { code: "1903772", category: "TOILET HARDWARE", name: "Wax Pan Seal", target: 1 },
-  { code: "1842800", category: "TRAP SPARES", name: "40mm Trap Washer Set", target: 1 },
-  { code: "1842799", category: "TRAP SPARES", name: "50mm Trap Washer Set", target: 1 },
-  { code: "1900299", category: "TRAP SPARES", name: "50mm Double Tapered Trap Washer", target: 2 },
-  { code: "1400200", category: "PVC PIPE", name: "100mm DWV Pipe", target: 1 },
-  { code: "1400110", category: "PVC PIPE", name: "50mm DWV Pipe", target: 1 },
-  { code: "1400105", category: "PVC PIPE", name: "40mm DWV Pipe", target: 1 },
-  { code: "801215",  category: "COPPER PIPE", name: "20mm Copper Pipe", target: 1 },
-  { code: "801020",  category: "COPPER PIPE", name: "15mm Copper Pipe", target: 1 },
-  { code: "1537759", category: "AUSPEX PIPE", name: "16mm Auspex Pipe", target: 1 },
-  { code: "1537773", category: "AUSPEX PIPE", name: "20mm Auspex Pipe", target: 1 },
-  { code: "1908346", category: "MISC", name: "100mm Fernco", target: 2 },
-  { code: "1908347", category: "MISC", name: "100mm EW - PVC Fernco", target: 2 },
-  { code: "1508931", category: "MISC", name: "25mm Poly Slip Coupling", target: 2 },
-  { code: "1842843", category: "MISC", name: "Flange Extensions", target: 6 },
-  { code: "505265",  category: "MISC", name: "Dishwasher Hose Clamp", target: 2 },
-  { code: "1317195", category: "ELECTRICAL", name: "1.8KW Element", target: 1 },
-  { code: "1317202", category: "ELECTRICAL", name: "2.4KW Element", target: 1 },
-  { code: "1317204", category: "ELECTRICAL", name: "3.6KW Element", target: 1 },
-  { code: "9501451", category: "ELECTRICAL", name: "Universal Thermostat", target: 1 },
-  { code: "DB-001",  category: "DRILL BITS", name: "5mm Rotary Bit", target: 2 },
-  { code: "DB-002",  category: "DRILL BITS", name: "8mm Rotary Bit", target: 2 },
-  { code: "DB-003",  category: "DRILL BITS", name: "25mm Spade Bit", target: 2 },
-  { code: "DB-004",  category: "DRILL BITS", name: "Phillips Bit #2", target: 2 },
-  { code: "DB-005",  category: "DRILL BITS", name: "5/16\" Hex Head Bit", target: 1 },
-  { code: "DB-006",  category: "DRILL BITS", name: "5mm Diamond Headed Bit", target: 2 },
-  { code: "DB-007",  category: "DRILL BITS", name: "8mm Diamond Headed Bit", target: 2 },
-  { code: "DB-008",  category: "DRILL BITS", name: "1/8\" Rivet Bit Pack", target: 1 },
-  { code: "HS-001",  category: "HOLESAWS", name: "57mm Holesaw", target: 1 },
-  { code: "HS-002",  category: "HOLESAWS", name: "57mm TCT Holesaw", target: 1 },
-  { code: "HS-003",  category: "HOLESAWS", name: "114mm Holesaw", target: 1 },
-  { code: "HS-004",  category: "HOLESAWS", name: "114mm TCT Holesaw", target: 1 },
+<div class="toast" id="toast"></div
+html<script>
+const PROXY='https://ipd-proxy-server.onrender.com';
+let SHEET_URL=localStorage.getItem('ipd_sheet_url')||'https://script.google.com/macros/s/AKfycbwuEeByI5LVi2TuS2R41CBdioM5BT2R4jp-BuT7tCk52ZFfe5-QsTaLFLMUO-rP5tIh/exec';
+const initialStock=[
+{code:"416065",category:"BRASSWARE",name:"15mm Compression Tee",target:3},
+{code:"208315",category:"BRASSWARE",name:"15mm Hex Nipple",target:6},
+{code:"606900",category:"BRASSWARE",name:"15mm Compression Nuts",target:20},
+{code:"415930",category:"BRASSWARE",name:"15mm Compression Elbows",target:4},
+{code:"415960",category:"BRASSWARE",name:"15mm Female Compression Elbow",target:4},
+{code:"208560",category:"BRASSWARE",name:"20mm x 15mm Reducing Nipple",target:3},
+{code:"606905",category:"BRASSWARE",name:"20mm Compression Nut",target:4},
+{code:"208320",category:"BRASSWARE",name:"20mm Hex Nipple",target:2},
+{code:"209120",category:"BRASSWARE",name:"20mm Brass Plug",target:2},
+{code:"207515",category:"BRASSWARE",name:"15mm Brass Cap",target:5},
+{code:"209115",category:"BRASSWARE",name:"15mm Brass Plugs",target:6},
+{code:"207715",category:"BRASSWARE",name:"15mm Female Brass Elbow",target:1},
+{code:"209715",category:"BRASSWARE",name:"15mm Female Brass Tee",target:1},
+{code:"415945",category:"BRASSWARE",name:"15mm Male Compression Elbow",target:1},
+{code:"209500",category:"BRASSWARE",name:"15mm MF Brass Socket",target:6},
+{code:"209365",category:"BRASSWARE",name:"15mm Brass Socket",target:4},
+{code:"1006796",category:"BRASSWARE",name:"15mm Vacuum Breaker",target:2},
+{code:"106210",category:"BRASSWARE",name:"15mm Female Hose Tap",target:2},
+{code:"106160",category:"BRASSWARE",name:"15mm Male Hose Tap",target:2},
+{code:"106206",category:"BRASSWARE",name:"15mm Lugged Male Hose Tap",target:2},
+{code:"605904",category:"BRASSWARE",name:"20mm Nylon Olive",target:6},
+{code:"605900",category:"BRASSWARE",name:"15mm Nylon Olive",target:100},
+{code:"415125",category:"BRASSWARE",name:"15mm Eziplug End Cap",target:10},
+{code:"415955",category:"BRASSWARE",name:"Rheem Elbow",target:2},
+{code:"1702035",category:"BRASSWARE",name:"15mm Copper Cover Plate Flat",target:6},
+{code:"1702040",category:"BRASSWARE",name:"15mm Copper Cover Plate Raised",target:6},
+{code:"1702030",category:"BRASSWARE",name:"15mm BSP Cover Plate Flat",target:10},
+{code:"1702010",category:"BRASSWARE",name:"15mm BSP Cover Plate Raised",target:10},
+{code:"404661",category:"B-PRESS FITTINGS",name:"15mm B-Press Water Slip Coupling",target:2},
+{code:"404662",category:"B-PRESS FITTINGS",name:"20mm B-Press Water Slip Coupling",target:2},
+{code:"404691",category:"B-PRESS FITTINGS",name:"15mm B-Press Water End Cap",target:2},
+{code:"404692",category:"B-PRESS FITTINGS",name:"20mm B-Press Water End Cap",target:2},
+{code:"404606",category:"B-PRESS FITTINGS",name:"15mm B-Press Water Elbow",target:4},
+{code:"404607",category:"B-PRESS FITTINGS",name:"20mm B-Press Water Elbow",target:4},
+{code:"404631",category:"B-PRESS FITTINGS",name:"20mm x 15mm B-Press Water Reducer",target:2},
+{code:"1534017",category:"AUSPEX FITTINGS",name:"16mm Lugged Elbow",target:6},
+{code:"1534002",category:"AUSPEX FITTINGS",name:"16mm Tee",target:8},
+{code:"1534000",category:"AUSPEX FITTINGS",name:"16mm Elbow",target:8},
+{code:"1534006",category:"AUSPEX FITTINGS",name:"16mm Coupling",target:4},
+{code:"1534045",category:"AUSPEX FITTINGS",name:"16mm Male Elbow",target:6},
+{code:"1534013",category:"AUSPEX FITTINGS",name:"16mm Male Coupling",target:6},
+{code:"1544580",category:"AUSPEX FITTINGS",name:"16mm Auspex to B-Press Adaptor",target:2},
+{code:"1534038",category:"AUSPEX FITTINGS",name:"16mm Red Ring Adaptor",target:2},
+{code:"1534040",category:"AUSPEX FITTINGS",name:"16mm Auspex to Polybute Adaptor",target:2},
+{code:"1544581",category:"AUSPEX FITTINGS",name:"20mm Auspex to B-Press Adaptor",target:2},
+{code:"1534039",category:"AUSPEX FITTINGS",name:"20mm Red Ring Adaptor",target:2},
+{code:"1544537",category:"AUSPEX FITTINGS",name:"20mm Auspex to Polybute Adaptor",target:2},
+{code:"1534003",category:"AUSPEX FITTINGS",name:"20mm Tee",target:2},
+{code:"1534001",category:"AUSPEX FITTINGS",name:"20mm Elbow",target:6},
+{code:"1534007",category:"AUSPEX FITTINGS",name:"20mm Coupling",target:4},
+{code:"1534008",category:"AUSPEX FITTINGS",name:"20mm x 16mm Reducer",target:4},
+{code:"1534004",category:"AUSPEX FITTINGS",name:"20x20x16 Tee",target:6},
+{code:"1533999",category:"AUSPEX FITTINGS",name:"20x16x16 Tee",target:2},
+{code:"103510",category:"ISOLATION VALVES",name:"Mini Stop",target:4},
+{code:"1120077",category:"ISOLATION VALVES",name:"Capstan Washing Machine Stop",target:2},
+{code:"107757",category:"FLEX HOSES",name:"300mm Pex Flex Hose",target:2},
+{code:"107758",category:"FLEX HOSES",name:"450mm Pex Flex Hose",target:4},
+{code:"107759",category:"FLEX HOSES",name:"600mm Pex Flex Hose",target:2},
+{code:"2299904",category:"FLEX HOSES",name:"Mixer Tails",target:1},
+{code:"1403810",category:"50mm PVC FITTINGS",name:"50mm Coupling",target:4},
+{code:"1409117",category:"50mm PVC FITTINGS",name:"50mm SP Trap",target:1},
+{code:"1405875",category:"50mm PVC FITTINGS",name:"50mm Floor Flange",target:2},
+{code:"1403120",category:"50mm PVC FITTINGS",name:"50mm 90deg Bend",target:10},
+{code:"1403110",category:"50mm PVC FITTINGS",name:"50mm 45deg Bend",target:6},
+{code:"1403715",category:"50mm PVC FITTINGS",name:"50mm 90deg MF Bend",target:1},
+{code:"1403710",category:"50mm PVC FITTINGS",name:"50mm 45 Bend MF",target:4},
+{code:"1405510",category:"50mm PVC FITTINGS",name:"50mm MI Adaptor",target:1},
+{code:"1405530",category:"50mm PVC FITTINGS",name:"50mm FI Adaptor",target:1},
+{code:"1405650",category:"50mm PVC FITTINGS",name:"50mm MI Connector",target:1},
+{code:"1405610",category:"50mm PVC FITTINGS",name:"50mm FI Connector",target:1},
+{code:"1405455",category:"50mm PVC FITTINGS",name:"50mm Cap",target:2},
+{code:"1409118",category:"50mm PVC FITTINGS",name:"50mm Double Bowl Connector",target:1},
+{code:"1405710",category:"50mm PVC FITTINGS",name:"50mm x 40mm LIT",target:2},
+{code:"1409116",category:"40mm PVC FITTINGS",name:"40mm SP Trap",target:2},
+{code:"1403030",category:"40mm PVC FITTINGS",name:"40mm 90deg Bend",target:6},
+{code:"1403020",category:"40mm PVC FITTINGS",name:"40mm 45deg Bend",target:6},
+{code:"1403704",category:"40mm PVC FITTINGS",name:"40mm 90deg MF Bend",target:1},
+{code:"1403705",category:"40mm PVC FITTINGS",name:"40mm 45deg MF Bend",target:4},
+{code:"1403706",category:"40mm PVC FITTINGS",name:"40mm 90deg Inpipe Bend",target:1},
+{code:"1409120",category:"40mm PVC FITTINGS",name:"40mm x 32mm Trap Adaptor",target:2},
+{code:"1405505",category:"40mm PVC FITTINGS",name:"40mm MI Adaptor",target:1},
+{code:"1405525",category:"40mm PVC FITTINGS",name:"40mm FI Adaptor",target:1},
+{code:"1405645",category:"40mm PVC FITTINGS",name:"40mm MI Connector",target:1},
+{code:"1405605",category:"40mm PVC FITTINGS",name:"40mm FI Connector",target:1},
+{code:"1403805",category:"40mm PVC FITTINGS",name:"40mm Coupling",target:4},
+{code:"1405870",category:"40mm PVC FITTINGS",name:"40mm Floor Flange",target:2},
+{code:"506241",category:"CLIPS + FIXINGS",name:"20mm Pex Clip Masonry Nail",target:50},
+{code:"506240",category:"CLIPS + FIXINGS",name:"16mm Pex Clip Masonry Nail",target:50},
+{code:"506292",category:"CLIPS + FIXINGS",name:"15mm Copper Clip Masonry Nail",target:50},
+{code:"508600",category:"CLIPS + FIXINGS",name:"15mm Copper Clip Head",target:6},
+{code:"508605",category:"CLIPS + FIXINGS",name:"20mm Copper Clip Head",target:6},
+{code:"540012",category:"CLIPS + FIXINGS",name:"15mm Copper Saddle",target:10},
+{code:"509105",category:"CLIPS + FIXINGS",name:"Stand Off Brackets",target:6},
+{code:"509055",category:"CLIPS + FIXINGS",name:"Adjustable Stand Off Bracket",target:2},
+{code:"506000",category:"CLIPS + FIXINGS",name:"40mm Flush Clip",target:2},
+{code:"506050",category:"CLIPS + FIXINGS",name:"40mm Stand Off Clip",target:2},
+{code:"506005",category:"CLIPS + FIXINGS",name:"50mm Flush Clip",target:4},
+{code:"506055",category:"CLIPS + FIXINGS",name:"50mm Stand Off Clip",target:2},
+{code:"1906000",category:"CONSUMABLES",name:"Silver Duct Tape",target:2},
+{code:"6802522",category:"CONSUMABLES",name:"MAPP Gas",target:1},
+{code:"1903591",category:"CONSUMABLES",name:"Clear Priming Fluid",target:2},
+{code:"1903602",category:"CONSUMABLES",name:"Clear Glue",target:2},
+{code:"1903577",category:"CONSUMABLES",name:"Clear Silicone (RG)",target:2},
+{code:"1903783",category:"CONSUMABLES",name:"Loxeal",target:1},
+{code:"7900051",category:"CONSUMABLES",name:"Pocket Knife Blades",target:1},
+{code:"1842866",category:"CONSUMABLES",name:"Soft Turn Tap Washers",target:25},
+{code:"1842781",category:"CONSUMABLES",name:"Fibre Body Washers",target:10},
+{code:"4913019",category:"CONSUMABLES",name:"Blue Expandit Plugs",target:1},
+{code:"7101520",category:"CONSUMABLES",name:"Drain Solvent",target:1},
+{code:"1906014",category:"CONSUMABLES",name:"Black Duct Tape",target:1},
+{code:"4913097",category:"CONSUMABLES",name:"Zinc WallMates",target:6},
+{code:"108398",category:"CONSUMABLES",name:"Reseating Tool Head",target:1},
+{code:"1903694",category:"CONSUMABLES",name:"Grey Thread Tape",target:10},
+{code:"1903582",category:"CONSUMABLES",name:"White Silicone",target:1},
+{code:"1903625",category:"CONSUMABLES",name:"Ferropre",target:1},
+{code:"3405052",category:"CONSUMABLES",name:"Marking Paint (Pink)",target:1},
+{code:"BUNNINGS-WD40",category:"CONSUMABLES",name:"WD40",target:1},
+{code:"1903025",category:"CONSUMABLES",name:"Silver Solder 5%",target:2},
+{code:"108374",category:"CONSUMABLES",name:"Hydroseal Tap Grease",target:1},
+{code:"8028078",category:"CONSUMABLES",name:"Disposable Gloves",target:1},
+{code:"1003046",category:"CONSUMABLES",name:"Water Main Lubricant",target:1},
+{code:"9508811",category:"TAPWARE",name:"Posh Solus MK3 Sink Mixer",target:2},
+{code:"1700672",category:"TAPWARE",name:"Standard Shower Rose + Arm",target:2},
+{code:"1842803",category:"TAP SPARES",name:"15mm Stainless Tap Seat (Packet)",target:6},
+{code:"1842342",category:"TAP SPARES",name:"9LPM Female Aerator",target:2},
+{code:"1842344",category:"TAP SPARES",name:"9LPM Male Aerator",target:2},
+{code:"1843035",category:"TAP SPARES",name:"8.5LPM Water Saving Discs",target:2},
+{code:"1403737",category:"TOILET HARDWARE",name:"100mm x 20mm Offset Flexifin Pan Collar",target:1},
+{code:"1403727",category:"TOILET HARDWARE",name:"100mm x 40mm Offset Flexifin Pan Collar",target:1},
+{code:"1409970",category:"TOILET HARDWARE",name:"Pan Collar Rubber",target:1},
+{code:"1409950",category:"TOILET HARDWARE",name:"Pan Collar Rubber (Lipped)",target:1},
+{code:"1403736",category:"TOILET HARDWARE",name:"100mm Straight Flexifin Pan Collar",target:1},
+{code:"1842173",category:"TOILET HARDWARE",name:"Fluidmaster",target:2},
+{code:"1842326",category:"TOILET HARDWARE",name:"50mm Keeseal",target:1},
+{code:"405006",category:"TOILET HARDWARE",name:"Caroma Cistern Outlet Washer (Red)",target:4},
+{code:"1908476",category:"TOILET HARDWARE",name:"50mm Pan Cone",target:1},
+{code:"1842816",category:"TOILET HARDWARE",name:"Cistern Pan Screws (12pk)",target:1},
+{code:"1903772",category:"TOILET HARDWARE",name:"Wax Pan Seal",target:1},
+{code:"1842800",category:"TRAP SPARES",name:"40mm Trap Washer Set",target:1},
+{code:"1842799",category:"TRAP SPARES",name:"50mm Trap Washer Set",target:1},
+{code:"1900299",category:"TRAP SPARES",name:"50mm Double Tapered Trap Washer",target:2},
+{code:"1400200",category:"PVC PIPE",name:"100mm DWV Pipe",target:1},
+{code:"1400110",category:"PVC PIPE",name:"50mm DWV Pipe",target:1},
+{code:"1400105",category:"PVC PIPE",name:"40mm DWV Pipe",target:1},
+{code:"801215",category:"COPPER PIPE",name:"20mm Copper Pipe",target:1},
+{code:"801020",category:"COPPER PIPE",name:"15mm Copper Pipe",target:1},
+{code:"1537759",category:"AUSPEX PIPE",name:"16mm Auspex Pipe",target:1},
+{code:"1537773",category:"AUSPEX PIPE",name:"20mm Auspex Pipe",target:1},
+{code:"1908346",category:"MISC",name:"100mm Fernco",target:2},
+{code:"1908347",category:"MISC",name:"100mm EW - PVC Fernco",target:2},
+{code:"1508931",category:"MISC",name:"25mm Poly Slip Coupling",target:2},
+{code:"1842843",category:"MISC",name:"Flange Extensions",target:6},
+{code:"505265",category:"MISC",name:"Dishwasher Hose Clamp",target:2},
+{code:"1317195",category:"ELECTRICAL",name:"1.8KW Element",target:1},
+{code:"1317202",category:"ELECTRICAL",name:"2.4KW Element",target:1},
+{code:"1317204",category:"ELECTRICAL",name:"3.6KW Element",target:1},
+{code:"9501451",category:"ELECTRICAL",name:"Universal Thermostat",target:1},
+{code:"DB-001",category:"DRILL BITS",name:"5mm Rotary Bit",target:2},
+{code:"DB-002",category:"DRILL BITS",name:"8mm Rotary Bit",target:2},
+{code:"DB-003",category:"DRILL BITS",name:"25mm Spade Bit",target:2},
+{code:"DB-004",category:"DRILL BITS",name:"Phillips Bit #2",target:2},
+{code:"DB-005",category:"DRILL BITS",name:'5/16" Hex Head Bit',target:1},
+{code:"DB-006",category:"DRILL BITS",name:"5mm Diamond Headed Bit",target:2},
+{code:"DB-007",category:"DRILL BITS",name:"8mm Diamond Headed Bit",target:2},
+{code:"DB-008",category:"DRILL BITS",name:'1/8" Rivet Bit Pack',target:1},
+{code:"HS-001",category:"HOLESAWS",name:"57mm Holesaw",target:1},
+{code:"HS-002",category:"HOLESAWS",name:"57mm TCT Holesaw",target:1},
+{code:"HS-003",category:"HOLESAWS",name:"114mm Holesaw",target:1},
+{code:"HS-004",category:"HOLESAWS",name:"114mm TCT Holesaw",target:1},
 ];
+const CAT_COLORS={"BRASSWARE":"#f97316","B-PRESS FITTINGS":"#3b82f6","AUSPEX FITTINGS":"#a78bfa","AUSPEX PIPE":"#7c3aed","ISOLATION VALVES":"#2dd4bf","FLEX HOSES":"#38bdf8","50mm PVC FITTINGS":"#4ade80","40mm PVC FITTINGS":"#22c55e","CLIPS + FIXINGS":"#fb923c","CONSUMABLES":"#fbbf24","TAPWARE":"#f472b6","TAP SPARES":"#ec4899","TOILET HARDWARE":"#60a5fa","TRAP SPARES":"#818cf8","PVC PIPE":"#34d399","COPPER PIPE":"#f97316","MISC":"#94a3b8","ELECTRICAL":"#f87171","DRILL BITS":"#a5b4fc","HOLESAWS":"#67e8f9"};
+let onHand={},stockCat='ALL',quoteCat='All',activeScreen='stock';
+let bundles=[],reece=[],knowledge=[],quote=[],dataLoaded=false;
+let recognition=null,isListening=false,aiRecognition=null,aiListening=false;
+let searchTimer=null,aiTimer=null;
 
-const CAT_COLORS = {
-  "BRASSWARE":"#f97316","B-PRESS FITTINGS":"#3b82f6","AUSPEX FITTINGS":"#a78bfa",
-  "AUSPEX PIPE":"#7c3aed","ISOLATION VALVES":"#2dd4bf","FLEX HOSES":"#38bdf8",
-  "50mm PVC FITTINGS":"#4ade80","40mm PVC FITTINGS":"#22c55e","CLIPS + FIXINGS":"#fb923c",
-  "CONSUMABLES":"#fbbf24","TAPWARE":"#f472b6","TAP SPARES":"#ec4899",
-  "TOILET HARDWARE":"#60a5fa","TRAP SPARES":"#818cf8","PVC PIPE":"#34d399",
-  "COPPER PIPE":"#f97316","MISC":"#94a3b8","ELECTRICAL":"#f87171",
-  "DRILL BITS":"#a5b4fc","HOLESAWS":"#67e8f9",
-};
-
-// ── STATE ─────────────────────────────────────────────────────────────────────
-let onHand = {};
-let stockCat = 'ALL';
-let quoteCat = 'All';
-let activeScreen = 'stock';
-let bundles = [], reece = [], knowledge = [];
-let quote = [];
-let dataLoaded = false;
-let recognition = null, isListening = false;
-let aiRecognition = null, aiListening = false;
-let searchTimer = null, aiTimer = null;
-
-// ── INIT ──────────────────────────────────────────────────────────────────────
-function init() {
-  const saved = localStorage.getItem('ipd_sm8_key');
-  if (saved) document.getElementById('sm8-key-input').value = saved;
-  const savedUrl = localStorage.getItem('ipd_sheet_url') || SHEET_URL;
-  document.getElementById('sheet-url-input').value = savedUrl;
-  SHEET_URL = savedUrl;
-  buildStockCats();
-  renderStock();
-  setupVoice();
-  setupAiVoice();
-  loadQuoteData();
+function init(){
+  const saved=localStorage.getItem('ipd_sm8_key');
+  if(saved)document.getElementById('sm8-key-input').value=saved;
+  const savedUrl=localStorage.getItem('ipd_sheet_url')||SHEET_URL;
+  document.getElementById('sheet-url-input').value=savedUrl;
+  SHEET_URL=savedUrl;
+  buildStockCats();renderStock();setupVoice();setupAiVoice();loadQuoteData();
 }
 
-// ── NAVIGATION ────────────────────────────────────────────────────────────────
-function goScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
-  document.getElementById('nav-' + name).classList.add('active');
-  activeScreen = name;
-  if (name === 'search') { buildQCats(); setTimeout(startListening, 400); }
-  else stopListening();
-  if (name === 'kb') renderKB();
+function goScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  activeScreen=name;
+  if(name==='search'){buildQCats();setTimeout(startListening,400);}else stopListening();
+  if(name==='kb')renderKB();
 }
 
-// ── SETTINGS ──────────────────────────────────────────────────────────────────
-function saveSheetUrl() {
-  const url = document.getElementById('sheet-url-input').value.trim();
-  localStorage.setItem('ipd_sheet_url', url);
-  SHEET_URL = url;
-  loadQuoteData();
-  showToast('Sheet URL saved — reloading data');
+function saveSheetUrl(){
+  const url=document.getElementById('sheet-url-input').value.trim();
+  localStorage.setItem('ipd_sheet_url',url);SHEET_URL=url;loadQuoteData();showToast('Saved — reloading');
 }
-function saveSM8Key() {
-  const key = document.getElementById('sm8-key-input').value.trim();
-  localStorage.setItem('ipd_sm8_key', key);
-  showToast('ServiceM8 key saved');
+function saveSM8Key(){
+  localStorage.setItem('ipd_sm8_key',document.getElementById('sm8-key-input').value.trim());showToast('Saved');
 }
 
-// ── STOCK ─────────────────────────────────────────────────────────────────────
-function getToOrder(item) {
-  const v = onHand[item.code];
-  if (v === '' || v === undefined) return null;
-  const diff = item.target - Number(v);
-  return diff > 0 ? diff : 0;
+function getToOrder(item){
+  const v=onHand[item.code];
+  if(v===''||v===undefined)return null;
+  const diff=item.target-Number(v);return diff>0?diff:0;
 }
-
-function orderItems() {
-  return initialStock.filter(i => getToOrder(i) > 0).map(i => ({
-    ...i, toOrder: getToOrder(i), onHand: Number(onHand[i.code])
-  }));
+function orderItems(){return initialStock.filter(i=>getToOrder(i)>0).map(i=>({...i,toOrder:getToOrder(i),onHand:Number(onHand[i.code])}));}
+function updateStockStats(){
+  const checked=Object.values(onHand).filter(v=>v!=='').length;
+  const items=orderItems();
+  const units=items.reduce((s,i)=>s+i.toOrder,0);
+  const stocked=Object.keys(onHand).filter(k=>onHand[k]!==''&&getToOrder(initialStock.find(i=>i.code===k))===0).length;
+  document.getElementById('s-checked').textContent=checked;
+  document.getElementById('s-order').textContent=items.length;
+  document.getElementById('s-units').textContent=units;
+  document.getElementById('s-stocked').textContent=stocked;
 }
-
-function updateStockStats() {
-  const checked = Object.values(onHand).filter(v => v !== '').length;
-  const items = orderItems();
-  const units = items.reduce((s,i) => s+i.toOrder, 0);
-  const stocked = Object.keys(onHand).filter(k => onHand[k] !== '' && getToOrder(initialStock.find(i=>i.code===k)) === 0).length;
-  document.getElementById('s-checked').textContent = checked;
-  document.getElementById('s-order').textContent = items.length;
-  document.getElementById('s-units').textContent = units;
-  document.getElementById('s-stocked').textContent = stocked;
+function buildStockCats(){
+  const cats=['ALL',...new Set(initialStock.map(i=>i.category))];
+  document.getElementById('stock-cats').innerHTML=cats.map(cat=>`<div class="cat-chip${cat===stockCat?' active':''}" onclick="setStockCat('${esc(cat)}')">${cat}</div>`).join('');
 }
-
-function buildStockCats() {
-  const cats = ['ALL', ...new Set(initialStock.map(i => i.category))];
-  const c = document.getElementById('stock-cats');
-  c.innerHTML = cats.map(cat => `<div class="cat-chip${cat===stockCat?' active':''}" onclick="setStockCat('${esc(cat)}')">${cat}</div>`).join('');
-}
-
-function setStockCat(cat) { stockCat = cat; buildStockCats(); renderStock(); }
-
-function renderStock() {
-  const q = (document.getElementById('stock-search').value || '').toLowerCase();
-  const filtered = initialStock.filter(item => {
-    const matchCat = stockCat === 'ALL' || item.category === stockCat;
-    const matchQ = !q || item.name.toLowerCase().includes(q) || item.code.toLowerCase().includes(q);
-    return matchCat && matchQ;
+function setStockCat(cat){stockCat=cat;buildStockCats();renderStock();}
+function renderStock(){
+  const q=(document.getElementById('stock-search').value||'').toLowerCase();
+  const filtered=initialStock.filter(item=>{
+    const matchCat=stockCat==='ALL'||item.category===stockCat;
+    const matchQ=!q||item.name.toLowerCase().includes(q)||item.code.toLowerCase().includes(q);
+    return matchCat&&matchQ;
   });
-  const grouped = {};
-  filtered.forEach(item => { if (!grouped[item.category]) grouped[item.category]=[]; grouped[item.category].push(item); });
-  let html = '';
-  Object.entries(grouped).forEach(([cat, items]) => {
-    const col = CAT_COLORS[cat] || '#94a3b8';
-    html += `<div class="section-hd" style="color:${col}">${cat}</div>`;
-    items.forEach(item => {
-      const v = onHand[item.code];
-      const toOrder = getToOrder(item);
-      const hasVal = v !== undefined && v !== '';
-      const cls = hasVal ? (toOrder > 0 ? 'need' : 'good') : '';
-      html += `<div class="stock-row">
-        <div class="stock-dot" style="background:${col}"></div>
-        <div class="stock-info">
-          <div class="stock-name">${esc(item.name)}</div>
-          <div class="stock-code">${esc(item.code)}</div>
-        </div>
-        <div class="stock-right">
-          <div class="stock-target">Target: ${item.target}</div>
-          <input class="stock-input ${cls}" type="number" min="0" value="${hasVal?v:''}" placeholder="?" 
-            oninput="setOnHand('${item.code}', this.value)" onchange="setOnHand('${item.code}', this.value)">
-          ${toOrder > 0 ? `<span class="order-badge">ORDER ${toOrder}</span>` : ''}
-        </div>
-      </div>`;
+  const grouped={};
+  filtered.forEach(item=>{if(!grouped[item.category])grouped[item.category]=[];grouped[item.category].push(item);});
+  let html='';
+  Object.entries(grouped).forEach(([cat,items])=>{
+    const col=CAT_COLORS[cat]||'#94a3b8';
+    html+=`<div class="section-hd" style="color:${col}">${cat}</div>`;
+    items.forEach(item=>{
+      const v=onHand[item.code];const toOrder=getToOrder(item);const hasVal=v!==undefined&&v!=='';
+      const cls=hasVal?(toOrder>0?'need':'good'):'';
+      html+=`<div class="stock-row"><div class="stock-dot" style="background:${col}"></div><div class="stock-info"><div class="stock-name">${esc(item.name)}</div><div class="stock-code">${esc(item.code)}</div></div><div class="stock-right"><div class="stock-target">Target: ${item.target}</div><input class="stock-input ${cls}" type="number" min="0" value="${hasVal?v:''}" placeholder="?" oninput="setOnHand('${item.code}',this.value)">${toOrder>0?`<span class="order-badge">ORDER ${toOrder}</span>`:''}</div></div>`;
     });
   });
-  document.getElementById('stock-list').innerHTML = html || '<div class="state-box"><span class="state-icon">🔍</span><p>No items found</p></div>';
+  document.getElementById('stock-list').innerHTML=html||'<div class="state-box"><p>No items found</p></div>';
   updateStockStats();
 }
+function setOnHand(code,val){onHand[code]=val===''?'':Math.max(0,parseInt(val)||0);renderStock();}
 
-function setOnHand(code, val) {
-  onHand[code] = val === '' ? '' : Math.max(0, parseInt(val) || 0);
-  updateStockStats();
-  // re-render just this input styling
-  const inputs = document.querySelectorAll('.stock-input');
-  // light update — just re-render
-  renderStock();
-}
-
-// ── REVIEW / AI STOCK ─────────────────────────────────────────────────────────
-async function runStockReview() {
-  const items = orderItems();
-  if (!items.length) { showToast('No items to order — count your stock first'); return; }
+async function runStockReview(){
+  const items=orderItems();
+  if(!items.length){showToast('Count your stock first');return;}
   goScreen('review');
-  const wrap = document.getElementById('review-wrap');
-  wrap.innerHTML = `<div class="review-card"><h3>Order Summary (${items.length} lines)</h3>${items.map(i=>`<div class="order-summary-row"><span>${esc(i.name)}</span><span class="badge-order">ORDER ${i.toOrder}</span></div>`).join('')}</div><div class="review-card"><h3>🤖 AI Review</h3><div class="mini-load"><div class="spin"></div>Claude is checking your order...</div></div>`;
-  try {
-    const res = await fetch(PROXY + '/ai-review', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ orderItems: items })
-    });
-    const data = await res.json();
-    const reviewText = data.review || data.error || 'No response.';
-    wrap.innerHTML = `
-      <div class="review-card"><h3>Order Summary — ${items.length} lines · ${items.reduce((s,i)=>s+i.toOrder,0)} units</h3>${items.map(i=>`<div class="order-summary-row"><span>${esc(i.name)}</span><span class="badge-order">ORDER ${i.toOrder}</span></div>`).join('')}</div>
-      <div class="review-card"><h3>🤖 AI Review</h3><div class="review-text">${esc(reviewText)}</div></div>
-      <button class="send-btn" id="send-btn" onclick="sendOrder()">📤 Send to ServiceM8</button>
-      <div id="send-status"></div>`;
-  } catch(e) {
-    wrap.innerHTML += `<div class="status-msg error">Could not reach server. Check internet.</div>`;
+  const wrap=document.getElementById('review-wrap');
+  wrap.innerHTML=`<div class="review-card"><h3>Order Summary (${items.length} lines)</h3>${items.map(i=>`<div class="order-summary-row"><span>${esc(i.name)}</span><span class="badge-order">ORDER ${i.toOrder}</span></div>`).join('')}</div><div class="review-card"><h3>AI Review</h3><div class="mini-load"><div class="spin"></div>Checking order...</div></div>`;
+  try{
+    const res=await fetch(PROXY+'/ai-review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderItems:items})});
+    const data=await res.json();
+    const reviewText=data.review||data.error||'No response.';
+    wrap.innerHTML=`<div class="review-card"><h3>Order — ${items.length} lines</h3>${items.map(i=>`<div class="order-summary-row"><span>${esc(i.name)}</span><span class="badge-order">ORDER ${i.toOrder}</span></div>`).join('')}</div><div class="review-card"><h3>AI Review</h3><div class="review-text">${esc(reviewText)}</div></div><button class="send-btn" id="send-btn" onclick="sendOrder()">📤 Send to ServiceM8</button><div id="send-status"></div>`;
+  }catch(e){wrap.innerHTML+=`<div class="status-msg error">Could not reach server.</div>`;}
+}
+async function sendOrder(){
+  const items=orderItems();const btn=document.getElementById('send-btn');const statusDiv=document.getElementById('send-status');
+  btn.disabled=true;btn.textContent='Sending...';
+  try{
+    const res=await fetch(PROXY+'/send-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderItems:items,totalUnits:items.reduce((s,i)=>s+i.toOrder,0)})});
+    const data=await res.json();
+    if(res.ok&&data.success){statusDiv.innerHTML=`<div class="status-msg success">✅ ${esc(data.message)}</div>`;}
+    else{statusDiv.innerHTML=`<div class="status-msg error">❌ ${esc(data.error||'Error')}</div>`;btn.disabled=false;btn.textContent='📤 Send to ServiceM8';}
+  }catch(e){statusDiv.innerHTML=`<div class="status-msg error">❌ Could not reach server.</div>`;btn.disabled=false;btn.textContent='📤 Send to ServiceM8';}
+}
+
+async function loadQuoteData(){
+  if(!SHEET_URL)return;
+  document.getElementById('q-sdot').className='s-dot warn';
+  document.getElementById('q-stext').textContent='Connecting...';
+  try{
+    const r=await fetch(SHEET_URL+(SHEET_URL.includes('?')?'&':'?')+'action=all&t='+Date.now());
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    bundles=d.bundles||[];reece=d.reece||[];knowledge=d.knowledge||[];dataLoaded=true;
+    document.getElementById('q-sdot').className='s-dot';
+    document.getElementById('q-stext').textContent=bundles.length+' bundles · '+reece.length.toLocaleString()+' Reece products';
+    buildQCats();renderKB();
+  }catch(e){
+    document.getElementById('q-sdot').className='s-dot err';
+    document.getElementById('q-stext').textContent='Could not load — check Settings';
   }
 }
 
-async function sendOrder() {
-  const items = orderItems();
-  const btn = document.getElementById('send-btn');
-  const statusDiv = document.getElementById('send-status');
-  btn.disabled = true; btn.textContent = 'Sending...';
-  try {
-    const res = await fetch(PROXY + '/send-order', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ orderItems: items, totalUnits: items.reduce((s,i)=>s+i.toOrder,0) })
-    });
-    const data = await res.json();
-    if (res.ok && data.success) {
-      statusDiv.innerHTML = `<div class="status-msg success">✅ ${esc(data.message)}</div>`;
-    } else {
-      statusDiv.innerHTML = `<div class="status-msg error">❌ ${esc(data.error||'Error')}</div>`;
-      btn.disabled = false; btn.textContent = '📤 Send to ServiceM8';
-    }
-  } catch(e) {
-    statusDiv.innerHTML = `<div class="status-msg error">❌ Could not reach server.</div>`;
-    btn.disabled = false; btn.textContent = '📤 Send to ServiceM8';
-  }
+function buildQCats(){
+  const cats=new Set(['All']);bundles.forEach(b=>{if(b.category)cats.add(b.category);});
+  document.getElementById('q-cats').innerHTML=[...cats].map(c=>`<div class="cat-chip${c===quoteCat?' active':''}" onclick="setQCat('${esc(c)}')">${esc(c)}</div>`).join('');
 }
-
-// ── QUOTE DATA ────────────────────────────────────────────────────────────────
-async function loadQuoteData() {
-  if (!SHEET_URL) return;
-  document.getElementById('q-sdot').className = 's-dot warn';
-  document.getElementById('q-stext').textContent = 'Connecting to Google Sheet...';
-  try {
-    const url = SHEET_URL + (SHEET_URL.includes('?')?'&':'?') + 'action=all&t=' + Date.now();
-    const r = await fetch(url);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const d = await r.json();
-    bundles = d.bundles || []; reece = d.reece || []; knowledge = d.knowledge || [];
-    dataLoaded = true;
-    document.getElementById('q-sdot').className = 's-dot';
-    document.getElementById('q-stext').textContent = bundles.length + ' bundles · ' + reece.length.toLocaleString() + ' Reece products';
-    buildQCats();
-    renderKB();
-  } catch(e) {
-    document.getElementById('q-sdot').className = 's-dot err';
-    document.getElementById('q-stext').textContent = 'Could not load — check Settings';
-  }
-}
-
-// ── QUOTE SEARCH ──────────────────────────────────────────────────────────────
-function buildQCats() {
-  const cats = new Set(['All']);
-  bundles.forEach(b => { if(b.category) cats.add(b.category); });
-  document.getElementById('q-cats').innerHTML = [...cats].map(c =>
-    `<div class="cat-chip${c===quoteCat?' active':''}" onclick="setQCat('${esc(c)}')">${esc(c)}</div>`
-  ).join('');
-}
-
-function setQCat(cat) { quoteCat = cat; buildQCats(); renderQResults(); }
-
-function onQSearch() {
+function setQCat(cat){quoteCat=cat;buildQCats();renderQResults();}
+function onQSearch(){
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
+  searchTimer=setTimeout(()=>{
     renderQResults();
-    const q = document.getElementById('q-search').value.trim();
-    if (q.length >= 3) triggerAiBand(q);
-    else document.getElementById('ai-band').style.display = 'none';
-  }, 200);
+    const q=document.getElementById('q-search').value.trim();
+    if(q.length>=3)triggerAiBand(q);else document.getElementById('ai-band').style.display='none';
+  },200);
 }
-
-function renderQResults() {
-  const q = (document.getElementById('q-search').value||'').toLowerCase().trim();
-  const container = document.getElementById('q-list');
-  if (!dataLoaded) { container.innerHTML = '<div class="state-box"><div class="big-spin"></div><p>Loading...</p></div>'; return; }
-  if (!q && quoteCat === 'All') { container.innerHTML = '<div class="state-box"><span class="state-icon">🔍</span><p>Search for a bundle or Reece product<br>or tap the mic and speak</p></div>'; return; }
-
-  const mB = bundles.filter(b => {
-    const matchQ = !q || (b.name||'').toLowerCase().includes(q) || (b.code||'').toLowerCase().includes(q);
-    const matchC = quoteCat === 'All' || b.category === quoteCat;
-    return matchQ && matchC;
+function renderQResults(){
+  const q=(document.getElementById('q-search').value||'').toLowerCase().trim();
+  const container=document.getElementById('q-list');
+  if(!dataLoaded){container.innerHTML='<div class="state-box"><div class="big-spin"></div><p>Loading...</p></div>';return;}
+  if(!q&&quoteCat==='All'){container.innerHTML='<div class="state-box"><span class="state-icon">🔍</span><p>Search for a bundle or Reece product<br>or tap the mic and speak</p></div>';return;}
+  const mB=bundles.filter(b=>{
+    const matchQ=!q||(b.name||'').toLowerCase().includes(q)||(b.code||'').toLowerCase().includes(q);
+    const matchC=quoteCat==='All'||b.category===quoteCat;return matchQ&&matchC;
   }).slice(0,50);
-
-  const mR = q ? reece.filter(r => (r.name||'').toLowerCase().includes(q) || (r.code||'').toLowerCase().includes(q)).slice(0,50) : [];
-
-  if (!mB.length && !mR.length) { container.innerHTML = '<div class="state-box"><span class="state-icon">🤷</span><p>No results.<br><span class="hint">Try AI Assist for suggestions.</span></p></div>'; return; }
-
-  let html = '';
-  if (mB.length) { html += `<div class="section-hd" style="color:#3b82f6">📦 Bundles (${mB.length})</div>`; html += mB.map(b => bundleCard(b)).join(''); }
-  if (mR.length) { html += `<div class="section-hd" style="color:#f87171">🏪 Reece Products (${mR.length})</div>`; html += mR.map(r => reeceCard(r)).join(''); }
-  container.innerHTML = html;
+  const mR=q?reece.filter(r=>(r.name||'').toLowerCase().includes(q)||(r.code||'').toLowerCase().includes(q)).slice(0,50):[];
+  if(!mB.length&&!mR.length){container.innerHTML='<div class="state-box"><span class="state-icon">🤷</span><p>No results.<br><span class="hint">Try AI Assist.</span></p></div>';return;}
+  let html='';
+  if(mB.length){html+=`<div class="section-hd" style="color:#3b82f6">📦 Bundles (${mB.length})</div>`;html+=mB.map(b=>bundleCard(b)).join('');}
+  if(mR.length){html+=`<div class="section-hd" style="color:#f87171">🏪 Reece Products (${mR.length})</div>`;html+=mR.map(r=>reeceCard(r)).join('');}
+  container.innerHTML=html;
+}
+function bundleCard(b){
+  const inQ=quote.find(i=>i.id===b.uuid);const price=b.price?'$'+parseFloat(b.price).toFixed(2):'';
+  return `<div class="item-card"><div class="item-icon bundle">📦</div><div class="item-body"><div class="item-name">${esc(b.name)}</div><div class="item-code">${esc(b.code||'')}</div><span class="item-cat">${esc(b.category||'')}</span></div><div class="item-right"><div class="item-price ${price?'':'dim'}">${price||'No price'}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${b.uuid}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${b.uuid}',1)">+</button></div>`:`<button class="add-btn" onclick="addBundle('${esc(b.uuid)}')">+</button>`}</div></div>`;
+}
+function reeceCard(r){
+  const id='r_'+r.code;const inQ=quote.find(i=>i.id===id);const retail=r.retail?'$'+parseFloat(r.retail).toFixed(2):'';
+  return `<div class="item-card"><div class="item-icon reece">🏪</div><div class="item-body"><div class="item-name">${esc(r.name)}</div><div class="item-code">${esc(r.code||'')}</div><span class="item-cat">${esc(r.category||'')}</span>${r.cost?`<div class="item-markup">Cost $${parseFloat(r.cost).toFixed(2)} · ${r.markup}% markup</div>`:''}</div><div class="item-right"><div class="item-price ${retail?'':'dim'}">${retail||'—'}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${id}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${id}',1)">+</button></div>`:`<button class="add-btn" onclick="addReece('${esc(r.code)}')">+</button>`}</div></div>`;
 }
 
-function bundleCard(b) {
-  const inQ = quote.find(i => i.id === b.uuid);
-  const price = b.price ? '$'+parseFloat(b.price).toFixed(2) : '';
-  return `<div class="item-card">
-    <div class="item-icon bundle">📦</div>
-    <div class="item-body">
-      <div class="item-name">${esc(b.name)}</div>
-      <div class="item-code">${esc(b.code||'')}</div>
-      <span class="item-cat">${esc(b.category||'')}</span>
-    </div>
-    <div class="item-right">
-      <div class="item-price ${price?'':'dim'}">${price||'No price'}</div>
-      ${inQ ? `<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${b.uuid}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${b.uuid}',1)">+</button></div>`
-             : `<button class="add-btn" onclick="addBundle('${esc(b.uuid)}')">+</button>`}
-    </div>
-  </div>`;
-}
-
-function reeceCard(r) {
-  const id = 'r_'+r.code;
-  const inQ = quote.find(i => i.id === id);
-  const retail = r.retail ? '$'+parseFloat(r.retail).toFixed(2) : '';
-  return `<div class="item-card">
-    <div class="item-icon reece">🏪</div>
-    <div class="item-body">
-      <div class="item-name">${esc(r.name)}</div>
-      <div class="item-code">${esc(r.code||'')}</div>
-      <span class="item-cat">${esc(r.category||'')}</span>
-      ${r.cost ? `<div class="item-markup">Cost $${parseFloat(r.cost).toFixed(2)} · ${r.markup}% markup</div>` : ''}
-    </div>
-    <div class="item-right">
-      <div class="item-price ${retail?'':'dim'}">${retail||'—'}</div>
-      ${inQ ? `<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${id}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${id}',1)">+</button></div>`
-             : `<button class="add-btn" onclick="addReece('${esc(r.code)}')">+</button>`}
-    </div>
-  </div>`;
-}
-
-// ── AI INLINE BAND ────────────────────────────────────────────────────────────
-async function triggerAiBand(query) {
-  document.getElementById('ai-band').style.display = 'block';
-  document.getElementById('ai-band-content').innerHTML = '<div class="mini-load"><div class="spin"></div>Finding matches...</div>';
+async function triggerAiBand(query){
+  document.getElementById('ai-band').style.display='block';
+  document.getElementById('ai-band-content').innerHTML='<div class="mini-load"><div class="spin"></div>Finding matches...</div>';
   clearTimeout(aiTimer);
-  aiTimer = setTimeout(async () => {
-    const s = await getAiSuggestions(query, false);
-    if (!s || !s.length) { document.getElementById('ai-band').style.display='none'; return; }
-    document.getElementById('ai-band-content').innerHTML = s.map(sg => {
-      const isB = sg.type==='bundle';
-      const item = isB ? bundles.find(b=>b.uuid===sg.id||(b.name||'').toLowerCase().includes((sg.name||'').toLowerCase().substring(0,15)))
-                       : reece.find(r=>r.code===sg.id||(r.name||'').toLowerCase().includes((sg.name||'').toLowerCase().substring(0,15)));
-      if (!item) return '';
-      const price = isB?(item.price?'$'+parseFloat(item.price).toFixed(2):''):(item.retail?'$'+parseFloat(item.retail).toFixed(2):'');
-      const id = isB?item.uuid:'r_'+item.code;
-      return `<div class="ai-chip" onclick="${isB?'addBundle':'addReece'}('${esc(isB?item.uuid:item.code)}')">
-        <span class="chip-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span>
-        <span>${esc((item.name||'').substring(0,35))}${(item.name||'').length>35?'...':''}</span>
-        ${price?`<span class="chip-price">${price}</span>`:''}
-      </div>`;
-    }).filter(Boolean).join('') || '<div class="mini-load">No strong matches</div>';
-  }, 500);
+  aiTimer=setTimeout(async()=>{
+    const s=await getAiSuggestions(query,false);
+    if(!s||!s.length){document.getElementById('ai-band').style.display='none';return;}
+    document.getElementById('ai-band-content').innerHTML=s.map(sg=>{
+      const isB=sg.type==='bundle';
+      const item=isB?bundles.find(b=>b.uuid===sg.id||(b.name||'').toLowerCase().includes((sg.name||'').toLowerCase().substring(0,15))):reece.find(r=>r.code===sg.id||(r.name||'').toLowerCase().includes((sg.name||'').toLowerCase().substring(0,15)));
+      if(!item)return'';
+      const price=isB?(item.price?'$'+parseFloat(item.price).toFixed(2):''):(item.retail?'$'+parseFloat(item.retail).toFixed(2):'');
+      return `<div class="ai-chip" onclick="${isB?'addBundle':'addReece'}('${esc(isB?item.uuid:item.code)}')"><span class="chip-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span><span>${esc((item.name||'').substring(0,30))}</span>${price?`<span class="chip-price">${price}</span>`:''}</div>`;
+    }).filter(Boolean).join('')||'<div class="mini-load">No matches</div>';
+  },500);
 }
 
-// ── AI ASSIST SCREEN ──────────────────────────────────────────────────────────
-async function runAiSuggest() {
-  const query = document.getElementById('ai-textarea').value.trim();
-  if (!query) return;
-  document.getElementById('ai-results').innerHTML = '<div class="state-box" style="padding:16px 0"><div class="big-spin"></div><p>Analysing job...</p></div>';
-  const suggestions = await getAiSuggestions(query, true);
-  if (!suggestions || !suggestions.length) {
-    document.getElementById('ai-results').innerHTML = '<div class="state-box" style="padding:16px 0"><span class="state-icon">🤷</span><p>No strong matches found.<br><span class="hint">Try describing it differently.</span></p></div>';
-    return;
-  }
-  document.getElementById('ai-results').innerHTML = suggestions.map(s => {
-    const isB = s.type==='bundle';
-    const item = isB ? bundles.find(b=>b.uuid===s.id||(b.code||'').toLowerCase()===(s.id||'').toLowerCase()||(b.name||'').toLowerCase().includes((s.name||'').toLowerCase().substring(0,20)))
-                     : reece.find(r=>r.code===s.id||(r.name||'').toLowerCase().includes((s.name||'').toLowerCase().substring(0,20)));
-    if (!item) return '';
-    const price = isB?(item.price?'$'+parseFloat(item.price).toFixed(2):'No price'):(item.retail?'$'+parseFloat(item.retail).toFixed(2):'—');
-    const id = isB?item.uuid:'r_'+item.code;
-    const inQ = quote.find(i=>i.id===id);
-    return `<div class="ai-result-card">
-      <div class="item-icon ${isB?'bundle':'reece'}">${isB?'📦':'🏪'}</div>
-      <div class="ai-result-body">
-        <div class="ai-result-name">${esc(item.name)}</div>
-        <div class="ai-result-why">${esc(s.reason||'')}</div>
-        <div class="ai-result-meta"><span class="type-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span><span class="item-cat">${esc(item.category||'')}</span></div>
-      </div>
-      <div class="item-right">
-        <div class="item-price">${price}</div>
-        ${inQ ? `<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${id}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${id}',1)">+</button></div>`
-               : `<button class="add-btn" onclick="${isB?'addBundle':'addReece'}('${esc(isB?item.uuid:item.code)}');runAiSuggest()">+</button>`}
-      </div>
-    </div>`;
-  }).filter(Boolean).join('') || '<div class="state-box" style="padding:16px 0"><p>Could not match items. Try Search instead.</p></div>';
+async function runAiSuggest(){
+  const query=document.getElementById('ai-textarea').value.trim();if(!query)return;
+  document.getElementById('ai-results').innerHTML='<div class="state-box" style="padding:16px 0"><div class="big-spin"></div><p>Analysing job...</p></div>';
+  const suggestions=await getAiSuggestions(query,true);
+  if(!suggestions||!suggestions.length){document.getElementById('ai-results').innerHTML='<div class="state-box" style="padding:16px 0"><span class="state-icon">🤷</span><p>No matches found.</p></div>';return;}
+  document.getElementById('ai-results').innerHTML=suggestions.map(s=>{
+    const isB=s.type==='bundle';
+    const item=isB?bundles.find(b=>b.uuid===s.id||(b.code||'').toLowerCase()===(s.id||'').toLowerCase()||(b.name||'').toLowerCase().includes((s.name||'').toLowerCase().substring(0,20))):reece.find(r=>r.code===s.id||(r.name||'').toLowerCase().includes((s.name||'').toLowerCase().substring(0,20)));
+    if(!item)return'';
+    const price=isB?(item.price?'$'+parseFloat(item.price).toFixed(2):'No price'):(item.retail?'$'+parseFloat(item.retail).toFixed(2):'—');
+    const id=isB?item.uuid:'r_'+item.code;const inQ=quote.find(i=>i.id===id);
+    return `<div class="ai-result-card"><div class="item-icon ${isB?'bundle':'reece'}">${isB?'📦':'🏪'}</div><div class="ai-result-body"><div class="ai-result-name">${esc(item.name)}</div><div class="ai-result-why">${esc(s.reason||'')}</div><div class="ai-result-meta"><span class="type-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span><span class="item-cat">${esc(item.category||'')}</span></div></div><div class="item-right"><div class="item-price">${price}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${id}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${id}',1)">+</button></div>`:`<button class="add-btn" onclick="${isB?'addBundle':'addReece'}('${esc(isB?item.uuid:item.code)}');runAiSuggest()">+</button>`}</div></div>`;
+  }).filter(Boolean).join('')||'<div class="state-box" style="padding:16px 0"><p>Could not match. Try Search.</p></div>';
 }
 
-async function getAiSuggestions(query, detailed=false) {
-  const bSample = bundles.slice(0,300).map(b=>`${b.code}|${b.name}|${b.category}|${b.price||''}`).join('\n');
-  const rSample = reece.slice(0,400).map(r=>`${r.code}|${r.name}|${r.category}|${r.retail||''}`).join('\n');
-  const prompt = `You are a plumbing quoting assistant for Innovation Plumbing & Design, Brisbane.
-Staff member is looking for: "${query}"
-
-ServiceM8 bundles (code|name|category|price):
-${bSample}
-
-Reece products (code|name|category|retail_inc_gst):
-${rSample}
-
-Return ONLY a JSON array of top ${detailed?8:4} most relevant matches:
-[{"type":"bundle"|"reece","id":"code or uuid","name":"item name","reason":"one short sentence why"}]
-Only include genuine matches. Raw JSON array only, no markdown.`;
-  try {
-    const r = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:prompt}]})
-    });
-    const d = await r.json();
-    const text = (d.content||[]).map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+async function getAiSuggestions(query,detailed=false){
+  const bSample=bundles.slice(0,300).map(b=>`${b.code}|${b.name}|${b.category}|${b.price||''}`).join('\n');
+  const rSample=reece.slice(0,400).map(r=>`${r.code}|${r.name}|${r.category}|${r.retail||''}`).join('\n');
+  const prompt=`You are a plumbing quoting assistant for Innovation Plumbing & Design, Brisbane.\nStaff looking for: "${query}"\n\nBundles:\n${bSample}\n\nReece products:\n${rSample}\n\nReturn ONLY JSON array of top ${detailed?8:4} matches:\n[{"type":"bundle"|"reece","id":"code or uuid","name":"item name","reason":"why"}]\nRaw JSON only.`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    const text=(d.content||[]).map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
     return JSON.parse(text);
-  } catch(e) { return []; }
+  }catch(e){return[];}
 }
 
-// ── QUOTE MANAGEMENT ──────────────────────────────────────────────────────────
-function addBundle(uuid) {
-  const b = bundles.find(x=>x.uuid===uuid); if(!b) return;
-  const ex = quote.find(i=>i.id===uuid);
-  if(ex) ex.qty++; else quote.push({id:uuid,type:'bundle',name:b.name,code:b.code,price:parseFloat(b.price)||0,qty:1});
-  updateQuoteUI(); renderQResults(); showToast('Added to quote');
+function addBundle(uuid){
+  const b=bundles.find(x=>x.uuid===uuid);if(!b)return;
+  const ex=quote.find(i=>i.id===uuid);
+  if(ex)ex.qty++;else quote.push({id:uuid,type:'bundle',name:b.name,code:b.code,price:parseFloat(b.price)||0,qty:1});
+  updateQuoteUI();renderQResults();showToast('Added to quote');
 }
-function addReece(code) {
-  const r = reece.find(x=>x.code===code); if(!r) return;
-  const id='r_'+code;
-  const ex=quote.find(i=>i.id===id);
-  if(ex) ex.qty++; else quote.push({id,type:'reece',name:r.name,code:r.code,price:parseFloat(r.retail)||0,cost:parseFloat(r.cost)||0,markup:r.markup,qty:1});
-  updateQuoteUI(); renderQResults(); showToast('Added to quote');
+function addReece(code){
+  const r=reece.find(x=>x.code===code);if(!r)return;
+  const id='r_'+code;const ex=quote.find(i=>i.id===id);
+  if(ex)ex.qty++;else quote.push({id,type:'reece',name:r.name,code:r.code,price:parseFloat(r.retail)||0,cost:parseFloat(r.cost)||0,markup:r.markup,qty:1});
+  updateQuoteUI();renderQResults();showToast('Added to quote');
 }
-function chQty(id, delta) {
-  const idx=quote.findIndex(i=>i.id===id); if(idx<0) return;
-  quote[idx].qty+=delta;
-  if(quote[idx].qty<=0) quote.splice(idx,1);
-  updateQuoteUI();
-  if(activeScreen==='quote') renderQuote();
-  else renderQResults();
+function chQty(id,delta){
+  const idx=quote.findIndex(i=>i.id===id);if(idx<0)return;
+  quote[idx].qty+=delta;if(quote[idx].qty<=0)quote.splice(idx,1);
+  updateQuoteUI();if(activeScreen==='quote')renderQuote();else renderQResults();
 }
-function clearQuote() { quote=[]; updateQuoteUI(); renderQuote(); renderQResults(); }
-
-function updateQuoteUI() {
-  const count = quote.reduce((s,i)=>s+i.qty,0);
-  const badge = document.getElementById('quote-badge');
-  const pill = document.getElementById('quote-pill');
-  badge.textContent = count;
-  badge.className = count > 0 ? 'nav-badge show' : 'nav-badge';
-  pill.style.display = count > 0 ? 'flex' : 'none';
-  document.getElementById('quote-pill-txt').textContent = count + (count===1?' item':' items');
+function clearQuote(){quote=[];updateQuoteUI();renderQuote();renderQResults();}
+function updateQuoteUI(){
+  const count=quote.reduce((s,i)=>s+i.qty,0);
+  const badge=document.getElementById('quote-badge');const pill=document.getElementById('quote-pill');
+  badge.textContent=count;badge.className=count>0?'nav-badge show':'nav-badge';
+  pill.style.display=count>0?'flex':'none';
+  document.getElementById('quote-pill-txt').textContent=count+(count===1?' item':' items');
   renderQuote();
 }
-
-function renderQuote() {
-  const container = document.getElementById('quote-list');
-  const totals = document.getElementById('quote-totals');
-  if (!quote.length) {
-    container.innerHTML = '<div class="state-box"><span class="state-icon">📋</span><p>No items yet.<br>Add bundles or products from Search.</p></div>';
-    totals.style.display = 'none'; return;
-  }
-  container.innerHTML = quote.map(item => {
-    const line = item.price * item.qty;
-    const isB = item.type==='bundle';
-    return `<div class="quote-item">
-      <div class="qi-top">
-        <div class="qi-name">${esc(item.name)} <span class="type-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span></div>
-        <div class="qi-line">$${line.toFixed(2)}</div>
-      </div>
-      <div class="qi-bot">
-        <div class="qty-ctrl">
-          <button class="qty-btn" onclick="chQty('${item.id}',-1)">−</button>
-          <span class="qty-num">${item.qty}</span>
-          <button class="qty-btn" onclick="chQty('${item.id}',1)">+</button>
-        </div>
-        <div class="qi-meta">$${item.price.toFixed(2)} ea${item.cost?` · Cost $${item.cost.toFixed(2)} · ${item.markup}% mkup`:''}</div>
-        <button class="qi-rm" onclick="chQty('${item.id}',${-item.qty})">✕</button>
-      </div>
-    </div>`;
+function renderQuote(){
+  const container=document.getElementById('quote-list');const totals=document.getElementById('quote-totals');
+  if(!quote.length){container.innerHTML='<div class="state-box"><span class="state-icon">📋</span><p>No items yet.</p></div>';totals.style.display='none';return;}
+  container.innerHTML=quote.map(item=>{
+    const line=item.price*item.qty;const isB=item.type==='bundle';
+    return `<div class="quote-item"><div class="qi-top"><div class="qi-name">${esc(item.name)} <span class="type-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span></div><div class="qi-line">$${line.toFixed(2)}</div></div><div class="qi-bot"><div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${item.id}',-1)">−</button><span class="qty-num">${item.qty}</span><button class="qty-btn" onclick="chQty('${item.id}',1)">+</button></div><div class="qi-meta">$${item.price.toFixed(2)} ea${item.cost?` · Cost $${item.cost.toFixed(2)} · ${item.markup}% mkup`:''}</div><button class="qi-rm" onclick="chQty('${item.id}',${-item.qty})">✕</button></div></div>`;
   }).join('');
-  const totalInc = quote.reduce((s,i)=>s+i.price*i.qty,0);
-  const gst = totalInc/11; const sub = totalInc-gst;
-  document.getElementById('t-sub').textContent = '$'+sub.toFixed(2);
-  document.getElementById('t-gst').textContent = '$'+gst.toFixed(2);
-  document.getElementById('t-total').textContent = '$'+totalInc.toFixed(2);
-  totals.style.display = 'block';
+  const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0);const gst=totalInc/11;const sub=totalInc-gst;
+  document.getElementById('t-sub').textContent='$'+sub.toFixed(2);
+  document.getElementById('t-gst').textContent='$'+gst.toFixed(2);
+  document.getElementById('t-total').textContent='$'+totalInc.toFixed(2);
+  totals.style.display='block';
+}
+function exportQuote(){
+  if(!quote.length){showToast('Nothing to export');return;}
+  const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0);const gst=totalInc/11;const sub=totalInc-gst;
+  const lines=['INNOVATION PLUMBING & DESIGN','Phone: 3073 2666','Quote — '+new Date().toLocaleDateString('en-AU',{day:'2-digit',month:'long',year:'numeric'}),'','ITEM'.padEnd(55)+'QTY'.padStart(4)+'UNIT'.padStart(10)+'TOTAL'.padStart(10),'-'.repeat(79),...quote.map(i=>i.name.substring(0,53).padEnd(55)+String(i.qty).padStart(4)+('$'+i.price.toFixed(2)).padStart(10)+('$'+(i.price*i.qty).toFixed(2)).padStart(10)),'-'.repeat(79),'Subtotal (ex GST)'.padEnd(69)+('$'+sub.toFixed(2)).padStart(10),'GST (10%)'.padEnd(69)+('$'+gst.toFixed(2)).padStart(10),'TOTAL INC GST'.padEnd(69)+('$'+totalInc.toFixed(2)).padStart(10),'','Verbal estimate only — subject to change upon site inspection.'];
+  const blob=new Blob([lines.join('\n')],{type:'text/plain'});const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='IPD_Quote_'+new Date().toISOString().slice(0,10)+'.txt';a.click();URL.revokeObjectURL(url);
 }
 
-function exportQuote() {
-  if (!quote.length) { showToast('Nothing to export'); return; }
-  const totalInc = quote.reduce((s,i)=>s+i.price*i.qty,0);
-  const gst=totalInc/11; const sub=totalInc-gst;
-  const lines = [
-    'INNOVATION PLUMBING & DESIGN','Phone: 3073 2666',
-    'Quote — '+new Date().toLocaleDateString('en-AU',{day:'2-digit',month:'long',year:'numeric'}),'',
-    'ITEM'.padEnd(55)+'QTY'.padStart(4)+'UNIT'.padStart(10)+'TOTAL'.padStart(10),'-'.repeat(79),
-    ...quote.map(i=>i.name.substring(0,53).padEnd(55)+String(i.qty).padStart(4)+('$'+i.price.toFixed(2)).padStart(10)+('$'+(i.price*i.qty).toFixed(2)).padStart(10)),
-    '-'.repeat(79),
-    'Subtotal (ex GST)'.padEnd(69)+('$'+sub.toFixed(2)).padStart(10),
-    'GST (10%)'.padEnd(69)+('$'+gst.toFixed(2)).padStart(10),
-    'TOTAL INC GST'.padEnd(69)+('$'+totalInc.toFixed(2)).padStart(10),'',
-    'This is a verbal estimate only and is subject to change upon site inspection.',
-  ];
-  const blob=new Blob([lines.join('\n')],{type:'text/plain'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download='IPD_Quote_'+new Date().toISOString().slice(0,10)+'.txt';
-  a.click();URL.revokeObjectURL(url);
-}
-
-// ── KNOWLEDGE BASE ────────────────────────────────────────────────────────────
-function renderKB() {
+function renderKB(){
   const q=(document.getElementById('kb-search').value||'').toLowerCase();
   const c=document.getElementById('kb-list');
-  if (!knowledge.length) {
-    c.innerHTML='<div class="state-box"><span class="state-icon">📚</span><p>No knowledge entries yet.<br><span class="hint">Run populateKnowledge() in Apps Script.</span></p></div>';
-    return;
-  }
-  const cats = ['All', ...new Set(knowledge.map(k=>k.category||'').filter(Boolean))];
-  const activeCat = window._kbCat || 'All';
-  const filtered = knowledge.filter(k => {
-    const matchQ = !q || (k.title||'').toLowerCase().includes(q) || (k.description||'').toLowerCase().includes(q) || (k.tags||'').toLowerCase().includes(q) || (k.reeceCode||'').toLowerCase().includes(q);
-    const matchC = activeCat === 'All' || k.category === activeCat;
-    return matchQ && matchC;
+  if(!knowledge.length){c.innerHTML='<div class="state-box"><span class="state-icon">📚</span><p>No knowledge entries yet.</p></div>';return;}
+  const cats=['All',...new Set(knowledge.map(k=>k.category||'').filter(Boolean))];
+  const activeCat=window._kbCat||'All';
+  const filtered=knowledge.filter(k=>{
+    const matchQ=!q||(k.title||'').toLowerCase().includes(q)||(k.description||'').toLowerCase().includes(q)||(k.tags||'').toLowerCase().includes(q)||(k.reeceCode||'').toLowerCase().includes(q);
+    const matchC=activeCat==='All'||k.category===activeCat;return matchQ&&matchC;
   });
-
-  // Build category chips
-  const chipHtml = `<div class="cat-row" style="border-top:none">${cats.map(ct=>`<div class="cat-chip${ct===activeCat?' active':''}" onclick="setKbCat('${esc(ct)}')">${esc(ct)}</div>`).join('')}</div>`;
-
-  if (!filtered.length) { c.innerHTML = chipHtml + '<div class="state-box"><p>No results found.</p></div>'; return; }
-
- return `<div class="kb-item" onclick="${hasCode ? `tapKbArticle('${esc(searchCode)}','${esc(k.title)}','${esc(k.url||'')}')` : ''}" const itemsHtml = filtered.map(k => {
-    const hasCode = k.reeceCode && k.reeceCode.trim();
-    // Strip REC prefix for searching in Reece tab
-    const searchCode = hasCode ? k.reeceCode.trim().replace(/^REC/i,'') : '';
-    style="${hasCode?'cursor:pointer':''}">
-      <div class="kb-icon">${hasCode ? '🏪' : '📄'}</div>
+  const chipHtml=`<div class="cat-row" style="border-top:none">${cats.map(ct=>`<div class="cat-chip${ct===activeCat?' active':''}" onclick="setKbCat('${esc(ct)}')">${esc(ct)}</div>`).join('')}</div>`;
+  if(!filtered.length){c.innerHTML=chipHtml+'<div class="state-box"><p>No results found.</p></div>';return;}
+  const itemsHtml=filtered.map(k=>{
+    const hasCode=k.reeceCode&&k.reeceCode.trim();
+    const hasUrl=k.url&&k.url.trim();
+    return `<div class="kb-item" onclick="${hasUrl?`window.open('${esc(k.url)}','_blank')`:hasCode?`tapKbArticle('${esc(k.reeceCode.replace(/^REC/i,''))}','${esc(k.title)}','')`:''}" style="${hasUrl||hasCode?'cursor:pointer':''}">
+      <div class="kb-icon">${hasUrl?'🏪':'📄'}</div>
       <div style="flex:1;min-width:0">
         <div class="kb-title">${esc(k.title)}</div>
         <div class="kb-desc">${esc(k.description||'')}</div>
         <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap;align-items:center">
           <span class="kb-cat">${esc(k.category||'')}</span>
-          ${hasCode ? `<span style="font-size:10px;font-family:var(--mono);color:var(--green);background:rgba(74,222,128,.1);padding:2px 6px;border-radius:4px">${esc(k.reeceCode)}</span>` : ''}
+          ${hasCode?`<span style="font-size:10px;font-family:var(--mono);color:var(--green);background:rgba(74,222,128,.1);padding:2px 6px;border-radius:4px">${esc(k.reeceCode)}</span>`:''}
         </div>
       </div>
-      <span style="color:var(--text-dim);font-size:18px;flex-shrink:0">${hasCode ? '🔍' : '›'}</span>
+      <span style="color:var(--text-dim);font-size:18px;flex-shrink:0">${hasUrl?'🔗':'›'}</span>
     </div>`;
   }).join('');
-
-  c.innerHTML = chipHtml + itemsHtml;
+  c.innerHTML=chipHtml+itemsHtml;
+}
+function setKbCat(cat){window._kbCat=cat;renderKB();}
+function tapKbArticle(code,title,url){
+  if(url&&url.trim()){window.open(url,'_blank');}
+  else{goScreen('search');document.getElementById('q-search').value=code;window._kbCat='All';quoteCat='All';onQSearch();showToast('Searching for '+title);}
 }
 
-function setKbCat(cat) { window._kbCat = cat; renderKB(); }
-function tapKbArticle(code, title, url) {
-  if (url && url.trim()) {
-    window.open(url, '_blank');
-  } else {
-    goScreen('search');
-    document.getElementById('q-search').value = code;
-    window._kbCat = 'All';
-    quoteCat = 'All';
-    onQSearch();
-    showToast('Searching Reece for ' + title);
-  }
-}
-
-// ── VOICE ─────────────────────────────────────────────────────────────────────
-function setupVoice() {
-  const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
-  if (!SR) { document.getElementById('mic-btn').style.display='none'; return; }
-  recognition=new SR(); recognition.continuous=true; recognition.interimResults=true; recognition.lang='en-AU';
-  recognition.onresult=e=>{
-    let t=''; for(let i=e.resultIndex;i<e.results.length;i++) t+=e.results[i][0].transcript;
-    document.getElementById('q-search').value=t;
-    document.getElementById('voice-txt').textContent='"'+t+'"';
-    onQSearch();
-  };
-  recognition.onend=()=>{ if(isListening) try{recognition.start()}catch(e){} };
-  recognition.onerror=e=>{ if(e.error!=='no-speech') stopListening(); };
-}
-function startListening() {
-  if (!recognition||isListening) return;
-  try{ recognition.start(); isListening=true;
-    document.getElementById('mic-btn').classList.add('listening');
-    document.getElementById('voice-hint').classList.add('show');
-  }catch(e){}
-}
-function stopListening() {
-  if (!recognition||!isListening) return;
-  try{recognition.stop();}catch(e){}
-  isListening=false;
-  document.getElementById('mic-btn').classList.remove('listening');
-  document.getElementById('voice-hint').classList.remove('show');
-}
-function toggleMic(){ isListening?stopListening():startListening(); }
-
-function setupAiVoice() {
+function setupVoice(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if (!SR) return;
-  aiRecognition=new SR(); aiRecognition.continuous=false; aiRecognition.interimResults=false; aiRecognition.lang='en-AU';
-  aiRecognition.onresult=e=>{ document.getElementById('ai-textarea').value=e.results[0][0].transcript; stopAiMic(); runAiSuggest(); };
-  aiRecognition.onend=()=>stopAiMic();
-  aiRecognition.onerror=()=>stopAiMic();
+  if(!SR){document.getElementById('mic-btn').style.display='none';return;}
+  recognition=new SR();recognition.continuous=true;recognition.interimResults=true;recognition.lang='en-AU';
+  recognition.onresult=e=>{let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;document.getElementById('q-search').value=t;document.getElementById('voice-txt').textContent='"'+t+'"';onQSearch();};
+  recognition.onend=()=>{if(isListening)try{recognition.start();}catch(e){}};
+  recognition.onerror=e=>{if(e.error!=='no-speech')stopListening();};
 }
-function toggleAiMic(){
-  if(aiListening){stopAiMic();return;}
-  try{aiRecognition.start();aiListening=true;document.getElementById('ai-mic').classList.add('listening');}catch(e){}
+function startListening(){
+  if(!recognition||isListening)return;
+  try{recognition.start();isListening=true;document.getElementById('mic-btn').classList.add('listening');document.getElementById('voice-hint').classList.add('show');}catch(e){}
 }
-function stopAiMic(){
-  if(!aiListening)return; try{aiRecognition.stop();}catch(e){}
-  aiListening=false;document.getElementById('ai-mic').classList.remove('listening');
+function stopListening(){
+  if(!recognition||!isListening)return;
+  try{recognition.stop();}catch(e){}
+  isListening=false;document.getElementById('mic-btn').classList.remove('listening');document.getElementById('voice-hint').classList.remove('show');
 }
+function toggleMic(){isListening?stopListening():startListening();}
+function setupAiVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;
+  aiRecognition=new SR();aiRecognition.continuous=false;aiRecognition.interimResults=false;aiRecognition.lang='en-AU';
+  aiRecognition.onresult=e=>{document.getElementById('ai-textarea').value=e.results[0][0].transcript;stopAiMic();runAiSuggest();};
+  aiRecognition.onend=()=>stopAiMic();aiRecognition.onerror=()=>stopAiMic();
+}
+function toggleAiMic(){if(aiListening){stopAiMic();return;}try{aiRecognition.start();aiListening=true;document.getElementById('ai-mic').classList.add('listening');}catch(e){}}
+function stopAiMic(){if(!aiListening)return;try{aiRecognition.stop();}catch(e){}aiListening=false;document.getElementById('ai-mic').classList.remove('listening');}
 
-// ── UTILS ─────────────────────────────────────────────────────────────────────
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
 
-// ── Intercept stock nav to trigger review
-
-
-window.addEventListener('load', init);
+window.addEventListener('load',init);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&activeScreen==='search')startListening();});
 </script>
 </body>
 </html>
+Copy Part 1, paste into GitHub. Then copy Part 2 and paste it directly after. Commit changes. That's the complete app.Sonnet 4.6 Low
