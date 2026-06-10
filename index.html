@@ -634,8 +634,8 @@ function renderQResults(){
   container.innerHTML=html;
 }
 function bundleCard(b){
-  const inQ=quote.find(i=>i.id===b.uuid);const price=b.price?'$'+parseFloat(b.price).toFixed(2):'';
-  return `<div class="item-card"><div class="item-icon bundle">📦</div><div class="item-body"><div class="item-name">${esc(b.name)}</div><div class="item-code">${esc(b.code||'')}</div><span class="item-cat">${esc(b.category||'')}</span></div><div class="item-right"><div class="item-price ${price?'':'dim'}">${price||'No price'}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${b.uuid}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${b.uuid}',1)">+</button></div>`:`<button class="add-btn" onclick="addBundle('${esc(b.uuid)}')">+</button>`}</div></div>`;
+  const inQ=quote.find(i=>i.id===b.uuid);const price=(b.price&&b.price!==''&&b.price!=='0')?'$'+parseFloat(b.price).toFixed(2):'';
+return `<div class="item-card"><div class="item-icon bundle">📦</div><div class="item-body"><div class="item-name">${esc(b.name)}</div><div class="item-code">${esc(b.code||b.uuid||'')}</div><span class="item-cat">${esc(b.category||'')}</span></div><div class="item-right"><div class="item-price ${price?'':'dim'}">${price||'No price'}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${b.uuid}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${b.uuid}',1)">+</button></div>`:`<button class="add-btn" onclick="addBundle('${esc(b.uuid)}')">+</button>`}</div></div>`;
 }
 function reeceCard(r){
   const id='r_'+r.code;const inQ=quote.find(i=>i.id===id);const retail=r.retail?'$'+parseFloat(r.retail).toFixed(2):'';
