@@ -2,14 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0f1115">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="IPD">
 <title>IPD · Innovation Plumbing + Design</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -69,7 +66,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .section-hd{padding:7px 16px;font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;background:var(--bg);border-bottom:1px solid var(--border);border-top:1px solid var(--border);position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:6px}
 .section-hd::before{content:'';width:6px;height:6px;border-radius:2px;background:currentColor;flex-shrink:0}
 .stock-row{display:flex;align-items:center;padding:10px 16px;border-bottom:1px solid var(--border);gap:10px;background:var(--surface)}
-.stock-row:active{background:var(--surface2)}
 .stock-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
 .stock-info{flex:1;min-width:0}
 .stock-name{font-size:13px;font-weight:500;color:var(--text);line-height:1.3}
@@ -81,7 +77,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .stock-input.good{border-color:var(--green);background:rgba(74,222,128,.08)}
 .order-badge{font-size:9px;font-weight:700;background:rgba(248,113,113,.15);color:var(--red);padding:2px 6px;border-radius:4px}
 .item-card{display:flex;align-items:flex-start;padding:11px 16px;border-bottom:1px solid var(--border);gap:10px;background:var(--surface)}
-.item-card:active{background:var(--surface2)}
 .item-icon{width:34px;height:34px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .item-icon.bundle{background:var(--blue-lt);color:var(--blue)}
 .item-icon.reece{background:rgba(248,113,113,.15);color:var(--red)}
@@ -100,12 +95,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .ai-band{background:linear-gradient(135deg,rgba(59,130,246,.08) 0%,rgba(167,139,250,.08) 100%);border-bottom:1px solid var(--border);padding:10px 16px;flex-shrink:0}
 .ai-band-hd{display:flex;align-items:center;gap:6px;margin-bottom:8px}
 .ai-band-hd span{font-size:11px;font-weight:600;color:var(--blue)}
+.ai-chips-wrap{display:flex;flex-wrap:wrap}
 .ai-chip{padding:5px 10px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border2);font-size:11px;color:var(--text-mid);cursor:pointer;display:flex;align-items:center;gap:5px;margin:2px}
 .ai-chip .chip-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px}
 .ai-chip .chip-badge.b{background:var(--blue-lt);color:var(--blue)}
 .ai-chip .chip-badge.r{background:var(--red-lt);color:var(--red)}
 .ai-chip .chip-price{font-weight:700;color:var(--orange)}
-.mini-load{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text-dim)}
+.mini-load{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text-dim);padding:4px 0}
 .spin{width:12px;height:12px;border:2px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ai-wrap{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
@@ -167,7 +163,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .state-box{padding:36px 20px;text-align:center;color:var(--text-dim)}
 .state-box .state-icon{font-size:36px;margin-bottom:10px;display:block;opacity:.4}
 .state-box p{font-size:13px;line-height:1.6}
-.state-box .hint{font-size:11px;margin-top:5px}
 .status-bar{display:flex;align-items:center;gap:6px;padding:5px 16px;font-size:10px;color:var(--text-dim);background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0}
 .s-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
 .s-dot.warn{background:#fbbf24;animation:mic-pulse 1s infinite}
@@ -182,15 +177,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
   <div class="top-bar">
     <div class="top-logo">
       <div class="top-logo-mark">🔧</div>
-      <div>
-        <div class="top-logo-text">IPD</div>
-        <div class="top-logo-sub">Innovation Plumbing + Design</div>
-      </div>
+      <div><div class="top-logo-text">IPD</div><div class="top-logo-sub">Innovation Plumbing + Design</div></div>
     </div>
     <div class="top-right">
-      <div class="quote-pill" onclick="goScreen('quote')" id="quote-pill" style="display:none">
-        📋 <span id="quote-pill-txt">0</span>
-      </div>
+      <div class="quote-pill" onclick="goScreen('quote')" id="quote-pill" style="display:none">📋 <span id="quote-pill-txt">0</span></div>
     </div>
   </div>
   <div class="screens">
@@ -201,24 +191,18 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
         <div class="stat-pill"><div class="stat-num" id="s-units" style="color:#f97316">0</div><div class="stat-label">Units</div></div>
         <div class="stat-pill"><div class="stat-num" id="s-stocked" style="color:#4ade80">0</div><div class="stat-label">Stocked</div></div>
       </div>
-      <div class="search-wrap">
-        <div class="search-row">
-          <div class="search-box"><span class="s-icon">🔍</span><input type="text" id="stock-search" placeholder="Search stock..." oninput="renderStock()"></div>
-        </div>
-      </div>
+      <div class="search-wrap"><div class="search-row"><div class="search-box"><span class="s-icon">🔍</span><input type="text" id="stock-search" placeholder="Search stock..." oninput="renderStock()"></div></div></div>
       <div class="cat-row" id="stock-cats"></div>
       <div class="list-body" id="stock-list"></div>
     </div>
     <div class="screen" id="screen-review">
-      <div class="review-wrap" id="review-wrap">
-        <div class="state-box"><span class="state-icon">🤖</span><p>Go to Stock, count your items, then tap Review.</p></div>
-      </div>
+      <div class="review-wrap" id="review-wrap"><div class="state-box"><span class="state-icon">🤖</span><p>Count your stock first, then tap Review.</p></div></div>
     </div>
     <div class="screen" id="screen-search">
       <div class="status-bar"><div class="s-dot warn" id="q-sdot"></div><span id="q-stext">Loading data...</span></div>
       <div class="search-wrap">
         <div class="search-row">
-          <div class="search-box"><span class="s-icon">🔍</span><input type="text" id="q-search" placeholder="Bundle code, Reece code or product name..." autocomplete="off" oninput="onQSearch()"></div>
+          <div class="search-box"><span class="s-icon">🔍</span><input type="text" id="q-search" placeholder="Bundle code, Reece code or name..." autocomplete="off" oninput="onQSearch()"></div>
           <div class="mic-btn" id="mic-btn" onclick="toggleMic()">🎤</div>
         </div>
         <div class="voice-hint" id="voice-hint"><div class="voice-dot"></div><span id="voice-txt">Listening...</span></div>
@@ -226,11 +210,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <div class="cat-row" id="q-cats"></div>
       <div id="ai-band" style="display:none" class="ai-band">
         <div class="ai-band-hd"><span>✨</span><span>AI Suggestions</span></div>
-        <div id="ai-band-content" style="display:flex;flex-wrap:wrap"><div class="mini-load"><div class="spin"></div>Finding matches...</div></div>
+        <div id="ai-band-content" class="ai-chips-wrap"><div class="mini-load"><div class="spin"></div>Finding matches...</div></div>
       </div>
-      <div id="q-list" class="list-body">
-        <div class="state-box"><span class="state-icon">🔍</span><p>Search for a bundle or Reece product<br>or tap the mic and speak</p></div>
-      </div>
+      <div id="q-list" class="list-body"><div class="state-box"><span class="state-icon">🔍</span><p>Search for a bundle or Reece product<br>or tap the mic and speak</p></div></div>
     </div>
     <div class="screen" id="screen-ai">
       <div class="ai-wrap">
@@ -245,15 +227,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
             </div>
           </div>
         </div>
-        <div id="ai-results">
-          <div class="state-box" style="padding:16px 0"><span class="state-icon">💡</span><p>Describe the job above and I'll suggest matching bundles and Reece products</p></div>
-        </div>
+        <div id="ai-results"><div class="state-box" style="padding:16px 0"><span class="state-icon">💡</span><p>Describe the job above and I'll suggest matching bundles and Reece products</p></div></div>
       </div>
     </div>
     <div class="screen" id="screen-quote">
-      <div id="quote-list" class="list-body">
-        <div class="state-box"><span class="state-icon">📋</span><p>No items yet.<br>Add bundles or products from Search.</p></div>
-      </div>
+      <div id="quote-list" class="list-body"><div class="state-box"><span class="state-icon">📋</span><p>No items yet.<br>Add bundles or products from Search.</p></div></div>
       <div id="quote-totals" class="totals-box" style="display:none">
         <div class="total-row"><span>Subtotal (ex GST)</span><span id="t-sub">$0.00</span></div>
         <div class="total-row"><span>GST (10%)</span><span id="t-gst">$0.00</span></div>
@@ -265,12 +243,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       </div>
     </div>
     <div class="screen" id="screen-kb">
-      <div class="search-wrap">
-        <div class="search-box"><span class="s-icon">🔍</span><input type="text" id="kb-search" placeholder="Search knowledge base..." oninput="renderKB()"></div>
-      </div>
-      <div style="padding:8px 16px;font-size:11px;color:var(--text-dim);background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0">
-        Tap any 🏪 article to open on Reece website
-      </div>
+      <div class="search-wrap"><div class="search-box"><span class="s-icon">🔍</span><input type="text" id="kb-search" placeholder="Search knowledge base..." oninput="renderKB()"></div></div>
+      <div style="padding:8px 16px;font-size:11px;color:var(--text-dim);background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0">Tap any 🏪 article to open on Reece website</div>
       <div id="kb-list" class="list-body"></div>
     </div>
     <div class="screen" id="screen-settings">
@@ -293,9 +267,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
         </div>
         <div class="settings-card">
           <div class="settings-card-hd">ℹ️ App Info</div>
-          <div class="settings-row">
-            <div class="settings-hint">IPD Unified App v3.0<br>Stock + Field Quoting<br>Innovation Plumbing & Design · 3073 2666</div>
-          </div>
+          <div class="settings-row"><div class="settings-hint">IPD Unified App v3.0<br>Stock + Field Quoting<br>Innovation Plumbing & Design · 3073 2666</div></div>
         </div>
       </div>
     </div>
@@ -312,7 +284,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 <div class="toast" id="toast"></div>
 <script>
 const PROXY='https://ipd-proxy-server.onrender.com';
-let SHEET_URL=localStorage.getItem('ipd_sheet_url')||'https://script.google.com/macros/s/AKfycbwiRPh_vfpvNwFXxoe5u02tLvWfHAA76juq7NcrC1uH77RHSNOJAoBqU4aatnpP8-zn/exec';
+const SHEET_URL_DEFAULT='https://script.google.com/macros/s/AKfycbwiRPh_vfpvNwFXxoe5u02tLvWfHAA76juq7NcrC1uH77RHSNOJAoBqU4aatnpP8-zn/exec';
+let SHEET_URL=localStorage.getItem('ipd_sheet_url')||SHEET_URL_DEFAULT;
 const initialStock=[
 {code:"416065",category:"BRASSWARE",name:"15mm Compression Tee",target:3},
 {code:"208315",category:"BRASSWARE",name:"15mm Hex Nipple",target:6},
@@ -493,10 +466,10 @@ let searchTimer=null,aiTimer=null;
 function init(){
   const saved=localStorage.getItem('ipd_sm8_key');
   if(saved)document.getElementById('sm8-key-input').value=saved;
-  const savedUrl=localStorage.getItem('ipd_sheet_url')||SHEET_URL;
+  const savedUrl=localStorage.getItem('ipd_sheet_url')||SHEET_URL_DEFAULT;
   document.getElementById('sheet-url-input').value=savedUrl;
   SHEET_URL=savedUrl;
-  buildStockCats();renderStock();setupVoice();setupAiVoice();loadQuoteData();
+  buildStockCats();renderStock();setupVoice();setupAiVoice();loadData();
 }
 
 function goScreen(name){
@@ -508,30 +481,17 @@ function goScreen(name){
   if(name==='search'){buildQCats();setTimeout(startListening,400);}else stopListening();
   if(name==='kb')renderKB();
 }
+function saveSheetUrl(){const url=document.getElementById('sheet-url-input').value.trim();localStorage.setItem('ipd_sheet_url',url);SHEET_URL=url;loadData();showToast('Saved — reloading');}
+function saveSM8Key(){localStorage.setItem('ipd_sm8_key',document.getElementById('sm8-key-input').value.trim());showToast('Saved');}
 
-function saveSheetUrl(){
-  const url=document.getElementById('sheet-url-input').value.trim();
-  localStorage.setItem('ipd_sheet_url',url);SHEET_URL=url;loadQuoteData();showToast('Saved — reloading');
-}
-function saveSM8Key(){
-  localStorage.setItem('ipd_sm8_key',document.getElementById('sm8-key-input').value.trim());showToast('Saved');
-}
-
-function getToOrder(item){
-  const v=onHand[item.code];
-  if(v===''||v===undefined)return null;
-  const diff=item.target-Number(v);return diff>0?diff:0;
-}
+function getToOrder(item){const v=onHand[item.code];if(v===''||v===undefined)return null;const diff=item.target-Number(v);return diff>0?diff:0;}
 function orderItems(){return initialStock.filter(i=>getToOrder(i)>0).map(i=>({...i,toOrder:getToOrder(i),onHand:Number(onHand[i.code])}));}
 function updateStockStats(){
   const checked=Object.values(onHand).filter(v=>v!=='').length;
-  const items=orderItems();
-  const units=items.reduce((s,i)=>s+i.toOrder,0);
+  const items=orderItems();const units=items.reduce((s,i)=>s+i.toOrder,0);
   const stocked=Object.keys(onHand).filter(k=>onHand[k]!==''&&getToOrder(initialStock.find(i=>i.code===k))===0).length;
-  document.getElementById('s-checked').textContent=checked;
-  document.getElementById('s-order').textContent=items.length;
-  document.getElementById('s-units').textContent=units;
-  document.getElementById('s-stocked').textContent=stocked;
+  document.getElementById('s-checked').textContent=checked;document.getElementById('s-order').textContent=items.length;
+  document.getElementById('s-units').textContent=units;document.getElementById('s-stocked').textContent=stocked;
 }
 function buildStockCats(){
   const cats=['ALL',...new Set(initialStock.map(i=>i.category))];
@@ -540,17 +500,11 @@ function buildStockCats(){
 function setStockCat(cat){stockCat=cat;buildStockCats();renderStock();}
 function renderStock(){
   const q=(document.getElementById('stock-search').value||'').toLowerCase();
-  const filtered=initialStock.filter(item=>{
-    const matchCat=stockCat==='ALL'||item.category===stockCat;
-    const matchQ=!q||item.name.toLowerCase().includes(q)||item.code.toLowerCase().includes(q);
-    return matchCat&&matchQ;
-  });
-  const grouped={};
-  filtered.forEach(item=>{if(!grouped[item.category])grouped[item.category]=[];grouped[item.category].push(item);});
+  const filtered=initialStock.filter(item=>(stockCat==='ALL'||item.category===stockCat)&&(!q||item.name.toLowerCase().includes(q)||item.code.toLowerCase().includes(q)));
+  const grouped={};filtered.forEach(item=>{if(!grouped[item.category])grouped[item.category]=[];grouped[item.category].push(item);});
   let html='';
   Object.entries(grouped).forEach(([cat,items])=>{
-    const col=CAT_COLORS[cat]||'#94a3b8';
-    html+=`<div class="section-hd" style="color:${col}">${cat}</div>`;
+    const col=CAT_COLORS[cat]||'#94a3b8';html+=`<div class="section-hd" style="color:${col}">${cat}</div>`;
     items.forEach(item=>{
       const v=onHand[item.code];const toOrder=getToOrder(item);const hasVal=v!==undefined&&v!=='';
       const cls=hasVal?(toOrder>0?'need':'good'):'';
@@ -563,49 +517,69 @@ function renderStock(){
 function setOnHand(code,val){onHand[code]=val===''?'':Math.max(0,parseInt(val)||0);renderStock();}
 
 async function runStockReview(){
-  const items=orderItems();
-  if(!items.length){showToast('Count your stock first');return;}
-  goScreen('review');
-  const wrap=document.getElementById('review-wrap');
-  wrap.innerHTML=`<div class="review-card"><h3>Order Summary (${items.length} lines)</h3>${items.map(i=>`<div class="order-summary-row"><span>${esc(i.name)}</span><span class="badge-order">ORDER ${i.toOrder}</span></div>`).join('')}</div><div class="review-card"><h3>AI Review</h3><div class="mini-load"><div class="spin"></div>Checking order...</div></div>`;
+  const items=orderItems();if(!items.length){showToast('Count your stock first');return;}
+  goScreen('review');const wrap=document.getElementById('review-wrap');
+  wrap.innerHTML=`<div class="review-card"><h3>Order (${items.length} lines)</h3>${items.map(i=>`<div class="order-summary-row"><span>${esc(i.name)}</span><span class="badge-order">ORDER ${i.toOrder}</span></div>`).join('')}</div><div class="review-card"><h3>AI Review</h3><div class="mini-load"><div class="spin"></div>Checking...</div></div>`;
   try{
     const res=await fetch(PROXY+'/ai-review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderItems:items})});
-    const data=await res.json();
-    const reviewText=data.review||data.error||'No response.';
+    const data=await res.json();const reviewText=data.review||data.error||'No response.';
     wrap.innerHTML=`<div class="review-card"><h3>Order — ${items.length} lines</h3>${items.map(i=>`<div class="order-summary-row"><span>${esc(i.name)}</span><span class="badge-order">ORDER ${i.toOrder}</span></div>`).join('')}</div><div class="review-card"><h3>AI Review</h3><div class="review-text">${esc(reviewText)}</div></div><button class="send-btn" id="send-btn" onclick="sendOrder()">📤 Send to ServiceM8</button><div id="send-status"></div>`;
   }catch(e){wrap.innerHTML+=`<div class="status-msg error">Could not reach server.</div>`;}
 }
 async function sendOrder(){
-  const items=orderItems();const btn=document.getElementById('send-btn');const statusDiv=document.getElementById('send-status');
+  const items=orderItems();const btn=document.getElementById('send-btn');const sd=document.getElementById('send-status');
   btn.disabled=true;btn.textContent='Sending...';
   try{
     const res=await fetch(PROXY+'/send-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderItems:items,totalUnits:items.reduce((s,i)=>s+i.toOrder,0)})});
     const data=await res.json();
-    if(res.ok&&data.success){statusDiv.innerHTML=`<div class="status-msg success">✅ ${esc(data.message)}</div>`;}
-    else{statusDiv.innerHTML=`<div class="status-msg error">❌ ${esc(data.error||'Error')}</div>`;btn.disabled=false;btn.textContent='📤 Send to ServiceM8';}
-  }catch(e){statusDiv.innerHTML=`<div class="status-msg error">❌ Could not reach server.</div>`;btn.disabled=false;btn.textContent='📤 Send to ServiceM8';}
+    if(res.ok&&data.success)sd.innerHTML=`<div class="status-msg success">✅ ${esc(data.message)}</div>`;
+    else{sd.innerHTML=`<div class="status-msg error">❌ ${esc(data.error||'Error')}</div>`;btn.disabled=false;btn.textContent='📤 Send to ServiceM8';}
+  }catch(e){sd.innerHTML=`<div class="status-msg error">❌ Could not reach server.</div>`;btn.disabled=false;btn.textContent='📤 Send to ServiceM8';}
 }
 
-async function loadQuoteData(){
+async function loadData(){
   if(!SHEET_URL)return;
   document.getElementById('q-sdot').className='s-dot warn';
-  document.getElementById('q-stext').textContent='Connecting...';
+  document.getElementById('q-stext').textContent='Connecting to Google Sheet...';
   try{
     const r=await fetch(SHEET_URL+(SHEET_URL.includes('?')?'&':'?')+'action=all&t='+Date.now());
     if(!r.ok)throw new Error('HTTP '+r.status);
     const d=await r.json();
-    bundles=d.bundles||[];reece=d.reece||[];knowledge=d.knowledge||[];dataLoaded=true;
+    bundles=(d.bundles||[]).map(function(b){
+      return {
+        uuid:String(b.uuid||''),
+        code:String(b.code||''),
+        name:String(b.name||''),
+        category:String(b.category||''),
+        price:b.price!==undefined&&b.price!==null&&b.price!==''?String(b.price):'',
+        notes:String(b.notes||'')
+      };
+    });
+    reece=(d.reece||[]).map(function(r){
+      return {
+        code:String(r.code||''),
+        name:String(r.name||''),
+        unit:String(r.unit||''),
+        category:String(r.category||''),
+        subcategory:String(r.subcategory||''),
+        retail:r.retail!==undefined&&r.retail!==null&&r.retail!==''?String(r.retail):'',
+        cost:r.cost!==undefined&&r.cost!==null&&r.cost!==''?String(r.cost):'',
+        markup:r.markup!==undefined?String(r.markup):''
+      };
+    });
+    knowledge=d.knowledge||[];
+    dataLoaded=true;
     document.getElementById('q-sdot').className='s-dot';
     document.getElementById('q-stext').textContent=bundles.length+' bundles · '+reece.length.toLocaleString()+' Reece products';
     buildQCats();renderKB();
   }catch(e){
     document.getElementById('q-sdot').className='s-dot err';
     document.getElementById('q-stext').textContent='Could not load — check Settings';
+    console.error('Load error:',e);
   }
 }
-
 function buildQCats(){
-  const cats=new Set(['All']);bundles.forEach(b=>{if(b.category)cats.add(b.category);});
+  const cats=new Set(['All']);bundles.forEach(b=>{if(b.category&&b.category!=='')cats.add(b.category);});
   document.getElementById('q-cats').innerHTML=[...cats].map(c=>`<div class="cat-chip${c===quoteCat?' active':''}" onclick="setQCat('${esc(c)}')">${esc(c)}</div>`).join('');
 }
 function setQCat(cat){quoteCat=cat;buildQCats();renderQResults();}
@@ -636,38 +610,16 @@ function renderQResults(){
 
 function bundleCard(b){
   const inQ=quote.find(i=>i.id===b.uuid);
-  const price=(b.price&&b.price!==''&&parseFloat(b.price)>0)?'$'+parseFloat(b.price).toFixed(2):'';
+  const p=parseFloat(b.price);
+  const price=(!isNaN(p)&&p>0)?'$'+p.toFixed(2):'';
   const code=b.code||'';
-  return `<div class="item-card">
-    <div class="item-icon bundle">📦</div>
-    <div class="item-body">
-      <div class="item-name">${esc(b.name)}</div>
-      <div class="item-code">${esc(code)}</div>
-      <span class="item-cat">${esc(b.category||'')}</span>
-    </div>
-    <div class="item-right">
-      <div class="item-price ${price?'':'dim'}">${price||'No price'}</div>
-      ${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${b.uuid}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${b.uuid}',1)">+</button></div>`:`<button class="add-btn" onclick="addBundle('${esc(b.uuid)}')">+</button>`}
-    </div>
-  </div>`;
+  return `<div class="item-card"><div class="item-icon bundle">📦</div><div class="item-body"><div class="item-name">${esc(b.name)}</div>${code?`<div class="item-code">${esc(code)}</div>`:''}<span class="item-cat">${esc(b.category||'')}</span></div><div class="item-right"><div class="item-price ${price?'':'dim'}">${price||'No price'}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${b.uuid}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${b.uuid}',1)">+</button></div>`:`<button class="add-btn" onclick="addBundle('${esc(b.uuid)}')">+</button>`}</div></div>`;
 }
-
 function reeceCard(r){
   const id='r_'+r.code;const inQ=quote.find(i=>i.id===id);
-  const retail=(r.retail&&parseFloat(r.retail)>0)?'$'+parseFloat(r.retail).toFixed(2):'';
-  return `<div class="item-card">
-    <div class="item-icon reece">🏪</div>
-    <div class="item-body">
-      <div class="item-name">${esc(r.name)}</div>
-      <div class="item-code">${esc(r.code||'')}</div>
-      <span class="item-cat">${esc(r.category||'')}</span>
-      ${r.cost&&parseFloat(r.cost)>0?`<div class="item-markup">Cost $${parseFloat(r.cost).toFixed(2)} · ${r.markup}% markup</div>`:''}
-    </div>
-    <div class="item-right">
-      <div class="item-price ${retail?'':'dim'}">${retail||'—'}</div>
-      ${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${id}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${id}',1)">+</button></div>`:`<button class="add-btn" onclick="addReece('${esc(r.code)}')">+</button>`}
-    </div>
-  </div>`;
+  const p=parseFloat(r.retail);const retail=(!isNaN(p)&&p>0)?'$'+p.toFixed(2):'';
+  const cp=parseFloat(r.cost);
+  return `<div class="item-card"><div class="item-icon reece">🏪</div><div class="item-body"><div class="item-name">${esc(r.name)}</div><div class="item-code">${esc(r.code||'')}</div><span class="item-cat">${esc(r.category||'')}</span>${(!isNaN(cp)&&cp>0)?`<div class="item-markup">Cost $${cp.toFixed(2)} · ${r.markup}% markup</div>`:''}</div><div class="item-right"><div class="item-price ${retail?'':'dim'}">${retail||'—'}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${id}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${id}',1)">+</button></div>`:`<button class="add-btn" onclick="addReece('${esc(r.code)}')">+</button>`}</div></div>`;
 }
 
 async function triggerAiBand(query){
@@ -681,7 +633,8 @@ async function triggerAiBand(query){
       const isB=sg.type==='bundle';
       const item=isB?bundles.find(b=>b.uuid===sg.id||(b.name||'').toLowerCase().includes((sg.name||'').toLowerCase().substring(0,15))):reece.find(r=>r.code===sg.id||(r.name||'').toLowerCase().includes((sg.name||'').toLowerCase().substring(0,15)));
       if(!item)return'';
-      const price=isB?(item.price&&parseFloat(item.price)>0?'$'+parseFloat(item.price).toFixed(2):''):(item.retail&&parseFloat(item.retail)>0?'$'+parseFloat(item.retail).toFixed(2):'');
+      const pp=isB?parseFloat(item.price):parseFloat(item.retail);
+      const price=(!isNaN(pp)&&pp>0)?'$'+pp.toFixed(2):'';
       return `<div class="ai-chip" onclick="${isB?'addBundle':'addReece'}('${esc(isB?item.uuid:item.code)}')"><span class="chip-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span><span>${esc((item.name||'').substring(0,30))}</span>${price?`<span class="chip-price">${price}</span>`:''}</div>`;
     }).filter(Boolean).join('')||'<div class="mini-load">No matches</div>';
   },500);
@@ -696,7 +649,8 @@ async function runAiSuggest(){
     const isB=s.type==='bundle';
     const item=isB?bundles.find(b=>b.uuid===s.id||(b.code||'').toLowerCase()===(s.id||'').toLowerCase()||(b.name||'').toLowerCase().includes((s.name||'').toLowerCase().substring(0,20))):reece.find(r=>r.code===s.id||(r.name||'').toLowerCase().includes((s.name||'').toLowerCase().substring(0,20)));
     if(!item)return'';
-    const price=isB?(item.price&&parseFloat(item.price)>0?'$'+parseFloat(item.price).toFixed(2):'No price'):(item.retail&&parseFloat(item.retail)>0?'$'+parseFloat(item.retail).toFixed(2):'—');
+    const pp=isB?parseFloat(item.price):parseFloat(item.retail);
+    const price=(!isNaN(pp)&&pp>0)?'$'+pp.toFixed(2):(isB?'No price':'—');
     const id=isB?item.uuid:'r_'+item.code;const inQ=quote.find(i=>i.id===id);
     return `<div class="ai-result-card"><div class="item-icon ${isB?'bundle':'reece'}">${isB?'📦':'🏪'}</div><div class="ai-result-body"><div class="ai-result-name">${esc(item.name)}</div><div class="ai-result-why">${esc(s.reason||'')}</div><div class="ai-result-meta"><span class="type-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span><span class="item-cat">${esc(item.category||'')}</span></div></div><div class="item-right"><div class="item-price">${price}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${id}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${id}',1)">+</button></div>`:`<button class="add-btn" onclick="${isB?'addBundle':'addReece'}('${esc(isB?item.uuid:item.code)}');runAiSuggest()">+</button>`}</div></div>`;
   }).filter(Boolean).join('')||'<div class="state-box" style="padding:16px 0"><p>Could not match. Try Search.</p></div>';
@@ -745,7 +699,7 @@ function renderQuote(){
   if(!quote.length){container.innerHTML='<div class="state-box"><span class="state-icon">📋</span><p>No items yet.</p></div>';totals.style.display='none';return;}
   container.innerHTML=quote.map(item=>{
     const line=item.price*item.qty;const isB=item.type==='bundle';
-    return `<div class="quote-item"><div class="qi-top"><div class="qi-name">${esc(item.name)} <span class="type-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span></div><div class="qi-line">$${line.toFixed(2)}</div></div><div class="qi-bot"><div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${item.id}',-1)">−</button><span class="qty-num">${item.qty}</span><button class="qty-btn" onclick="chQty('${item.id}',1)">+</button></div><div class="qi-meta">$${item.price.toFixed(2)} ea${item.cost?` · Cost $${item.cost.toFixed(2)} · ${item.markup}% mkup`:''}</div><button class="qi-rm" onclick="chQty('${item.id}',${-item.qty})">✕</button></div></div>`;
+    return `<div class="quote-item"><div class="qi-top"><div class="qi-name">${esc(item.name)} <span class="type-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span></div><div class="qi-line">$${line.toFixed(2)}</div></div><div class="qi-bot"><div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${item.id}',-1)">−</button><span class="qty-num">${item.qty}</span><button class="qty-btn" onclick="chQty('${item.id}',1)">+</button></div><div class="qi-meta">$${item.price.toFixed(2)} ea${item.cost?` · Cost $${item.cost.toFixed(2)}`:''}</div><button class="qi-rm" onclick="chQty('${item.id}',${-item.qty})">✕</button></div></div>`;
   }).join('');
   const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0);const gst=totalInc/11;const sub=totalInc-gst;
   document.getElementById('t-sub').textContent='$'+sub.toFixed(2);
@@ -772,32 +726,14 @@ function renderKB(){
     const matchC=activeCat==='All'||k.category===activeCat;return matchQ&&matchC;
   });
   const chipHtml=`<div class="cat-row" style="border-top:none">${cats.map(ct=>`<div class="cat-chip${ct===activeCat?' active':''}" onclick="setKbCat('${esc(ct)}')">${esc(ct)}</div>`).join('')}</div>`;
-  if(!filtered.length){c.innerHTML=chipHtml+'<div class="state-box"><p>No results found.</p></div>';return;}
-  const itemsHtml=filtered.map(k=>{
-    const hasUrl=k.url&&k.url.trim();
-    const hasCode=k.reeceCode&&k.reeceCode.trim();
-    return `<div class="kb-item" onclick="${hasUrl?`window.open('${esc(k.url)}','_blank')`:hasCode?`tapKbArticle('${esc(k.reeceCode.replace(/^REC/i,''))}','${esc(k.title)}')`:''}" style="${hasUrl||hasCode?'cursor:pointer':''}">
-      <div class="kb-icon">${hasUrl?'🏪':'📄'}</div>
-      <div style="flex:1;min-width:0">
-        <div class="kb-title">${esc(k.title)}</div>
-        <div class="kb-desc">${esc(k.description||'')}</div>
-        <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap;align-items:center">
-          <span class="kb-cat">${esc(k.category||'')}</span>
-          ${hasCode?`<span style="font-size:10px;font-family:var(--mono);color:var(--green);background:rgba(74,222,128,.1);padding:2px 6px;border-radius:4px">${esc(k.reeceCode)}</span>`:''}
-        </div>
-      </div>
-      <span style="color:var(--text-dim);font-size:18px;flex-shrink:0">${hasUrl?'🔗':'›'}</span>
-    </div>`;
+  if(!filtered.length){c.innerHTML=chipHtml+'<div class="state-box"><p>No results.</p></div>';return;}
+  c.innerHTML=chipHtml+filtered.map(k=>{
+    const hasUrl=k.url&&k.url.trim();const hasCode=k.reeceCode&&k.reeceCode.trim();
+    return `<div class="kb-item" onclick="${hasUrl?`window.open('${esc(k.url)}','_blank')`:hasCode?`tapKbArticle('${esc(k.reeceCode.replace(/^REC/i,''))}','${esc(k.title)}')`:''}" style="${hasUrl||hasCode?'cursor:pointer':''}"><div class="kb-icon">${hasUrl?'🏪':'📄'}</div><div style="flex:1;min-width:0"><div class="kb-title">${esc(k.title)}</div><div class="kb-desc">${esc(k.description||'')}</div><div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap"><span class="kb-cat">${esc(k.category||'')}</span>${hasCode?`<span style="font-size:10px;font-family:var(--mono);color:var(--green);background:rgba(74,222,128,.1);padding:2px 6px;border-radius:4px">${esc(k.reeceCode)}</span>`:''}</div></div><span style="color:var(--text-dim);font-size:18px;flex-shrink:0">${hasUrl?'🔗':'›'}</span></div>`;
   }).join('');
-  c.innerHTML=chipHtml+itemsHtml;
 }
 function setKbCat(cat){window._kbCat=cat;renderKB();}
-function tapKbArticle(code,title){
-  goScreen('search');
-  document.getElementById('q-search').value=code;
-  window._kbCat='All';quoteCat='All';onQSearch();
-  showToast('Searching for '+title);
-}
+function tapKbArticle(code,title){goScreen('search');document.getElementById('q-search').value=code;window._kbCat='All';quoteCat='All';onQSearch();showToast('Searching for '+title);}
 
 function setupVoice(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -812,8 +748,7 @@ function startListening(){
   try{recognition.start();isListening=true;document.getElementById('mic-btn').classList.add('listening');document.getElementById('voice-hint').classList.add('show');}catch(e){}
 }
 function stopListening(){
-  if(!recognition||!isListening)return;
-  try{recognition.stop();}catch(e){}
+  if(!recognition||!isListening)return;try{recognition.stop();}catch(e){}
   isListening=false;document.getElementById('mic-btn').classList.remove('listening');document.getElementById('voice-hint').classList.remove('show');
 }
 function toggleMic(){isListening?stopListening():startListening();}
@@ -833,4 +768,4 @@ window.addEventListener('load',init);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&activeScreen==='search')startListening();});
 </script>
 </body>
-</html>
+</html>  
