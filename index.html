@@ -87,7 +87,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .item-icon.reece{background:rgba(248,113,113,.15);color:var(--red)}
 .item-body{flex:1;min-width:0}
 .item-name{font-size:13px;font-weight:500;color:var(--text);line-height:1.3}
-.item-code{font-size:10px;color:var(--text-dim);font-family:var(--mono);margin-top:1px}
+.item-code{font-size:11px;color:var(--orange);font-family:var(--mono);margin-top:2px;font-weight:600}
 .item-cat{font-size:10px;color:var(--text-mid);background:var(--surface2);padding:2px 6px;border-radius:4px;margin-top:4px;display:inline-block}
 .item-markup{font-size:10px;color:var(--green);margin-top:3px}
 .item-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
@@ -150,7 +150,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .status-msg{padding:12px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;text-align:center}
 .status-msg.success{background:var(--green-lt);color:var(--green)}
 .status-msg.error{background:var(--red-lt);color:var(--red)}
-.kb-item{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px;background:var(--surface)}
+.kb-item{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px;background:var(--surface);cursor:pointer}
 .kb-icon{width:32px;height:32px;background:rgba(74,222,128,.12);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--green);flex-shrink:0}
 .kb-title{font-size:13px;font-weight:500;color:var(--text)}
 .kb-desc{font-size:11px;color:var(--text-dim);margin-top:2px}
@@ -633,13 +633,41 @@ function renderQResults(){
   if(mR.length){html+=`<div class="section-hd" style="color:#f87171">🏪 Reece Products (${mR.length})</div>`;html+=mR.map(r=>reeceCard(r)).join('');}
   container.innerHTML=html;
 }
+
 function bundleCard(b){
-  const inQ=quote.find(i=>i.id===b.uuid);const price=(b.price&&b.price!==''&&b.price!=='0')?'$'+parseFloat(b.price).toFixed(2):'';
-return `<div class="item-card"><div class="item-icon bundle">📦</div><div class="item-body"><div class="item-name">${esc(b.name)}</div><div class="item-code">${esc(b.code||b.uuid||'')}</div><span class="item-cat">${esc(b.category||'')}</span></div><div class="item-right"><div class="item-price ${price?'':'dim'}">${price||'No price'}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${b.uuid}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${b.uuid}',1)">+</button></div>`:`<button class="add-btn" onclick="addBundle('${esc(b.uuid)}')">+</button>`}</div></div>`;
+  const inQ=quote.find(i=>i.id===b.uuid);
+  const price=(b.price&&b.price!==''&&parseFloat(b.price)>0)?'$'+parseFloat(b.price).toFixed(2):'';
+  const code=b.code||b.uuid.substring(0,8);
+  return `<div class="item-card">
+    <div class="item-icon bundle">📦</div>
+    <div class="item-body">
+      <div class="item-name">${esc(b.name)}</div>
+      <div class="item-code">${esc(code)}</div>
+      <span class="item-cat">${esc(b.category||'')}</span>
+    </div>
+    <div class="item-right">
+      <div class="item-price ${price?'':'dim'}">${price||'No price'}</div>
+      ${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${b.uuid}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${b.uuid}',1)">+</button></div>`:`<button class="add-btn" onclick="addBundle('${esc(b.uuid)}')">+</button>`}
+    </div>
+  </div>`;
 }
+
 function reeceCard(r){
-  const id='r_'+r.code;const inQ=quote.find(i=>i.id===id);const retail=r.retail?'$'+parseFloat(r.retail).toFixed(2):'';
-  return `<div class="item-card"><div class="item-icon reece">🏪</div><div class="item-body"><div class="item-name">${esc(r.name)}</div><div class="item-code">${esc(r.code||'')}</div><span class="item-cat">${esc(r.category||'')}</span>${r.cost?`<div class="item-markup">Cost $${parseFloat(r.cost).toFixed(2)} · ${r.markup}% markup</div>`:''}</div><div class="item-right"><div class="item-price ${retail?'':'dim'}">${retail||'—'}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${id}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${id}',1)">+</button></div>`:`<button class="add-btn" onclick="addReece('${esc(r.code)}')">+</button>`}</div></div>`;
+  const id='r_'+r.code;const inQ=quote.find(i=>i.id===id);
+  const retail=(r.retail&&parseFloat(r.retail)>0)?'$'+parseFloat(r.retail).toFixed(2):'';
+  return `<div class="item-card">
+    <div class="item-icon reece">🏪</div>
+    <div class="item-body">
+      <div class="item-name">${esc(r.name)}</div>
+      <div class="item-code">${esc(r.code||'')}</div>
+      <span class="item-cat">${esc(r.category||'')}</span>
+      ${r.cost&&parseFloat(r.cost)>0?`<div class="item-markup">Cost $${parseFloat(r.cost).toFixed(2)} · ${r.markup}% markup</div>`:''}
+    </div>
+    <div class="item-right">
+      <div class="item-price ${retail?'':'dim'}">${retail||'—'}</div>
+      ${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${id}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${id}',1)">+</button></div>`:`<button class="add-btn" onclick="addReece('${esc(r.code)}')">+</button>`}
+    </div>
+  </div>`;
 }
 
 async function triggerAiBand(query){
@@ -653,7 +681,7 @@ async function triggerAiBand(query){
       const isB=sg.type==='bundle';
       const item=isB?bundles.find(b=>b.uuid===sg.id||(b.name||'').toLowerCase().includes((sg.name||'').toLowerCase().substring(0,15))):reece.find(r=>r.code===sg.id||(r.name||'').toLowerCase().includes((sg.name||'').toLowerCase().substring(0,15)));
       if(!item)return'';
-      const price=isB?(item.price?'$'+parseFloat(item.price).toFixed(2):''):(item.retail?'$'+parseFloat(item.retail).toFixed(2):'');
+      const price=isB?(item.price&&parseFloat(item.price)>0?'$'+parseFloat(item.price).toFixed(2):''):(item.retail&&parseFloat(item.retail)>0?'$'+parseFloat(item.retail).toFixed(2):'');
       return `<div class="ai-chip" onclick="${isB?'addBundle':'addReece'}('${esc(isB?item.uuid:item.code)}')"><span class="chip-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span><span>${esc((item.name||'').substring(0,30))}</span>${price?`<span class="chip-price">${price}</span>`:''}</div>`;
     }).filter(Boolean).join('')||'<div class="mini-load">No matches</div>';
   },500);
@@ -668,7 +696,7 @@ async function runAiSuggest(){
     const isB=s.type==='bundle';
     const item=isB?bundles.find(b=>b.uuid===s.id||(b.code||'').toLowerCase()===(s.id||'').toLowerCase()||(b.name||'').toLowerCase().includes((s.name||'').toLowerCase().substring(0,20))):reece.find(r=>r.code===s.id||(r.name||'').toLowerCase().includes((s.name||'').toLowerCase().substring(0,20)));
     if(!item)return'';
-    const price=isB?(item.price?'$'+parseFloat(item.price).toFixed(2):'No price'):(item.retail?'$'+parseFloat(item.retail).toFixed(2):'—');
+    const price=isB?(item.price&&parseFloat(item.price)>0?'$'+parseFloat(item.price).toFixed(2):'No price'):(item.retail&&parseFloat(item.retail)>0?'$'+parseFloat(item.retail).toFixed(2):'—');
     const id=isB?item.uuid:'r_'+item.code;const inQ=quote.find(i=>i.id===id);
     return `<div class="ai-result-card"><div class="item-icon ${isB?'bundle':'reece'}">${isB?'📦':'🏪'}</div><div class="ai-result-body"><div class="ai-result-name">${esc(item.name)}</div><div class="ai-result-why">${esc(s.reason||'')}</div><div class="ai-result-meta"><span class="type-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span><span class="item-cat">${esc(item.category||'')}</span></div></div><div class="item-right"><div class="item-price">${price}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${id}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${id}',1)">+</button></div>`:`<button class="add-btn" onclick="${isB?'addBundle':'addReece'}('${esc(isB?item.uuid:item.code)}');runAiSuggest()">+</button>`}</div></div>`;
   }).filter(Boolean).join('')||'<div class="state-box" style="padding:16px 0"><p>Could not match. Try Search.</p></div>';
@@ -746,9 +774,9 @@ function renderKB(){
   const chipHtml=`<div class="cat-row" style="border-top:none">${cats.map(ct=>`<div class="cat-chip${ct===activeCat?' active':''}" onclick="setKbCat('${esc(ct)}')">${esc(ct)}</div>`).join('')}</div>`;
   if(!filtered.length){c.innerHTML=chipHtml+'<div class="state-box"><p>No results found.</p></div>';return;}
   const itemsHtml=filtered.map(k=>{
-    const hasCode=k.reeceCode&&k.reeceCode.trim();
     const hasUrl=k.url&&k.url.trim();
-    return `<div class="kb-item" onclick="${hasUrl?`window.open('${esc(k.url)}','_blank')`:hasCode?`tapKbArticle('${esc(k.reeceCode.replace(/^REC/i,''))}','${esc(k.title)}','')`:''}" style="${hasUrl||hasCode?'cursor:pointer':''}">
+    const hasCode=k.reeceCode&&k.reeceCode.trim();
+    return `<div class="kb-item" onclick="${hasUrl?`window.open('${esc(k.url)}','_blank')`:hasCode?`tapKbArticle('${esc(k.reeceCode.replace(/^REC/i,''))}','${esc(k.title)}')`:''}" style="${hasUrl||hasCode?'cursor:pointer':''}">
       <div class="kb-icon">${hasUrl?'🏪':'📄'}</div>
       <div style="flex:1;min-width:0">
         <div class="kb-title">${esc(k.title)}</div>
@@ -764,9 +792,11 @@ function renderKB(){
   c.innerHTML=chipHtml+itemsHtml;
 }
 function setKbCat(cat){window._kbCat=cat;renderKB();}
-function tapKbArticle(code,title,url){
-  if(url&&url.trim()){window.open(url,'_blank');}
-  else{goScreen('search');document.getElementById('q-search').value=code;window._kbCat='All';quoteCat='All';onQSearch();showToast('Searching for '+title);}
+function tapKbArticle(code,title){
+  goScreen('search');
+  document.getElementById('q-search').value=code;
+  window._kbCat='All';quoteCat='All';onQSearch();
+  showToast('Searching for '+title);
 }
 
 function setupVoice(){
