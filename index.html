@@ -637,7 +637,7 @@ function renderQResults(){
 function bundleCard(b){
   const inQ=quote.find(i=>i.id===b.uuid);
   const price=(b.price&&b.price!==''&&parseFloat(b.price)>0)?'$'+parseFloat(b.price).toFixed(2):'';
-  const code=b.code||b.uuid.substring(0,8);
+  const code=b.code||'';
   return `<div class="item-card">
     <div class="item-icon bundle">📦</div>
     <div class="item-body">
