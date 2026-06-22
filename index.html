@@ -165,6 +165,53 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .big-spin{width:22px;height:22px;border:2.5px solid var(--border2);border-top-color:var(--orange);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 8px}
 .toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(10px);background:#1a1f2e;color:#fff;padding:8px 16px;border-radius:999px;font-size:12px;font-weight:500;opacity:0;transition:all .2s;pointer-events:none;z-index:999;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── DARK MODE ── */
+body.dark{
+  --bg:#0f1117;--surface:#1a1f2e;--surface2:#242938;--surface3:#2d3347;
+  --border:#2d3347;--border2:#3a4058;
+  --text:#e8eaf0;--text-mid:#9aa3b8;--text-dim:#5a6478;
+}
+body.dark .top-bar,body.dark .bottom-nav{background:#1a1f2e}
+body.dark .stock-input{color:#e8eaf0}
+body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
+
+/* ── DARK MODE TOGGLE ── */
+.dm-toggle{width:36px;height:20px;border-radius:999px;background:var(--border2);border:none;cursor:pointer;position:relative;flex-shrink:0;transition:background .2s}
+.dm-toggle.on{background:var(--orange)}
+.dm-toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .2s}
+.dm-toggle.on::after{transform:translateX(16px)}
+
+/* ── STOCK COUNTER ── */
+.stock-counter{display:flex;align-items:center;gap:4px}
+.sc-btn{width:32px;height:38px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:18px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font)}
+.sc-btn:active{background:var(--orange);color:#fff;border-color:var(--orange)}
+.stock-input{width:60px;height:38px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:17px;font-weight:700;font-family:var(--font);text-align:center;outline:none}
+.stock-input.need{border-color:var(--red);background:rgba(248,113,113,.08)}
+.stock-input.good{border-color:var(--green);background:rgba(74,222,128,.08)}
+
+/* ── LABOUR SCREEN ── */
+.labour-wrap{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.labour-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden}
+.labour-card-hd{padding:9px 12px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;display:flex;justify-content:space-between;align-items:center}
+.labour-rate-row{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid var(--border);gap:8px}
+.labour-rate-row:last-child{border-bottom:none}
+.labour-rate-label{flex:1;font-size:13px;font-weight:500}
+.labour-rate-val{font-size:13px;color:var(--orange);font-weight:700;min-width:52px;text-align:right}
+.labour-input{width:70px;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:13px;font-family:var(--font);text-align:center;outline:none}
+.labour-input:focus{border-color:var(--orange)}
+.hours-row{display:flex;align-items:center;gap:6px;padding:10px 12px;border-bottom:1px solid var(--border)}
+.hours-row:last-child{border-bottom:none}
+.hours-label{flex:1;font-size:13px;font-weight:500}
+.hours-ctrl{display:flex;align-items:center;gap:5px}
+.h-btn{width:28px;height:28px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.h-val{font-size:13px;font-weight:700;min-width:36px;text-align:center;color:var(--orange)}
+.labour-total{padding:12px;background:var(--surface2);border-top:2px solid var(--border2)}
+.labour-total-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text-mid);padding:2px 0}
+.labour-total-row.grand{font-size:16px;font-weight:700;color:var(--text);padding-top:8px;margin-top:6px;border-top:1px solid var(--border2)}
+.pct-chip{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text-mid);white-space:nowrap}
+.pct-chip.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+.add-labour-btn{width:100%;padding:11px;border-radius:var(--radius-sm);background:var(--orange);color:#fff;border:none;font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;margin-top:4px}
 </style>
 </head>
 <body>
@@ -174,7 +221,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <div class="top-logo-mark">🔧</div>
       <div><div class="top-logo-text">IPD</div><div class="top-logo-sub">Innovation Plumbing + Design</div></div>
     </div>
-    <div class="top-right">
+    <div class="top-right" style="display:flex;align-items:center;gap:8px">
+      <button class="dm-toggle" id="dm-toggle" onclick="toggleDark()" title="Dark mode"></button>
       <div class="quote-pill" onclick="goScreen('quote')" id="quote-pill" style="display:none">📋 <span id="quote-pill-txt">0</span></div>
     </div>
   </div>
@@ -208,6 +256,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
           <div class="mic-btn" id="mic-btn" onclick="toggleMic()">🎤</div>
         </div>
         <div class="voice-hint" id="voice-hint"><div class="voice-dot"></div><span id="voice-txt">Listening...</span></div>
+      </div>
+      <div style="display:flex;gap:0;margin:0 12px 0;border:1px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden;flex-shrink:0">
+        <button id="search-tab-reece" onclick="setSearchTab('reece')" style="flex:1;padding:7px;border:none;background:var(--red);color:#fff;font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer">🏪 Reece Products</button>
+        <button id="search-tab-bundles" onclick="setSearchTab('bundles')" style="flex:1;padding:7px;border:none;background:var(--surface2);color:var(--text-mid);font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer">📦 Bundles</button>
       </div>
       <div class="cat-row" id="q-cats"></div>
       <div id="ai-band" style="display:none" class="ai-band">
@@ -275,6 +327,112 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       </div>
     </div>
 
+    <!-- LABOUR -->
+    <div class="screen" id="screen-labour">
+      <div class="labour-wrap" id="labour-wrap">
+        <div class="labour-card">
+          <div class="labour-card-hd">
+            <span>⏱ Labour Rates (inc GST)</span>
+          </div>
+          <div class="labour-rate-row">
+            <div class="labour-rate-label">Standard</div>
+            <input class="labour-input" id="rate-standard" type="number" value="229" onchange="updateLabourTotals()">
+            <span style="font-size:11px;color:var(--text-dim)">/hr</span>
+          </div>
+          <div class="labour-rate-row">
+            <div class="labour-rate-label">2nd Tradesman</div>
+            <input class="labour-input" id="rate-second" type="number" value="160" onchange="updateLabourTotals()">
+            <span style="font-size:11px;color:var(--text-dim)">/hr</span>
+          </div>
+          <div class="labour-rate-row">
+            <div class="labour-rate-label">Builder Rate</div>
+            <input class="labour-input" id="rate-builder" type="number" value="195" onchange="updateLabourTotals()">
+            <span style="font-size:11px;color:var(--text-dim)">/hr</span>
+          </div>
+          <div class="labour-rate-row">
+            <div class="labour-rate-label">Apprentice</div>
+            <input class="labour-input" id="rate-apprentice" type="number" value="100" onchange="updateLabourTotals()">
+            <span style="font-size:11px;color:var(--text-dim)">/hr</span>
+          </div>
+        </div>
+
+        <div class="labour-card">
+          <div class="labour-card-hd"><span>🕐 Hours</span></div>
+          <div class="hours-row">
+            <div class="hours-label">Standard</div>
+            <div class="hours-ctrl">
+              <button class="h-btn" onclick="chHours('standard',-0.5)">−</button>
+              <div class="h-val" id="h-standard">1.0</div>
+              <button class="h-btn" onclick="chHours('standard',0.5)">+</button>
+            </div>
+          </div>
+          <div class="hours-row">
+            <div class="hours-label">2nd Tradesman</div>
+            <div class="hours-ctrl">
+              <button class="h-btn" onclick="chHours('second',-0.5)">−</button>
+              <div class="h-val" id="h-second">0.0</div>
+              <button class="h-btn" onclick="chHours('second',0.5)">+</button>
+            </div>
+          </div>
+          <div class="hours-row">
+            <div class="hours-label">Builder Rate</div>
+            <div class="hours-ctrl">
+              <button class="h-btn" onclick="chHours('builder',-0.5)">−</button>
+              <div class="h-val" id="h-builder">0.0</div>
+              <button class="h-btn" onclick="chHours('builder',0.5)">+</button>
+            </div>
+          </div>
+          <div class="hours-row">
+            <div class="hours-label">Apprentice</div>
+            <div class="hours-ctrl">
+              <button class="h-btn" onclick="chHours('apprentice',-0.5)">−</button>
+              <div class="h-val" id="h-apprentice">0.0</div>
+              <button class="h-btn" onclick="chHours('apprentice',0.5)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="labour-card">
+          <div class="labour-card-hd"><span>➕ Adjustments</span></div>
+          <div style="padding:10px 12px;display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:11px;color:var(--text-dim);font-weight:600;text-transform:uppercase;letter-spacing:.5px">After Hours / Surcharge</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <div class="pct-chip" id="surcharge-0" onclick="setSurcharge(0)">None</div>
+              <div class="pct-chip" id="surcharge-25" onclick="setSurcharge(25)">+25%</div>
+              <div class="pct-chip" id="surcharge-50" onclick="setSurcharge(50)">+50%</div>
+              <div class="pct-chip" id="surcharge-100" onclick="setSurcharge(100)">+100%</div>
+              <div style="display:flex;align-items:center;gap:4px">
+                <input class="labour-input" id="surcharge-custom" type="number" placeholder="%" style="width:56px" oninput="setSurcharge(parseFloat(this.value)||0)">
+                <span style="font-size:11px;color:var(--text-dim)">%</span>
+              </div>
+            </div>
+            <div style="margin-top:4px;font-size:11px;color:var(--text-dim);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Discount (Pensioner / VIP)</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <div class="pct-chip" id="discount-0" onclick="setDiscount(0)">None</div>
+              <div class="pct-chip" id="discount-10" onclick="setDiscount(10)">−10%</div>
+              <div class="pct-chip" id="discount-15" onclick="setDiscount(15)">−15%</div>
+              <div style="display:flex;align-items:center;gap:4px">
+                <input class="labour-input" id="discount-custom" type="number" placeholder="%" style="width:56px" oninput="setDiscount(parseFloat(this.value)||0)">
+                <span style="font-size:11px;color:var(--text-dim)">%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="labour-card">
+          <div class="labour-total">
+            <div class="labour-total-row"><span>Labour subtotal</span><span id="lt-sub">$0.00</span></div>
+            <div class="labour-total-row" id="lt-surcharge-row" style="display:none"><span id="lt-surcharge-label">Surcharge</span><span id="lt-surcharge-val">$0.00</span></div>
+            <div class="labour-total-row" id="lt-discount-row" style="display:none"><span id="lt-discount-label">Discount</span><span id="lt-discount-val">$0.00</span></div>
+            <div class="labour-total-row grand"><span>Total inc GST</span><span id="lt-total">$0.00</span></div>
+          </div>
+          <div style="padding:0 12px 12px">
+            <button class="add-labour-btn" onclick="addLabourToQuote()">➕ Add Labour to Quote</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- KNOWLEDGE -->
     <div class="screen" id="screen-kb">
       <div class="search-wrap"><div class="search-box"><span class="s-icon">🔍</span><input type="text" id="kb-search" placeholder="Search knowledge base..." oninput="renderKB()"></div></div>
@@ -326,7 +484,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 
   <div class="bottom-nav">
     <button class="nav-btn active" id="nav-stock" onclick="goScreen('stock')"><div class="nav-icon">📦</div><div class="nav-label">Stock</div></button>
-    <button class="nav-btn" id="nav-review" onclick="runStockReview()"><div class="nav-icon">🤖</div><div class="nav-label">Review</div></button>
+    <button class="nav-btn" id="nav-labour" onclick="goScreen('labour')"><div class="nav-icon">⏱</div><div class="nav-label">Labour</div></button>
     <button class="nav-btn" id="nav-search" onclick="goScreen('search')"><div class="nav-icon">🔍</div><div class="nav-label">Search</div></button>
     <button class="nav-btn" id="nav-ai" onclick="goScreen('ai')"><div class="nav-icon">✨</div><div class="nav-label">AI</div></button>
     <button class="nav-btn" id="nav-quote" onclick="goScreen('quote')"><div class="nav-icon">📋</div><div class="nav-badge" id="quote-badge">0</div><div class="nav-label">Quote</div></button>
@@ -542,6 +700,8 @@ function init() {
   setupVoice();
   setupAiVoice();
   loadQuoteData();
+  initDarkMode();
+  updateLabourTotals();
 }
 
 // ── NAVIGATION ────────────────────────────────────────────────────────────────
@@ -556,6 +716,7 @@ function goScreen(name) {
   if (name !== 'search') stopListening();
   if (name === 'kb') renderKB();
   if (name === 'quote') renderQuote();
+  if (name === 'labour') updateLabourTotals();
 }
 
 function saveSheetUrl() {
@@ -606,7 +767,7 @@ function renderStock() {
     items.forEach(item => {
       const v = onHand[item.code]; const toOrder = getToOrder(item); const hasVal = v !== undefined && v !== '';
       const cls = hasVal ? (toOrder > 0 ? 'need' : 'good') : '';
-      html += `<div class="stock-row"><div class="stock-dot" style="background:${col}"></div><div class="stock-info"><div class="stock-name">${esc(item.name)}</div><div class="stock-code">${esc(item.code)}</div></div><div class="stock-right"><div class="stock-target">Target: ${item.target}</div><input class="stock-input ${cls}" type="number" min="0" value="${hasVal?v:''}" placeholder="?" oninput="setOnHand('${item.code}',this.value)">${toOrder>0?`<span class="order-badge">ORDER ${toOrder}`:''}</div></div>`;
+      html += `<div class="stock-row"><div class="stock-dot" style="background:${col}"></div><div class="stock-info"><div class="stock-name">${esc(item.name)}</div><div class="stock-code">${esc(item.code)}</div></div><div class="stock-right"><div class="stock-target">Target: ${item.target}</div><div class="stock-counter"><button class="sc-btn" onclick="adjOnHand('${item.code}',-1)">−</button><input class="stock-input ${cls}" type="number" min="0" value="${hasVal?v:''}" placeholder="?" oninput="setOnHand('${item.code}',this.value)" id="si-${item.code}"><button class="sc-btn" onclick="adjOnHand('${item.code}',1)">+</button></div>${toOrder>0?`<span class="order-badge">ORDER ${toOrder}`:''}</div></div>`;
     });
   });
   document.getElementById('stock-list').innerHTML = html || '<div class="state-box"><p>No items found</p></div>';
@@ -648,8 +809,8 @@ async function loadQuoteData() {
     if (!r.ok) throw new Error('HTTP '+r.status);
     const d = await r.json();
     bundles = (d.bundles||[]).map(b=>({uuid:String(b.uuid||''),code:String(b.code||''),name:String(b.name||''),category:String(b.category||''),price:b.price!=null&&b.price!==''?String(b.price):'',notes:String(b.notes||'')}));
-    // Strip -1 suffix from Reece codes at load time so codes are clean everywhere in the app
-    reece = (d.reece||[]).map(r=>({code:String(r.code||'').replace(/-1$/,'').trim(),name:String(r.name||''),unit:String(r.unit||''),category:String(r.category||''),subcategory:String(r.subcategory||''),retail:r.retail!=null&&r.retail!==''?String(r.retail):'',cost:r.cost!=null&&r.cost!==''?String(r.cost):'',markup:r.markup!=null?String(r.markup):''}));
+    // Keep full Reece codes including -1 suffix for correct SM8 matching (REC{code})
+    reece = (d.reece||[]).map(r=>({code:String(r.code||'').trim(),name:String(r.name||''),unit:String(r.unit||''),category:String(r.category||''),subcategory:String(r.subcategory||''),retail:r.retail!=null&&r.retail!==''?String(r.retail):'',cost:r.cost!=null&&r.cost!==''?String(r.cost):'',markup:r.markup!=null?String(r.markup):''}));
     knowledge = d.knowledge||[];
     dataLoaded = true;
     document.getElementById('q-sdot').className = 's-dot';
@@ -675,7 +836,7 @@ function onQSearch() {
   searchTimer = setTimeout(() => {
     renderQResults();
     const q = document.getElementById('q-search').value.trim();
-    if (q.length >= 2) triggerAiBand(q);
+    if (q.length >= 2 && (window._searchTab||'reece') === 'reece') triggerAiBand(q);
     else document.getElementById('ai-band').style.display = 'none';
   }, 200);
 }
@@ -685,10 +846,14 @@ function renderQResults() {
   const container = document.getElementById('q-list');
   if (!dataLoaded) { container.innerHTML = '<div class="state-box"><div class="big-spin"></div><p>Loading...</p></div>'; return; }
   if (!q && quoteCat==='All') { container.innerHTML = '<div class="state-box"><span class="state-icon">🔍</span><p>Search or tap mic to speak</p></div>'; return; }
-  const mB = q
-    ? bundles.filter(b=>quoteCat==='All'||b.category===quoteCat).map(b=>({...b,_s:scoreItem(b.name,b.code,b.category,q)})).filter(b=>b._s>0).sort((a,b)=>b._s-a._s).slice(0,50)
-    : bundles.filter(b=>quoteCat!=='All'&&b.category===quoteCat).slice(0,50);
-  const mR = q ? reece.map(r=>({...r,_s:scoreItem(r.name,r.code,r.category,q)})).filter(r=>r._s>0).sort((a,b)=>b._s-a._s).slice(0,50) : [];
+  const searchTab = window._searchTab || 'reece';
+  const showBundles = searchTab === 'bundles';
+  const showReece = searchTab === 'reece';
+  const mB = showBundles
+    ? (q ? bundles.filter(b=>quoteCat==='All'||b.category===quoteCat).map(b=>({...b,_s:scoreItem(b.name,b.code,b.category,q)})).filter(b=>b._s>0).sort((a,b)=>b._s-a._s).slice(0,50)
+         : bundles.filter(b=>quoteCat!=='All'&&b.category===quoteCat).slice(0,50))
+    : [];
+  const mR = (showReece && q) ? reece.map(r=>({...r,_s:scoreItem(r.name,r.code,r.category,q)})).filter(r=>r._s>0).sort((a,b)=>b._s-a._s).slice(0,50) : [];
   if (!mB.length && !mR.length) { container.innerHTML = '<div class="state-box"><span class="state-icon">🤷</span><p>No results.<br><span class="hint">Try different keywords or AI tab.</span></p></div>'; return; }
   let html = '';
   if (mB.length) { html += `<div class="section-hd" style="color:#3b82f6">📦 Bundles (${mB.length})</div>`; html += mB.map(b=>bundleCard(b)).join(''); }
@@ -873,6 +1038,7 @@ function showBundlePrefixes() {
 function searchBundle(prefix) {
   document.querySelectorAll('[style]').forEach(el => { if(el.style.position==='fixed') el.remove(); });
   goScreen('search');
+  setSearchTab('bundles');
   document.getElementById('q-search').value = prefix;
   onQSearch();
 }
@@ -1161,6 +1327,133 @@ function setupAiVoice(){
 }
 function toggleAiMic(){if(aiListening){stopAiMic();return;}try{aiRecognition.start();aiListening=true;document.getElementById('ai-mic').classList.add('listening');}catch(e){}}
 function stopAiMic(){if(!aiListening)return;try{aiRecognition.stop();}catch(e){}aiListening=false;document.getElementById('ai-mic').classList.remove('listening');}
+
+// ── DARK MODE ─────────────────────────────────────────────────────────────────
+function initDarkMode() {
+  const saved = localStorage.getItem('ipd_dark');
+  if (saved === '1') { document.body.classList.add('dark'); document.getElementById('dm-toggle').classList.add('on'); }
+}
+function toggleDark() {
+  const on = document.body.classList.toggle('dark');
+  document.getElementById('dm-toggle').classList.toggle('on', on);
+  localStorage.setItem('ipd_dark', on ? '1' : '0');
+}
+
+// ── SEARCH TAB ────────────────────────────────────────────────────────────────
+function setSearchTab(tab) {
+  window._searchTab = tab;
+  const rBtn = document.getElementById('search-tab-reece');
+  const bBtn = document.getElementById('search-tab-bundles');
+  if (tab === 'reece') {
+    rBtn.style.background = 'var(--red)'; rBtn.style.color = '#fff';
+    bBtn.style.background = 'var(--surface2)'; bBtn.style.color = 'var(--text-mid)';
+    document.getElementById('q-cats').style.display = 'none';
+  } else {
+    bBtn.style.background = 'var(--blue)'; bBtn.style.color = '#fff';
+    rBtn.style.background = 'var(--surface2)'; rBtn.style.color = 'var(--text-mid)';
+    document.getElementById('q-cats').style.display = 'flex';
+  }
+  document.getElementById('ai-band').style.display = 'none';
+  renderQResults();
+}
+
+// ── STOCK COUNTER ─────────────────────────────────────────────────────────────
+function adjOnHand(code, delta) {
+  const cur = onHand[code];
+  const curVal = (cur === '' || cur === undefined) ? 0 : Number(cur);
+  const newVal = Math.max(0, curVal + delta);
+  onHand[code] = newVal;
+  const input = document.getElementById('si-' + code);
+  if (input) input.value = newVal;
+  renderStock();
+}
+
+// ── LABOUR ────────────────────────────────────────────────────────────────────
+let labourHours = { standard: 1.0, second: 0.0, builder: 0.0, apprentice: 0.0 };
+let labourSurcharge = 0, labourDiscount = 0;
+
+function chHours(type, delta) {
+  labourHours[type] = Math.max(0, Math.round((labourHours[type] + delta) * 2) / 2);
+  document.getElementById('h-' + type).textContent = labourHours[type].toFixed(1);
+  updateLabourTotals();
+}
+
+function setSurcharge(pct) {
+  labourSurcharge = pct;
+  document.querySelectorAll('[id^="surcharge-"]').forEach(el => el.classList.remove('active'));
+  const chip = document.getElementById('surcharge-' + pct);
+  if (chip) chip.classList.add('active');
+  if (![0,25,50,100].includes(pct)) {
+    document.getElementById('surcharge-custom').value = pct || '';
+  }
+  updateLabourTotals();
+}
+
+function setDiscount(pct) {
+  labourDiscount = pct;
+  document.querySelectorAll('[id^="discount-"]').forEach(el => el.classList.remove('active'));
+  const chip = document.getElementById('discount-' + pct);
+  if (chip) chip.classList.add('active');
+  if (![0,10,15].includes(pct)) {
+    document.getElementById('discount-custom').value = pct || '';
+  }
+  updateLabourTotals();
+}
+
+function updateLabourTotals() {
+  const rates = {
+    standard: parseFloat(document.getElementById('rate-standard')?.value) || 229,
+    second:   parseFloat(document.getElementById('rate-second')?.value)   || 160,
+    builder:  parseFloat(document.getElementById('rate-builder')?.value)  || 195,
+    apprentice: parseFloat(document.getElementById('rate-apprentice')?.value) || 100,
+  };
+  const sub = Object.keys(labourHours).reduce((s, k) => s + (labourHours[k] * rates[k]), 0);
+  const surchargeAmt = sub * (labourSurcharge / 100);
+  const afterSurcharge = sub + surchargeAmt;
+  const discountAmt = afterSurcharge * (labourDiscount / 100);
+  const total = afterSurcharge - discountAmt;
+  const gst = total / 11;
+  const subEx = total - gst;
+
+  const el = id => document.getElementById(id);
+  if (!el('lt-sub')) return;
+  el('lt-sub').textContent = '$' + sub.toFixed(2);
+  el('lt-total').textContent = '$' + total.toFixed(2);
+
+  if (labourSurcharge > 0) {
+    el('lt-surcharge-row').style.display = 'flex';
+    el('lt-surcharge-label').textContent = 'Surcharge (' + labourSurcharge + '%)';
+    el('lt-surcharge-val').textContent = '+$' + surchargeAmt.toFixed(2);
+  } else { el('lt-surcharge-row').style.display = 'none'; }
+
+  if (labourDiscount > 0) {
+    el('lt-discount-row').style.display = 'flex';
+    el('lt-discount-label').textContent = 'Discount (' + labourDiscount + '%)';
+    el('lt-discount-val').textContent = '-$' + discountAmt.toFixed(2);
+  } else { el('lt-discount-row').style.display = 'none'; }
+}
+
+function addLabourToQuote() {
+  const rates = {
+    standard:   parseFloat(document.getElementById('rate-standard')?.value)   || 229,
+    second:     parseFloat(document.getElementById('rate-second')?.value)      || 160,
+    builder:    parseFloat(document.getElementById('rate-builder')?.value)     || 195,
+    apprentice: parseFloat(document.getElementById('rate-apprentice')?.value)  || 100,
+  };
+  const labels = { standard:'Standard Labour', second:'2nd Tradesman', builder:'Builder Rate', apprentice:'Apprentice Labour' };
+  let added = 0;
+  Object.keys(labourHours).forEach(k => {
+    if (labourHours[k] <= 0) return;
+    const basePrice = labourHours[k] * rates[k];
+    const afterSurcharge = basePrice * (1 + labourSurcharge / 100);
+    const finalPrice = afterSurcharge * (1 - labourDiscount / 100);
+    const id = 'labour_' + k + '_' + Date.now();
+    quote.push({ id, type: 'labour', name: labels[k] + ' (' + labourHours[k] + 'h)', code: '', price: parseFloat(finalPrice.toFixed(2)), qty: 1 });
+    added++;
+  });
+  if (added) { updateQuoteUI(); showToast('Labour added to quote'); goScreen('quote'); }
+  else showToast('Set some hours first');
+}
 
 // ── UTILS ─────────────────────────────────────────────────────────────────────
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
