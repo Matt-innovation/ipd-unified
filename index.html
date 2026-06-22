@@ -427,6 +427,11 @@ body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
             <input class="labour-input" id="rate-apprentice" type="number" value="100" onchange="updateLabourTotals()">
             <span style="font-size:11px;color:var(--text-dim)">/hr</span>
           </div>
+          <div class="labour-rate-row">
+            <div class="labour-rate-label">Service Fee</div>
+            <input class="labour-input" id="rate-service" type="number" value="88" onchange="updateLabourTotals()">
+            <span style="font-size:11px;color:var(--text-dim)">flat</span>
+          </div>
         </div>
 
         <div class="labour-card">
@@ -461,6 +466,14 @@ body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
               <button class="h-btn" onclick="chHours('apprentice',-0.5)">−</button>
               <div class="h-val" id="h-apprentice">0.0</div>
               <button class="h-btn" onclick="chHours('apprentice',0.5)">+</button>
+            </div>
+          </div>
+          <div class="hours-row">
+            <div class="hours-label">Service Fee</div>
+            <div class="hours-ctrl">
+              <button class="h-btn" onclick="chHours('service',-1)">−</button>
+              <div class="h-val" id="h-service">0</div>
+              <button class="h-btn" onclick="chHours('service',1)">+</button>
             </div>
           </div>
         </div>
@@ -924,9 +937,15 @@ function renderQResults() {
   const searchTab = window._searchTab || 'reece';
   const showBundles = searchTab === 'bundles';
   const showReece = searchTab === 'reece';
+  // Bundle prefix search — raw value used directly (e.g. BHWU, BWC)
+  // These are uppercase bundle code prefixes from knowledge base
+  const isBundlePrefix = showBundles && raw && /^B[A-Z]{1,10}$/i.test(raw.trim());
   const mB = showBundles
-    ? (q ? bundles.filter(b=>quoteCat==='All'||b.category===quoteCat).map(b=>({...b,_s:scoreItem(b.name,b.code,b.category,q)})).filter(b=>b._s>0).sort((a,b)=>b._s-a._s).slice(0,50)
-         : bundles.filter(b=>quoteCat!=='All'&&b.category===quoteCat).slice(0,50))
+    ? (isBundlePrefix
+        // Prefix match: BHWU matches BHWU001, BHWU-STANDARD etc
+        ? bundles.filter(b => b.code && b.code.toUpperCase().startsWith(raw.trim().toUpperCase())).slice(0, 50)
+        : (q ? bundles.filter(b=>quoteCat==='All'||b.category===quoteCat).map(b=>({...b,_s:scoreItem(b.name,b.code,b.category,q)})).filter(b=>b._s>0).sort((a,b)=>b._s-a._s).slice(0,50)
+             : bundles.filter(b=>quoteCat!=='All'&&b.category===quoteCat).slice(0,50)))
     : [];
   // For Reece tab, fetch from server CSV endpoint
   if (showReece && q) {
@@ -1323,90 +1342,216 @@ function scoreItem(name,code,cat,q) {
 }
 
 // ── VOICE ─────────────────────────────────────────────────────────────────────
+// ── VOICE SYSTEM ─────────────────────────────────────────────────────────────
+// Speak a message aloud and show it in the voice hint bar
 function speakAndShow(msg) {
-  document.getElementById('voice-txt').textContent = msg;
+  const el = document.getElementById('voice-txt');
+  if (el) el.textContent = msg;
   if (window.speechSynthesis) {
     window.speechSynthesis.cancel();
     const utt = new SpeechSynthesisUtterance(msg);
     utt.lang = 'en-AU';
-    utt.rate = 1.1;
+    utt.rate = 1.05;
+    utt.pitch = 1.0;
     window.speechSynthesis.speak(utt);
   }
-  showToast(msg.substring(0,50));
+  showToast(msg.substring(0, 50));
+}
+
+// Extract quantity from spoken phrase
+// "two 50mm bends" -> {qty:2, term:"50mm bends"}
+// "3 x fernco" -> {qty:3, term:"fernco"}
+function extractVoiceQty(raw) {
+  const wordNums = {
+    'a ': 1, 'one ': 1, 'two ': 2, 'three ': 3, 'four ': 4, 'five ': 5,
+    'six ': 6, 'seven ': 7, 'eight ': 8, 'nine ': 9, 'ten ': 10,
+    'a couple': 2, 'couple of': 2, 'a few': 3, 'half a dozen': 6,
+    'a dozen': 12, 'dozen': 12,
+  };
+  let s = raw.toLowerCase().trim();
+  // Numeric: "3 x bend" or "3 bend"
+  let m = s.match(/^(\d+)\s*(?:x|times|of)?\s+(.+)/);
+  if (m && parseInt(m[1]) >= 1) return { qty: parseInt(m[1]), term: m[2].trim() };
+  // Word numbers
+  for (const [w, n] of Object.entries(wordNums)) {
+    if (s.startsWith(w)) return { qty: n, term: s.slice(w.length).trim() };
+  }
+  return { qty: 1, term: s };
+}
+
+// Convert spoken plumbing terms to searchable text
+function voiceToSearchTerm(spoken) {
+  let s = spoken.toLowerCase().trim();
+  // Strip filler
+  s = s.replace(/^(i need|i want|add|get me|grab|put in|we need)\s+/i, '');
+  s = s.replace(/\s+(please|thanks|thank you|to the quote|to quote)$/i, '');
+  // Spoken sizes: "fifty mil" -> "50", "hundred mil" -> "100"
+  const spoken_sizes = {
+    'fifteen mil': '15', 'fifteen mm': '15', 'fifteen millimetre': '15',
+    'twenty mil': '20', 'twenty mm': '20',
+    'twenty five mil': '25', 'twenty-five mil': '25',
+    'thirty two mil': '32', 'thirty-two mil': '32',
+    'forty mil': '40', 'forty mm': '40',
+    'fifty mil': '50', 'fifty mm': '50',
+    'sixty five mil': '65', 'sixty-five mil': '65',
+    'eighty mil': '80', 'eighty mm': '80',
+    'ninety mil': '90', 'ninety mm': '90',
+    'hundred mil': '100', 'one hundred mil': '100', 'one hundred mm': '100',
+    'hundred and fifty mil': '150', 'one fifty mil': '150',
+    'fifteen': '15', 'twenty': '20', 'forty': '40', 'fifty': '50',
+    'eighty': '80', 'ninety': '90', 'hundred': '100',
+  };
+  for (const [w, n] of Object.entries(spoken_sizes)) {
+    s = s.replace(new RegExp('\b' + w + '\b', 'gi'), n);
+  }
+  // Degree synonyms
+  s = s.replace(/ninety\s*degree/gi, '90');
+  s = s.replace(/forty.?five\s*degree/gi, '45');
+  s = s.replace(/\b90\s*degree\b/gi, '90');
+  s = s.replace(/\b45\s*degree\b/gi, '45');
+  s = s.replace(/\b(\d+)\s*deg\w*/gi, '$1');
+  // Common plumbing synonyms
+  s = s.replace(/\belbow\b/gi, 'elbow bend');
+  s = s.replace(/\bbends?\b/gi, 'bend');
+  s = s.replace(/\bjunction\b/gi, 'tee junction');
+  s = s.replace(/\bjoiner\b/gi, 'coupling');
+  s = s.replace(/\bflexi\b/gi, 'flex hose');
+  s = s.replace(/\bpoly\b/gi, 'auspex');
+  s = s.replace(/\bhot water unit\b/gi, 'hot water');
+  s = s.replace(/\bdunny\b/gi, 'toilet');
+  s = s.replace(/\bloo\b/gi, 'toilet');
+  s = s.replace(/\bstop valve\b/gi, 'isolation valve');
+  s = s.replace(/\bmini stop\b/gi, 'mini stop isolation');
+  return s.trim();
 }
 
 function setupVoice() {
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){document.getElementById('mic-btn').style.display='none';return;}
-  recognition=new SR();recognition.continuous=true;recognition.interimResults=true;recognition.lang='en-AU';
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { document.getElementById('mic-btn').style.display = 'none'; return; }
+  recognition = new SR();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-AU';
+
+  // Plumbing grammar hints
   try {
     const SG = window.SpeechGrammarList || window.webkitSpeechGrammarList;
     if (SG) {
-      const terms = 'bend bends elbow elbows coupling tee trap flange adaptor connector reducer cap plug valve hose flexi pipe fitting brass copper auspex pvc dwv compression isolation toilet cistern basin mixer shower tapware drain jetter blocked hot water thermann rheem rinnai tempering fifteen twenty twenty five thirty two forty fifty sixty five eighty ninety hundred millimetre millimetres floor flange pan collar floor waste fernco saddle clip bracket olive washer jumper spindle aerator keeseal fluidmaster';
+      const terms = 'yes no stop done bend elbow coupling tee junction trap flange adaptor connector reducer cap plug valve hose flexi pipe fitting brass copper auspex pvc dwv isolation toilet cistern basin mixer shower tapware drain fernco saddle clip bracket olive washer aerator fluidmaster fifteen twenty forty fifty eighty ninety hundred millimetre millimetres degree degrees';
       const grammar = '#JSGF V1.0; grammar plumbing; public <plumbing> = ' + terms.split(' ').join(' | ') + ';';
       const list = new SG();
       list.addFromString(grammar, 1);
       recognition.grammars = list;
     }
   } catch(e) {}
-  let pendingAdd = null;
-  recognition.onresult=e=>{
-    let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;
-    if(e.results[e.results.length-1].isFinal){
-      const lower=t.toLowerCase().trim();
-      if(pendingAdd){
-        if(lower==='yes'||lower==='yeah'||lower==='yep'||lower==='correct'||lower==='add it'||lower==='add'){
-          const{qty,item}=pendingAdd;pendingAdd=null;
-          if(item.uuid){
-            const ex=quote.find(i=>i.id===item.uuid);
-            if(ex)ex.qty+=qty;else quote.push({id:item.uuid,type:'bundle',name:item.name,code:item.code,price:parseFloat(item.price)||0,qty});
-          } else {
-            const id='r_'+item.code;const ex=quote.find(i=>i.id===id);
-            if(ex)ex.qty+=qty;else quote.push({id,type:'reece',name:item.name,code:item.code,price:parseFloat(item.retail)||0,cost:parseFloat(item.cost)||0,markup:item.markup,qty});
-          }
-          updateQuoteUI();renderQResults();
-          speakAndShow('Added '+qty+'x '+item.name.substring(0,30)+' to quote. Say next item or stop.');
-          setTimeout(()=>{document.getElementById('q-search').value='';document.getElementById('voice-txt').textContent='Listening...';onQSearch();},5000);
-          return;
-        } else if(lower==='no'||lower==='nope'||lower==='wrong'||lower==='incorrect'||lower==='cancel'){
-          pendingAdd=null;
-          speakAndShow('Cancelled. Say the item again.');
-          document.getElementById('q-search').value='';onQSearch();
-          return;
-        }
-      }
-      const norm=normaliseTerm(t);
-      const{qty,term}=extractQuantity(norm);
-      if(qty>1||term.length>2){
-        const searchTerm=term||norm;
-        document.getElementById('q-search').value=searchTerm;
-        document.getElementById('voice-txt').textContent='"'+t+'"';
+
+  let pendingAdd = null; // {qty, item} waiting for yes/no
+
+  recognition.onresult = e => {
+    let t = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
+
+    if (!e.results[e.results.length - 1].isFinal) {
+      // Interim — just show what's being heard
+      const el = document.getElementById('voice-txt');
+      if (el) el.textContent = '"' + t + '"';
+      return;
+    }
+
+    const lower = t.toLowerCase().trim();
+
+    // Stop commands
+    if (lower === 'stop' || lower === 'done' || lower === 'finish' || lower === 'thats it' || lower === 'thats it') {
+      stopListening();
+      speakAndShow('Done. ' + quote.length + ' items in quote.');
+      return;
+    }
+
+    // Yes/No confirmation for pending item
+    if (pendingAdd) {
+      const isYes = ['yes','yeah','yep','correct','add it','add','that one','perfect','yep thats it'].some(w => lower.includes(w));
+      const isNo = ['no','nope','wrong','incorrect','cancel','skip','next','not that'].some(w => lower.includes(w));
+
+      if (isYes) {
+        const { qty, item } = pendingAdd;
+        pendingAdd = null;
+        const id = 'r_' + item.code;
+        const ex = quote.find(i => i.id === id);
+        if (ex) ex.qty += qty;
+        else quote.push({ id, type: 'reece', name: item.name, code: item.code, price: parseFloat(item.retail) || 0, cost: parseFloat(item.cost) || 0, markup: item.markup, qty });
+        updateQuoteUI();
+        const price = item.retail ? ' at $' + parseFloat(item.retail).toFixed(2) : '';
+        speakAndShow('Added ' + qty + 'x ' + item.name.substring(0, 35) + price + '. Next item?');
+        document.getElementById('q-search').value = '';
         onQSearch();
-        setTimeout(()=>{
-          const q=normaliseTerm(searchTerm);
-          const topB=bundles.map(b=>({...b,_s:scoreItem(b.name,b.code,b.category,q)})).filter(b=>b._s>0).sort((a,b)=>b._s-a._s)[0];
-          const topR=reece.map(r=>({...r,_s:scoreItem(r.name,r.code,r.category,q)})).filter(r=>r._s>0).sort((a,b)=>b._s-a._s)[0];
-          const winner=(topB&&topR)?(topB._s>=topR._s?topB:topR):(topB||topR);
-          if(winner){
-            pendingAdd={qty:qty>1?qty:1,item:winner};
-            speakAndShow('Found: '+(qty>1?qty+'x ':'')+winner.name.substring(0,35)+'. Say YES to add or NO to cancel.');
-          } else {
-            speakAndShow('No match found. Try again.');
-          }
-        },600);
+        return;
+      }
+
+      if (isNo) {
+        pendingAdd = null;
+        speakAndShow('Skipped. Say the item again or say stop.');
+        document.getElementById('q-search').value = '';
+        onQSearch();
         return;
       }
     }
-    document.getElementById('q-search').value=t;
-    document.getElementById('voice-txt').textContent='"'+t+'"';
+
+    // New item search
+    const { qty, term } = extractVoiceQty(lower);
+    if (term.length < 2) return;
+
+    const searchTerm = voiceToSearchTerm(term);
+    document.getElementById('q-search').value = searchTerm;
+    document.getElementById('voice-txt').textContent = 'Searching: "' + t + '"...';
     onQSearch();
+
+    // Search the CSV via server
+    fetch(PROXY + '/reece-search?q=' + encodeURIComponent(searchTerm))
+      .then(r => r.json())
+      .then(data => {
+        if (!data.products || !data.products.length) {
+          // Also check bundles as fallback
+          const q = normaliseTerm(searchTerm);
+          const topB = bundles.map(b => ({ ...b, _s: scoreItem(b.name, b.code, b.category, q) })).filter(b => b._s > 0).sort((a, b) => b._s - a._s)[0];
+          if (topB) {
+            pendingAdd = { qty, item: { ...topB, uuid: topB.uuid } };
+            speakAndShow('Found bundle: ' + topB.name.substring(0, 35) + '. Say YES to add or NO to skip.');
+          } else {
+            speakAndShow('Nothing found for ' + term.substring(0, 25) + '. Try again.');
+          }
+          return;
+        }
+        const best = data.products[0];
+        pendingAdd = { qty, item: best };
+        const price = best.retail ? ' $' + parseFloat(best.retail).toFixed(2) : '';
+        const qtyStr = qty > 1 ? qty + 'x ' : '';
+        speakAndShow('Found: ' + qtyStr + best.name.substring(0, 40) + price + '. YES to add, NO to skip.');
+      })
+      .catch(() => speakAndShow('Could not search. Check connection.'));
   };
-  recognition.onend=()=>{if(isListening)try{recognition.start();}catch(e){}};
-  recognition.onerror=e=>{if(e.error!=='no-speech')stopListening();};
+
+  recognition.onend = () => { if (isListening) try { recognition.start(); } catch(e) {} };
+  recognition.onerror = e => { if (e.error !== 'no-speech') stopListening(); };
 }
-function startListening(){if(!recognition||isListening)return;try{recognition.start();isListening=true;document.getElementById('mic-btn').classList.add('listening');document.getElementById('voice-hint').classList.add('show');}catch(e){}}
-function stopListening(){if(!recognition||!isListening)return;try{recognition.stop();}catch(e){}isListening=false;document.getElementById('mic-btn').classList.remove('listening');document.getElementById('voice-hint').classList.remove('show');}
-function toggleMic(){isListening?stopListening():startListening();}
+
+function startListening() {
+  if (!recognition || isListening) return;
+  try {
+    recognition.start();
+    isListening = true;
+    document.getElementById('mic-btn').classList.add('listening');
+    document.getElementById('voice-hint').classList.add('show');
+    speakAndShow('Listening — say an item and quantity...');
+  } catch(e) {}
+}
+function stopListening() {
+  if (!recognition || !isListening) return;
+  try { recognition.stop(); } catch(e) {}
+  isListening = false;
+  document.getElementById('mic-btn').classList.remove('listening');
+  document.getElementById('voice-hint').classList.remove('show');
+}
+function toggleMic() { isListening ? stopListening() : startListening(); }
 function setupAiVoice(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;
   aiRecognition=new SR();aiRecognition.continuous=false;aiRecognition.interimResults=false;aiRecognition.lang='en-AU';
@@ -1479,12 +1624,17 @@ function adjOnHand(code, delta) {
 }
 
 // ── LABOUR ────────────────────────────────────────────────────────────────────
-let labourHours = { standard: 1.0, second: 0.0, builder: 0.0, apprentice: 0.0 };
+let labourHours = { standard: 1.0, second: 0.0, builder: 0.0, apprentice: 0.0, service: 0 };
 let labourSurcharge = 0, labourDiscount = 0;
 
 function chHours(type, delta) {
-  labourHours[type] = Math.max(0, Math.round((labourHours[type] + delta) * 2) / 2);
-  document.getElementById('h-' + type).textContent = labourHours[type].toFixed(1);
+  if (type === 'service') {
+    labourHours[type] = Math.max(0, labourHours[type] + delta);
+    document.getElementById('h-' + type).textContent = labourHours[type];
+  } else {
+    labourHours[type] = Math.max(0, Math.round((labourHours[type] + delta) * 2) / 2);
+    document.getElementById('h-' + type).textContent = labourHours[type].toFixed(1);
+  }
   updateLabourTotals();
 }
 
@@ -1516,6 +1666,7 @@ function updateLabourTotals() {
     second:   parseFloat(document.getElementById('rate-second')?.value)   || 160,
     builder:  parseFloat(document.getElementById('rate-builder')?.value)  || 195,
     apprentice: parseFloat(document.getElementById('rate-apprentice')?.value) || 100,
+    service:  parseFloat(document.getElementById('rate-service')?.value)  || 88,
   };
   const sub = Object.keys(labourHours).reduce((s, k) => s + (labourHours[k] * rates[k]), 0);
   const surchargeAmt = sub * (labourSurcharge / 100);
@@ -1550,7 +1701,7 @@ function addLabourToQuote() {
     builder:    parseFloat(document.getElementById('rate-builder')?.value)     || 195,
     apprentice: parseFloat(document.getElementById('rate-apprentice')?.value)  || 100,
   };
-  const labels = { standard:'Standard Labour', second:'2nd Tradesman', builder:'Builder Rate', apprentice:'Apprentice Labour' };
+  const labels = { standard:'Standard Labour', second:'2nd Tradesman', builder:'Builder Rate', apprentice:'Apprentice Labour', service:'Service Fee' };
   let added = 0;
   Object.keys(labourHours).forEach(k => {
     if (labourHours[k] <= 0) return;
@@ -1558,7 +1709,8 @@ function addLabourToQuote() {
     const afterSurcharge = basePrice * (1 + labourSurcharge / 100);
     const finalPrice = afterSurcharge * (1 - labourDiscount / 100);
     const id = 'labour_' + k + '_' + Date.now();
-    quote.push({ id, type: 'labour', name: labels[k] + ' (' + labourHours[k] + 'h)', code: '', price: parseFloat(finalPrice.toFixed(2)), qty: 1 });
+    const labelSuffix = k === 'service' ? (' x' + labourHours[k]) : (' (' + labourHours[k] + 'h)');
+    quote.push({ id, type: 'labour', name: labels[k] + labelSuffix, code: '', price: parseFloat(finalPrice.toFixed(2)), qty: 1 });
     added++;
   });
   if (added) { updateQuoteUI(); showToast('Labour added to quote'); goScreen('quote'); }
