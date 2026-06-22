@@ -166,6 +166,22 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(10px);background:#1a1f2e;color:#fff;padding:8px 16px;border-radius:999px;font-size:12px;font-weight:500;opacity:0;transition:all .2s;pointer-events:none;z-index:999;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* ── HOME SCREEN ── */
+.home-wrap{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;min-height:0}
+.home-greeting{padding:4px 2px}
+.home-greeting-name{font-size:20px;font-weight:700}
+.home-greeting-sub{font-size:12px;color:var(--text-mid);margin-top:2px}
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.home-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:16px 14px;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:border-color .15s}
+.home-card:active{border-color:var(--orange)}
+.home-card-icon{font-size:26px;line-height:1}
+.home-card-label{font-size:13px;font-weight:600}
+.home-card-desc{font-size:11px;color:var(--text-mid);line-height:1.4}
+.home-stat-row{display:flex;gap:8px}
+.home-stat{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px;text-align:center}
+.home-stat-num{font-size:18px;font-weight:700;color:var(--orange)}
+.home-stat-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
 /* ── DARK MODE ── */
 body.dark{
   --bg:#0f1117;--surface:#1a1f2e;--surface2:#242938;--surface3:#2d3347;
@@ -229,8 +245,65 @@ body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
 
   <div class="screens">
 
+    <!-- HOME -->
+    <div class="screen active" id="screen-home">
+      <div class="home-wrap">
+        <div class="home-greeting">
+          <div class="home-greeting-name">Innovation Plumbing + Design</div>
+          <div class="home-greeting-sub">What do you need today?</div>
+        </div>
+        <div class="home-stat-row">
+          <div class="home-stat"><div class="home-stat-num" id="hs-quote">0</div><div class="home-stat-label">Quote Items</div></div>
+          <div class="home-stat"><div class="home-stat-num" id="hs-order">0</div><div class="home-stat-label">To Order</div></div>
+          <div class="home-stat"><div class="home-stat-num" id="hs-checked">0</div><div class="home-stat-label">Checked</div></div>
+        </div>
+        <div class="home-grid">
+          <div class="home-card" onclick="goScreen('search')">
+            <div class="home-card-icon">🔍</div>
+            <div class="home-card-label">Search</div>
+            <div class="home-card-desc">Find Reece products &amp; bundles</div>
+          </div>
+          <div class="home-card" onclick="goScreen('quote')">
+            <div class="home-card-icon">📋</div>
+            <div class="home-card-label">Quote</div>
+            <div class="home-card-desc">Build &amp; send to ServiceM8</div>
+          </div>
+          <div class="home-card" onclick="goScreen('labour')">
+            <div class="home-card-icon">⏱</div>
+            <div class="home-card-label">Labour</div>
+            <div class="home-card-desc">Rates, hours &amp; adjustments</div>
+          </div>
+          <div class="home-card" onclick="goScreen('stock')">
+            <div class="home-card-icon">📦</div>
+            <div class="home-card-label">Stock</div>
+            <div class="home-card-desc">Count &amp; order van stock</div>
+          </div>
+          <div class="home-card" onclick="goScreen('ai')">
+            <div class="home-card-icon">✨</div>
+            <div class="home-card-label">AI Assistant</div>
+            <div class="home-card-desc">Standards, regs &amp; advice</div>
+          </div>
+          <div class="home-card" onclick="goScreen('kb')">
+            <div class="home-card-icon">📚</div>
+            <div class="home-card-label">Knowledge</div>
+            <div class="home-card-desc">Bundles, codes &amp; guides</div>
+          </div>
+          <div class="home-card" onclick="goScreen('settings')">
+            <div class="home-card-icon">⚙️</div>
+            <div class="home-card-label">Settings</div>
+            <div class="home-card-desc">App config &amp; data source</div>
+          </div>
+          <div class="home-card" onclick="runStockReview()">
+            <div class="home-card-icon">🤖</div>
+            <div class="home-card-label">AI Review</div>
+            <div class="home-card-desc">Review stock order with AI</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- STOCK -->
-    <div class="screen active" id="screen-stock">
+    <div class="screen" id="screen-stock">
       <div class="stats-bar">
         <div class="stat-pill"><div class="stat-num" id="s-checked" style="color:#60a5fa">0</div><div class="stat-label">Checked</div></div>
         <div class="stat-pill"><div class="stat-num" id="s-order" style="color:#f87171">0</div><div class="stat-label">To Order</div></div>
@@ -483,7 +556,8 @@ body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
   </div><!-- end .screens -->
 
   <div class="bottom-nav">
-    <button class="nav-btn active" id="nav-stock" onclick="goScreen('stock')"><div class="nav-icon">📦</div><div class="nav-label">Stock</div></button>
+    <button class="nav-btn active" id="nav-home" onclick="goScreen('home')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></button>
+    <button class="nav-btn" id="nav-stock" onclick="goScreen('stock')"><div class="nav-icon">📦</div><div class="nav-label">Stock</div></button>
     <button class="nav-btn" id="nav-labour" onclick="goScreen('labour')"><div class="nav-icon">⏱</div><div class="nav-label">Labour</div></button>
     <button class="nav-btn" id="nav-search" onclick="goScreen('search')"><div class="nav-icon">🔍</div><div class="nav-label">Search</div></button>
     <button class="nav-btn" id="nav-ai" onclick="goScreen('ai')"><div class="nav-icon">✨</div><div class="nav-label">AI</div></button>
@@ -717,6 +791,7 @@ function goScreen(name) {
   if (name === 'kb') renderKB();
   if (name === 'quote') renderQuote();
   if (name === 'labour') updateLabourTotals();
+  if (name === 'home') updateHomeStats();
 }
 
 function saveSheetUrl() {
@@ -836,8 +911,8 @@ function onQSearch() {
   searchTimer = setTimeout(() => {
     renderQResults();
     const q = document.getElementById('q-search').value.trim();
-    if (q.length >= 2 && (window._searchTab||'reece') === 'reece') triggerAiBand(q);
-    else document.getElementById('ai-band').style.display = 'none';
+    // AI band disabled — search results only
+    document.getElementById('ai-band').style.display = 'none';
   }, 200);
 }
 function renderQResults() {
@@ -943,6 +1018,15 @@ function updateQuoteUI() {
   pill.style.display = count>0?'flex':'none';
   document.getElementById('quote-pill-txt').textContent = count+(count===1?' item':' items');
   if(activeScreen==='quote') renderQuote();
+  updateHomeStats();
+}
+function updateHomeStats() {
+  const hs_quote = document.getElementById('hs-quote');
+  const hs_order = document.getElementById('hs-order');
+  const hs_checked = document.getElementById('hs-checked');
+  if (hs_quote) hs_quote.textContent = quote.reduce((s,i)=>s+i.qty,0);
+  if (hs_order) hs_order.textContent = orderItems().length;
+  if (hs_checked) hs_checked.textContent = Object.values(onHand).filter(v=>v!=='').length;
 }
 function renderQuote() {
   const list = document.getElementById('quote-list');
