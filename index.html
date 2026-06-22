@@ -648,7 +648,8 @@ async function loadQuoteData() {
     if (!r.ok) throw new Error('HTTP '+r.status);
     const d = await r.json();
     bundles = (d.bundles||[]).map(b=>({uuid:String(b.uuid||''),code:String(b.code||''),name:String(b.name||''),category:String(b.category||''),price:b.price!=null&&b.price!==''?String(b.price):'',notes:String(b.notes||'')}));
-    reece = (d.reece||[]).map(r=>({code:String(r.code||''),name:String(r.name||''),unit:String(r.unit||''),category:String(r.category||''),subcategory:String(r.subcategory||''),retail:r.retail!=null&&r.retail!==''?String(r.retail):'',cost:r.cost!=null&&r.cost!==''?String(r.cost):'',markup:r.markup!=null?String(r.markup):''}));
+    // Strip -1 suffix from Reece codes at load time so codes are clean everywhere in the app
+    reece = (d.reece||[]).map(r=>({code:String(r.code||'').replace(/-1$/,'').trim(),name:String(r.name||''),unit:String(r.unit||''),category:String(r.category||''),subcategory:String(r.subcategory||''),retail:r.retail!=null&&r.retail!==''?String(r.retail):'',cost:r.cost!=null&&r.cost!==''?String(r.cost):'',markup:r.markup!=null?String(r.markup):''}));
     knowledge = d.knowledge||[];
     dataLoaded = true;
     document.getElementById('q-sdot').className = 's-dot';
@@ -730,7 +731,7 @@ async function triggerAiBand(query) {
 // ── AI SUGGEST ────────────────────────────────────────────────────────────────
 function runAiSuggest() {
   const query = document.getElementById('ai-textarea').value.trim();
-if (!query) { showToast('Enter a description first'); return; }
+  if (!query) { showToast('Enter a description first'); return; }
   const resultsDiv = document.getElementById('ai-results');
   resultsDiv.innerHTML = '<div class="state-box"><div class="big-spin"></div><p>Finding matches...</p></div>';
   setTimeout(() => {
@@ -912,7 +913,6 @@ async function runWebSearch() {
     });
     const data = await res.json();
     if (data.answer) {
-      // Format the answer nicely
       const formatted = data.answer
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\n\n/g, '</p><p>')
@@ -940,10 +940,10 @@ function renderKB() {
   if(!filtered.length){c.innerHTML=chips+'<div class="state-box"><p>No results.</p></div>';return;}
   c.innerHTML=chips+filtered.map(k=>{
     const hasUrl=k.url&&k.url.trim(); const hasCode=k.reeceCode&&k.reeceCode.trim();
-    const cleanCode=hasCode?k.reeceCode.replace(/^REC/i,''):'';
+    const cleanCode=hasCode?k.reeceCode.replace(/^REC/i,'').replace(/-1$/,''):'';
     const linkUrl=hasUrl?k.url:(cleanCode?'https://www.reece.com.au/product/-'+cleanCode:'');
     const isBundleRef=k.title&&k.title.toLowerCase().includes('bundle') && k.title.toLowerCase().includes('prefix');
-    return `<div class="kb-item" onclick="${isBundleRef?'showBundlePrefixes()':linkUrl?`window.open('${esc(linkUrl)}','_blank')`:''}" style="${linkUrl?'cursor:pointer':''}"><div class="kb-icon">${linkUrl?'🏪':'📄'}</div><div style="flex:1;min-width:0"><div class="kb-title">${esc(k.title)}</div><div class="kb-desc">${esc(k.description||'')}</div><div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap"><span class="kb-cat">${esc(k.category||'')}</span>${hasCode?`<span style="font-size:10px;font-family:var(--mono);color:var(--green);background:rgba(74,222,128,.1);padding:1px 5px;border-radius:3px">${esc(k.reeceCode)}</span>`:''}</div></div><span style="color:var(--text-dim);font-size:16px">${linkUrl?'🔗':'›'}</span></div>`;
+    return `<div class="kb-item" onclick="${isBundleRef?'showBundlePrefixes()':linkUrl?`window.open('${esc(linkUrl)}','_blank')`:''}" style="${linkUrl?'cursor:pointer':''}"><div class="kb-icon">${linkUrl?'🏪':'📄'}</div><div style="flex:1;min-width:0"><div class="kb-title">${esc(k.title)}</div><div class="kb-desc">${esc(k.description||'')}</div><div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap"><span class="kb-cat">${esc(k.category||'')}</span>${hasCode?`<span style="font-size:10px;font-family:var(--mono);color:var(--green);background:rgba(74,222,128,.1);padding:1px 5px;border-radius:3px">${esc(cleanCode)}</span>`:''}</div></div><span style="color:var(--text-dim);font-size:16px">${linkUrl?'🔗':'›'}</span></div>`;
   }).join('');
 }
 function setKbCat(cat){window._kbCat=cat;renderKB();}
@@ -965,9 +965,7 @@ const PLUMB_CATS=['pvc','dwv','copper','auspex','brassware','isolation','tapware
 const SIZE_MAP={'half inch':'15mm','1/2 inch':'15mm','three quarter inch':'20mm','3/4 inch':'20mm','three quarter':'20mm','one inch':'25mm','1 inch':'25mm','one and a half inch':'40mm','1 1/2 inch':'40mm','two inch':'50mm','2 inch':'50mm','three inch':'80mm','3 inch':'80mm','four inch':'100mm','4 inch':'100mm'};
 
 const TERM_MAP={
-  // Toilet
   'dunny':'toilet','loo':'toilet','wc':'toilet','dunny suite':'toilet suite',
-  // Bends - critical - many names for same thing
   'band':'bend','bands':'bend','bent':'bend','bond':'bend','bin':'bend',
   'elbow':'bend','elbows':'bend','bends':'bend','ell':'bend','ells':'bend',
   'junction':'bend','swept bend':'bend','return bend':'bend','quarter bend':'90deg bend',
@@ -975,58 +973,41 @@ const TERM_MAP={
   '90 degree':'90deg','45 degree':'45deg','22.5 degree':'22deg',
   '88 degree':'90deg','85 degree':'90deg','87 degree':'90deg',
   '43 degree':'45deg','44 degree':'45deg','46 degree':'45deg',
-  // Angles spoken
   'ninety degree':'90deg','forty five degree':'45deg',
   'ninety':'90deg','forty five':'45deg',
-  // Fittings
   'socket':'coupling','joiner':'coupling','sleeve':'coupling',
   'tees':'tee','tee piece':'tee','t piece':'tee',
   'end cap':'cap','stop end':'cap','blanking cap':'cap',
   'reducer':'reducer','reducing coupling':'reducer',
   'male adaptor':'mi adaptor','female adaptor':'fi adaptor',
   'male connector':'mi connector','female connector':'fi connector',
-  // Hot water
   'hot water system':'hot water','hws':'hot water','hwu':'hot water',
   'water heater':'hot water','storage hot water':'hot water',
-  // Pipe types
   'poly pipe':'auspex','pex pipe':'auspex','plastic pipe':'auspex','poly':'auspex',
   'copper tube':'copper pipe','copper tubing':'copper pipe',
-  // Valves
   'stop tap':'isolation valve','ball valve':'isolation valve','stopcock':'isolation valve',
   'gate valve':'isolation valve',
-  // Traps
   'gully trap':'trap','p trap':'trap','s trap':'trap','bottle trap':'trap',
-  // Drainage
   'floor waste':'floor flange','shower waste':'floor flange','floor drain':'floor flange',
   'blocked drain':'drain clean','blocked':'drain clean','drain cleaner':'drain clean',
   'high pressure':'jetter','water jetter':'jetter','hydro jet':'jetter',
-  // Hoses
   'flexible hose':'flexi hose','braided hose':'flexi hose','flexi':'flexi hose',
-  // Tapware
   'mixer tap':'mixer','basin tap':'basin mixer','sink tap':'sink mixer',
   'shower tap':'shower mixer','bath tap':'bath mixer',
-  // Misc
   'thread tape':'thread tape','teflon':'thread tape',
   'silastic':'silicone','sealant':'silicone',
 };
 
 function normaliseTerm(q) {
   let n=q.toLowerCase().trim();
-  // Strip command phrases
   n=n.replace(/^(i want|i need|add|please add|can you add|put in|give me|get me|order|quote for|quote me|we need|we want)\s+/i,'');
   n=n.replace(/\s+(to (the )?quote|to (the )?order|please|thanks|thank you)$/i,'');
-  // Spoken numbers
   const nums={'zero':'0','one':'1','two':'2','three':'3','four':'4','five':'5','six':'6','seven':'7','eight':'8','nine':'9','ten':'10','eleven':'11','twelve':'12','fifteen':'15','twenty':'20','twenty five':'25','thirty':'30','thirty two':'32','forty':'40','forty five':'45','fifty':'50','sixty':'60','sixty five':'65','seventy':'70','eighty':'80','ninety':'90','one hundred':'100','hundred':'100','fiddy':'50','fify':'50','fitty':'50','firty':'40','fotty':'40','nighty':'90'};
   for(const [w,d] of Object.entries(nums)) n=n.replace(new RegExp('\b'+w+'\b','gi'),d);
-  // Millimetre
-  n=n.replace(/(\d+)\s*(millimetre|millimeter|millimetres|millimeters|mil)/gi,'$1mm');
-  // Number x number
+  n=n.replace(/(\d+)\s*(millimetre|millimeter|millimetres|millimeters|mil)/gi,'$1mm');
   n=n.replace(/(\d+)\s*(x|by|times|×)\s*(\d+)/gi,'$1 x $3');
-  // Imperial
   for(const [k,v] of Object.entries(SIZE_MAP)) n=n.replace(new RegExp(k,'gi'),v);
-  // Add mm to bare numbers before plumbing terms
-  n=n.replace(/(\d+)\s+(floor flange|bend|elbow|tee|trap|coupling|cap|plug|reducer|adaptor|connector|flange|collar|fernco|saddle|clip|pipe|fitting|valve|hose|washer|olive)/gi,'$1mm $2');
-  // Term synonyms
+  n=n.replace(/(\d+)\s+(floor flange|bend|elbow|tee|trap|coupling|cap|plug|reducer|adaptor|connector|flange|collar|fernco|saddle|clip|pipe|fitting|valve|hose|washer|olive)/gi,'$1mm $2');
   for(const [k,v] of Object.entries(TERM_MAP)) n=n.replace(new RegExp('\b'+k+'\b','gi'),v);
   return n.trim();
 }
@@ -1090,7 +1071,6 @@ function scoreItem(name,code,cat,q) {
 // ── VOICE ─────────────────────────────────────────────────────────────────────
 function speakAndShow(msg) {
   document.getElementById('voice-txt').textContent = msg;
-  // Use speech synthesis if available
   if (window.speechSynthesis) {
     window.speechSynthesis.cancel();
     const utt = new SpeechSynthesisUtterance(msg);
@@ -1105,7 +1085,6 @@ function setupVoice() {
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){document.getElementById('mic-btn').style.display='none';return;}
   recognition=new SR();recognition.continuous=true;recognition.interimResults=true;recognition.lang='en-AU';
-  // Add plumbing speech grammar so browser recognises trade terms
   try {
     const SG = window.SpeechGrammarList || window.webkitSpeechGrammarList;
     if (SG) {
@@ -1116,12 +1095,11 @@ function setupVoice() {
       recognition.grammars = list;
     }
   } catch(e) {}
-  let pendingAdd = null; // {qty, item}
+  let pendingAdd = null;
   recognition.onresult=e=>{
     let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;
     if(e.results[e.results.length-1].isFinal){
       const lower=t.toLowerCase().trim();
-      // Handle yes/no confirmation
       if(pendingAdd){
         if(lower==='yes'||lower==='yeah'||lower==='yep'||lower==='correct'||lower==='add it'||lower==='add'){
           const{qty,item}=pendingAdd;pendingAdd=null;
@@ -1143,7 +1121,6 @@ function setupVoice() {
           return;
         }
       }
-      // Normal search with quantity
       const norm=normaliseTerm(t);
       const{qty,term}=extractQuantity(norm);
       if(qty>1||term.length>2){
@@ -1152,7 +1129,6 @@ function setupVoice() {
         document.getElementById('voice-txt').textContent='"'+t+'"';
         onQSearch();
         setTimeout(()=>{
-          // Find best match
           const q=normaliseTerm(searchTerm);
           const topB=bundles.map(b=>({...b,_s:scoreItem(b.name,b.code,b.category,q)})).filter(b=>b._s>0).sort((a,b)=>b._s-a._s)[0];
           const topR=reece.map(r=>({...r,_s:scoreItem(r.name,r.code,r.category,q)})).filter(r=>r._s>0).sort((a,b)=>b._s-a._s)[0];
@@ -1193,4 +1169,4 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 window.addEventListener('load',init);
 </script>
 </body>
-</html>  
+</html>
