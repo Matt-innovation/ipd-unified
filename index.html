@@ -809,12 +809,12 @@ async function loadQuoteData() {
     if (!r.ok) throw new Error('HTTP '+r.status);
     const d = await r.json();
     bundles = (d.bundles||[]).map(b=>({uuid:String(b.uuid||''),code:String(b.code||''),name:String(b.name||''),category:String(b.category||''),price:b.price!=null&&b.price!==''?String(b.price):'',notes:String(b.notes||'')}));
-    // Keep full Reece codes including -1 suffix for correct SM8 matching (REC{code})
-    reece = (d.reece||[]).map(r=>({code:String(r.code||'').trim(),name:String(r.name||''),unit:String(r.unit||''),category:String(r.category||''),subcategory:String(r.subcategory||''),retail:r.retail!=null&&r.retail!==''?String(r.retail):'',cost:r.cost!=null&&r.cost!==''?String(r.cost):'',markup:r.markup!=null?String(r.markup):''}));
+    // Reece products now come from CSV via server /reece-search endpoint — not the sheet
+    reece = []; // populated on-demand per search
     knowledge = d.knowledge||[];
     dataLoaded = true;
     document.getElementById('q-sdot').className = 's-dot';
-    document.getElementById('q-stext').textContent = bundles.length+' bundles · '+reece.length.toLocaleString()+' Reece products';
+    document.getElementById('q-stext').textContent = bundles.length+' bundles · Reece catalogue live';
     buildQCats(); renderKB();
   } catch(e) {
     document.getElementById('q-sdot').className = 's-dot err';
@@ -853,11 +853,15 @@ function renderQResults() {
     ? (q ? bundles.filter(b=>quoteCat==='All'||b.category===quoteCat).map(b=>({...b,_s:scoreItem(b.name,b.code,b.category,q)})).filter(b=>b._s>0).sort((a,b)=>b._s-a._s).slice(0,50)
          : bundles.filter(b=>quoteCat!=='All'&&b.category===quoteCat).slice(0,50))
     : [];
-  const mR = (showReece && q) ? reece.map(r=>({...r,_s:scoreItem(r.name,r.code,r.category,q)})).filter(r=>r._s>0).sort((a,b)=>b._s-a._s).slice(0,50) : [];
-  if (!mB.length && !mR.length) { container.innerHTML = '<div class="state-box"><span class="state-icon">🤷</span><p>No results.<br><span class="hint">Try different keywords or AI tab.</span></p></div>'; return; }
+  // For Reece tab, fetch from server CSV endpoint
+  if (showReece && q) {
+    if (!mB.length) container.innerHTML = '<div class="state-box"><div class="big-spin"></div><p>Searching Reece catalogue...</p></div>';
+    fetchReeceSearch(q, container);
+    return;
+  }
+  if (!mB.length) { container.innerHTML = '<div class="state-box"><span class="state-icon">🤷</span><p>No results.<br><span class="hint">Try different keywords or AI tab.</span></p></div>'; return; }
   let html = '';
   if (mB.length) { html += `<div class="section-hd" style="color:#3b82f6">📦 Bundles (${mB.length})</div>`; html += mB.map(b=>bundleCard(b)).join(''); }
-  if (mR.length) { html += `<div class="section-hd" style="color:#f87171">🏪 Reece Products (${mR.length})</div>`; html += mR.map(r=>reeceCard(r)).join(''); }
   container.innerHTML = html;
 }
 function bundleCard(b) {
@@ -1327,6 +1331,28 @@ function setupAiVoice(){
 }
 function toggleAiMic(){if(aiListening){stopAiMic();return;}try{aiRecognition.start();aiListening=true;document.getElementById('ai-mic').classList.add('listening');}catch(e){}}
 function stopAiMic(){if(!aiListening)return;try{aiRecognition.stop();}catch(e){}aiListening=false;document.getElementById('ai-mic').classList.remove('listening');}
+
+// ── REECE CSV SEARCH ─────────────────────────────────────────────────────────
+let reeceSearchTimer = null;
+async function fetchReeceSearch(q, container) {
+  clearTimeout(reeceSearchTimer);
+  reeceSearchTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(PROXY + '/reece-search?q=' + encodeURIComponent(q));
+      const data = await res.json();
+      if (!data.products || !data.products.length) {
+        container.innerHTML = '<div class="state-box"><span class="state-icon">🤷</span><p>No Reece products found.<br><span class="hint">Try different keywords.</span></p></div>';
+        return;
+      }
+      const total = data.total || data.products.length;
+      let html = `<div class="section-hd" style="color:#f87171">🏪 Reece Products (${total > 60 ? '60 of ' + total : total})</div>`;
+      html += data.products.map(r => reeceCard(r)).join('');
+      container.innerHTML = html;
+    } catch(e) {
+      container.innerHTML = '<div class="state-box"><span class="state-icon">❌</span><p>Could not reach server.<br><span class="hint">Check connection.</span></p></div>';
+    }
+  }, 300);
+}
 
 // ── DARK MODE ─────────────────────────────────────────────────────────────────
 function initDarkMode() {
