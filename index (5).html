@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="IPD">
+<title>IPD · Innovation Plumbing + Design</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#f97316;--blue:#3b82f6;--blue-lt:rgba(59,130,246,0.15);
+  --red:#f87171;--red-lt:rgba(248,113,113,0.15);
+  --green:#4ade80;--green-lt:rgba(74,222,128,0.15);--purple:#a78bfa;
+  --bg:#f0f2f5;--surface:#ffffff;--surface2:#f5f7fa;--surface3:#e8ecf1;
+  --border:#dde1e8;--border2:#c8cdd7;
+  --text:#1a1f2e;--text-mid:#5a6478;--text-dim:#9aa3b0;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  --nav-h:58px;--top-h:54px;--radius:12px;--radius-sm:8px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);-webkit-tap-highlight-color:transparent}
+#app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;background:var(--bg)}
+.top-bar{height:var(--top-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;z-index:10}
+.top-logo{display:flex;align-items:center;gap:9px}
+.top-logo-mark{width:30px;height:30px;background:var(--orange);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.top-logo-text{font-size:15px;font-weight:700}
+.top-logo-sub{font-size:10px;color:var(--text-mid)}
+.top-right{margin-left:auto}
+.quote-pill{background:rgba(249,115,22,.15);color:var(--orange);border:1px solid rgba(249,115,22,.3);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px}
+.screens{flex:1;overflow:hidden;position:relative;min-height:0}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden}
+.screen.active{display:flex}
+.screen-scroll{flex:1;overflow-y:auto;min-height:0}
+.bottom-nav{height:var(--nav-h);background:var(--surface);border-top:1px solid var(--border);display:flex;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom);z-index:10}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border:none;background:none;color:var(--text-dim);font-family:var(--font);padding:5px 2px;position:relative;transition:color .15s}
+.nav-btn.active{color:var(--orange)}
+.nav-btn .nav-icon{font-size:20px;line-height:1}
+.nav-btn .nav-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0}
+.nav-badge{position:absolute;top:5px;right:calc(50% - 18px);background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:999px;padding:1px 5px;display:none;min-width:16px;text-align:center}
+.nav-badge.show{display:block}
+.stats-bar{display:flex;padding:8px 12px;gap:4px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.stat-pill{flex:1;text-align:center;background:var(--surface2);border-radius:var(--radius-sm);padding:5px 2px}
+.stat-num{font-size:15px;font-weight:700;line-height:1}
+.stat-label{font-size:8px;color:var(--text-dim);letter-spacing:.5px;margin-top:1px;text-transform:uppercase}
+.search-wrap{padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.search-row{display:flex;gap:8px;align-items:center}
+.search-box{flex:1;position:relative}
+.search-box .s-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--text-dim);pointer-events:none}
+.search-box input{width:100%;padding:9px 10px 9px 32px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:14px;font-family:var(--font);color:var(--text);background:var(--surface2);outline:none}
+.search-box input:focus{border-color:var(--orange)}
+.search-box input::placeholder{color:var(--text-dim)}
+.mic-btn{width:40px;height:40px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:18px;color:var(--text-mid)}
+.mic-btn.listening{background:var(--red);border-color:var(--red);color:#fff;animation:pulse 1.2s infinite}
+.voice-hint{font-size:11px;color:var(--red);margin-top:4px;display:none;align-items:center;gap:5px}
+.voice-hint.show{display:flex}
+.voice-dot{width:5px;height:5px;background:var(--red);border-radius:50%;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.cat-row{display:flex;gap:5px;padding:6px 12px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border)}
+.cat-row::-webkit-scrollbar{display:none}
+.cat-chip{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text-mid);white-space:nowrap;flex-shrink:0}
+.cat-chip.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+.section-hd{padding:6px 14px;font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
+.stock-row{display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border);gap:10px;background:var(--surface)}
+.stock-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.stock-info{flex:1;min-width:0}
+.stock-name{font-size:13px;font-weight:500;line-height:1.3}
+.stock-code{font-size:10px;color:var(--text-dim);font-family:var(--mono);margin-top:1px}
+.stock-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.stock-target{font-size:10px;color:var(--text-dim)}
+.stock-input{width:52px;height:32px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:15px;font-weight:600;font-family:var(--font);text-align:center;outline:none}
+.stock-input.need{border-color:var(--red);background:rgba(248,113,113,.08)}
+.stock-input.good{border-color:var(--green);background:rgba(74,222,128,.08)}
+.order-badge{font-size:9px;font-weight:700;background:rgba(248,113,113,.15);color:var(--red);padding:2px 5px;border-radius:4px}
+.item-card{display:flex;align-items:flex-start;padding:10px 14px;border-bottom:1px solid var(--border);gap:10px;background:var(--surface)}
+.item-icon{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.item-icon.bundle{background:var(--blue-lt);color:var(--blue)}
+.item-icon.reece{background:var(--red-lt);color:var(--red)}
+.item-body{flex:1;min-width:0}
+.item-name{font-size:13px;font-weight:500;line-height:1.3}
+.item-code{font-size:10px;color:var(--orange);font-family:var(--mono);margin-top:2px;font-weight:600}
+.item-cat{font-size:10px;color:var(--text-mid);background:var(--surface2);padding:2px 5px;border-radius:4px;margin-top:3px;display:inline-block}
+.item-markup{font-size:10px;color:var(--green);margin-top:2px}
+.item-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.item-price{font-size:14px;font-weight:700}
+.item-price.dim{font-size:11px;font-weight:400;color:var(--text-dim)}
+.add-btn{width:28px;height:28px;border-radius:var(--radius-sm);background:var(--orange);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px}
+.qty-ctrl{display:flex;align-items:center;gap:4px}
+.qty-btn{width:26px;height:26px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.qty-num{font-size:13px;font-weight:700;min-width:18px;text-align:center;color:var(--orange)}
+.ai-band{background:linear-gradient(135deg,rgba(59,130,246,.06) 0%,rgba(167,139,250,.06) 100%);border-bottom:1px solid var(--border);padding:8px 14px;flex-shrink:0}
+.ai-band-hd{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:11px;font-weight:600;color:var(--blue)}
+.ai-chips-wrap{display:flex;flex-wrap:wrap;gap:4px}
+.ai-chip{padding:4px 8px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border2);font-size:11px;color:var(--text-mid);cursor:pointer;display:flex;align-items:center;gap:4px}
+.chip-badge{font-size:9px;font-weight:700;padding:1px 4px;border-radius:3px}
+.chip-badge.b{background:var(--blue-lt);color:var(--blue)}
+.chip-badge.r{background:var(--red-lt);color:var(--red)}
+.chip-price{font-weight:700;color:var(--orange)}
+.mini-load{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim)}
+.spin{width:12px;height:12px;border:2px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.status-bar{display:flex;align-items:center;gap:6px;padding:5px 14px;font-size:10px;color:var(--text-dim);background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0}
+.s-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+.s-dot.warn{background:#fbbf24}
+.s-dot.err{background:var(--red)}
+.ai-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.ai-input-area{padding:12px;flex-shrink:0;border-bottom:1px solid var(--border);background:var(--surface)}
+.ai-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden}
+.ai-card-hd{padding:10px 14px;background:linear-gradient(135deg,var(--blue) 0%,var(--purple) 100%);display:flex;align-items:center;gap:8px}
+.ai-card-hd span{color:#fff;font-size:13px;font-weight:600}
+.ai-textarea{width:100%;padding:10px 14px;font-size:14px;font-family:var(--font);color:var(--text);background:var(--surface);border:none;outline:none;resize:none;min-height:80px;line-height:1.5}
+.ai-card-ft{padding:8px 14px;border-top:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between}
+.ai-card-ft .hint{font-size:11px;color:var(--text-dim)}
+.ai-go{padding:7px 14px;background:var(--orange);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer}
+.ai-mic-btn{width:36px;height:36px;border-radius:var(--radius-sm);background:var(--red-lt);border:1px solid var(--red);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--red)}
+.ai-mic-btn.listening{background:var(--red);color:#fff}
+.ai-results-area{flex:1;overflow-y:auto;min-height:0}
+.quote-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.quote-list{flex:1;overflow-y:auto;min-height:0}
+.quote-item{padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface)}
+.qi-top{display:flex;justify-content:space-between;gap:8px;margin-bottom:4px}
+.qi-name{font-size:13px;font-weight:500;line-height:1.3}
+.qi-line{font-size:14px;font-weight:700;white-space:nowrap}
+.qi-bot{display:flex;align-items:center;justify-content:space-between}
+.qi-meta{font-size:10px;color:var(--text-dim)}
+.qi-rm{background:none;border:none;color:var(--text-dim);cursor:pointer;padding:3px;font-size:16px}
+.totals-box{padding:12px 14px;background:var(--surface2);border-top:2px solid var(--border2);flex-shrink:0}
+.total-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text-mid);padding:2px 0}
+.total-row.grand{font-size:16px;font-weight:700;color:var(--text);padding-top:8px;margin-top:6px;border-top:1px solid var(--border2)}
+.quote-actions{padding:8px 12px;display:flex;gap:6px;background:var(--surface);flex-shrink:0;border-top:1px solid var(--border)}
+.q-btn{flex:1;padding:10px 6px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text-mid);display:flex;align-items:center;justify-content:center;gap:4px}
+.q-btn.primary{background:var(--orange);color:#fff;border-color:var(--orange)}
+.review-wrap{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;min-height:0}
+.review-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:12px}
+.review-card h3{font-size:12px;font-weight:600;color:var(--text-mid);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.review-text{font-size:13px;color:var(--text);line-height:1.6;white-space:pre-wrap}
+.order-summary-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-mid)}
+.badge-order{background:var(--red-lt);color:var(--red);font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px}
+.send-btn{width:100%;padding:12px;border-radius:var(--radius-sm);background:var(--orange);color:#fff;border:none;font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.send-btn:disabled{opacity:.5;cursor:not-allowed}
+.status-msg{padding:10px 12px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;text-align:center;margin-top:8px}
+.status-msg.success{background:var(--green-lt);color:var(--green)}
+.status-msg.error{background:var(--red-lt);color:var(--red)}
+.kb-item{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surface);cursor:pointer}
+.kb-icon{width:30px;height:30px;background:rgba(74,222,128,.12);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--green);flex-shrink:0}
+.kb-title{font-size:13px;font-weight:500}
+.kb-desc{font-size:11px;color:var(--text-dim);margin-top:1px}
+.kb-cat{font-size:9px;background:var(--surface2);color:var(--text-mid);padding:2px 5px;border-radius:3px;margin-top:3px;display:inline-block;text-transform:uppercase}
+.settings-wrap{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.settings-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden}
+.settings-card-hd{padding:9px 12px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px}
+.settings-row{padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.settings-label{font-size:12px;color:var(--text-mid)}
+.settings-input{width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:13px;font-family:var(--font);outline:none}
+.settings-input:focus{border-color:var(--orange)}
+.settings-btn{padding:8px 14px;border-radius:var(--radius-sm);background:var(--orange);color:#fff;border:none;font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;align-self:flex-start}
+.settings-hint{font-size:11px;color:var(--text-dim);line-height:1.5}
+.state-box{padding:30px 16px;text-align:center;color:var(--text-dim)}
+.state-box .state-icon{font-size:32px;margin-bottom:8px;display:block;opacity:.4}
+.state-box p{font-size:13px;line-height:1.6}
+.state-box .hint{font-size:11px;margin-top:4px;display:block}
+.type-badge{font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px}
+.type-badge.b{background:var(--blue-lt);color:var(--blue)}
+.type-badge.r{background:var(--red-lt);color:var(--red)}
+.big-spin{width:22px;height:22px;border:2.5px solid var(--border2);border-top-color:var(--orange);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 8px}
+.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(10px);background:#1a1f2e;color:#fff;padding:8px 16px;border-radius:999px;font-size:12px;font-weight:500;opacity:0;transition:all .2s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── DARK MODE ── */
+body.dark{
+  --bg:#0f1117;--surface:#1a1f2e;--surface2:#242938;--surface3:#2d3347;
+  --border:#2d3347;--border2:#3a4058;
+  --text:#e8eaf0;--text-mid:#9aa3b8;--text-dim:#5a6478;
+}
+body.dark .top-bar,body.dark .bottom-nav{background:#1a1f2e}
+body.dark .stock-input{color:#e8eaf0}
+body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
+
+/* ── DARK MODE TOGGLE ── */
+.dm-toggle{width:36px;height:20px;border-radius:999px;background:var(--border2);border:none;cursor:pointer;position:relative;flex-shrink:0;transition:background .2s}
+.dm-toggle.on{background:var(--orange)}
+.dm-toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .2s}
+.dm-toggle.on::after{transform:translateX(16px)}
+
+/* ── STOCK COUNTER ── */
+.stock-counter{display:flex;align-items:center;gap:4px}
+.sc-btn{width:32px;height:38px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:18px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font)}
+.sc-btn:active{background:var(--orange);color:#fff;border-color:var(--orange)}
+.stock-input{width:60px;height:38px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:17px;font-weight:700;font-family:var(--font);text-align:center;outline:none}
+.stock-input.need{border-color:var(--red);background:rgba(248,113,113,.08)}
+.stock-input.good{border-color:var(--green);background:rgba(74,222,128,.08)}
+
+/* ── LABOUR SCREEN ── */
+.labour-wrap{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.labour-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden}
+.labour-card-hd{padding:9px 12px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;display:flex;justify-content:space-between;align-items:center}
+.labour-rate-row{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid var(--border);gap:8px}
+.labour-rate-row:last-child{border-bottom:none}
+.labour-rate-label{flex:1;font-size:13px;font-weight:500}
+.labour-rate-val{font-size:13px;color:var(--orange);font-weight:700;min-width:52px;text-align:right}
+.labour-input{width:70px;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:13px;font-family:var(--font);text-align:center;outline:none}
+.labour-input:focus{border-color:var(--orange)}
+.hours-row{display:flex;align-items:center;gap:6px;padding:10px 12px;border-bottom:1px solid var(--border)}
+.hours-row:last-child{border-bottom:none}
+.hours-label{flex:1;font-size:13px;font-weight:500}
+.hours-ctrl{display:flex;align-items:center;gap:5px}
+.h-btn{width:28px;height:28px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.h-val{font-size:13px;font-weight:700;min-width:36px;text-align:center;color:var(--orange)}
+.labour-total{padding:12px;background:var(--surface2);border-top:2px solid var(--border2)}
+.labour-total-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text-mid);padding:2px 0}
+.labour-total-row.grand{font-size:16px;font-weight:700;color:var(--text);padding-top:8px;margin-top:6px;border-top:1px solid var(--border2)}
+.pct-chip{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text-mid);white-space:nowrap}
+.pct-chip.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+.add-labour-btn{width:100%;padding:11px;border-radius:var(--radius-sm);background:var(--orange);color:#fff;border:none;font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;margin-top:4px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top-bar">
+    <div class="top-logo">
+      <div class="top-logo-mark">🔧</div>
+      <div><div class="top-logo-text">IPD</div><div class="top-logo-sub">Innovation Plumbing + Design</div></div>
+    </div>
+    <div class="top-right" style="display:flex;align-items:center;gap:8px">
+      <button class="dm-toggle" id="dm-toggle" onclick="toggleDark()" title="Dark mode"></button>
+      <div class="quote-pill" onclick="goScreen('quote')" id="quote-pill" style="display:none">📋 <span id="quote-pill-txt">0</span></div>
+    </div>
+  </div>
+
+  <div class="screens">
+
+    <!-- STOCK -->
+    <div class="screen active" id="screen-stock">
+      <div class="stats-bar">
+        <div class="stat-pill"><div class="stat-num" id="s-checked" style="color:#60a5fa">0</div><div class="stat-label">Checked</div></div>
+        <div class="stat-pill"><div class="stat-num" id="s-order" style="color:#f87171">0</div><div class="stat-label">To Order</div></div>
+        <div class="stat-pill"><div class="stat-num" id="s-units" style="color:#f97316">0</div><div class="stat-label">Units</div></div>
+        <div class="stat-pill"><div class="stat-num" id="s-stocked" style="color:#4ade80">0</div><div class="stat-label">Stocked</div></div>
+      </div>
+      <div class="search-wrap"><div class="search-row"><div class="search-box"><span class="s-icon">🔍</span><input type="text" id="stock-search" placeholder="Search stock..." oninput="renderStock()"></div></div></div>
+      <div class="cat-row" id="stock-cats"></div>
+      <div class="screen-scroll" id="stock-list"></div>
+    </div>
+
+    <!-- REVIEW -->
+    <div class="screen" id="screen-review">
+      <div class="review-wrap" id="review-wrap"><div class="state-box"><span class="state-icon">🤖</span><p>Count your stock first, then tap Review.</p></div></div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="screen" id="screen-search">
+      <div class="status-bar"><div class="s-dot warn" id="q-sdot"></div><span id="q-stext">Loading data...</span></div>
+      <div class="search-wrap">
+        <div class="search-row">
+          <div class="search-box"><span class="s-icon">🔍</span><input type="text" id="q-search" placeholder="Search bundles or Reece products..." autocomplete="off" oninput="onQSearch()"></div>
+          <div class="mic-btn" id="mic-btn" onclick="toggleMic()">🎤</div>
+        </div>
+        <div class="voice-hint" id="voice-hint"><div class="voice-dot"></div><span id="voice-txt">Listening...</span></div>
+      </div>
+      <div style="display:flex;gap:0;margin:0 12px 0;border:1px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden;flex-shrink:0">
+        <button id="search-tab-reece" onclick="setSearchTab('reece')" style="flex:1;padding:7px;border:none;background:var(--red);color:#fff;font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer">🏪 Reece Products</button>
+        <button id="search-tab-bundles" onclick="setSearchTab('bundles')" style="flex:1;padding:7px;border:none;background:var(--surface2);color:var(--text-mid);font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer">📦 Bundles</button>
+      </div>
+      <div class="cat-row" id="q-cats"></div>
+      <div id="ai-band" style="display:none" class="ai-band">
+        <div class="ai-band-hd">✨ AI Suggestions</div>
+        <div id="ai-band-content" class="ai-chips-wrap"><div class="mini-load"><div class="spin"></div>Finding...</div></div>
+      </div>
+      <div class="screen-scroll" id="q-list"><div class="state-box"><span class="state-icon">🔍</span><p>Search or tap the mic to speak</p></div></div>
+    </div>
+
+    <!-- AI -->
+    <div class="screen" id="screen-ai">
+      <div class="ai-wrap">
+        <div class="ai-input-area">
+          <!-- Tab switcher -->
+          <div style="display:flex;gap:0;margin-bottom:10px;border:1px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden">
+            <button id="ai-tab-search" onclick="setAiTab('search')" style="flex:1;padding:8px;border:none;background:var(--orange);color:#fff;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer">🔍 Find Items</button>
+            <button id="ai-tab-web" onclick="setAiTab('web')" style="flex:1;padding:8px;border:none;background:var(--surface2);color:var(--text-mid);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer">🌐 Ask AI</button>
+          </div>
+          <!-- Find Items tab -->
+          <div id="ai-panel-search">
+            <div class="ai-card">
+              <div class="ai-card-hd"><span>✨</span><span>Describe the job</span></div>
+              <textarea class="ai-textarea" id="ai-textarea" placeholder="e.g. blocked drain · 50mm bend · hot water unit · toilet suite..."></textarea>
+              <div class="ai-card-ft">
+                <span class="hint">Keywords work best</span>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <div class="ai-mic-btn" id="ai-mic" onclick="toggleAiMic()">🎤</div>
+                  <button class="ai-go" onclick="runAiSuggest()">🔍 Find Items</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Ask AI tab -->
+          <div id="ai-panel-web" style="display:none">
+            <div class="ai-card">
+              <div class="ai-card-hd"><span>🌐</span><span>Ask anything — Standards, Regs, Products</span></div>
+              <textarea class="ai-textarea" id="ai-web-textarea" placeholder="e.g. What is AS3500? · Min pipe fall for drainage? · Alternative to Thermann? · QBCC requirements for hot water..."></textarea>
+              <div class="ai-card-ft">
+                <span class="hint">Searches the web for current info</span>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <button class="ai-go" onclick="runWebSearch()">🌐 Search</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ai-results-area" id="ai-results"><div class="state-box"><span class="state-icon">💡</span><p>Describe the job above<br><span class="hint">e.g. "blocked drain" · "50mm bend" · "hot water"</span></p></div></div>
+      </div>
+    </div>
+
+    <!-- QUOTE -->
+    <div class="screen" id="screen-quote">
+      <div class="quote-wrap">
+        <div class="quote-list" id="quote-list"><div class="state-box"><span class="state-icon">📋</span><p>No items yet.<br>Add from Search or AI tab.</p></div></div>
+        <div id="quote-totals" class="totals-box" style="display:none">
+          <div class="total-row"><span>Subtotal (ex GST)</span><span id="t-sub">$0.00</span></div>
+          <div class="total-row"><span>GST (10%)</span><span id="t-gst">$0.00</span></div>
+          <div class="total-row grand"><span>Total inc GST</span><span id="t-total">$0.00</span></div>
+        </div>
+        <div class="quote-actions">
+          <button class="q-btn" onclick="clearQuote()">🗑 Clear</button>
+          <button class="q-btn" onclick="exportQuote()">⬇ Download</button>
+          <button class="q-btn primary" onclick="sendQuoteToSM8()">📤 Send to SM8</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LABOUR -->
+    <div class="screen" id="screen-labour">
+      <div class="labour-wrap" id="labour-wrap">
+        <div class="labour-card">
+          <div class="labour-card-hd">
+            <span>⏱ Labour Rates (inc GST)</span>
+          </div>
+          <div class="labour-rate-row">
+            <div class="labour-rate-label">Standard</div>
+            <input class="labour-input" id="rate-standard" type="number" value="229" onchange="updateLabourTotals()">
+            <span style="font-size:11px;color:var(--text-dim)">/hr</span>
+          </div>
+          <div class="labour-rate-row">
+            <div class="labour-rate-label">2nd Tradesman</div>
+            <input class="labour-input" id="rate-second" type="number" value="160" onchange="updateLabourTotals()">
+            <span style="font-size:11px;color:var(--text-dim)">/hr</span>
+          </div>
+          <div class="labour-rate-row">
+            <div class="labour-rate-label">Builder Rate</div>
+            <input class="labour-input" id="rate-builder" type="number" value="195" onchange="updateLabourTotals()">
+            <span style="font-size:11px;color:var(--text-dim)">/hr</span>
+          </div>
+          <div class="labour-rate-row">
+            <div class="labour-rate-label">Apprentice</div>
+            <input class="labour-input" id="rate-apprentice" type="number" value="100" onchange="updateLabourTotals()">
+            <span style="font-size:11px;color:var(--text-dim)">/hr</span>
+          </div>
+        </div>
+
+        <div class="labour-card">
+          <div class="labour-card-hd"><span>🕐 Hours</span></div>
+          <div class="hours-row">
+            <div class="hours-label">Standard</div>
+            <div class="hours-ctrl">
+              <button class="h-btn" onclick="chHours('standard',-0.5)">−</button>
+              <div class="h-val" id="h-standard">1.0</div>
+              <button class="h-btn" onclick="chHours('standard',0.5)">+</button>
+            </div>
+          </div>
+          <div class="hours-row">
+            <div class="hours-label">2nd Tradesman</div>
+            <div class="hours-ctrl">
+              <button class="h-btn" onclick="chHours('second',-0.5)">−</button>
+              <div class="h-val" id="h-second">0.0</div>
+              <button class="h-btn" onclick="chHours('second',0.5)">+</button>
+            </div>
+          </div>
+          <div class="hours-row">
+            <div class="hours-label">Builder Rate</div>
+            <div class="hours-ctrl">
+              <button class="h-btn" onclick="chHours('builder',-0.5)">−</button>
+              <div class="h-val" id="h-builder">0.0</div>
+              <button class="h-btn" onclick="chHours('builder',0.5)">+</button>
+            </div>
+          </div>
+          <div class="hours-row">
+            <div class="hours-label">Apprentice</div>
+            <div class="hours-ctrl">
+              <button class="h-btn" onclick="chHours('apprentice',-0.5)">−</button>
+              <div class="h-val" id="h-apprentice">0.0</div>
+              <button class="h-btn" onclick="chHours('apprentice',0.5)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="labour-card">
+          <div class="labour-card-hd"><span>➕ Adjustments</span></div>
+          <div style="padding:10px 12px;display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:11px;color:var(--text-dim);font-weight:600;text-transform:uppercase;letter-spacing:.5px">After Hours / Surcharge</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <div class="pct-chip" id="surcharge-0" onclick="setSurcharge(0)">None</div>
+              <div class="pct-chip" id="surcharge-25" onclick="setSurcharge(25)">+25%</div>
+              <div class="pct-chip" id="surcharge-50" onclick="setSurcharge(50)">+50%</div>
+              <div class="pct-chip" id="surcharge-100" onclick="setSurcharge(100)">+100%</div>
+              <div style="display:flex;align-items:center;gap:4px">
+                <input class="labour-input" id="surcharge-custom" type="number" placeholder="%" style="width:56px" oninput="setSurcharge(parseFloat(this.value)||0)">
+                <span style="font-size:11px;color:var(--text-dim)">%</span>
+              </div>
+            </div>
+            <div style="margin-top:4px;font-size:11px;color:var(--text-dim);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Discount (Pensioner / VIP)</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <div class="pct-chip" id="discount-0" onclick="setDiscount(0)">None</div>
+              <div class="pct-chip" id="discount-10" onclick="setDiscount(10)">−10%</div>
+              <div class="pct-chip" id="discount-15" onclick="setDiscount(15)">−15%</div>
+              <div style="display:flex;align-items:center;gap:4px">
+                <input class="labour-input" id="discount-custom" type="number" placeholder="%" style="width:56px" oninput="setDiscount(parseFloat(this.value)||0)">
+                <span style="font-size:11px;color:var(--text-dim)">%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="labour-card">
+          <div class="labour-total">
+            <div class="labour-total-row"><span>Labour subtotal</span><span id="lt-sub">$0.00</span></div>
+            <div class="labour-total-row" id="lt-surcharge-row" style="display:none"><span id="lt-surcharge-label">Surcharge</span><span id="lt-surcharge-val">$0.00</span></div>
+            <div class="labour-total-row" id="lt-discount-row" style="display:none"><span id="lt-discount-label">Discount</span><span id="lt-discount-val">$0.00</span></div>
+            <div class="labour-total-row grand"><span>Total inc GST</span><span id="lt-total">$0.00</span></div>
+          </div>
+          <div style="padding:0 12px 12px">
+            <button class="add-labour-btn" onclick="addLabourToQuote()">➕ Add Labour to Quote</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KNOWLEDGE -->
+    <div class="screen" id="screen-kb">
+      <div class="search-wrap"><div class="search-box"><span class="s-icon">🔍</span><input type="text" id="kb-search" placeholder="Search knowledge base..." oninput="renderKB()"></div></div>
+      <div style="padding:6px 14px;font-size:11px;color:var(--text-dim);background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0">Tap any 🏪 article to open on Reece website</div>
+      <div class="screen-scroll" id="kb-list"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="screen" id="screen-settings">
+      <div class="settings-wrap">
+        <div class="settings-card">
+          <div class="settings-card-hd">📊 Quote Data Source</div>
+          <div class="settings-row">
+            <div class="settings-label">Google Apps Script Web App URL</div>
+            <input class="settings-input" id="sheet-url-input" type="url" placeholder="https://script.google.com/macros/s/...">
+            <button class="settings-btn" onclick="saveSheetUrl()">Save & Reload</button>
+          </div>
+        </div>
+        <div class="settings-card">
+          <div class="settings-card-hd">🔧 ServiceM8 API Key</div>
+          <div class="settings-row">
+            <div class="settings-label">API Key (for stock orders)</div>
+            <input class="settings-input" id="sm8-key-input" type="text" placeholder="smk-...">
+            <button class="settings-btn" onclick="saveSM8Key()">Save</button>
+          </div>
+        </div>
+        <div class="settings-card">
+          <div class="settings-card-hd">📚 Knowledge Base</div>
+          <div class="settings-row">
+            <div class="settings-hint">Product links, Reece codes and reference guides.</div>
+            <button class="settings-btn" onclick="goScreen('kb')">Open Knowledge Base</button>
+          </div>
+        </div>
+        <div class="settings-card">
+          <div class="settings-card-hd">🤖 Stock Review</div>
+          <div class="settings-row">
+            <div class="settings-hint">AI review of your stock order before sending to ServiceM8.</div>
+            <button class="settings-btn" onclick="runStockReview()">Review & Send Order</button>
+          </div>
+        </div>
+        <div class="settings-card">
+          <div class="settings-card-hd">ℹ️ App Info</div>
+          <div class="settings-row"><div class="settings-hint">IPD Unified App v3.0 · Innovation Plumbing & Design · 3073 2666</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .screens -->
+
+  <div class="bottom-nav">
+    <button class="nav-btn active" id="nav-stock" onclick="goScreen('stock')"><div class="nav-icon">📦</div><div class="nav-label">Stock</div></button>
+    <button class="nav-btn" id="nav-labour" onclick="goScreen('labour')"><div class="nav-icon">⏱</div><div class="nav-label">Labour</div></button>
+    <button class="nav-btn" id="nav-search" onclick="goScreen('search')"><div class="nav-icon">🔍</div><div class="nav-label">Search</div></button>
+    <button class="nav-btn" id="nav-ai" onclick="goScreen('ai')"><div class="nav-icon">✨</div><div class="nav-label">AI</div></button>
+    <button class="nav-btn" id="nav-quote" onclick="goScreen('quote')"><div class="nav-icon">📋</div><div class="nav-badge" id="quote-badge">0</div><div class="nav-label">Quote</div></button>
+    <button class="nav-btn" id="nav-settings" onclick="goScreen('settings')"><div class="nav-icon">⚙️</div><div class="nav-label">Settings</div></button>
+  </div>
+
+</div><!-- end #app -->
+<div class="toast" id="toast"></div>
+
+<script>
+const PROXY = 'https://ipd-proxy-server.onrender.com';
+const SHEET_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbwiRPh_vfpvNwFXxoe5u02tLvWfHAA76juq7NcrC1uH77RHSNOJAoBqU4aatnpP8-zn/exec';
+let SHEET_URL = localStorage.getItem('ipd_sheet_url') || SHEET_URL_DEFAULT;
+
+const initialStock = [
+  { code: "416065", category: "BRASSWARE", name: "15mm Compression Tee", target: 3 },
+  { code: "208315", category: "BRASSWARE", name: "15mm Hex Nipple", target: 6 },
+  { code: "606900", category: "BRASSWARE", name: "15mm Compression Nuts", target: 20 },
+  { code: "415930", category: "BRASSWARE", name: "15mm Compression Elbows", target: 4 },
+  { code: "415960", category: "BRASSWARE", name: "15mm Female Compression Elbow", target: 4 },
+  { code: "208560", category: "BRASSWARE", name: "20mm x 15mm Reducing Nipple", target: 3 },
+  { code: "606905", category: "BRASSWARE", name: "20mm Compression Nut", target: 4 },
+  { code: "208320", category: "BRASSWARE", name: "20mm Hex Nipple", target: 2 },
+  { code: "209120", category: "BRASSWARE", name: "20mm Brass Plug", target: 2 },
+  { code: "207515", category: "BRASSWARE", name: "15mm Brass Cap", target: 5 },
+  { code: "209115", category: "BRASSWARE", name: "15mm Brass Plugs", target: 6 },
+  { code: "207715", category: "BRASSWARE", name: "15mm Female Brass Elbow", target: 1 },
+  { code: "209715", category: "BRASSWARE", name: "15mm Female Brass Tee", target: 1 },
+  { code: "415945", category: "BRASSWARE", name: "15mm Male Compression Elbow", target: 1 },
+  { code: "209500", category: "BRASSWARE", name: "15mm MF Brass Socket", target: 6 },
+  { code: "209365", category: "BRASSWARE", name: "15mm Brass Socket", target: 4 },
+  { code: "1006796", category: "BRASSWARE", name: "15mm Vacuum Breaker", target: 2 },
+  { code: "106210", category: "BRASSWARE", name: "15mm Female Hose Tap", target: 2 },
+  { code: "106160", category: "BRASSWARE", name: "15mm Male Hose Tap", target: 2 },
+  { code: "106206", category: "BRASSWARE", name: "15mm Lugged Male Hose Tap", target: 2 },
+  { code: "605904", category: "BRASSWARE", name: "20mm Nylon Olive", target: 6 },
+  { code: "605900", category: "BRASSWARE", name: "15mm Nylon Olive", target: 100 },
+  { code: "415125", category: "BRASSWARE", name: "15mm Eziplug End Cap", target: 10 },
+  { code: "415955", category: "BRASSWARE", name: "Rheem Elbow", target: 2 },
+  { code: "1702035", category: "BRASSWARE", name: "15mm Copper Cover Plate Flat", target: 6 },
+  { code: "1702040", category: "BRASSWARE", name: "15mm Copper Cover Plate Raised", target: 6 },
+  { code: "1702030", category: "BRASSWARE", name: "15mm BSP Cover Plate Flat", target: 10 },
+  { code: "1702010", category: "BRASSWARE", name: "15mm BSP Cover Plate Raised", target: 10 },
+  { code: "404661", category: "B-PRESS FITTINGS", name: "15mm B-Press Water Slip Coupling", target: 2 },
+  { code: "404662", category: "B-PRESS FITTINGS", name: "20mm B-Press Water Slip Coupling", target: 2 },
+  { code: "404691", category: "B-PRESS FITTINGS", name: "15mm B-Press Water End Cap", target: 2 },
+  { code: "404692", category: "B-PRESS FITTINGS", name: "20mm B-Press Water End Cap", target: 2 },
+  { code: "404606", category: "B-PRESS FITTINGS", name: "15mm B-Press Water Elbow", target: 4 },
+  { code: "404607", category: "B-PRESS FITTINGS", name: "20mm B-Press Water Elbow", target: 4 },
+  { code: "404631", category: "B-PRESS FITTINGS", name: "20mm x 15mm B-Press Water Reducer", target: 2 },
+  { code: "1534017", category: "AUSPEX FITTINGS", name: "16mm Lugged Elbow", target: 6 },
+  { code: "1534002", category: "AUSPEX FITTINGS", name: "16mm Tee", target: 8 },
+  { code: "1534000", category: "AUSPEX FITTINGS", name: "16mm Elbow", target: 8 },
+  { code: "1534006", category: "AUSPEX FITTINGS", name: "16mm Coupling", target: 4 },
+  { code: "1534045", category: "AUSPEX FITTINGS", name: "16mm Male Elbow", target: 6 },
+  { code: "1534013", category: "AUSPEX FITTINGS", name: "16mm Male Coupling", target: 6 },
+  { code: "1544580", category: "AUSPEX FITTINGS", name: "16mm Auspex to B-Press Adaptor", target: 2 },
+  { code: "1534038", category: "AUSPEX FITTINGS", name: "16mm Red Ring Adaptor", target: 2 },
+  { code: "1534040", category: "AUSPEX FITTINGS", name: "16mm Auspex to Polybute Adaptor", target: 2 },
+  { code: "1544581", category: "AUSPEX FITTINGS", name: "20mm Auspex to B-Press Adaptor", target: 2 },
+  { code: "1534039", category: "AUSPEX FITTINGS", name: "20mm Red Ring Adaptor", target: 2 },
+  { code: "1544537", category: "AUSPEX FITTINGS", name: "20mm Auspex to Polybute Adaptor", target: 2 },
+  { code: "1534003", category: "AUSPEX FITTINGS", name: "20mm Tee", target: 2 },
+  { code: "1534001", category: "AUSPEX FITTINGS", name: "20mm Elbow", target: 6 },
+  { code: "1534007", category: "AUSPEX FITTINGS", name: "20mm Coupling", target: 4 },
+  { code: "1534008", category: "AUSPEX FITTINGS", name: "20mm x 16mm Reducer", target: 4 },
+  { code: "1534004", category: "AUSPEX FITTINGS", name: "20x20x16 Tee", target: 6 },
+  { code: "1533999", category: "AUSPEX FITTINGS", name: "20x16x16 Tee", target: 2 },
+  { code: "103510", category: "ISOLATION VALVES", name: "Mini Stop", target: 4 },
+  { code: "1120077", category: "ISOLATION VALVES", name: "Capstan Washing Machine Stop", target: 2 },
+  { code: "107757", category: "FLEX HOSES", name: "300mm Pex Flex Hose", target: 2 },
+  { code: "107758", category: "FLEX HOSES", name: "450mm Pex Flex Hose", target: 4 },
+  { code: "107759", category: "FLEX HOSES", name: "600mm Pex Flex Hose", target: 2 },
+  { code: "2299904", category: "FLEX HOSES", name: "Mixer Tails", target: 1 },
+  { code: "1403810", category: "50mm PVC FITTINGS", name: "50mm Coupling", target: 4 },
+  { code: "1409117", category: "50mm PVC FITTINGS", name: "50mm SP Trap", target: 1 },
+  { code: "1405875", category: "50mm PVC FITTINGS", name: "50mm Floor Flange", target: 2 },
+  { code: "1403120", category: "50mm PVC FITTINGS", name: "50mm 90deg Bend", target: 10 },
+  { code: "1403110", category: "50mm PVC FITTINGS", name: "50mm 45deg Bend", target: 6 },
+  { code: "1403715", category: "50mm PVC FITTINGS", name: "50mm 90deg MF Bend", target: 1 },
+  { code: "1403710", category: "50mm PVC FITTINGS", name: "50mm 45 Bend MF", target: 4 },
+  { code: "1405510", category: "50mm PVC FITTINGS", name: "50mm MI Adaptor", target: 1 },
+  { code: "1405530", category: "50mm PVC FITTINGS", name: "50mm FI Adaptor", target: 1 },
+  { code: "1405650", category: "50mm PVC FITTINGS", name: "50mm MI Connector", target: 1 },
+  { code: "1405610", category: "50mm PVC FITTINGS", name: "50mm FI Connector", target: 1 },
+  { code: "1405455", category: "50mm PVC FITTINGS", name: "50mm Cap", target: 2 },
+  { code: "1409118", category: "50mm PVC FITTINGS", name: "50mm Double Bowl Connector", target: 1 },
+  { code: "1405710", category: "50mm PVC FITTINGS", name: "50mm x 40mm LIT", target: 2 },
+  { code: "1409116", category: "40mm PVC FITTINGS", name: "40mm SP Trap", target: 2 },
+  { code: "1403030", category: "40mm PVC FITTINGS", name: "40mm 90deg Bend", target: 6 },
+  { code: "1403020", category: "40mm PVC FITTINGS", name: "40mm 45deg Bend", target: 6 },
+  { code: "1403704", category: "40mm PVC FITTINGS", name: "40mm 90deg MF Bend", target: 1 },
+  { code: "1403705", category: "40mm PVC FITTINGS", name: "40mm 45deg MF Bend", target: 4 },
+  { code: "1403706", category: "40mm PVC FITTINGS", name: "40mm 90deg Inpipe Bend", target: 1 },
+  { code: "1409120", category: "40mm PVC FITTINGS", name: "40mm x 32mm Trap Adaptor", target: 2 },
+  { code: "1405505", category: "40mm PVC FITTINGS", name: "40mm MI Adaptor", target: 1 },
+  { code: "1405525", category: "40mm PVC FITTINGS", name: "40mm FI Adaptor", target: 1 },
+  { code: "1405645", category: "40mm PVC FITTINGS", name: "40mm MI Connector", target: 1 },
+  { code: "1405605", category: "40mm PVC FITTINGS", name: "40mm FI Connector", target: 1 },
+  { code: "1403805", category: "40mm PVC FITTINGS", name: "40mm Coupling", target: 4 },
+  { code: "1405870", category: "40mm PVC FITTINGS", name: "40mm Floor Flange", target: 2 },
+  { code: "506241", category: "CLIPS + FIXINGS", name: "20mm Pex Clip Masonry Nail", target: 50 },
+  { code: "506240", category: "CLIPS + FIXINGS", name: "16mm Pex Clip Masonry Nail", target: 50 },
+  { code: "506292", category: "CLIPS + FIXINGS", name: "15mm Copper Clip Masonry Nail", target: 50 },
+  { code: "508600", category: "CLIPS + FIXINGS", name: "15mm Copper Clip Head", target: 6 },
+  { code: "508605", category: "CLIPS + FIXINGS", name: "20mm Copper Clip Head", target: 6 },
+  { code: "540012", category: "CLIPS + FIXINGS", name: "15mm Copper Saddle", target: 10 },
+  { code: "509105", category: "CLIPS + FIXINGS", name: "Stand Off Brackets", target: 6 },
+  { code: "509055", category: "CLIPS + FIXINGS", name: "Adjustable Stand Off Bracket", target: 2 },
+  { code: "506000", category: "CLIPS + FIXINGS", name: "40mm Flush Clip", target: 2 },
+  { code: "506050", category: "CLIPS + FIXINGS", name: "40mm Stand Off Clip", target: 2 },
+  { code: "506005", category: "CLIPS + FIXINGS", name: "50mm Flush Clip", target: 4 },
+  { code: "506055", category: "CLIPS + FIXINGS", name: "50mm Stand Off Clip", target: 2 },
+  { code: "1906000", category: "CONSUMABLES", name: "Silver Duct Tape", target: 2 },
+  { code: "6802522", category: "CONSUMABLES", name: "MAPP Gas", target: 1 },
+  { code: "1903591", category: "CONSUMABLES", name: "Clear Priming Fluid", target: 2 },
+  { code: "1903602", category: "CONSUMABLES", name: "Clear Glue", target: 2 },
+  { code: "1903577", category: "CONSUMABLES", name: "Clear Silicone (RG)", target: 2 },
+  { code: "1903783", category: "CONSUMABLES", name: "Loxeal", target: 1 },
+  { code: "7900051", category: "CONSUMABLES", name: "Pocket Knife Blades", target: 1 },
+  { code: "1842866", category: "CONSUMABLES", name: "Soft Turn Tap Washers", target: 25 },
+  { code: "1842781", category: "CONSUMABLES", name: "Fibre Body Washers", target: 10 },
+  { code: "4913019", category: "CONSUMABLES", name: "Blue Expandit Plugs", target: 1 },
+  { code: "7101520", category: "CONSUMABLES", name: "Drain Solvent", target: 1 },
+  { code: "1906014", category: "CONSUMABLES", name: "Black Duct Tape", target: 1 },
+  { code: "4913097", category: "CONSUMABLES", name: "Zinc WallMates", target: 6 },
+  { code: "108398", category: "CONSUMABLES", name: "Reseating Tool Head", target: 1 },
+  { code: "1903694", category: "CONSUMABLES", name: "Grey Thread Tape", target: 10 },
+  { code: "1903582", category: "CONSUMABLES", name: "White Silicone", target: 1 },
+  { code: "1903625", category: "CONSUMABLES", name: "Ferropre", target: 1 },
+  { code: "3405052", category: "CONSUMABLES", name: "Marking Paint (Pink)", target: 1 },
+  { code: "BUNNINGS-WD40", category: "CONSUMABLES", name: "WD40", target: 1 },
+  { code: "1903025", category: "CONSUMABLES", name: "Silver Solder 5%", target: 2 },
+  { code: "108374", category: "CONSUMABLES", name: "Hydroseal Tap Grease", target: 1 },
+  { code: "8028078", category: "CONSUMABLES", name: "Disposable Gloves", target: 1 },
+  { code: "1003046", category: "CONSUMABLES", name: "Water Main Lubricant", target: 1 },
+  { code: "9508811", category: "TAPWARE", name: "Posh Solus MK3 Sink Mixer", target: 2 },
+  { code: "1700672", category: "TAPWARE", name: "Standard Shower Rose + Arm", target: 2 },
+  { code: "1842803", category: "TAP SPARES", name: "15mm Stainless Tap Seat (Packet)", target: 6 },
+  { code: "1842342", category: "TAP SPARES", name: "9LPM Female Aerator", target: 2 },
+  { code: "1842344", category: "TAP SPARES", name: "9LPM Male Aerator", target: 2 },
+  { code: "1843035", category: "TAP SPARES", name: "8.5LPM Water Saving Discs", target: 2 },
+  { code: "1403737", category: "TOILET HARDWARE", name: "100mm x 20mm Offset Flexifin Pan Collar", target: 1 },
+  { code: "1403727", category: "TOILET HARDWARE", name: "100mm x 40mm Offset Flexifin Pan Collar", target: 1 },
+  { code: "1409970", category: "TOILET HARDWARE", name: "Pan Collar Rubber", target: 1 },
+  { code: "1409950", category: "TOILET HARDWARE", name: "Pan Collar Rubber (Lipped)", target: 1 },
+  { code: "1403736", category: "TOILET HARDWARE", name: "100mm Straight Flexifin Pan Collar", target: 1 },
+  { code: "1842173", category: "TOILET HARDWARE", name: "Fluidmaster", target: 2 },
+  { code: "1842326", category: "TOILET HARDWARE", name: "50mm Keeseal", target: 1 },
+  { code: "405006",  category: "TOILET HARDWARE", name: "Caroma Cistern Outlet Washer (Red)", target: 4 },
+  { code: "1908476", category: "TOILET HARDWARE", name: "50mm Pan Cone", target: 1 },
+  { code: "1842816", category: "TOILET HARDWARE", name: "Cistern Pan Screws (12pk)", target: 1 },
+  { code: "1903772", category: "TOILET HARDWARE", name: "Wax Pan Seal", target: 1 },
+  { code: "1842800", category: "TRAP SPARES", name: "40mm Trap Washer Set", target: 1 },
+  { code: "1842799", category: "TRAP SPARES", name: "50mm Trap Washer Set", target: 1 },
+  { code: "1900299", category: "TRAP SPARES", name: "50mm Double Tapered Trap Washer", target: 2 },
+  { code: "1400200", category: "PVC PIPE", name: "100mm DWV Pipe", target: 1 },
+  { code: "1400110", category: "PVC PIPE", name: "50mm DWV Pipe", target: 1 },
+  { code: "1400105", category: "PVC PIPE", name: "40mm DWV Pipe", target: 1 },
+  { code: "801215",  category: "COPPER PIPE", name: "20mm Copper Pipe", target: 1 },
+  { code: "801020",  category: "COPPER PIPE", name: "15mm Copper Pipe", target: 1 },
+  { code: "1537759", category: "AUSPEX PIPE", name: "16mm Auspex Pipe", target: 1 },
+  { code: "1537773", category: "AUSPEX PIPE", name: "20mm Auspex Pipe", target: 1 },
+  { code: "1908346", category: "MISC", name: "100mm Fernco", target: 2 },
+  { code: "1908347", category: "MISC", name: "100mm EW - PVC Fernco", target: 2 },
+  { code: "1508931", category: "MISC", name: "25mm Poly Slip Coupling", target: 2 },
+  { code: "1842843", category: "MISC", name: "Flange Extensions", target: 6 },
+  { code: "505265",  category: "MISC", name: "Dishwasher Hose Clamp", target: 2 },
+  { code: "1317195", category: "ELECTRICAL", name: "1.8KW Element", target: 1 },
+  { code: "1317202", category: "ELECTRICAL", name: "2.4KW Element", target: 1 },
+  { code: "1317204", category: "ELECTRICAL", name: "3.6KW Element", target: 1 },
+  { code: "9501451", category: "ELECTRICAL", name: "Universal Thermostat", target: 1 },
+  { code: "DB-001",  category: "DRILL BITS", name: "5mm Rotary Bit", target: 2 },
+  { code: "DB-002",  category: "DRILL BITS", name: "8mm Rotary Bit", target: 2 },
+  { code: "DB-003",  category: "DRILL BITS", name: "25mm Spade Bit", target: 2 },
+  { code: "DB-004",  category: "DRILL BITS", name: "Phillips Bit #2", target: 2 },
+  { code: "DB-005",  category: "DRILL BITS", name: "5/16\" Hex Head Bit", target: 1 },
+  { code: "DB-006",  category: "DRILL BITS", name: "5mm Diamond Headed Bit", target: 2 },
+  { code: "DB-007",  category: "DRILL BITS", name: "8mm Diamond Headed Bit", target: 2 },
+  { code: "DB-008",  category: "DRILL BITS", name: "1/8\" Rivet Bit Pack", target: 1 },
+  { code: "HS-001",  category: "HOLESAWS", name: "57mm Holesaw", target: 1 },
+  { code: "HS-002",  category: "HOLESAWS", name: "57mm TCT Holesaw", target: 1 },
+  { code: "HS-003",  category: "HOLESAWS", name: "114mm Holesaw", target: 1 },
+  { code: "HS-004",  category: "HOLESAWS", name: "114mm TCT Holesaw", target: 1 },
+];
+
+const CAT_COLORS = {
+  "BRASSWARE":"#f97316","B-PRESS FITTINGS":"#3b82f6","AUSPEX FITTINGS":"#a78bfa",
+  "AUSPEX PIPE":"#7c3aed","ISOLATION VALVES":"#2dd4bf","FLEX HOSES":"#38bdf8",
+  "50mm PVC FITTINGS":"#4ade80","40mm PVC FITTINGS":"#22c55e","CLIPS + FIXINGS":"#fb923c",
+  "CONSUMABLES":"#fbbf24","TAPWARE":"#f472b6","TAP SPARES":"#ec4899",
+  "TOILET HARDWARE":"#60a5fa","TRAP SPARES":"#818cf8","PVC PIPE":"#34d399",
+  "COPPER PIPE":"#f97316","MISC":"#94a3b8","ELECTRICAL":"#f87171",
+  "DRILL BITS":"#a5b4fc","HOLESAWS":"#67e8f9",
+};
+
+let onHand = {}, stockCat = 'ALL', quoteCat = 'All', activeScreen = 'stock';
+let bundles = [], reece = [], knowledge = [], quote = [];
+let dataLoaded = false;
+let recognition = null, isListening = false;
+let aiRecognition = null, aiListening = false;
+let searchTimer = null, aiTimer = null;
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+function init() {
+  const saved = localStorage.getItem('ipd_sm8_key');
+  if (saved) document.getElementById('sm8-key-input').value = saved;
+  const savedUrl = localStorage.getItem('ipd_sheet_url') || SHEET_URL_DEFAULT;
+  document.getElementById('sheet-url-input').value = savedUrl;
+  SHEET_URL = savedUrl;
+  buildStockCats();
+  renderStock();
+  setupVoice();
+  setupAiVoice();
+  loadQuoteData();
+  initDarkMode();
+  updateLabourTotals();
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+function goScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const screen = document.getElementById('screen-' + name);
+  if (screen) screen.classList.add('active');
+  const nav = document.getElementById('nav-' + name);
+  if (nav) nav.classList.add('active');
+  activeScreen = name;
+  if (name !== 'search') stopListening();
+  if (name === 'kb') renderKB();
+  if (name === 'quote') renderQuote();
+  if (name === 'labour') updateLabourTotals();
+}
+
+function saveSheetUrl() {
+  const url = document.getElementById('sheet-url-input').value.trim();
+  localStorage.setItem('ipd_sheet_url', url);
+  SHEET_URL = url;
+  loadQuoteData();
+  showToast('Saved — reloading data');
+}
+function saveSM8Key() {
+  localStorage.setItem('ipd_sm8_key', document.getElementById('sm8-key-input').value.trim());
+  showToast('Saved');
+}
+
+// ── STOCK ─────────────────────────────────────────────────────────────────────
+function getToOrder(item) {
+  const v = onHand[item.code];
+  if (v === '' || v === undefined) return null;
+  return Math.max(0, item.target - Number(v));
+}
+function orderItems() {
+  return initialStock.filter(i => getToOrder(i) > 0).map(i => ({...i, toOrder: getToOrder(i), onHand: Number(onHand[i.code])}));
+}
+function updateStockStats() {
+  const checked = Object.values(onHand).filter(v => v !== '').length;
+  const items = orderItems();
+  document.getElementById('s-checked').textContent = checked;
+  document.getElementById('s-order').textContent = items.length;
+  document.getElementById('s-units').textContent = items.reduce((s,i) => s+i.toOrder, 0);
+  document.getElementById('s-stocked').textContent = Object.keys(onHand).filter(k => onHand[k] !== '' && getToOrder(initialStock.find(i=>i.code===k)) === 0).length;
+}
+function buildStockCats() {
+  const cats = ['ALL', ...new Set(initialStock.map(i => i.category))];
+  document.getElementById('stock-cats').innerHTML = cats.map(cat =>
+    `<div class="cat-chip${cat===stockCat?' active':''}" onclick="setStockCat('${esc(cat)}')">${cat}</div>`
+  ).join('');
+}
+function setStockCat(cat) { stockCat = cat; buildStockCats(); renderStock(); }
+function renderStock() {
+  const q = (document.getElementById('stock-search').value||'').toLowerCase();
+  const filtered = initialStock.filter(i => (stockCat==='ALL'||i.category===stockCat) && (!q||i.name.toLowerCase().includes(q)||i.code.toLowerCase().includes(q)));
+  const grouped = {};
+  filtered.forEach(i => { if (!grouped[i.category]) grouped[i.category]=[]; grouped[i.category].push(i); });
+  let html = '';
+  Object.entries(grouped).forEach(([cat, items]) => {
+    const col = CAT_COLORS[cat] || '#94a3b8';
+    html += `<div class="section-hd" style="color:${col}">${cat}</div>`;
+    items.forEach(item => {
+      const v = onHand[item.code]; const toOrder = getToOrder(item); const hasVal = v !== undefined && v !== '';
+      const cls = hasVal ? (toOrder > 0 ? 'need' : 'good') : '';
+      html += `<div class="stock-row"><div class="stock-dot" style="background:${col}"></div><div class="stock-info"><div class="stock-name">${esc(item.name)}</div><div class="stock-code">${esc(item.code)}</div></div><div class="stock-right"><div class="stock-target">Target: ${item.target}</div><div class="stock-counter"><button class="sc-btn" onclick="adjOnHand('${item.code}',-1)">−</button><input class="stock-input ${cls}" type="number" min="0" value="${hasVal?v:''}" placeholder="?" oninput="setOnHand('${item.code}',this.value)" id="si-${item.code}"><button class="sc-btn" onclick="adjOnHand('${item.code}',1)">+</button></div>${toOrder>0?`<span class="order-badge">ORDER ${toOrder}`:''}</div></div>`;
+    });
+  });
+  document.getElementById('stock-list').innerHTML = html || '<div class="state-box"><p>No items found</p></div>';
+  updateStockStats();
+}
+function setOnHand(code, val) { onHand[code] = val==='' ? '' : Math.max(0, parseInt(val)||0); renderStock(); }
+
+// ── REVIEW ────────────────────────────────────────────────────────────────────
+async function runStockReview() {
+  const items = orderItems();
+  if (!items.length) { showToast('Count your stock first'); return; }
+  goScreen('review');
+  const wrap = document.getElementById('review-wrap');
+  wrap.innerHTML = `<div class="review-card"><h3>Order (${items.length} lines)</h3>${items.map(i=>`<div class="order-summary-row"><span>${esc(i.name)}</span><span class="badge-order">ORDER ${i.toOrder}</span></div>`).join('')}</div><div class="review-card"><h3>AI Review</h3><div class="mini-load"><div class="spin"></div>Checking...</div></div>`;
+  try {
+    const res = await fetch(PROXY+'/ai-review', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderItems:items})});
+    const data = await res.json();
+    wrap.innerHTML = `<div class="review-card"><h3>Order — ${items.length} lines</h3>${items.map(i=>`<div class="order-summary-row"><span>${esc(i.name)}</span><span class="badge-order">ORDER ${i.toOrder}</span></div>`).join('')}</div><div class="review-card"><h3>AI Review</h3><div class="review-text">${esc(data.review||data.error||'No response.')}</div></div><button class="send-btn" id="send-btn" onclick="sendOrder()">📤 Send to ServiceM8</button><div id="send-status"></div>`;
+  } catch(e) { wrap.innerHTML += '<div class="status-msg error">Could not reach server.</div>'; }
+}
+async function sendOrder() {
+  const items = orderItems(); const btn = document.getElementById('send-btn'); const sd = document.getElementById('send-status');
+  btn.disabled=true; btn.textContent='Sending...';
+  try {
+    const res = await fetch(PROXY+'/send-order', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderItems:items,totalUnits:items.reduce((s,i)=>s+i.toOrder,0)})});
+    const data = await res.json();
+    if (res.ok && data.success) sd.innerHTML = `<div class="status-msg success">✅ ${esc(data.message)}</div>`;
+    else { sd.innerHTML = `<div class="status-msg error">❌ ${esc(data.error||'Error')}</div>`; btn.disabled=false; btn.textContent='📤 Send to ServiceM8'; }
+  } catch(e) { sd.innerHTML='<div class="status-msg error">❌ Could not reach server.</div>'; btn.disabled=false; btn.textContent='📤 Send to ServiceM8'; }
+}
+
+// ── QUOTE DATA ────────────────────────────────────────────────────────────────
+async function loadQuoteData() {
+  if (!SHEET_URL) return;
+  document.getElementById('q-sdot').className = 's-dot warn';
+  document.getElementById('q-stext').textContent = 'Connecting...';
+  try {
+    const r = await fetch(SHEET_URL+(SHEET_URL.includes('?')?'&':'?')+'action=all&t='+Date.now());
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+    bundles = (d.bundles||[]).map(b=>({uuid:String(b.uuid||''),code:String(b.code||''),name:String(b.name||''),category:String(b.category||''),price:b.price!=null&&b.price!==''?String(b.price):'',notes:String(b.notes||'')}));
+    // Reece products now come from CSV via server /reece-search endpoint — not the sheet
+    reece = []; // populated on-demand per search
+    knowledge = d.knowledge||[];
+    dataLoaded = true;
+    document.getElementById('q-sdot').className = 's-dot';
+    document.getElementById('q-stext').textContent = bundles.length+' bundles · Reece catalogue live';
+    buildQCats(); renderKB();
+  } catch(e) {
+    document.getElementById('q-sdot').className = 's-dot err';
+    document.getElementById('q-stext').textContent = 'Could not load — check Settings';
+  }
+}
+
+// ── SEARCH ────────────────────────────────────────────────────────────────────
+function buildQCats() {
+  const cats = new Set(['All']);
+  bundles.forEach(b => { if(b.category) cats.add(b.category); });
+  document.getElementById('q-cats').innerHTML = [...cats].map(c =>
+    `<div class="cat-chip${c===quoteCat?' active':''}" onclick="setQCat('${esc(c)}')">${esc(c)}</div>`
+  ).join('');
+}
+function setQCat(cat) { quoteCat=cat; buildQCats(); renderQResults(); }
+function onQSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    renderQResults();
+    const q = document.getElementById('q-search').value.trim();
+    if (q.length >= 2 && (window._searchTab||'reece') === 'reece') triggerAiBand(q);
+    else document.getElementById('ai-band').style.display = 'none';
+  }, 200);
+}
+function renderQResults() {
+  const raw = (document.getElementById('q-search').value||'').trim();
+  const q = raw ? normaliseTerm(raw) : '';
+  const container = document.getElementById('q-list');
+  if (!dataLoaded) { container.innerHTML = '<div class="state-box"><div class="big-spin"></div><p>Loading...</p></div>'; return; }
+  if (!q && quoteCat==='All') { container.innerHTML = '<div class="state-box"><span class="state-icon">🔍</span><p>Search or tap mic to speak</p></div>'; return; }
+  const searchTab = window._searchTab || 'reece';
+  const showBundles = searchTab === 'bundles';
+  const showReece = searchTab === 'reece';
+  const mB = showBundles
+    ? (q ? bundles.filter(b=>quoteCat==='All'||b.category===quoteCat).map(b=>({...b,_s:scoreItem(b.name,b.code,b.category,q)})).filter(b=>b._s>0).sort((a,b)=>b._s-a._s).slice(0,50)
+         : bundles.filter(b=>quoteCat!=='All'&&b.category===quoteCat).slice(0,50))
+    : [];
+  // For Reece tab, fetch from server CSV endpoint
+  if (showReece && q) {
+    if (!mB.length) container.innerHTML = '<div class="state-box"><div class="big-spin"></div><p>Searching Reece catalogue...</p></div>';
+    fetchReeceSearch(q, container);
+    return;
+  }
+  if (!mB.length) { container.innerHTML = '<div class="state-box"><span class="state-icon">🤷</span><p>No results.<br><span class="hint">Try different keywords or AI tab.</span></p></div>'; return; }
+  let html = '';
+  if (mB.length) { html += `<div class="section-hd" style="color:#3b82f6">📦 Bundles (${mB.length})</div>`; html += mB.map(b=>bundleCard(b)).join(''); }
+  container.innerHTML = html;
+}
+function bundleCard(b) {
+  const inQ = quote.find(i=>i.id===b.uuid);
+  const p = parseFloat(b.price); const price = (!isNaN(p)&&p>0)?'$'+p.toFixed(2):'';
+  return `<div class="item-card"><div class="item-icon bundle">📦</div><div class="item-body"><div class="item-name">${esc(b.name)}</div>${b.code?`<div class="item-code">${esc(b.code)}</div>`:''}<span class="item-cat">${esc(b.category||'')}</span></div><div class="item-right"><div class="item-price ${price?'':'dim'}">${price||'No price'}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${b.uuid}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${b.uuid}',1)">+</button></div>`:`<button class="add-btn" onclick="addBundle('${esc(b.uuid)}')">+</button>`}</div></div>`;
+}
+function reeceCard(r) {
+  const id='r_'+r.code; const inQ=quote.find(i=>i.id===id);
+  const p=parseFloat(r.retail); const retail=(!isNaN(p)&&p>0)?'$'+p.toFixed(2):'';
+  const cp=parseFloat(r.cost);
+  return `<div class="item-card"><div class="item-icon reece">🏪</div><div class="item-body"><div class="item-name">${esc(r.name)}</div><div class="item-code">${esc(r.code||'')}</div><span class="item-cat">${esc(r.category||'')}</span>${(!isNaN(cp)&&cp>0)?`<div class="item-markup">Cost $${cp.toFixed(2)} · ${r.markup}% markup</div>`:''}</div><div class="item-right"><div class="item-price ${retail?'':'dim'}">${retail||'—'}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${id}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${id}',1)">+</button></div>`:`<button class="add-btn" onclick="addReece('${esc(r.code)}')">+</button>`}</div></div>`;
+}
+
+// ── AI BAND ───────────────────────────────────────────────────────────────────
+async function triggerAiBand(query) {
+  document.getElementById('ai-band').style.display = 'block';
+  document.getElementById('ai-band-content').innerHTML = '<div class="mini-load"><div class="spin"></div>Finding...</div>';
+  clearTimeout(aiTimer);
+  aiTimer = setTimeout(() => {
+    const q = normaliseTerm(query);
+    const all = [
+      ...bundles.map(b=>({...b,_s:scoreItem(b.name,b.code,b.category,q),_type:'bundle'})),
+      ...reece.map(r=>({...r,_s:scoreItem(r.name,r.code,r.category,q),_type:'reece'}))
+    ].filter(x=>x._s>0).sort((a,b)=>b._s-a._s).slice(0,5);
+    if (!all.length) { document.getElementById('ai-band').style.display='none'; return; }
+    document.getElementById('ai-band-content').innerHTML = all.map(item => {
+      const isB = item._type==='bundle';
+      const pp = isB?parseFloat(item.price):parseFloat(item.retail);
+      const price = (!isNaN(pp)&&pp>0)?'$'+pp.toFixed(2):'';
+      return `<div class="ai-chip" onclick="${isB?'addBundle':'addReece'}('${esc(isB?item.uuid:item.code)}')"><span class="chip-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span><span>${esc((item.name||'').substring(0,28))}</span>${price?`<span class="chip-price">${price}</span>`:''}</div>`;
+    }).join('');
+  }, 400);
+}
+
+// ── AI SUGGEST ────────────────────────────────────────────────────────────────
+function runAiSuggest() {
+  const query = document.getElementById('ai-textarea').value.trim();
+  if (!query) { showToast('Enter a description first'); return; }
+  const resultsDiv = document.getElementById('ai-results');
+  resultsDiv.innerHTML = '<div class="state-box"><div class="big-spin"></div><p>Finding matches...</p></div>';
+  setTimeout(() => {
+    const q = normaliseTerm(query);
+    const topB = bundles.map(b=>({...b,_s:scoreItem(b.name,b.code,b.category,q)})).filter(b=>b._s>0).sort((a,b)=>b._s-a._s).slice(0,6);
+    const topR = reece.map(r=>({...r,_s:scoreItem(r.name,r.code,r.category,q)})).filter(r=>r._s>0).sort((a,b)=>b._s-a._s).slice(0,6);
+    if (!topB.length && !topR.length) { resultsDiv.innerHTML='<div class="state-box"><span class="state-icon">🤷</span><p>No matches.<br><span class="hint">Try different keywords.</span></p></div>'; return; }
+    let html = '';
+    if (topB.length) { html+='<div class="section-hd" style="color:#3b82f6">📦 Bundles</div>'; html+=topB.map(b=>bundleCard(b)).join(''); }
+    if (topR.length) { html+='<div class="section-hd" style="color:#f87171">🏪 Reece Products</div>'; html+=topR.map(r=>reeceCard(r)).join(''); }
+    resultsDiv.innerHTML = html;
+  }, 100);
+}
+
+// ── QUOTE ─────────────────────────────────────────────────────────────────────
+function addBundle(uuid) {
+  const b = bundles.find(x=>x.uuid===uuid); if(!b) return;
+  const ex = quote.find(i=>i.id===uuid);
+  if(ex) ex.qty++; else quote.push({id:uuid,type:'bundle',name:b.name,code:b.code,price:parseFloat(b.price)||0,qty:1});
+  updateQuoteUI(); renderQResults(); showToast('Added to quote');
+}
+function addReece(code) {
+  const r = reece.find(x=>x.code===code); if(!r) return;
+  const id='r_'+code; const ex=quote.find(i=>i.id===id);
+  if(ex) ex.qty++; else quote.push({id,type:'reece',name:r.name,code:r.code,price:parseFloat(r.retail)||0,cost:parseFloat(r.cost)||0,markup:r.markup,qty:1});
+  updateQuoteUI(); renderQResults(); showToast('Added to quote');
+}
+function chQty(id, delta) {
+  const idx = quote.findIndex(i=>i.id===id); if(idx<0) return;
+  quote[idx].qty += delta; if(quote[idx].qty <= 0) quote.splice(idx,1);
+  updateQuoteUI();
+  if(activeScreen==='quote') renderQuote(); else renderQResults();
+}
+function clearQuote() { quote=[]; updateQuoteUI(); renderQuote(); renderQResults(); }
+function updateQuoteUI() {
+  const count = quote.reduce((s,i)=>s+i.qty,0);
+  const badge = document.getElementById('quote-badge');
+  const pill = document.getElementById('quote-pill');
+  badge.textContent = count; badge.className = count>0?'nav-badge show':'nav-badge';
+  pill.style.display = count>0?'flex':'none';
+  document.getElementById('quote-pill-txt').textContent = count+(count===1?' item':' items');
+  if(activeScreen==='quote') renderQuote();
+}
+function renderQuote() {
+  const list = document.getElementById('quote-list');
+  const totals = document.getElementById('quote-totals');
+  if (!quote.length) { list.innerHTML='<div class="state-box"><span class="state-icon">📋</span><p>No items yet.<br>Add from Search or AI tab.</p></div>'; totals.style.display='none'; return; }
+  list.innerHTML = quote.map(item => {
+    const line = item.price*item.qty; const isB = item.type==='bundle';
+    return `<div class="quote-item"><div class="qi-top"><div class="qi-name">${esc(item.name)} <span class="type-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span></div><div class="qi-line">$${line.toFixed(2)}</div></div><div class="qi-bot"><div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${item.id}',-1)">−</button><span class="qty-num">${item.qty}</span><button class="qty-btn" onclick="chQty('${item.id}',1)">+</button></div><div class="qi-meta">$${item.price.toFixed(2)} ea${item.cost?` · Cost $${item.cost.toFixed(2)}`:''}</div><button class="qi-rm" onclick="chQty('${item.id}',${-item.qty})">✕</button></div></div>`;
+  }).join('');
+  const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0); const gst=totalInc/11; const sub=totalInc-gst;
+  document.getElementById('t-sub').textContent='$'+sub.toFixed(2);
+  document.getElementById('t-gst').textContent='$'+gst.toFixed(2);
+  document.getElementById('t-total').textContent='$'+totalInc.toFixed(2);
+  totals.style.display='block';
+}
+function exportQuote() {
+  if(!quote.length){showToast('Nothing to export');return;}
+  const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0); const gst=totalInc/11; const sub=totalInc-gst;
+  const lines=['INNOVATION PLUMBING & DESIGN','Phone: 3073 2666','Quote — '+new Date().toLocaleDateString('en-AU',{day:'2-digit',month:'long',year:'numeric'}),'','ITEM'.padEnd(50)+'QTY'.padStart(4)+'UNIT'.padStart(10)+'TOTAL'.padStart(10),'-'.repeat(74),...quote.map(i=>i.name.substring(0,48).padEnd(50)+String(i.qty).padStart(4)+('$'+i.price.toFixed(2)).padStart(10)+('$'+(i.price*i.qty).toFixed(2)).padStart(10)),'-'.repeat(74),'Subtotal (ex GST)'.padEnd(64)+('$'+sub.toFixed(2)).padStart(10),'GST (10%)'.padEnd(64)+('$'+gst.toFixed(2)).padStart(10),'TOTAL INC GST'.padEnd(64)+('$'+totalInc.toFixed(2)).padStart(10),'','Verbal estimate only — subject to change upon site inspection.'];
+  const blob=new Blob([lines.join('\n')],{type:'text/plain'});const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='IPD_Quote_'+new Date().toISOString().slice(0,10)+'.txt';a.click();URL.revokeObjectURL(url);
+}
+async function sendQuoteToSM8() {
+  if(!quote.length){showToast('Nothing to send');return;}
+  const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0);
+  showToast('Sending to ServiceM8...');
+  try {
+    const res=await fetch(PROXY+'/send-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quoteItems:quote.map(i=>({name:i.name,qty:i.qty,price:i.price,code:i.code||'',type:i.type||'reece',uuid:i.type==='bundle'?i.id:''})),totalInc})});
+    const data=await res.json();
+    if(res.ok&&data.success){
+      showToast('✅ Quote sent to ServiceM8!');
+      const banner=document.createElement('div');
+      banner.style.cssText='padding:10px 14px;background:rgba(74,222,128,.1);font-size:12px;color:#16a34a;text-align:center;border-bottom:1px solid rgba(74,222,128,.2)';
+      banner.textContent='✅ '+data.message;
+      document.getElementById('quote-list').prepend(banner);
+    } else showToast('❌ '+(data.error||'Could not send'));
+  } catch(e){showToast('❌ Could not reach server');}
+}
+function autoAddTopResult(qty) {
+  const q=normaliseTerm((document.getElementById('q-search').value||'').trim());
+  if(!q) return;
+  const topB=bundles.map(b=>({...b,_s:scoreItem(b.name,b.code,b.category,q)})).filter(b=>b._s>0).sort((a,b)=>b._s-a._s)[0];
+  const topR=reece.map(r=>({...r,_s:scoreItem(r.name,r.code,r.category,q)})).filter(r=>r._s>0).sort((a,b)=>b._s-a._s)[0];
+  const winner = (topB&&topR) ? (topB._s>=topR._s?topB:topR) : (topB||topR);
+  if (!winner) { showToast('No match found'); return; }
+  if (winner.uuid) {
+    const ex=quote.find(i=>i.id===winner.uuid);
+    if(ex)ex.qty+=qty;else quote.push({id:winner.uuid,type:'bundle',name:winner.name,code:winner.code,price:parseFloat(winner.price)||0,qty});
+    showToast('Added '+qty+'x '+winner.name.substring(0,25));
+  } else {
+    const id='r_'+winner.code; const ex=quote.find(i=>i.id===id);
+    if(ex)ex.qty+=qty;else quote.push({id,type:'reece',name:winner.name,code:winner.code,price:parseFloat(winner.retail)||0,cost:parseFloat(winner.cost)||0,markup:winner.markup,qty});
+    showToast('Added '+qty+'x '+winner.name.substring(0,25));
+  }
+  updateQuoteUI(); renderQResults();
+}
+
+// ── KNOWLEDGE ─────────────────────────────────────────────────────────────────
+const BUNDLE_PREFIXES = [
+  ['BAFTERHOURS','After Hours'],['BBATHROOM','Bathrooms'],['BQFEE','Quote Fee'],
+  ['BMINIMUM','Minimum Fee'],['BQ','Bundle Quote'],['BDRAINCLEAN','Drain Cleaning'],
+  ['BDOWNPIPE','Downpipes'],['BDISWASHER','Dishwashers'],['BFLEXI','Flexi Hose'],
+  ['BFILTER','Water Filters'],['BFRIDGE','Fridge Water'],['BGDISP','Garbage Disposals'],
+  ['BGAS','Gas Works'],['BHIRE','Equipment Hire'],['BHOSECOCK','Hose Taps'],
+  ['BHWU','Hot Water'],['BMIX','Mixers'],['BQPIPEWORK','Pipework'],
+  ['BROOF','Roofing'],['BSHW','Showers'],['BSPOUT','Sink Spouts'],
+  ['BTAP','Tapware'],['BTEMP','Tempering Valve'],['BVANITY','Vanity'],
+  ['BWC','Toilets'],['BPW','Plug & Waste'],['BDWTAP','New Water Point'],
+];
+
+function showBundlePrefixes() {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;display:flex;align-items:flex-end;';
+  modal.innerHTML = `
+    <div style="background:var(--surface);width:100%;max-height:80vh;border-radius:16px 16px 0 0;overflow:hidden;display:flex;flex-direction:column">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:14px;font-weight:700">📦 Bundle Prefix Codes</span>
+        <button onclick="this.closest('[style]').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-dim)">✕</button>
+      </div>
+      <div style="overflow-y:auto;padding:8px 0">
+        ${BUNDLE_PREFIXES.map(([code,cat]) => `
+          <div style="display:flex;align-items:center;padding:8px 16px;border-bottom:1px solid var(--border);gap:10px;cursor:pointer" onclick="searchBundle('${code}')">
+            <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--orange);min-width:120px">${code}</span>
+            <span style="font-size:13px;color:var(--text)">${cat}</span>
+            <span style="margin-left:auto;color:var(--text-dim)">›</span>
+          </div>
+        `).join('')}
+      </div>
+      <div style="padding:10px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text-dim);text-align:center">
+        Tap any prefix to search bundles
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+function searchBundle(prefix) {
+  document.querySelectorAll('[style]').forEach(el => { if(el.style.position==='fixed') el.remove(); });
+  goScreen('search');
+  setSearchTab('bundles');
+  document.getElementById('q-search').value = prefix;
+  onQSearch();
+}
+
+function setAiTab(tab) {
+  const searchPanel = document.getElementById('ai-panel-search');
+  const webPanel = document.getElementById('ai-panel-web');
+  const searchBtn = document.getElementById('ai-tab-search');
+  const webBtn = document.getElementById('ai-tab-web');
+  if (tab === 'search') {
+    searchPanel.style.display = 'block';
+    webPanel.style.display = 'none';
+    searchBtn.style.background = 'var(--orange)';
+    searchBtn.style.color = '#fff';
+    webBtn.style.background = 'var(--surface2)';
+    webBtn.style.color = 'var(--text-mid)';
+  } else {
+    searchPanel.style.display = 'none';
+    webPanel.style.display = 'block';
+    webBtn.style.background = 'var(--orange)';
+    webBtn.style.color = '#fff';
+    searchBtn.style.background = 'var(--surface2)';
+    searchBtn.style.color = 'var(--text-mid)';
+  }
+  document.getElementById('ai-results').innerHTML = '<div class="state-box"><span class="state-icon">💡</span><p>Enter your question above</p></div>';
+}
+
+async function runWebSearch() {
+  const query = document.getElementById('ai-web-textarea').value.trim();
+  if (!query) { showToast('Enter a question first'); return; }
+  const resultsDiv = document.getElementById('ai-results');
+  resultsDiv.innerHTML = '<div class="state-box"><div class="big-spin"></div><p>Searching the web...</p></div>';
+  try {
+    const res = await fetch(PROXY + '/ai-search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    });
+    const data = await res.json();
+    if (data.answer) {
+      const formatted = data.answer
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+      resultsDiv.innerHTML = `<div style="padding:14px;background:var(--surface);border-radius:var(--radius);margin:8px 0;font-size:13px;line-height:1.7;color:var(--text)"><p>${formatted}</p></div>`;
+    } else {
+      resultsDiv.innerHTML = '<div class="state-box"><span class="state-icon">🤷</span><p>No answer found. Try rephrasing.</p></div>';
+    }
+  } catch(e) {
+    resultsDiv.innerHTML = '<div class="state-box"><span class="state-icon">❌</span><p>Could not reach server.</p></div>';
+  }
+}
+
+function renderKB() {
+  const q=(document.getElementById('kb-search').value||'').toLowerCase();
+  const c=document.getElementById('kb-list');
+  if(!knowledge.length){c.innerHTML='<div class="state-box"><span class="state-icon">📚</span><p>No knowledge entries yet.</p></div>';return;}
+  const cats=['All',...new Set(knowledge.map(k=>k.category||'').filter(Boolean))];
+  const activeCat=window._kbCat||'All';
+  const filtered=knowledge.filter(k=>{
+    const mq=!q||(k.title||'').toLowerCase().includes(q)||(k.description||'').toLowerCase().includes(q)||(k.tags||'').toLowerCase().includes(q);
+    return mq&&(activeCat==='All'||k.category===activeCat);
+  });
+  const chips=`<div class="cat-row" style="border-top:none">${cats.map(ct=>`<div class="cat-chip${ct===activeCat?' active':''}" onclick="setKbCat('${esc(ct)}')">${esc(ct)}</div>`).join('')}</div>`;
+  if(!filtered.length){c.innerHTML=chips+'<div class="state-box"><p>No results.</p></div>';return;}
+  c.innerHTML=chips+filtered.map(k=>{
+    const hasUrl=k.url&&k.url.trim(); const hasCode=k.reeceCode&&k.reeceCode.trim();
+    const cleanCode=hasCode?k.reeceCode.replace(/^REC/i,'').replace(/-1$/,''):'';
+    const linkUrl=hasUrl?k.url:(cleanCode?'https://www.reece.com.au/product/-'+cleanCode:'');
+    const isBundleRef=k.title&&k.title.toLowerCase().includes('bundle') && k.title.toLowerCase().includes('prefix');
+    return `<div class="kb-item" onclick="${isBundleRef?'showBundlePrefixes()':linkUrl?`window.open('${esc(linkUrl)}','_blank')`:''}" style="${linkUrl?'cursor:pointer':''}"><div class="kb-icon">${linkUrl?'🏪':'📄'}</div><div style="flex:1;min-width:0"><div class="kb-title">${esc(k.title)}</div><div class="kb-desc">${esc(k.description||'')}</div><div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap"><span class="kb-cat">${esc(k.category||'')}</span>${hasCode?`<span style="font-size:10px;font-family:var(--mono);color:var(--green);background:rgba(74,222,128,.1);padding:1px 5px;border-radius:3px">${esc(cleanCode)}</span>`:''}</div></div><span style="color:var(--text-dim);font-size:16px">${linkUrl?'🔗':'›'}</span></div>`;
+  }).join('');
+}
+function setKbCat(cat){window._kbCat=cat;renderKB();}
+
+// ── SEARCH HELPERS ────────────────────────────────────────────────────────────
+function levenshtein(a,b){
+  if(!a.length)return b.length;if(!b.length)return a.length;
+  if(Math.abs(a.length-b.length)>3)return 99;
+  const m=[];
+  for(let i=0;i<=b.length;i++)m[i]=[i];
+  for(let j=0;j<=a.length;j++)m[0][j]=j;
+  for(let i=1;i<=b.length;i++)for(let j=1;j<=a.length;j++)
+    m[i][j]=b[i-1]===a[j-1]?m[i-1][j-1]:Math.min(m[i-1][j-1]+1,m[i][j-1]+1,m[i-1][j]+1);
+  return m[b.length][a.length];
+}
+
+const PLUMB_CATS=['pvc','dwv','copper','auspex','brassware','isolation','tapware','toilet','shower','drain','hot water','gas','flexi','fittings','clips','consumables','valves','pipe','waste'];
+
+const SIZE_MAP={'half inch':'15mm','1/2 inch':'15mm','three quarter inch':'20mm','3/4 inch':'20mm','three quarter':'20mm','one inch':'25mm','1 inch':'25mm','one and a half inch':'40mm','1 1/2 inch':'40mm','two inch':'50mm','2 inch':'50mm','three inch':'80mm','3 inch':'80mm','four inch':'100mm','4 inch':'100mm'};
+
+const TERM_MAP={
+  'dunny':'toilet','loo':'toilet','wc':'toilet','dunny suite':'toilet suite',
+  'band':'bend','bands':'bend','bent':'bend','bond':'bend','bin':'bend',
+  'elbow':'bend','elbows':'bend','bends':'bend','ell':'bend','ells':'bend',
+  'junction':'bend','swept bend':'bend','return bend':'bend','quarter bend':'90deg bend',
+  'eighth bend':'45deg bend','long radius':'bend','short radius':'bend',
+  '90 degree':'90deg','45 degree':'45deg','22.5 degree':'22deg',
+  '88 degree':'90deg','85 degree':'90deg','87 degree':'90deg',
+  '43 degree':'45deg','44 degree':'45deg','46 degree':'45deg',
+  'ninety degree':'90deg','forty five degree':'45deg',
+  'ninety':'90deg','forty five':'45deg',
+  'socket':'coupling','joiner':'coupling','sleeve':'coupling',
+  'tees':'tee','tee piece':'tee','t piece':'tee',
+  'end cap':'cap','stop end':'cap','blanking cap':'cap',
+  'reducer':'reducer','reducing coupling':'reducer',
+  'male adaptor':'mi adaptor','female adaptor':'fi adaptor',
+  'male connector':'mi connector','female connector':'fi connector',
+  'hot water system':'hot water','hws':'hot water','hwu':'hot water',
+  'water heater':'hot water','storage hot water':'hot water',
+  'poly pipe':'auspex','pex pipe':'auspex','plastic pipe':'auspex','poly':'auspex',
+  'copper tube':'copper pipe','copper tubing':'copper pipe',
+  'stop tap':'isolation valve','ball valve':'isolation valve','stopcock':'isolation valve',
+  'gate valve':'isolation valve',
+  'gully trap':'trap','p trap':'trap','s trap':'trap','bottle trap':'trap',
+  'floor waste':'floor flange','shower waste':'floor flange','floor drain':'floor flange',
+  'blocked drain':'drain clean','blocked':'drain clean','drain cleaner':'drain clean',
+  'high pressure':'jetter','water jetter':'jetter','hydro jet':'jetter',
+  'flexible hose':'flexi hose','braided hose':'flexi hose','flexi':'flexi hose',
+  'mixer tap':'mixer','basin tap':'basin mixer','sink tap':'sink mixer',
+  'shower tap':'shower mixer','bath tap':'bath mixer',
+  'thread tape':'thread tape','teflon':'thread tape',
+  'silastic':'silicone','sealant':'silicone',
+};
+
+function normaliseTerm(q) {
+  let n=q.toLowerCase().trim();
+  n=n.replace(/^(i want|i need|add|please add|can you add|put in|give me|get me|order|quote for|quote me|we need|we want)\s+/i,'');
+  n=n.replace(/\s+(to (the )?quote|to (the )?order|please|thanks|thank you)$/i,'');
+  const nums={'zero':'0','one':'1','two':'2','three':'3','four':'4','five':'5','six':'6','seven':'7','eight':'8','nine':'9','ten':'10','eleven':'11','twelve':'12','fifteen':'15','twenty':'20','twenty five':'25','thirty':'30','thirty two':'32','forty':'40','forty five':'45','fifty':'50','sixty':'60','sixty five':'65','seventy':'70','eighty':'80','ninety':'90','one hundred':'100','hundred':'100','fiddy':'50','fify':'50','fitty':'50','firty':'40','fotty':'40','nighty':'90'};
+  for(const [w,d] of Object.entries(nums)) n=n.replace(new RegExp('\b'+w+'\b','gi'),d);
+  n=n.replace(/(\d+)\s*(millimetre|millimeter|millimetres|millimeters|mil)/gi,'$1mm');
+  n=n.replace(/(\d+)\s*(x|by|times|×)\s*(\d+)/gi,'$1 x $3');
+  for(const [k,v] of Object.entries(SIZE_MAP)) n=n.replace(new RegExp(k,'gi'),v);
+  n=n.replace(/(\d+)\s+(floor flange|bend|elbow|tee|trap|coupling|cap|plug|reducer|adaptor|connector|flange|collar|fernco|saddle|clip|pipe|fitting|valve|hose|washer|olive)/gi,'$1mm $2');
+  for(const [k,v] of Object.entries(TERM_MAP)) n=n.replace(new RegExp('\b'+k+'\b','gi'),v);
+  return n.trim();
+}
+
+function extractQuantity(q) {
+  let qty=1,cleaned=q;
+  const nw={'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,'nine':9,'ten':10};
+  let m=cleaned.match(/^(\d+)\s*(x|×|by|times)?\s*/i);
+  if(m&&parseInt(m[1])>1){qty=parseInt(m[1]);cleaned=cleaned.replace(m[0],'').trim();}
+  else for(const [w,n] of Object.entries(nw)){const r=new RegExp('^'+w+'\s*(x|×|by|times)?\s+','i');if(r.test(cleaned)){qty=n;cleaned=cleaned.replace(r,'').trim();break;}}
+  return{qty,term:cleaned};
+}
+
+function scoreItem(name,code,cat,q) {
+  q=normaliseTerm(q);
+  const n=(name||'').toLowerCase(),c=(code||'').toLowerCase(),ca=(cat||'').toLowerCase();
+  let score=0;
+  if(c===q)return 100;
+  if(c.startsWith(q))return 90;
+  if(n.startsWith(q))return 80;
+  if(c.includes(q))return 70;
+  if(n.includes(q))return 60;
+  if(ca.includes(q))return 40;
+  const tokens=q.split(/\s+/).filter(t=>t.length>1);
+  if(tokens.length>0){
+    const tv=tokens.map(t=>{
+      const v=[t];
+      if(t.endsWith('s'))v.push(t.slice(0,-1));
+      if(!t.endsWith('s'))v.push(t+'s');
+      if(t==='90')v.push('90deg','90 deg','88','85','87');
+      if(t==='45')v.push('45deg','45 deg','43','44','46');
+      if(t==='x')v.push('×','by','times');
+      return v;
+    });
+    const mc=tv.filter(vars=>vars.some(v=>n.includes(v)||c.includes(v))).length;
+    if(mc===tokens.length)score=55;
+    else if(tokens.length>=3&&mc>=tokens.length-1)score=40;
+    else if(tokens.length>=2&&mc>=Math.ceil(tokens.length/2))score=25;
+    score+=mc*8;
+  }
+  if(score===0&&tokens.length>0){
+    const words=n.split(/\s+/);
+    const fm=tokens.filter(t=>words.some(w=>w.includes(t)||t.includes(w)||levenshtein(w,t)<=2)).length;
+    if(fm===tokens.length)score=20;
+    else if(fm>=tokens.length-1&&tokens.length>1)score=12;
+  }
+  if(score>0){
+    if(PLUMB_CATS.some(pc=>ca.includes(pc)))score+=15;
+    if(ca.includes('refrigeration')||ca.includes('hvac')||ca.includes('switchboard'))score=Math.max(0,score-50);
+    tokens.forEach(t=>{
+      if(/^\d+$/.test(t)){
+        const sr=new RegExp('(^|[\sx×])'+t+'(mm|\s|$|x|×|deg)','i');
+        if(sr.test(n))score+=20;
+        else if(n.includes(t+'0')||n.includes('1'+t))score-=15;
+      }
+    });
+  }
+  return Math.max(0,score);
+}
+
+// ── VOICE ─────────────────────────────────────────────────────────────────────
+function speakAndShow(msg) {
+  document.getElementById('voice-txt').textContent = msg;
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(msg);
+    utt.lang = 'en-AU';
+    utt.rate = 1.1;
+    window.speechSynthesis.speak(utt);
+  }
+  showToast(msg.substring(0,50));
+}
+
+function setupVoice() {
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){document.getElementById('mic-btn').style.display='none';return;}
+  recognition=new SR();recognition.continuous=true;recognition.interimResults=true;recognition.lang='en-AU';
+  try {
+    const SG = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+    if (SG) {
+      const terms = 'bend bends elbow elbows coupling tee trap flange adaptor connector reducer cap plug valve hose flexi pipe fitting brass copper auspex pvc dwv compression isolation toilet cistern basin mixer shower tapware drain jetter blocked hot water thermann rheem rinnai tempering fifteen twenty twenty five thirty two forty fifty sixty five eighty ninety hundred millimetre millimetres floor flange pan collar floor waste fernco saddle clip bracket olive washer jumper spindle aerator keeseal fluidmaster';
+      const grammar = '#JSGF V1.0; grammar plumbing; public <plumbing> = ' + terms.split(' ').join(' | ') + ';';
+      const list = new SG();
+      list.addFromString(grammar, 1);
+      recognition.grammars = list;
+    }
+  } catch(e) {}
+  let pendingAdd = null;
+  recognition.onresult=e=>{
+    let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;
+    if(e.results[e.results.length-1].isFinal){
+      const lower=t.toLowerCase().trim();
+      if(pendingAdd){
+        if(lower==='yes'||lower==='yeah'||lower==='yep'||lower==='correct'||lower==='add it'||lower==='add'){
+          const{qty,item}=pendingAdd;pendingAdd=null;
+          if(item.uuid){
+            const ex=quote.find(i=>i.id===item.uuid);
+            if(ex)ex.qty+=qty;else quote.push({id:item.uuid,type:'bundle',name:item.name,code:item.code,price:parseFloat(item.price)||0,qty});
+          } else {
+            const id='r_'+item.code;const ex=quote.find(i=>i.id===id);
+            if(ex)ex.qty+=qty;else quote.push({id,type:'reece',name:item.name,code:item.code,price:parseFloat(item.retail)||0,cost:parseFloat(item.cost)||0,markup:item.markup,qty});
+          }
+          updateQuoteUI();renderQResults();
+          speakAndShow('Added '+qty+'x '+item.name.substring(0,30)+' to quote. Say next item or stop.');
+          setTimeout(()=>{document.getElementById('q-search').value='';document.getElementById('voice-txt').textContent='Listening...';onQSearch();},5000);
+          return;
+        } else if(lower==='no'||lower==='nope'||lower==='wrong'||lower==='incorrect'||lower==='cancel'){
+          pendingAdd=null;
+          speakAndShow('Cancelled. Say the item again.');
+          document.getElementById('q-search').value='';onQSearch();
+          return;
+        }
+      }
+      const norm=normaliseTerm(t);
+      const{qty,term}=extractQuantity(norm);
+      if(qty>1||term.length>2){
+        const searchTerm=term||norm;
+        document.getElementById('q-search').value=searchTerm;
+        document.getElementById('voice-txt').textContent='"'+t+'"';
+        onQSearch();
+        setTimeout(()=>{
+          const q=normaliseTerm(searchTerm);
+          const topB=bundles.map(b=>({...b,_s:scoreItem(b.name,b.code,b.category,q)})).filter(b=>b._s>0).sort((a,b)=>b._s-a._s)[0];
+          const topR=reece.map(r=>({...r,_s:scoreItem(r.name,r.code,r.category,q)})).filter(r=>r._s>0).sort((a,b)=>b._s-a._s)[0];
+          const winner=(topB&&topR)?(topB._s>=topR._s?topB:topR):(topB||topR);
+          if(winner){
+            pendingAdd={qty:qty>1?qty:1,item:winner};
+            speakAndShow('Found: '+(qty>1?qty+'x ':'')+winner.name.substring(0,35)+'. Say YES to add or NO to cancel.');
+          } else {
+            speakAndShow('No match found. Try again.');
+          }
+        },600);
+        return;
+      }
+    }
+    document.getElementById('q-search').value=t;
+    document.getElementById('voice-txt').textContent='"'+t+'"';
+    onQSearch();
+  };
+  recognition.onend=()=>{if(isListening)try{recognition.start();}catch(e){}};
+  recognition.onerror=e=>{if(e.error!=='no-speech')stopListening();};
+}
+function startListening(){if(!recognition||isListening)return;try{recognition.start();isListening=true;document.getElementById('mic-btn').classList.add('listening');document.getElementById('voice-hint').classList.add('show');}catch(e){}}
+function stopListening(){if(!recognition||!isListening)return;try{recognition.stop();}catch(e){}isListening=false;document.getElementById('mic-btn').classList.remove('listening');document.getElementById('voice-hint').classList.remove('show');}
+function toggleMic(){isListening?stopListening():startListening();}
+function setupAiVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;
+  aiRecognition=new SR();aiRecognition.continuous=false;aiRecognition.interimResults=false;aiRecognition.lang='en-AU';
+  aiRecognition.onresult=e=>{document.getElementById('ai-textarea').value=e.results[0][0].transcript;stopAiMic();runAiSuggest();};
+  aiRecognition.onend=()=>stopAiMic();aiRecognition.onerror=()=>stopAiMic();
+}
+function toggleAiMic(){if(aiListening){stopAiMic();return;}try{aiRecognition.start();aiListening=true;document.getElementById('ai-mic').classList.add('listening');}catch(e){}}
+function stopAiMic(){if(!aiListening)return;try{aiRecognition.stop();}catch(e){}aiListening=false;document.getElementById('ai-mic').classList.remove('listening');}
+
+// ── REECE CSV SEARCH ─────────────────────────────────────────────────────────
+let reeceSearchTimer = null;
+async function fetchReeceSearch(q, container) {
+  clearTimeout(reeceSearchTimer);
+  reeceSearchTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(PROXY + '/reece-search?q=' + encodeURIComponent(q));
+      const data = await res.json();
+      if (!data.products || !data.products.length) {
+        container.innerHTML = '<div class="state-box"><span class="state-icon">🤷</span><p>No Reece products found.<br><span class="hint">Try different keywords.</span></p></div>';
+        return;
+      }
+      const total = data.total || data.products.length;
+      let html = `<div class="section-hd" style="color:#f87171">🏪 Reece Products (${total > 60 ? '60 of ' + total : total})</div>`;
+      html += data.products.map(r => reeceCard(r)).join('');
+      container.innerHTML = html;
+    } catch(e) {
+      container.innerHTML = '<div class="state-box"><span class="state-icon">❌</span><p>Could not reach server.<br><span class="hint">Check connection.</span></p></div>';
+    }
+  }, 300);
+}
+
+// ── DARK MODE ─────────────────────────────────────────────────────────────────
+function initDarkMode() {
+  const saved = localStorage.getItem('ipd_dark');
+  if (saved === '1') { document.body.classList.add('dark'); document.getElementById('dm-toggle').classList.add('on'); }
+}
+function toggleDark() {
+  const on = document.body.classList.toggle('dark');
+  document.getElementById('dm-toggle').classList.toggle('on', on);
+  localStorage.setItem('ipd_dark', on ? '1' : '0');
+}
+
+// ── SEARCH TAB ────────────────────────────────────────────────────────────────
+function setSearchTab(tab) {
+  window._searchTab = tab;
+  const rBtn = document.getElementById('search-tab-reece');
+  const bBtn = document.getElementById('search-tab-bundles');
+  if (tab === 'reece') {
+    rBtn.style.background = 'var(--red)'; rBtn.style.color = '#fff';
+    bBtn.style.background = 'var(--surface2)'; bBtn.style.color = 'var(--text-mid)';
+    document.getElementById('q-cats').style.display = 'none';
+  } else {
+    bBtn.style.background = 'var(--blue)'; bBtn.style.color = '#fff';
+    rBtn.style.background = 'var(--surface2)'; rBtn.style.color = 'var(--text-mid)';
+    document.getElementById('q-cats').style.display = 'flex';
+  }
+  document.getElementById('ai-band').style.display = 'none';
+  renderQResults();
+}
+
+// ── STOCK COUNTER ─────────────────────────────────────────────────────────────
+function adjOnHand(code, delta) {
+  const cur = onHand[code];
+  const curVal = (cur === '' || cur === undefined) ? 0 : Number(cur);
+  const newVal = Math.max(0, curVal + delta);
+  onHand[code] = newVal;
+  const input = document.getElementById('si-' + code);
+  if (input) input.value = newVal;
+  renderStock();
+}
+
+// ── LABOUR ────────────────────────────────────────────────────────────────────
+let labourHours = { standard: 1.0, second: 0.0, builder: 0.0, apprentice: 0.0 };
+let labourSurcharge = 0, labourDiscount = 0;
+
+function chHours(type, delta) {
+  labourHours[type] = Math.max(0, Math.round((labourHours[type] + delta) * 2) / 2);
+  document.getElementById('h-' + type).textContent = labourHours[type].toFixed(1);
+  updateLabourTotals();
+}
+
+function setSurcharge(pct) {
+  labourSurcharge = pct;
+  document.querySelectorAll('[id^="surcharge-"]').forEach(el => el.classList.remove('active'));
+  const chip = document.getElementById('surcharge-' + pct);
+  if (chip) chip.classList.add('active');
+  if (![0,25,50,100].includes(pct)) {
+    document.getElementById('surcharge-custom').value = pct || '';
+  }
+  updateLabourTotals();
+}
+
+function setDiscount(pct) {
+  labourDiscount = pct;
+  document.querySelectorAll('[id^="discount-"]').forEach(el => el.classList.remove('active'));
+  const chip = document.getElementById('discount-' + pct);
+  if (chip) chip.classList.add('active');
+  if (![0,10,15].includes(pct)) {
+    document.getElementById('discount-custom').value = pct || '';
+  }
+  updateLabourTotals();
+}
+
+function updateLabourTotals() {
+  const rates = {
+    standard: parseFloat(document.getElementById('rate-standard')?.value) || 229,
+    second:   parseFloat(document.getElementById('rate-second')?.value)   || 160,
+    builder:  parseFloat(document.getElementById('rate-builder')?.value)  || 195,
+    apprentice: parseFloat(document.getElementById('rate-apprentice')?.value) || 100,
+  };
+  const sub = Object.keys(labourHours).reduce((s, k) => s + (labourHours[k] * rates[k]), 0);
+  const surchargeAmt = sub * (labourSurcharge / 100);
+  const afterSurcharge = sub + surchargeAmt;
+  const discountAmt = afterSurcharge * (labourDiscount / 100);
+  const total = afterSurcharge - discountAmt;
+  const gst = total / 11;
+  const subEx = total - gst;
+
+  const el = id => document.getElementById(id);
+  if (!el('lt-sub')) return;
+  el('lt-sub').textContent = '$' + sub.toFixed(2);
+  el('lt-total').textContent = '$' + total.toFixed(2);
+
+  if (labourSurcharge > 0) {
+    el('lt-surcharge-row').style.display = 'flex';
+    el('lt-surcharge-label').textContent = 'Surcharge (' + labourSurcharge + '%)';
+    el('lt-surcharge-val').textContent = '+$' + surchargeAmt.toFixed(2);
+  } else { el('lt-surcharge-row').style.display = 'none'; }
+
+  if (labourDiscount > 0) {
+    el('lt-discount-row').style.display = 'flex';
+    el('lt-discount-label').textContent = 'Discount (' + labourDiscount + '%)';
+    el('lt-discount-val').textContent = '-$' + discountAmt.toFixed(2);
+  } else { el('lt-discount-row').style.display = 'none'; }
+}
+
+function addLabourToQuote() {
+  const rates = {
+    standard:   parseFloat(document.getElementById('rate-standard')?.value)   || 229,
+    second:     parseFloat(document.getElementById('rate-second')?.value)      || 160,
+    builder:    parseFloat(document.getElementById('rate-builder')?.value)     || 195,
+    apprentice: parseFloat(document.getElementById('rate-apprentice')?.value)  || 100,
+  };
+  const labels = { standard:'Standard Labour', second:'2nd Tradesman', builder:'Builder Rate', apprentice:'Apprentice Labour' };
+  let added = 0;
+  Object.keys(labourHours).forEach(k => {
+    if (labourHours[k] <= 0) return;
+    const basePrice = labourHours[k] * rates[k];
+    const afterSurcharge = basePrice * (1 + labourSurcharge / 100);
+    const finalPrice = afterSurcharge * (1 - labourDiscount / 100);
+    const id = 'labour_' + k + '_' + Date.now();
+    quote.push({ id, type: 'labour', name: labels[k] + ' (' + labourHours[k] + 'h)', code: '', price: parseFloat(finalPrice.toFixed(2)), qty: 1 });
+    added++;
+  });
+  if (added) { updateQuoteUI(); showToast('Labour added to quote'); goScreen('quote'); }
+  else showToast('Set some hours first');
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+window.addEventListener('load',init);
+</script>
+</body>
+</html>
