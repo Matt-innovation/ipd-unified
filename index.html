@@ -298,6 +298,16 @@ body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
             <div class="home-card-label">AI Review</div>
             <div class="home-card-desc">Review stock order with AI</div>
           </div>
+          <div class="home-card" onclick="goScreen('training')">
+            <div class="home-card-icon">🎓</div>
+            <div class="home-card-label">Training</div>
+            <div class="home-card-desc">Step-by-step app guide</div>
+          </div>
+          <div class="home-card" onclick="goScreen('standards')">
+            <div class="home-card-icon">📐</div>
+            <div class="home-card-label">AS Standards</div>
+            <div class="home-card-desc">AS3500, AS1428, AS5601 &amp; more</div>
+          </div>
           <a class="home-card" href="https://wa.me/61730732666" target="_blank" style="text-decoration:none;color:inherit">
             <div class="home-card-icon">💬</div>
             <div class="home-card-label">WhatsApp</div>
@@ -576,6 +586,30 @@ body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
       </div>
     </div>
 
+    <div class="screen" id="screen-training">
+      <div class="screen-scroll">
+        <div style="padding:20px 16px">
+          <div style="font-size:22px;font-weight:700;margin-bottom:4px">🎓 Training Roadmap</div>
+          <div style="font-size:13px;color:var(--text-mid);margin-bottom:24px">Step-by-step guide for using the IPD app</div>
+          <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:20px;text-align:center;color:var(--text-mid);font-size:14px">
+            Content coming soon — training steps will be added here.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-standards">
+      <div class="screen-scroll">
+        <div style="padding:20px 16px">
+          <div style="font-size:22px;font-weight:700;margin-bottom:4px">📐 Australian Standards</div>
+          <div style="font-size:13px;color:var(--text-mid);margin-bottom:24px">Quick reference for AS3500, AS1428, AS5601 &amp; more</div>
+          <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:20px;text-align:center;color:var(--text-mid);font-size:14px">
+            Content coming soon — standards reference will be added here.
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- end .screens -->
 
   <div class="bottom-nav">
@@ -583,7 +617,7 @@ body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
     <button class="nav-btn" id="nav-stock" onclick="goScreen('stock')"><div class="nav-icon">📦</div><div class="nav-label">Stock</div></button>
     <button class="nav-btn" id="nav-labour" onclick="goScreen('labour')"><div class="nav-icon">⏱</div><div class="nav-label">Labour</div></button>
     <button class="nav-btn" id="nav-search" onclick="goScreen('search')"><div class="nav-icon">🔍</div><div class="nav-label">Search</div></button>
-    <button class="nav-btn" id="nav-ai" onclick="goScreen('ai')"><div class="nav-icon">✨</div><div class="nav-label">AI</div></button>
+    <button class="nav-btn" id="nav-review" onclick="runStockReview()"><div class="nav-icon">🤖</div><div class="nav-label">Review</div></button>
     <button class="nav-btn" id="nav-quote" onclick="goScreen('quote')"><div class="nav-icon">📋</div><div class="nav-badge" id="quote-badge">0</div><div class="nav-label">Quote</div></button>
     <button class="nav-btn" id="nav-settings" onclick="goScreen('settings')"><div class="nav-icon">⚙️</div><div class="nav-label">Settings</div></button>
   </div>
