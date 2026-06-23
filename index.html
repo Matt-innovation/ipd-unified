@@ -639,6 +639,13 @@ body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
       .qr-val{font-size:15px;font-weight:700;color:var(--orange);line-height:1}
       .qr-lbl{font-size:10px;color:var(--text-mid);margin-top:3px;line-height:1.3}
       .std-no-result{text-align:center;padding:30px 16px;color:var(--text-dim);font-size:13px;display:none}
+      .std-pdf-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);text-decoration:none;color:var(--text);transition:border-color .15s}
+      .std-pdf-btn:active{border-color:var(--orange)}
+      .std-pdf-icon{width:34px;height:34px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+      .std-pdf-info{flex:1;min-width:0}
+      .std-pdf-name{font-size:13px;font-weight:700;color:var(--text)}
+      .std-pdf-desc{font-size:11px;color:var(--text-mid);margin-top:1px}
+      .std-pdf-arrow{font-size:16px;color:var(--text-dim);flex-shrink:0}
       </style>
 
       <!-- Fixed header + search -->
@@ -654,6 +661,54 @@ body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
       <!-- Scrollable body -->
       <div class="screen-scroll">
         <div class="std-wrap" id="std-wrap">
+
+          <!-- ── FULL STANDARDS ────────────────────────────────── -->
+          <div class="std-section" id="std-pdfs">
+            <button class="std-hd" onclick="toggleStd('std-pdfs')">
+              <div class="std-hd-left">
+                <div class="std-sect-icon" style="background:rgba(249,115,22,.12);color:var(--orange)">📄</div>
+                <div>
+                  <div class="std-sect-name">Full Standards — PDFs</div>
+                  <div class="std-sect-desc">Open official documents in Google Drive</div>
+                </div>
+              </div>
+              <span class="std-chev" id="std-pdfs-chev">▼</span>
+            </button>
+            <div class="std-body" id="std-pdfs-body">
+              <div class="std-sub" style="display:flex;flex-direction:column;gap:8px">
+                <a href="https://drive.google.com/file/d/1-MYJc0S8u0nB1wnmV9XadwQZoujpQKbA/view?usp=sharing" target="_blank" rel="noopener" class="std-pdf-btn">
+                  <span class="std-pdf-icon" style="background:rgba(59,130,246,.12);color:var(--blue)">💧</span>
+                  <div class="std-pdf-info"><div class="std-pdf-name">AS/NZS 3500.1</div><div class="std-pdf-desc">Water Services</div></div>
+                  <span class="std-pdf-arrow">↗</span>
+                </a>
+                <a href="https://drive.google.com/file/d/16zB2buXfz0KjhM1wepPjVf154HfjwgVh/view?usp=sharing" target="_blank" rel="noopener" class="std-pdf-btn">
+                  <span class="std-pdf-icon" style="background:rgba(74,222,128,.12);color:var(--green)">🔩</span>
+                  <div class="std-pdf-info"><div class="std-pdf-name">AS/NZS 3500.2</div><div class="std-pdf-desc">Sanitary Plumbing &amp; Drainage</div></div>
+                  <span class="std-pdf-arrow">↗</span>
+                </a>
+                <a href="https://drive.google.com/file/d/1E9nPD7zAsKB7xO8xHDa2Z5m5eHwQYA2X/view?usp=sharing" target="_blank" rel="noopener" class="std-pdf-btn">
+                  <span class="std-pdf-icon" style="background:rgba(167,139,250,.12);color:var(--purple)">🌧️</span>
+                  <div class="std-pdf-info"><div class="std-pdf-name">AS/NZS 3500.3</div><div class="std-pdf-desc">Stormwater Drainage</div></div>
+                  <span class="std-pdf-arrow">↗</span>
+                </a>
+                <a href="https://drive.google.com/file/d/1i2s-JjLSTKhDaySaQjb0R3Yob19C_rzK/view?usp=sharing" target="_blank" rel="noopener" class="std-pdf-btn">
+                  <span class="std-pdf-icon" style="background:rgba(248,113,113,.12);color:var(--red)">🌡️</span>
+                  <div class="std-pdf-info"><div class="std-pdf-name">AS/NZS 3500.4</div><div class="std-pdf-desc">Heated Water Services</div></div>
+                  <span class="std-pdf-arrow">↗</span>
+                </a>
+                <a href="https://drive.google.com/file/d/1nOIdsC_tIlN1cs-uSlf_HE1K_hFF9N8F/view?usp=sharing" target="_blank" rel="noopener" class="std-pdf-btn">
+                  <span class="std-pdf-icon" style="background:rgba(251,191,36,.12);color:#fbbf24">🔥</span>
+                  <div class="std-pdf-info"><div class="std-pdf-name">AS/NZS 5601.2</div><div class="std-pdf-desc">Gas — Boats &amp; Caravans</div></div>
+                  <span class="std-pdf-arrow">↗</span>
+                </a>
+                <a href="https://drive.google.com/file/d/1uNgk1P71NeASOCowubaHqkRA5wl6kQhc/view?usp=sharing" target="_blank" rel="noopener" class="std-pdf-btn">
+                  <span class="std-pdf-icon" style="background:rgba(74,222,128,.12);color:var(--green)">🔩</span>
+                  <div class="std-pdf-info"><div class="std-pdf-name">AS/NZS 3500.2 (copy)</div><div class="std-pdf-desc">Sanitary Plumbing &amp; Drainage</div></div>
+                  <span class="std-pdf-arrow">↗</span>
+                </a>
+              </div>
+            </div>
+          </div>
 
           <!-- ── QUICK REFERENCE ─────────────────────────────── -->
           <div class="qr-card" id="std-qr">
