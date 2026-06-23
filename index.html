@@ -582,13 +582,376 @@ body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
     </div>
 
     <div class="screen" id="screen-training">
+      <style>
+      .tr-wrap{padding:12px;padding-bottom:28px}
+      .tr-intro{background:var(--surface);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;border-left:4px solid var(--orange)}
+      .tr-intro-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px}
+      .tr-intro-sub{font-size:12px;color:var(--text-mid)}
+      .tr-step{margin-bottom:8px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border2)}
+      .tr-step-header{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;width:100%;border:none;font-family:var(--font);text-align:left}
+      .tr-step-header:active{opacity:.8}
+      .tr-step-num{width:26px;height:26px;border-radius:50%;background:var(--orange);color:#000;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+      .tr-step-title{flex:1;font-size:14px;font-weight:600;color:var(--text)}
+      .tr-step-chevron{font-size:11px;color:var(--text-dim);transition:transform .2s}
+      .tr-step.open .tr-step-chevron{transform:rotate(180deg)}
+      .tr-step-body{display:none;background:var(--surface2);padding:0 14px 14px;border-top:1px solid var(--border)}
+      .tr-step.open .tr-step-body{display:block}
+      .tr-instruction{padding-top:12px;font-size:13px;color:var(--text);line-height:1.6}
+      .tr-instruction p{margin:0 0 10px}
+      .tr-tip{background:rgba(249,115,22,.08);border-left:3px solid var(--orange);padding:8px 10px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:12px;color:var(--text);margin:10px 0;line-height:1.5}
+      .tr-warning{background:rgba(248,113,113,.08);border-left:3px solid var(--red);padding:8px 10px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:12px;color:var(--text);margin:10px 0;line-height:1.5}
+      .tr-how{margin:10px 0}
+      .tr-how-title{font-size:11px;font-weight:700;color:var(--orange);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+      .tr-how ol{margin:0;padding-left:18px}
+      .tr-how ol li{margin-bottom:6px;font-size:13px;color:var(--text)}
+      .tr-items{margin:10px 0}
+      .tr-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);line-height:1.4}
+      .tr-item:last-child{border-bottom:none}
+      .tr-icon{font-size:18px;flex-shrink:0;width:24px;text-align:center}
+      .tr-rates{margin:10px 0}
+      .tr-rate{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+      .tr-rate:last-child{border-bottom:none}
+      .tr-rate-name{font-weight:600;color:var(--text);width:110px;flex-shrink:0}
+      .tr-rate-price{color:var(--orange);font-weight:700;width:70px;flex-shrink:0}
+      .tr-rate-desc{color:var(--text-mid);font-size:12px}
+      .tr-issue{padding:10px 0;border-bottom:1px solid var(--border)}
+      .tr-issue:last-child{border-bottom:none}
+      .tr-issue-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px}
+      .tr-issue-fix{font-size:12px;color:var(--text-mid);line-height:1.5}
+      .tr-footer{text-align:center;padding:16px;font-size:12px;color:var(--text-mid);margin-top:8px}
+      </style>
       <div class="screen-scroll">
-        <div style="padding:20px 16px">
-          <div style="font-size:22px;font-weight:700;margin-bottom:4px">🎓 Training Roadmap</div>
-          <div style="font-size:13px;color:var(--text-mid);margin-bottom:24px">Step-by-step guide for using the IPD app</div>
-          <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:20px;text-align:center;color:var(--text-mid);font-size:14px">
-            Content coming soon — training steps will be added here.
+        <div class="tr-wrap">
+
+          <div class="tr-intro">
+            <div class="tr-intro-title">IPD App — How To Use</div>
+            <div class="tr-intro-sub">Follow these steps in order. Take your time — once you know it, it's quick.</div>
           </div>
+
+          <!-- STEP 1 -->
+          <div class="tr-step open">
+            <button class="tr-step-header" onclick="toggleStep(this)">
+              <div class="tr-step-num">1</div>
+              <div class="tr-step-title">Opening the App</div>
+              <div class="tr-step-chevron">▼</div>
+            </button>
+            <div class="tr-step-body">
+              <div class="tr-instruction">
+                <p>The IPD app lives in your phone's browser — it is not downloaded from the App Store. It works like a website but behaves like an app.</p>
+                <div class="tr-tip">💡 <strong>Add it to your home screen</strong> so you can open it with one tap, just like any other app.</div>
+                <div class="tr-how">
+                  <div class="tr-how-title">How to add to home screen (iPhone):</div>
+                  <ol>
+                    <li>Open Safari and go to the app link your manager gave you</li>
+                    <li>Tap the <strong>Share button</strong> (box with arrow pointing up) at the bottom of the screen</li>
+                    <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+                    <li>Tap <strong>Add</strong> — the IPD icon will appear on your home screen</li>
+                  </ol>
+                </div>
+                <div class="tr-how">
+                  <div class="tr-how-title">How to add to home screen (Android):</div>
+                  <ol>
+                    <li>Open Chrome and go to the app link</li>
+                    <li>Tap the <strong>three dots menu</strong> (top right)</li>
+                    <li>Tap <strong>"Add to Home screen"</strong></li>
+                    <li>Tap <strong>Add</strong></li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2 -->
+          <div class="tr-step">
+            <button class="tr-step-header" onclick="toggleStep(this)">
+              <div class="tr-step-num">2</div>
+              <div class="tr-step-title">The Home Screen</div>
+              <div class="tr-step-chevron">▼</div>
+            </button>
+            <div class="tr-step-body">
+              <div class="tr-instruction">
+                <p>When you open the app you'll see the <strong>Home Screen</strong>. This is your starting point for everything.</p>
+                <div class="tr-items">
+                  <div class="tr-item"><span class="tr-icon">🔧</span><div><strong>New Quote</strong> — Start a quote for a job. Use this for pricing up work for a customer.</div></div>
+                  <div class="tr-item"><span class="tr-icon">📦</span><div><strong>Stock Order</strong> — Build a list of materials you need to order from Reece. Prices come through automatically.</div></div>
+                  <div class="tr-item"><span class="tr-icon">🎓</span><div><strong>Training</strong> — This guide you're reading right now.</div></div>
+                  <div class="tr-item"><span class="tr-icon">📋</span><div><strong>Australian Standards</strong> — Quick reference for AS3500, AS1428, AS5601 and other compliance standards.</div></div>
+                  <div class="tr-item"><span class="tr-icon">✨</span><div><strong>AI Assistant</strong> — Ask it plumbing questions, get help with compliance, or troubleshoot issues.</div></div>
+                  <div class="tr-item"><span class="tr-icon">💬</span><div><strong>WhatsApp</strong> — Quick link to contact the office.</div></div>
+                </div>
+                <div class="tr-tip">💡 The <strong>bottom bar</strong> has navigation buttons — Quote, Labour, Review, and more. These appear once you're in a job.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3 -->
+          <div class="tr-step">
+            <button class="tr-step-header" onclick="toggleStep(this)">
+              <div class="tr-step-num">3</div>
+              <div class="tr-step-title">Starting a Quote — Enter the Job Number</div>
+              <div class="tr-step-chevron">▼</div>
+            </button>
+            <div class="tr-step-body">
+              <div class="tr-instruction">
+                <p>Before you add anything to a quote, you need to enter the <strong>SM8 job number</strong>. This links your quote to the correct job in ServiceM8.</p>
+                <div class="tr-how">
+                  <div class="tr-how-title">How to do it:</div>
+                  <ol>
+                    <li>Tap <strong>New Quote</strong> on the home screen</li>
+                    <li>At the top of the screen you'll see a <strong>Job Number</strong> field</li>
+                    <li>Tap it and type in the job number — you'll find this in ServiceM8 (e.g. <strong>7282</strong>)</li>
+                  </ol>
+                </div>
+                <div class="tr-warning">⚠️ <strong>Always enter the job number first</strong> before adding items. If you forget, the quote won't link to the right job in SM8.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 4 -->
+          <div class="tr-step">
+            <button class="tr-step-header" onclick="toggleStep(this)">
+              <div class="tr-step-num">4</div>
+              <div class="tr-step-title">Searching for Reece Products</div>
+              <div class="tr-step-chevron">▼</div>
+            </button>
+            <div class="tr-step-body">
+              <div class="tr-instruction">
+                <p>The app searches the full Reece product catalogue — over 42,000 products — directly from your phone.</p>
+                <div class="tr-how">
+                  <div class="tr-how-title">How to search:</div>
+                  <ol>
+                    <li>Make sure the <strong>Reece</strong> tab is selected (not Bundles)</li>
+                    <li>Type what you're looking for in the search bar — e.g. <strong>"15mm comp tee"</strong> or <strong>"isolation valve"</strong></li>
+                    <li>Results appear below — scroll through to find the right product</li>
+                    <li>Tap the <strong>+ button</strong> next to the item to add it to your quote</li>
+                    <li>Tap + again to increase the quantity, or use the <strong>− button</strong> to reduce it</li>
+                  </ol>
+                </div>
+                <div class="tr-tip">💡 <strong>Search tips:</strong> Use the size and type — "20mm ball valve" works better than just "valve". The more specific you are, the better the results.</div>
+                <div class="tr-tip">💡 You can also tap the <strong>🎤 microphone button</strong> to search by voice — just say the product name out loud.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 5 -->
+          <div class="tr-step">
+            <button class="tr-step-header" onclick="toggleStep(this)">
+              <div class="tr-step-num">5</div>
+              <div class="tr-step-title">Using Bundles</div>
+              <div class="tr-step-chevron">▼</div>
+            </button>
+            <div class="tr-step-body">
+              <div class="tr-instruction">
+                <p>Bundles are pre-built material lists for common jobs — like a hot water unit changeout or a new bathroom fit-off. Instead of searching for each item one by one, you add the whole bundle at once.</p>
+                <div class="tr-how">
+                  <div class="tr-how-title">How to use a bundle:</div>
+                  <ol>
+                    <li>Tap the <strong>Bundles</strong> tab at the top of the search screen</li>
+                    <li>Type the job type — e.g. <strong>"hot water"</strong> or <strong>"basin"</strong></li>
+                    <li>Find the bundle you want and tap it</li>
+                    <li>All items from the bundle are added to your quote automatically</li>
+                    <li>You can then adjust quantities or add extra items from Reece</li>
+                  </ol>
+                </div>
+                <div class="tr-tip">💡 Bundles save a lot of time on repeat jobs. Ask your supervisor which bundles are set up for common IPD jobs.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 6 -->
+          <div class="tr-step">
+            <button class="tr-step-header" onclick="toggleStep(this)">
+              <div class="tr-step-num">6</div>
+              <div class="tr-step-title">Adding Labour</div>
+              <div class="tr-step-chevron">▼</div>
+            </button>
+            <div class="tr-step-body">
+              <div class="tr-instruction">
+                <p>After adding your materials, you need to add the labour charge. This covers the time spent on the job.</p>
+                <div class="tr-how">
+                  <div class="tr-how-title">How to add labour:</div>
+                  <ol>
+                    <li>Tap the <strong>Labour</strong> button on the bottom navigation bar</li>
+                    <li>Select the correct <strong>rate type</strong>:</li>
+                  </ol>
+                </div>
+                <div class="tr-rates">
+                  <div class="tr-rate"><span class="tr-rate-name">Standard</span><span class="tr-rate-price">$229/hr</span><span class="tr-rate-desc">Normal tradie rate</span></div>
+                  <div class="tr-rate"><span class="tr-rate-name">2nd Tradesman</span><span class="tr-rate-price">$160/hr</span><span class="tr-rate-desc">Second tradie on same job</span></div>
+                  <div class="tr-rate"><span class="tr-rate-name">Builder Rate</span><span class="tr-rate-price">$195/hr</span><span class="tr-rate-desc">For builder clients</span></div>
+                  <div class="tr-rate"><span class="tr-rate-name">Apprentice</span><span class="tr-rate-price">$100/hr</span><span class="tr-rate-desc">Apprentice labour</span></div>
+                  <div class="tr-rate"><span class="tr-rate-name">Service Fee</span><span class="tr-rate-price">$88 flat</span><span class="tr-rate-desc">Call-out / service charge</span></div>
+                </div>
+                <div class="tr-how" style="margin-top:10px">
+                  <ol start="3">
+                    <li>Enter the number of <strong>hours</strong> (e.g. 2.5 for two and a half hours)</li>
+                    <li>The labour line is added to your quote automatically</li>
+                  </ol>
+                </div>
+                <div class="tr-warning">⚠️ If you're unsure which rate to use, ask your supervisor before sending the quote.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 7 -->
+          <div class="tr-step">
+            <button class="tr-step-header" onclick="toggleStep(this)">
+              <div class="tr-step-num">7</div>
+              <div class="tr-step-title">Reviewing Your Quote</div>
+              <div class="tr-step-chevron">▼</div>
+            </button>
+            <div class="tr-step-body">
+              <div class="tr-instruction">
+                <p>Before sending anything to SM8, always review your quote to make sure everything is correct.</p>
+                <div class="tr-how">
+                  <div class="tr-how-title">How to review:</div>
+                  <ol>
+                    <li>Tap the <strong>Review</strong> button on the bottom navigation bar</li>
+                    <li>Check each item — name, quantity, and price</li>
+                    <li>Check the labour lines are correct</li>
+                    <li>Check the <strong>job number</strong> at the top is correct</li>
+                    <li>If anything is wrong, go back and fix it before sending</li>
+                  </ol>
+                </div>
+                <div class="tr-tip">💡 It's much easier to fix a mistake here than after it's been sent to SM8.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 8 -->
+          <div class="tr-step">
+            <button class="tr-step-header" onclick="toggleStep(this)">
+              <div class="tr-step-num">8</div>
+              <div class="tr-step-title">Sending to ServiceM8</div>
+              <div class="tr-step-chevron">▼</div>
+            </button>
+            <div class="tr-step-body">
+              <div class="tr-instruction">
+                <p>Once you're happy with everything, send the quote to SM8. It will appear on the job automatically — no typing required.</p>
+                <div class="tr-how">
+                  <div class="tr-how-title">How to send:</div>
+                  <ol>
+                    <li>Make sure the <strong>job number</strong> is entered correctly</li>
+                    <li>Tap the <strong>Send to ServiceM8</strong> button</li>
+                    <li>Wait for the green confirmation message — <strong>"Quote sent to ServiceM8!"</strong></li>
+                    <li>Open SM8 and check the job — all your items should be there with prices</li>
+                  </ol>
+                </div>
+                <div class="tr-warning">⚠️ If you get an error message, check the job number is correct and try again. If it still fails, contact the office.</div>
+                <div class="tr-tip">💡 After sending, the quote resets so you're ready for the next job.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 9 -->
+          <div class="tr-step">
+            <button class="tr-step-header" onclick="toggleStep(this)">
+              <div class="tr-step-num">9</div>
+              <div class="tr-step-title">Doing a Stock Order</div>
+              <div class="tr-step-chevron">▼</div>
+            </button>
+            <div class="tr-step-body">
+              <div class="tr-instruction">
+                <p>A stock order is used when you need to order materials from Reece — not for quoting a customer, just for getting your materials sorted.</p>
+                <div class="tr-how">
+                  <div class="tr-how-title">How to do a stock order:</div>
+                  <ol>
+                    <li>Tap <strong>Stock Order</strong> on the home screen</li>
+                    <li>Search for each product you need using the Reece search tab</li>
+                    <li>Tap <strong>+</strong> to add items and set quantities</li>
+                    <li>You'll see the <strong>cost price</strong> (what IPD pays Reece) — not the retail price</li>
+                    <li>Once you have everything, tap <strong>Send to ServiceM8</strong></li>
+                    <li>The order will appear in SM8 for the office to process</li>
+                  </ol>
+                </div>
+                <div class="tr-tip">💡 Stock orders use cost prices — this is what helps the office track spending. Don't worry about markup on stock orders.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 10 -->
+          <div class="tr-step">
+            <button class="tr-step-header" onclick="toggleStep(this)">
+              <div class="tr-step-num">10</div>
+              <div class="tr-step-title">Dark Mode &amp; Settings</div>
+              <div class="tr-step-chevron">▼</div>
+            </button>
+            <div class="tr-step-body">
+              <div class="tr-instruction">
+                <p>The app has a dark mode for working at night or in low light conditions.</p>
+                <div class="tr-how">
+                  <div class="tr-how-title">How to toggle dark mode:</div>
+                  <ol>
+                    <li>Look for the <strong>🌙 moon icon</strong> on the home screen or top bar</li>
+                    <li>Tap it to switch between dark and light mode</li>
+                    <li>The setting is saved — it will remember your preference next time</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 11 -->
+          <div class="tr-step">
+            <button class="tr-step-header" onclick="toggleStep(this)">
+              <div class="tr-step-num">11</div>
+              <div class="tr-step-title">Using the AI Assistant</div>
+              <div class="tr-step-chevron">▼</div>
+            </button>
+            <div class="tr-step-body">
+              <div class="tr-instruction">
+                <p>The AI Assistant is a built-in tool you can ask plumbing questions, compliance questions, or get help with anything job-related.</p>
+                <div class="tr-how">
+                  <div class="tr-how-title">How to use it:</div>
+                  <ol>
+                    <li>Tap the <strong>AI Assistant (✨)</strong> icon on the home screen</li>
+                    <li>Type your question — e.g. <strong>"What is the minimum grade for a DN100 drain?"</strong></li>
+                    <li>Read the answer — it draws on Australian plumbing standards</li>
+                  </ol>
+                </div>
+                <div class="tr-tip">💡 Good for quick compliance checks on site. Always double-check critical decisions with your supervisor or the full standard.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 12 -->
+          <div class="tr-step">
+            <button class="tr-step-header" onclick="toggleStep(this)">
+              <div class="tr-step-num">12</div>
+              <div class="tr-step-title">Troubleshooting Common Issues</div>
+              <div class="tr-step-chevron">▼</div>
+            </button>
+            <div class="tr-step-body">
+              <div class="tr-instruction">
+                <div class="tr-issue">
+                  <div class="tr-issue-title">❌ Quote sent but nothing appears in SM8</div>
+                  <div class="tr-issue-fix">Check the job number is correct. Open SM8 and look at the job — sometimes it takes 30 seconds to appear. If still nothing, try sending again.</div>
+                </div>
+                <div class="tr-issue">
+                  <div class="tr-issue-title">❌ Can't find a product in the search</div>
+                  <div class="tr-issue-fix">Try different words — e.g. "compression" instead of "comp", or just the size like "15mm tee". If still not found, add it manually in SM8 after sending.</div>
+                </div>
+                <div class="tr-issue">
+                  <div class="tr-issue-title">❌ Prices showing as $0.00</div>
+                  <div class="tr-issue-fix">This can happen with some product codes. Send the quote anyway and open the job in SM8 — tap the green Reece button next to the item to pull the price through manually.</div>
+                </div>
+                <div class="tr-issue">
+                  <div class="tr-issue-title">❌ App not loading or showing a blank screen</div>
+                  <div class="tr-issue-fix">Close the app completely and reopen it. If on poor signal, wait until you have better reception. The app needs internet to search products and send to SM8.</div>
+                </div>
+                <div class="tr-issue">
+                  <div class="tr-issue-title">❌ Sent to wrong job number</div>
+                  <div class="tr-issue-fix">Open SM8, find the wrong job, and delete the items. Then redo the quote with the correct job number. Let your supervisor know.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tr-footer">
+            <div>Questions? Contact the office via WhatsApp or call Matt.</div>
+            <div style="margin-top:6px;color:var(--orange)">Innovation Plumbing + Design</div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -2098,6 +2461,11 @@ function addLabourToQuote() {
 // ── UTILS ─────────────────────────────────────────────────────────────────────
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// ── TRAINING SCREEN ───────────────────────────────────────────────────────────
+function toggleStep(header) {
+  header.closest('.tr-step').classList.toggle('open');
+}
 
 // ── STANDARDS SCREEN ──────────────────────────────────────────────────────────
 function toggleStd(id) {
