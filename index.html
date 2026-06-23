@@ -779,6 +779,7 @@ const CAT_COLORS = {
 };
 
 let onHand = {}, stockCat = 'ALL', quoteCat = 'All', activeScreen = 'stock';
+let reeceCache = {};
 let bundles = [], reece = [], knowledge = [], quote = [];
 let dataLoaded = false;
 let recognition = null, isListening = false;
@@ -974,6 +975,7 @@ function bundleCard(b) {
   return `<div class="item-card"><div class="item-icon bundle">📦</div><div class="item-body"><div class="item-name">${esc(b.name)}</div>${b.code?`<div class="item-code">${esc(b.code)}</div>`:''}<span class="item-cat">${esc(b.category||'')}</span></div><div class="item-right"><div class="item-price ${price?'':'dim'}">${price||'No price'}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${b.uuid}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${b.uuid}',1)">+</button></div>`:`<button class="add-btn" onclick="addBundle('${esc(b.uuid)}')">+</button>`}</div></div>`;
 }
 function reeceCard(r) {
+  reeceCache[r.code] = r;
   const id='r_'+r.code; const inQ=quote.find(i=>i.id===id);
   const p=parseFloat(r.retail); const retail=(!isNaN(p)&&p>0)?'$'+p.toFixed(2):'';
   const cp=parseFloat(r.cost);
@@ -1027,7 +1029,7 @@ function addBundle(uuid) {
   updateQuoteUI(); renderQResults(); showToast('Added to quote');
 }
 function addReece(code) {
-  const r = reece.find(x=>x.code===code); if(!r) return;
+  const r = reeceCache[code]; if(!r) return;
   const id='r_'+code; const ex=quote.find(i=>i.id===id);
   if(ex) ex.qty++; else quote.push({id,type:'reece',name:r.name,code:r.code,price:parseFloat(r.retail)||0,cost:parseFloat(r.cost)||0,markup:r.markup,qty:1});
   updateQuoteUI(); renderQResults(); showToast('Added to quote');
