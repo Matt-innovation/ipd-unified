@@ -298,6 +298,11 @@ body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
             <div class="home-card-label">AI Review</div>
             <div class="home-card-desc">Review stock order with AI</div>
           </div>
+          <a class="home-card" href="https://wa.me/61730732666" target="_blank" style="text-decoration:none;color:inherit">
+            <div class="home-card-icon">💬</div>
+            <div class="home-card-label">WhatsApp</div>
+            <div class="home-card-desc">Message the office directly</div>
+          </a>
         </div>
       </div>
     </div>
@@ -391,6 +396,9 @@ body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
           <div class="total-row"><span>Subtotal (ex GST)</span><span id="t-sub">$0.00</span></div>
           <div class="total-row"><span>GST (10%)</span><span id="t-gst">$0.00</span></div>
           <div class="total-row grand"><span>Total inc GST</span><span id="t-total">$0.00</span></div>
+        </div>
+        <div style="padding:8px 12px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0">
+          <input type="text" id="job-number-input" placeholder="Job number (optional)" style="width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:13px;font-family:var(--font);outline:none">
         </div>
         <div class="quote-actions">
           <button class="q-btn" onclick="clearQuote()">🗑 Clear</button>
@@ -1071,9 +1079,10 @@ function exportQuote() {
 async function sendQuoteToSM8() {
   if(!quote.length){showToast('Nothing to send');return;}
   const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0);
+  const jobNumber=(document.getElementById('job-number-input')?.value||'').trim();
   showToast('Sending to ServiceM8...');
   try {
-    const res=await fetch(PROXY+'/send-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quoteItems:quote.map(i=>({name:i.name,qty:i.qty,price:i.price,code:i.code||'',type:i.type||'reece',uuid:i.type==='bundle'?i.id:''})),totalInc})});
+    const res=await fetch(PROXY+'/send-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quoteItems:quote.map(i=>({name:i.name,qty:i.qty,price:i.price,code:i.code||'',type:i.type||'reece',uuid:i.type==='bundle'?i.id:''})),totalInc,jobNumber})});
     const data=await res.json();
     if(res.ok&&data.success){
       showToast('✅ Quote sent to ServiceM8!');
