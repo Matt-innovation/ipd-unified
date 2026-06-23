@@ -594,15 +594,296 @@ body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
     </div>
 
     <div class="screen" id="screen-standards">
-      <div class="screen-scroll">
-        <div style="padding:20px 16px">
-          <div style="font-size:22px;font-weight:700;margin-bottom:4px">📐 Australian Standards</div>
-          <div style="font-size:13px;color:var(--text-mid);margin-bottom:24px">Quick reference for AS3500, AS1428, AS5601 &amp; more</div>
-          <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:20px;text-align:center;color:var(--text-mid);font-size:14px">
-            Content coming soon — standards reference will be added here.
-          </div>
+      <style>
+      .std-top{padding:11px 14px 8px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+      .std-title-text{font-size:20px;font-weight:700;line-height:1.2}
+      .std-sub-text{font-size:12px;color:var(--text-mid);margin-top:2px}
+      .std-search-wrap{position:relative;margin-top:8px}
+      .std-search-wrap input{width:100%;padding:8px 10px 8px 32px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);color:var(--text);background:var(--surface2);outline:none}
+      .std-search-wrap input:focus{border-color:var(--orange)}
+      .std-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text-dim);pointer-events:none;line-height:1}
+      .std-wrap{padding:12px 14px;display:flex;flex-direction:column;gap:10px;padding-bottom:20px}
+      .std-section{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden}
+      .std-hd{width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:none;border:none;cursor:pointer;font-family:var(--font);text-align:left;-webkit-tap-highlight-color:transparent}
+      .std-hd:active{background:var(--surface2)}
+      .std-hd-left{display:flex;align-items:center;gap:10px}
+      .std-sect-icon{width:34px;height:34px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+      .std-sect-name{font-size:13px;font-weight:700;color:var(--text)}
+      .std-sect-desc{font-size:11px;color:var(--text-mid);margin-top:1px}
+      .std-chev{color:var(--text-dim);font-size:11px;transition:transform .2s;flex-shrink:0;margin-left:8px}
+      .std-chev.open{transform:rotate(180deg)}
+      .std-body{display:none;border-top:1px solid var(--border)}
+      .std-body.open{display:block}
+      .std-sub{padding:10px 14px;border-bottom:1px solid var(--border)}
+      .std-sub:last-child{border-bottom:none}
+      .std-sub-title{font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+      .std-kv{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px;gap:8px}
+      .std-kv:last-of-type{border-bottom:none}
+      .std-kv-k{color:var(--text-mid);flex:1}
+      .std-kv-v{font-weight:700;color:var(--text);text-align:right;white-space:nowrap}
+      .std-kv-v.hi{color:var(--orange)}
+      .std-kv-v.ok{color:var(--green)}
+      .std-kv-v.warn{color:var(--red)}
+      .std-kv-v.blue{color:var(--blue)}
+      .std-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
+      .std-tbl th{text-align:left;padding:5px 7px;font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border2);background:var(--surface2)}
+      .std-tbl td{padding:6px 7px;border-bottom:1px solid var(--border);color:var(--text);font-size:12px}
+      .std-tbl tr:last-child td{border-bottom:none}
+      .std-tbl td:first-child{font-weight:700;color:var(--orange);font-family:var(--mono);font-size:11px}
+      .std-note{font-size:11px;color:var(--text-mid);line-height:1.5;padding:6px 8px;background:rgba(59,130,246,.06);border-radius:var(--radius-sm);margin-top:6px;border-left:3px solid var(--blue)}
+      .std-warn-box{font-size:11px;color:var(--red);line-height:1.5;padding:6px 8px;background:rgba(248,113,113,.06);border-radius:var(--radius-sm);margin-top:6px;border-left:3px solid var(--red)}
+      .qr-card{background:linear-gradient(135deg,rgba(59,130,246,.07),rgba(167,139,250,.07));border:1px solid rgba(59,130,246,.18);border-radius:var(--radius);padding:12px 14px}
+      .qr-card-title{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+      .qr-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+      .qr-item{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 10px}
+      .qr-val{font-size:15px;font-weight:700;color:var(--orange);line-height:1}
+      .qr-lbl{font-size:10px;color:var(--text-mid);margin-top:3px;line-height:1.3}
+      .std-no-result{text-align:center;padding:30px 16px;color:var(--text-dim);font-size:13px;display:none}
+      </style>
+
+      <!-- Fixed header + search -->
+      <div class="std-top">
+        <div class="std-title-text">📐 Australian Standards</div>
+        <div class="std-sub-text">AS/NZS 3500.1 · 3500.2 · 3500.4 Quick Reference</div>
+        <div class="std-search-wrap">
+          <span class="std-search-icon">🔍</span>
+          <input type="text" id="std-search" placeholder="Search standards…" oninput="stdSearch(this.value)">
         </div>
       </div>
+
+      <!-- Scrollable body -->
+      <div class="screen-scroll">
+        <div class="std-wrap" id="std-wrap">
+
+          <!-- ── QUICK REFERENCE ─────────────────────────────── -->
+          <div class="qr-card" id="std-qr">
+            <div class="qr-card-title">⚡ Quick Reference — Critical Numbers</div>
+            <div class="qr-grid">
+              <div class="qr-item"><div class="qr-val">50 kPa</div><div class="qr-lbl">Min operating pressure</div></div>
+              <div class="qr-item"><div class="qr-val">500 kPa</div><div class="qr-lbl">Max static pressure</div></div>
+              <div class="qr-item"><div class="qr-val">3.0 m/s</div><div class="qr-lbl">Max flow velocity</div></div>
+              <div class="qr-item"><div class="qr-val">1,500 kPa</div><div class="qr-lbl">Min pressure test</div></div>
+              <div class="qr-item"><div class="qr-val">≥ 60°C</div><div class="qr-lbl">Hot water storage min</div></div>
+              <div class="qr-item"><div class="qr-val">≤ 50°C</div><div class="qr-lbl">Residential TMV max</div></div>
+              <div class="qr-item"><div class="qr-val">≤ 45°C</div><div class="qr-lbl">High-risk facility TMV</div></div>
+              <div class="qr-item"><div class="qr-val">10°C</div><div class="qr-lbl">Min hot/cold differential</div></div>
+              <div class="qr-item"><div class="qr-val">1 : 100</div><div class="qr-lbl">DN100 drain grade</div></div>
+              <div class="qr-item"><div class="qr-val">25 mm</div><div class="qr-lbl">Min trap seal depth</div></div>
+              <div class="qr-item"><div class="qr-val">300 mm</div><div class="qr-lbl">Min burial depth (outside)</div></div>
+              <div class="qr-item"><div class="qr-val">150 mm</div><div class="qr-lbl">Stack vent above roof</div></div>
+            </div>
+          </div>
+
+          <!-- ── AS/NZS 3500.1 WATER SERVICES ──────────────── -->
+          <div class="std-section" id="std-s1">
+            <button class="std-hd" onclick="toggleStd('std-s1')">
+              <div class="std-hd-left">
+                <div class="std-sect-icon" style="background:rgba(59,130,246,.12);color:var(--blue)">💧</div>
+                <div>
+                  <div class="std-sect-name">AS/NZS 3500.1</div>
+                  <div class="std-sect-desc">Water Services</div>
+                </div>
+              </div>
+              <span class="std-chev" id="std-s1-chev">▼</span>
+            </button>
+            <div class="std-body" id="std-s1-body">
+
+              <div class="std-sub">
+                <div class="std-sub-title">Pressure Requirements</div>
+                <div class="std-kv"><span class="std-kv-k">Minimum operating pressure at outlet</span><span class="std-kv-v hi">50 kPa</span></div>
+                <div class="std-kv"><span class="std-kv-k">Maximum static pressure (mains)</span><span class="std-kv-v warn">500 kPa</span></div>
+                <div class="std-kv"><span class="std-kv-k">Recommended PRV set point</span><span class="std-kv-v">350 – 400 kPa</span></div>
+                <div class="std-kv"><span class="std-kv-k">Maximum flow velocity</span><span class="std-kv-v warn">3.0 m/s</span></div>
+                <div class="std-kv"><span class="std-kv-k">Velocity (water hammer prevention)</span><span class="std-kv-v">≤ 1.5 m/s</span></div>
+                <div class="std-note">PRV required wherever mains pressure exceeds 500 kPa. Install on cold-water main before HWS.</div>
+              </div>
+
+              <div class="std-sub">
+                <div class="std-sub-title">Pressure Testing</div>
+                <div class="std-kv"><span class="std-kv-k">Test pressure (minimum)</span><span class="std-kv-v hi">1,500 kPa</span></div>
+                <div class="std-kv"><span class="std-kv-k">Or 1.5× max working pressure</span><span class="std-kv-v">(whichever is greater)</span></div>
+                <div class="std-kv"><span class="std-kv-k">Duration</span><span class="std-kv-v">30 minutes</span></div>
+                <div class="std-kv"><span class="std-kv-k">Allowable pressure drop</span><span class="std-kv-v ok">Nil</span></div>
+              </div>
+
+              <div class="std-sub">
+                <div class="std-sub-title">Minimum Burial Depth (Cover)</div>
+                <div class="std-kv"><span class="std-kv-k">Outside building — general ground</span><span class="std-kv-v hi">300 mm</span></div>
+                <div class="std-kv"><span class="std-kv-k">Inside building (in sand/bedding)</span><span class="std-kv-v hi">150 mm</span></div>
+                <div class="std-kv"><span class="std-kv-k">Under vehicle driveway</span><span class="std-kv-v warn">600 mm</span></div>
+                <div class="std-kv"><span class="std-kv-k">Under road (heavy traffic)</span><span class="std-kv-v warn">900 mm</span></div>
+                <div class="std-kv"><span class="std-kv-k">Frost protection (where exposed)</span><span class="std-kv-v">Required</span></div>
+              </div>
+
+              <div class="std-sub">
+                <div class="std-sub-title">Common Pipe Sizes</div>
+                <table class="std-tbl">
+                  <thead><tr><th>DN Size</th><th>Typical Use</th><th>Max Velocity</th></tr></thead>
+                  <tbody>
+                    <tr><td>DN15</td><td>Fixtures, taps, outlets</td><td>3.0 m/s</td></tr>
+                    <tr><td>DN20</td><td>Branch mains, HWS</td><td>3.0 m/s</td></tr>
+                    <tr><td>DN25</td><td>Sub-mains, trunk lines</td><td>3.0 m/s</td></tr>
+                    <tr><td>DN32</td><td>Rising mains</td><td>3.0 m/s</td></tr>
+                    <tr><td>DN40</td><td>Mains, fire services</td><td>3.0 m/s</td></tr>
+                    <tr><td>DN50</td><td>Mains, commercial</td><td>3.0 m/s</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="std-sub">
+                <div class="std-sub-title">Backflow Prevention</div>
+                <div class="std-kv"><span class="std-kv-k">High hazard (sewage, chemicals)</span><span class="std-kv-v warn">RP Valve required</span></div>
+                <div class="std-kv"><span class="std-kv-k">Medium hazard (garden irrigation)</span><span class="std-kv-v hi">DCV or RP Valve</span></div>
+                <div class="std-kv"><span class="std-kv-k">Low hazard (general plumbing)</span><span class="std-kv-v">Check valve</span></div>
+                <div class="std-kv"><span class="std-kv-k">RP valve annual inspection</span><span class="std-kv-v warn">Required (high hazard)</span></div>
+                <div class="std-warn-box">Backflow prevention required at ALL cross-connections between potable and non-potable water.</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ── AS/NZS 3500.2 SANITARY DRAINAGE ───────────── -->
+          <div class="std-section" id="std-s2">
+            <button class="std-hd" onclick="toggleStd('std-s2')">
+              <div class="std-hd-left">
+                <div class="std-sect-icon" style="background:rgba(74,222,128,.12);color:var(--green)">🔩</div>
+                <div>
+                  <div class="std-sect-name">AS/NZS 3500.2</div>
+                  <div class="std-sect-desc">Sanitary Plumbing &amp; Drainage</div>
+                </div>
+              </div>
+              <span class="std-chev" id="std-s2-chev">▼</span>
+            </button>
+            <div class="std-body" id="std-s2-body">
+
+              <div class="std-sub">
+                <div class="std-sub-title">Minimum Drain Grades</div>
+                <table class="std-tbl">
+                  <thead><tr><th>Pipe Size</th><th>Min Grade</th><th>mm / metre</th></tr></thead>
+                  <tbody>
+                    <tr><td>DN40</td><td>1 : 40</td><td>25.0 mm/m</td></tr>
+                    <tr><td>DN50</td><td>1 : 40</td><td>25.0 mm/m</td></tr>
+                    <tr><td>DN65</td><td>1 : 60</td><td>16.7 mm/m</td></tr>
+                    <tr><td>DN80</td><td>1 : 60</td><td>16.7 mm/m</td></tr>
+                    <tr><td>DN100</td><td>1 : 100</td><td>10.0 mm/m</td></tr>
+                    <tr><td>DN150</td><td>1 : 150</td><td>6.7 mm/m</td></tr>
+                    <tr><td>DN225</td><td>1 : 300</td><td>3.3 mm/m</td></tr>
+                    <tr><td>DN300</td><td>1 : 500</td><td>2.0 mm/m</td></tr>
+                  </tbody>
+                </table>
+                <div class="std-note">Steeper grades are acceptable. Avoid exceeding 1:4 for DN100 — risk of liquid racing ahead of solids.</div>
+              </div>
+
+              <div class="std-sub">
+                <div class="std-sub-title">Cover Depths (Minimum)</div>
+                <div class="std-kv"><span class="std-kv-k">Under building slab</span><span class="std-kv-v hi">75 mm</span></div>
+                <div class="std-kv"><span class="std-kv-k">Outside building — no traffic</span><span class="std-kv-v hi">300 mm</span></div>
+                <div class="std-kv"><span class="std-kv-k">Under vehicle driveway</span><span class="std-kv-v warn">600 mm</span></div>
+                <div class="std-kv"><span class="std-kv-k">Under road (heavy traffic)</span><span class="std-kv-v warn">900 mm</span></div>
+              </div>
+
+              <div class="std-sub">
+                <div class="std-sub-title">Trap Seals</div>
+                <div class="std-kv"><span class="std-kv-k">Minimum seal depth</span><span class="std-kv-v hi">25 mm</span></div>
+                <div class="std-kv"><span class="std-kv-k">Maximum seal depth</span><span class="std-kv-v">75 mm</span></div>
+                <div class="std-kv"><span class="std-kv-k">Floor wastes (minimum)</span><span class="std-kv-v hi">38 mm</span></div>
+                <div class="std-kv"><span class="std-kv-k">Air admittance valve (AAV)</span><span class="std-kv-v ok">Permitted where accessible</span></div>
+                <div class="std-warn-box">Loss of trap seal allows H₂S sewer gas into building. Seals must be maintained at all times — check on every service visit.</div>
+              </div>
+
+              <div class="std-sub">
+                <div class="std-sub-title">Overflow Relief Gully (ORG)</div>
+                <div class="std-kv"><span class="std-kv-k">Grate height above floor (inside)</span><span class="std-kv-v hi">25 – 150 mm</span></div>
+                <div class="std-kv"><span class="std-kv-k">Grate height above paving (outside)</span><span class="std-kv-v hi">≥ 25 mm</span></div>
+                <div class="std-kv"><span class="std-kv-k">Trap seal depth</span><span class="std-kv-v">25 – 75 mm</span></div>
+                <div class="std-kv"><span class="std-kv-k">Position in drainage system</span><span class="std-kv-v warn">Lowest point — overflows first</span></div>
+                <div class="std-note">ORG must be lower than all fixture flood levels so a blocked sewer overflows to the gully, not back into the building.</div>
+              </div>
+
+              <div class="std-sub">
+                <div class="std-sub-title">Venting Requirements</div>
+                <div class="std-kv"><span class="std-kv-k">Stack vent height above roof</span><span class="std-kv-v hi">150 mm min</span></div>
+                <div class="std-kv"><span class="std-kv-k">Clearance from openable window/door</span><span class="std-kv-v warn">900 mm (horizontal)</span></div>
+                <div class="std-kv"><span class="std-kv-k">Air admittance valve (AAV)</span><span class="std-kv-v ok">Permitted (Cl. 7.6)</span></div>
+                <div class="std-kv"><span class="std-kv-k">Vent stack diameter (min)</span><span class="std-kv-v">Equal to largest drain served</span></div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ── AS/NZS 3500.4 HEATED WATER ─────────────────── -->
+          <div class="std-section" id="std-s4">
+            <button class="std-hd" onclick="toggleStd('std-s4')">
+              <div class="std-hd-left">
+                <div class="std-sect-icon" style="background:rgba(248,113,113,.12);color:var(--red)">🌡️</div>
+                <div>
+                  <div class="std-sect-name">AS/NZS 3500.4</div>
+                  <div class="std-sect-desc">Heated Water Services</div>
+                </div>
+              </div>
+              <span class="std-chev" id="std-s4-chev">▼</span>
+            </button>
+            <div class="std-body" id="std-s4-body">
+
+              <div class="std-sub">
+                <div class="std-sub-title">Storage Temperature — Legionella Control</div>
+                <div class="std-kv"><span class="std-kv-k">Minimum storage temperature</span><span class="std-kv-v warn">60°C</span></div>
+                <div class="std-kv"><span class="std-kv-k">Legionella danger zone</span><span class="std-kv-v warn">20°C – 50°C</span></div>
+                <div class="std-kv"><span class="std-kv-k">Legionella killed (instant)</span><span class="std-kv-v ok">≥ 70°C</span></div>
+                <div class="std-kv"><span class="std-kv-k">Solar preheat — must pasteurise</span><span class="std-kv-v hi">60°C daily cycle</span></div>
+                <div class="std-warn-box">All storage HWS must maintain ≥ 60°C. Water stored below this temperature creates a Legionella risk — never lower thermostat below 60°C.</div>
+              </div>
+
+              <div class="std-sub">
+                <div class="std-sub-title">Delivery Temperature Limits (TMV)</div>
+                <table class="std-tbl">
+                  <thead><tr><th>Premises / Outlet</th><th>Max Temp</th></tr></thead>
+                  <tbody>
+                    <tr><td>Residential — showers &amp; baths</td><td>≤ 50°C</td></tr>
+                    <tr><td>Residential — hand basins</td><td>≤ 50°C</td></tr>
+                    <tr><td>High risk — showers &amp; baths</td><td>≤ 45°C</td></tr>
+                    <tr><td>High risk — hand basins</td><td>≤ 45°C</td></tr>
+                    <tr><td>Child care — all outlets</td><td>≤ 45°C</td></tr>
+                    <tr><td>Kitchen / laundry (residential)</td><td>No TMV req.</td></tr>
+                  </tbody>
+                </table>
+                <div class="std-note">High risk premises: hospitals, aged care, disability accommodation, child care. AS 4032.1 compliant TMV required.</div>
+              </div>
+
+              <div class="std-sub">
+                <div class="std-sub-title">Temperature Differential</div>
+                <div class="std-kv"><span class="std-kv-k">Minimum differential (hot – cold supply)</span><span class="std-kv-v hi">10°C</span></div>
+                <div class="std-kv"><span class="std-kv-k">Typical QLD cold supply (summer)</span><span class="std-kv-v">~20°C</span></div>
+                <div class="std-kv"><span class="std-kv-k">Hot storage (pre-TMV)</span><span class="std-kv-v warn">≥ 60°C</span></div>
+                <div class="std-kv"><span class="std-kv-k">Max delivery residential (post-TMV)</span><span class="std-kv-v hi">≤ 50°C</span></div>
+              </div>
+
+              <div class="std-sub">
+                <div class="std-sub-title">Relief Valves &amp; Expansion</div>
+                <div class="std-kv"><span class="std-kv-k">TPR valve — required on all storage HWS</span><span class="std-kv-v warn">Mandatory</span></div>
+                <div class="std-kv"><span class="std-kv-k">Standard TPR set temperature</span><span class="std-kv-v">99°C</span></div>
+                <div class="std-kv"><span class="std-kv-k">Standard TPR set pressure</span><span class="std-kv-v">850 kPa</span></div>
+                <div class="std-kv"><span class="std-kv-k">TPR discharge pipe — end height</span><span class="std-kv-v hi">Within 200 mm of floor/ground</span></div>
+                <div class="std-kv"><span class="std-kv-k">Thermal expansion control</span><span class="std-kv-v warn">Required (cold-side valve)</span></div>
+                <div class="std-kv"><span class="std-kv-k">Cold inlet — non-return valve</span><span class="std-kv-v ok">Required on all HWS</span></div>
+                <div class="std-warn-box">Never cap or reduce TPR discharge pipe. Must discharge to observable safe location — not directly to drain without visible air break.</div>
+              </div>
+
+              <div class="std-sub">
+                <div class="std-sub-title">TMV Servicing</div>
+                <div class="std-kv"><span class="std-kv-k">Residential TMV — service interval</span><span class="std-kv-v">Per manufacturer (typ. 2–5 yr)</span></div>
+                <div class="std-kv"><span class="std-kv-k">High risk facility — inspection</span><span class="std-kv-v warn">Annual minimum</span></div>
+                <div class="std-kv"><span class="std-kv-k">Fail-safe (cold water failure)</span><span class="std-kv-v ok">Must shut off — no scalding</span></div>
+                <div class="std-kv"><span class="std-kv-k">TMV standard</span><span class="std-kv-v blue">AS 4032.1 compliant</span></div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="std-no-result" id="std-no-result">No matching standards found</div>
+
+        </div><!-- end std-wrap -->
+      </div><!-- end screen-scroll -->
     </div>
 
   </div><!-- end .screens -->
@@ -1762,6 +2043,44 @@ function addLabourToQuote() {
 // ── UTILS ─────────────────────────────────────────────────────────────────────
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// ── STANDARDS SCREEN ──────────────────────────────────────────────────────────
+function toggleStd(id) {
+  const body = document.getElementById(id + '-body');
+  const chev = document.getElementById(id + '-chev');
+  if (!body) return;
+  const open = body.classList.toggle('open');
+  chev.classList.toggle('open', open);
+}
+function stdSearch(q) {
+  const query = q.toLowerCase().trim();
+  const sections = document.querySelectorAll('#std-wrap .std-section');
+  const qr = document.getElementById('std-qr');
+  let anyMatch = false;
+  if (!query) {
+    sections.forEach(s => { s.style.display = ''; });
+    if (qr) qr.style.display = '';
+    document.getElementById('std-no-result').style.display = 'none';
+    return;
+  }
+  sections.forEach(s => {
+    const match = s.textContent.toLowerCase().includes(query);
+    s.style.display = match ? '' : 'none';
+    if (match) {
+      anyMatch = true;
+      const id = s.id;
+      const body = document.getElementById(id + '-body');
+      const chev = document.getElementById(id + '-chev');
+      if (body && !body.classList.contains('open')) { body.classList.add('open'); chev.classList.add('open'); }
+    }
+  });
+  if (qr) {
+    const qrMatch = qr.textContent.toLowerCase().includes(query);
+    qr.style.display = qrMatch ? '' : 'none';
+    if (qrMatch) anyMatch = true;
+  }
+  document.getElementById('std-no-result').style.display = anyMatch ? 'none' : 'block';
+}
 
 window.addEventListener('load',init);
 </script>
