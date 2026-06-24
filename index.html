@@ -76,6 +76,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .item-icon{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
 .item-icon.bundle{background:var(--blue-lt);color:var(--blue)}
 .item-icon.reece{background:var(--red-lt);color:var(--red)}
+.reece-img{width:44px;height:44px;border-radius:var(--radius-sm);object-fit:contain;background:var(--surface2);border:1px solid var(--border);flex-shrink:0}
 .item-body{flex:1;min-width:0}
 .item-name{font-size:13px;font-weight:500;line-height:1.3}
 .item-code{font-size:10px;color:var(--orange);font-family:var(--mono);margin-top:2px;font-weight:600}
@@ -1765,12 +1766,13 @@ function bundleCard(b) {
   const p = parseFloat(b.price); const price = (!isNaN(p)&&p>0)?'$'+p.toFixed(2):'';
   return `<div class="item-card"><div class="item-icon bundle">📦</div><div class="item-body"><div class="item-name">${esc(b.name)}</div>${b.code?`<div class="item-code">${esc(b.code)}</div>`:''}<span class="item-cat">${esc(b.category||'')}</span></div><div class="item-right"><div class="item-price ${price?'':'dim'}">${price||'No price'}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${b.uuid}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${b.uuid}',1)">+</button></div>`:`<button class="add-btn" onclick="addBundle('${esc(b.uuid)}')">+</button>`}</div></div>`;
 }
+const REECE_IMG_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Crect width='44' height='44' rx='6' fill='%23e5e7eb'/%3E%3Cg transform='translate(11,10)'%3E%3Cpath d='M21 3.5A3.5 3.5 0 0 0 17.5 0c-.47 0-.9.1-1.3.27L19 3.07l-1.06 1.06L15.07 1.3A3.5 3.5 0 0 0 14 5.5c0 .9.34 1.72.9 2.34L2.5 20.25a1.77 1.77 0 1 0 2.25 2.25L17.16 10.1A3.5 3.5 0 0 0 21 3.5z' fill='%239ca3af'/%3E%3C/g%3E%3C/svg%3E";
 function reeceCard(r) {
   reeceCache[r.code] = r;
   const id='r_'+r.code; const inQ=quote.find(i=>i.id===id);
   const p=parseFloat(r.retail); const retail=(!isNaN(p)&&p>0)?'$'+p.toFixed(2):'';
   const cp=parseFloat(r.cost);
-  return `<div class="item-card"><div class="item-icon reece">🏪</div><div class="item-body"><div class="item-name">${esc(r.name)}</div><div class="item-code">${esc(r.code||'')}</div><span class="item-cat">${esc(r.category||'')}</span>${(!isNaN(cp)&&cp>0)?`<div class="item-markup">Cost $${cp.toFixed(2)} · ${r.markup}% markup</div>`:''}</div><div class="item-right"><div class="item-price ${retail?'':'dim'}">${retail||'—'}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${id}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${id}',1)">+</button></div>`:`<button class="add-btn" onclick="addReece('${esc(r.code)}')">+</button>`}</div></div>`;
+  return `<div class="item-card"><img class="reece-img" data-code="${esc(r.code)}" src="${REECE_IMG_PLACEHOLDER}" alt=""><div class="item-body"><div class="item-name">${esc(r.name)}</div><div class="item-code">${esc(r.code||'')}</div><span class="item-cat">${esc(r.category||'')}</span>${(!isNaN(cp)&&cp>0)?`<div class="item-markup">Cost $${cp.toFixed(2)} · ${r.markup}% markup</div>`:''}</div><div class="item-right"><div class="item-price ${retail?'':'dim'}">${retail||'—'}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${id}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${id}',1)">+</button></div>`:`<button class="add-btn" onclick="addReece('${esc(r.code)}')">+</button>`}</div></div>`;
 }
 
 // ── AI BAND ───────────────────────────────────────────────────────────────────
@@ -1809,6 +1811,7 @@ function runAiSuggest() {
     if (topB.length) { html+='<div class="section-hd" style="color:#3b82f6">📦 Bundles</div>'; html+=topB.map(b=>bundleCard(b)).join(''); }
     if (topR.length) { html+='<div class="section-hd" style="color:#f87171">🏪 Reece Products</div>'; html+=topR.map(r=>reeceCard(r)).join(''); }
     resultsDiv.innerHTML = html;
+    if (topR.length) loadReeceImages(resultsDiv);
   }, 100);
 }
 
@@ -2366,6 +2369,24 @@ function toggleAiMic(){if(aiListening){stopAiMic();return;}try{aiRecognition.sta
 function stopAiMic(){if(!aiListening)return;try{aiRecognition.stop();}catch(e){}aiListening=false;document.getElementById('ai-mic').classList.remove('listening');}
 
 // ── REECE CSV SEARCH ─────────────────────────────────────────────────────────
+// Batch-fetches product images from the proxy and updates img tags in `container`.
+async function loadReeceImages(container) {
+  const imgs = container.querySelectorAll('img.reece-img[data-code]');
+  if (!imgs.length) return;
+  const codes = [...imgs].map(img => img.dataset.code).filter(Boolean);
+  try {
+    const r = await fetch(PROXY + '/reece-images?codes=' + codes.map(c => encodeURIComponent(c)).join(','));
+    const data = await r.json();
+    imgs.forEach(img => {
+      const url = data[img.dataset.code];
+      if (url) {
+        img.onerror = function() { this.onerror = null; this.src = REECE_IMG_PLACEHOLDER; };
+        img.src = url;
+      }
+    });
+  } catch(e) { /* leave placeholders on network error */ }
+}
+
 let reeceSearchTimer = null;
 async function fetchReeceSearch(q, container) {
   clearTimeout(reeceSearchTimer);
@@ -2381,6 +2402,7 @@ async function fetchReeceSearch(q, container) {
       let html = `<div class="section-hd" style="color:#f87171">🏪 Reece Products (${total > 60 ? '60 of ' + total : total})</div>`;
       html += data.products.map(r => reeceCard(r)).join('');
       container.innerHTML = html;
+      loadReeceImages(container); // fire-and-forget: images appear as they load
     } catch(e) {
       container.innerHTML = '<div class="state-box"><span class="state-icon">❌</span><p>Could not reach server.<br><span class="hint">Check connection.</span></p></div>';
     }
