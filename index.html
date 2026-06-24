@@ -192,6 +192,27 @@ body.dark .top-bar,body.dark .bottom-nav{background:#1a1f2e}
 body.dark .stock-input{color:#e8eaf0}
 body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
 
+/* ── PIN LOCK ── */
+#pin-overlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
+#pin-overlay.hidden{display:none}
+.pin-box{display:flex;flex-direction:column;align-items:center;gap:16px;padding:40px 24px;width:100%;max-width:340px}
+.pin-logo-mark{width:56px;height:56px;background:var(--orange);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px}
+.pin-title{font-size:22px;font-weight:700;color:var(--text)}
+.pin-sub{font-size:12px;color:var(--text-dim)}
+.pin-dots{display:flex;gap:14px;margin:8px 0}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border2);background:transparent;transition:background .1s,border-color .1s}
+.pin-dot.filled{background:var(--orange);border-color:var(--orange)}
+.pin-dot.error{background:var(--red);border-color:var(--red)}
+.pin-msg{font-size:12px;color:var(--red);min-height:18px;text-align:center}
+.pin-pad{display:grid;grid-template-columns:repeat(3,72px);gap:10px}
+.pin-key{width:72px;height:72px;border-radius:50%;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:22px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .1s}
+.pin-key:active{background:var(--orange);color:#fff;border-color:var(--orange)}
+.pin-key:disabled{opacity:.4;cursor:default}
+.pin-key-empty{background:transparent;border:none;pointer-events:none}
+.pin-key-del{font-size:18px}
+@keyframes pinShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.pin-dots.shake{animation:pinShake .4s}
+
 /* ── DARK MODE TOGGLE ── */
 .dm-toggle{width:36px;height:20px;border-radius:999px;background:var(--border2);border:none;cursor:pointer;position:relative;flex-shrink:0;transition:background .2s}
 .dm-toggle.on{background:var(--orange)}
@@ -231,6 +252,34 @@ body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
 </style>
 </head>
 <body>
+<div id="pin-overlay">
+  <div class="pin-box">
+    <div class="pin-logo-mark">🔧</div>
+    <div class="pin-title">IPD</div>
+    <div class="pin-sub">Innovation Plumbing + Design</div>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-msg" id="pin-msg"></div>
+    <div class="pin-pad">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <div class="pin-key pin-key-empty"></div>
+      <button class="pin-key" onclick="pinKey('0')">0</button>
+      <button class="pin-key pin-key-del" onclick="pinDel()">⌫</button>
+    </div>
+  </div>
+</div>
 <div id="app">
   <div class="top-bar">
     <div class="top-logo">
@@ -572,6 +621,19 @@ body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
           <div class="settings-row">
             <div class="settings-hint">AI review of your stock order before sending to ServiceM8.</div>
             <button class="settings-btn" onclick="runStockReview()">Review & Send Order</button>
+          </div>
+        </div>
+        <div class="settings-card">
+          <div class="settings-card-hd">🔒 Change PIN</div>
+          <div class="settings-row">
+            <div class="settings-label">Current PIN</div>
+            <input class="settings-input" id="pin-current" type="password" inputmode="numeric" maxlength="4" placeholder="Current 4-digit PIN">
+            <div class="settings-label">New PIN</div>
+            <input class="settings-input" id="pin-new" type="password" inputmode="numeric" maxlength="4" placeholder="New 4-digit PIN">
+            <div class="settings-label">Confirm new PIN</div>
+            <input class="settings-input" id="pin-confirm" type="password" inputmode="numeric" maxlength="4" placeholder="Confirm new PIN">
+            <button class="settings-btn" onclick="savePin()">Update PIN</button>
+            <div class="settings-hint">Default PIN is 1234. Enter a 4-digit number.</div>
           </div>
         </div>
         <div class="settings-card">
@@ -1516,6 +1578,7 @@ let searchTimer = null, aiTimer = null;
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 function init() {
+  initPin();
   const saved = localStorage.getItem('ipd_sm8_key');
   if (saved) document.getElementById('sm8-key-input').value = saved;
   const savedUrl = localStorage.getItem('ipd_sheet_url') || SHEET_URL_DEFAULT;
@@ -2503,6 +2566,103 @@ function stdSearch(q) {
     if (qrMatch) anyMatch = true;
   }
   document.getElementById('std-no-result').style.display = anyMatch ? 'none' : 'block';
+}
+
+// ── PIN LOCK ──────────────────────────────────────────────────────────────────
+const PIN_KEY = 'ipd_pin';
+const PIN_FAILS_KEY = 'ipd_pin_fails';
+const PIN_LOCK_KEY = 'ipd_pin_lock';
+const PIN_MAX_FAILS = 5;
+const PIN_LOCK_MS = 10 * 60 * 1000;
+let pinEntry = '';
+let pinLockTimer = null;
+
+function initPin() {
+  if (localStorage.getItem('ipd_dark') === '1') document.body.classList.add('dark');
+  const lockUntil = parseInt(localStorage.getItem(PIN_LOCK_KEY) || '0');
+  if (lockUntil > Date.now()) { showPinLockout(lockUntil); return; }
+}
+
+function pinKey(d) {
+  if (parseInt(localStorage.getItem(PIN_LOCK_KEY) || '0') > Date.now()) return;
+  if (pinEntry.length >= 4) return;
+  pinEntry += d;
+  updatePinDots();
+  if (pinEntry.length === 4) setTimeout(checkPin, 80);
+}
+
+function pinDel() {
+  pinEntry = pinEntry.slice(0, -1);
+  updatePinDots();
+}
+
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('pd' + i);
+    dot.classList.toggle('filled', i < pinEntry.length);
+    dot.classList.remove('error');
+  }
+}
+
+function checkPin() {
+  const saved = localStorage.getItem(PIN_KEY) || '1234';
+  if (pinEntry === saved) {
+    localStorage.setItem(PIN_FAILS_KEY, '0');
+    document.getElementById('pin-overlay').classList.add('hidden');
+  } else {
+    const fails = parseInt(localStorage.getItem(PIN_FAILS_KEY) || '0') + 1;
+    localStorage.setItem(PIN_FAILS_KEY, String(fails));
+    for (let i = 0; i < 4; i++) document.getElementById('pd' + i).classList.add('error');
+    const dotsEl = document.getElementById('pin-dots');
+    dotsEl.classList.remove('shake');
+    void dotsEl.offsetWidth;
+    dotsEl.classList.add('shake');
+    if (fails >= PIN_MAX_FAILS) {
+      const lockUntil = Date.now() + PIN_LOCK_MS;
+      localStorage.setItem(PIN_LOCK_KEY, String(lockUntil));
+      localStorage.setItem(PIN_FAILS_KEY, '0');
+      showPinLockout(lockUntil);
+    } else {
+      document.getElementById('pin-msg').textContent = `Wrong PIN — ${PIN_MAX_FAILS - fails} attempt${PIN_MAX_FAILS - fails !== 1 ? 's' : ''} left`;
+    }
+    pinEntry = '';
+    setTimeout(updatePinDots, 400);
+  }
+}
+
+function showPinLockout(lockUntil) {
+  document.querySelectorAll('.pin-key').forEach(k => k.disabled = true);
+  clearTimeout(pinLockTimer);
+  function tick() {
+    const remaining = lockUntil - Date.now();
+    if (remaining <= 0) {
+      document.querySelectorAll('.pin-key').forEach(k => k.disabled = false);
+      document.getElementById('pin-msg').textContent = '';
+      pinEntry = '';
+      updatePinDots();
+      return;
+    }
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+    document.getElementById('pin-msg').textContent = `Locked — ${mins}:${secs.toString().padStart(2, '0')} remaining`;
+    pinLockTimer = setTimeout(tick, 1000);
+  }
+  tick();
+}
+
+function savePin() {
+  const current = document.getElementById('pin-current').value.trim();
+  const newPin  = document.getElementById('pin-new').value.trim();
+  const confirm = document.getElementById('pin-confirm').value.trim();
+  const saved   = localStorage.getItem(PIN_KEY) || '1234';
+  if (current !== saved)          { showToast('Current PIN is incorrect'); return; }
+  if (!/^\d{4}$/.test(newPin))    { showToast('PIN must be exactly 4 digits'); return; }
+  if (newPin !== confirm)         { showToast('New PINs do not match'); return; }
+  localStorage.setItem(PIN_KEY, newPin);
+  document.getElementById('pin-current').value = '';
+  document.getElementById('pin-new').value = '';
+  document.getElementById('pin-confirm').value = '';
+  showToast('PIN updated successfully');
 }
 
 window.addEventListener('load',init);
