@@ -791,7 +791,7 @@ body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
                   </ol>
                 </div>
                 <div class="tr-tip">💡 <strong>Search tips:</strong> Use the size and type — "20mm ball valve" works better than just "valve". The more specific you are, the better the results.</div>
-                <div class="tr-tip">💡 You can also tap the <strong>🎤 microphone button</strong> to search by voice — just say the product name out loud.</div>
+                <div class="tr-tip" id="voice-tip">💡 You can also tap the <strong>🎤 microphone button</strong> to search by voice — just say the product name out loud.</div>
               </div>
             </div>
           </div>
@@ -1573,9 +1573,29 @@ let onHand = {}, stockCat = 'ALL', quoteCat = 'All', activeScreen = 'stock';
 let reeceCache = {};
 let bundles = [], reece = [], knowledge = [], quote = [];
 let dataLoaded = false;
-let recognition = null, isListening = false;
+let recognition = null, isListening = false, pendingAdd = null; // pendingAdd: {qty, item} waiting for yes/no
 let aiRecognition = null, aiListening = false;
 let searchTimer = null, aiTimer = null;
+
+// iPadOS reports as "MacIntel" but has touch points, unlike real Macs.
+function isIOSDevice() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+// iOS Safari's SpeechRecognition has a much lower accuracy ceiling than the
+// keyboard's built-in dictation (which uses Apple's own on-device/Siri speech
+// model, not the web-exposed API) — no page-level fix can close that gap. Hide
+// our mic buttons on iOS and point people at the keyboard mic instead.
+function deemphasiseMicOnIOS() {
+  if (!isIOSDevice()) return;
+  const micBtn = document.getElementById('mic-btn');
+  const aiMic = document.getElementById('ai-mic');
+  if (micBtn) micBtn.style.display = 'none';
+  if (aiMic) aiMic.style.display = 'none';
+  const tip = document.getElementById('voice-tip');
+  if (tip) tip.innerHTML = '💡 On iPhone, tap the search box then use the <strong>🎤 on your keyboard</strong> to dictate — it\'s more reliable than an in-app mic button.';
+}
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 function init() {
@@ -1589,6 +1609,7 @@ function init() {
   renderStock();
   setupVoice();
   setupAiVoice();
+  deemphasiseMicOnIOS();
   loadQuoteData();
   initDarkMode();
   updateLabourTotals();
@@ -2234,13 +2255,21 @@ function voiceToSearchTerm(spoken) {
 
 function setupVoice() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { document.getElementById('mic-btn').style.display = 'none'; return; }
-  recognition = new SR();
-  recognition.continuous = true;
-  recognition.interimResults = true;
-  recognition.lang = 'en-AU';
+  if (!SR) { document.getElementById('mic-btn').style.display = 'none'; }
+}
 
-  // Plumbing grammar hints
+// Builds a fresh SpeechRecognition instance. iOS Safari's implementation can go
+// silently unresponsive to .start() after a instance has errored/stopped a few
+// times, so we build a new one every time we (re)start listening rather than
+// reusing a single long-lived instance for the whole session.
+function buildRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const rec = new SR();
+  rec.continuous = true;
+  rec.interimResults = true;
+  rec.lang = 'en-AU';
+
+  // Plumbing grammar hints (no-op on Safari/WebKit, harmless elsewhere)
   try {
     const SG = window.SpeechGrammarList || window.webkitSpeechGrammarList;
     if (SG) {
@@ -2248,13 +2277,11 @@ function setupVoice() {
       const grammar = '#JSGF V1.0; grammar plumbing; public <plumbing> = ' + terms.split(' ').join(' | ') + ';';
       const list = new SG();
       list.addFromString(grammar, 1);
-      recognition.grammars = list;
+      rec.grammars = list;
     }
   } catch(e) {}
 
-  let pendingAdd = null; // {qty, item} waiting for yes/no
-
-  recognition.onresult = e => {
+  rec.onresult = e => {
     let t = '';
     for (let i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
 
@@ -2337,13 +2364,17 @@ function setupVoice() {
       .catch(() => speakAndShow('Could not search. Check connection.'));
   };
 
-  recognition.onend = () => { if (isListening) try { recognition.start(); } catch(e) {} };
-  recognition.onerror = e => { if (e.error !== 'no-speech') stopListening(); };
+  rec.onend = () => { if (isListening) { try { recognition = buildRecognition(); recognition.start(); } catch(e) { stopListening(); } } };
+  rec.onerror = e => { if (e.error !== 'no-speech') stopListening(); };
+  return rec;
 }
 
 function startListening() {
-  if (!recognition || isListening) return;
+  if (isListening) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
   try {
+    recognition = buildRecognition();
     recognition.start();
     isListening = true;
     document.getElementById('mic-btn').classList.add('listening');
@@ -2352,21 +2383,30 @@ function startListening() {
   } catch(e) {}
 }
 function stopListening() {
-  if (!recognition || !isListening) return;
-  try { recognition.stop(); } catch(e) {}
+  if (!isListening) return;
+  try { recognition && recognition.stop(); } catch(e) {}
   isListening = false;
   document.getElementById('mic-btn').classList.remove('listening');
   document.getElementById('voice-hint').classList.remove('show');
 }
 function toggleMic() { isListening ? stopListening() : startListening(); }
 function setupAiVoice(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;
-  aiRecognition=new SR();aiRecognition.continuous=false;aiRecognition.interimResults=false;aiRecognition.lang='en-AU';
-  aiRecognition.onresult=e=>{document.getElementById('ai-textarea').value=e.results[0][0].transcript;stopAiMic();runAiSuggest();};
-  aiRecognition.onend=()=>stopAiMic();aiRecognition.onerror=()=>stopAiMic();
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ document.getElementById('ai-mic').style.display='none'; }
 }
-function toggleAiMic(){if(aiListening){stopAiMic();return;}try{aiRecognition.start();aiListening=true;document.getElementById('ai-mic').classList.add('listening');}catch(e){}}
-function stopAiMic(){if(!aiListening)return;try{aiRecognition.stop();}catch(e){}aiListening=false;document.getElementById('ai-mic').classList.remove('listening');}
+function buildAiRecognition(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const r=new SR();r.continuous=false;r.interimResults=false;r.lang='en-AU';
+  r.onresult=e=>{document.getElementById('ai-textarea').value=e.results[0][0].transcript;stopAiMic();runAiSuggest();};
+  r.onend=()=>stopAiMic();r.onerror=()=>stopAiMic();
+  return r;
+}
+function toggleAiMic(){
+  if(aiListening){stopAiMic();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;
+  try{aiRecognition=buildAiRecognition();aiRecognition.start();aiListening=true;document.getElementById('ai-mic').classList.add('listening');}catch(e){}
+}
+function stopAiMic(){if(!aiListening)return;try{aiRecognition&&aiRecognition.stop();}catch(e){}aiListening=false;document.getElementById('ai-mic').classList.remove('listening');}
 
 // ── REECE CSV SEARCH ─────────────────────────────────────────────────────────
 // Batch-fetches product images from the proxy and updates img tags in `container`.

@@ -526,9 +526,25 @@ const CAT_COLORS = {
 let onHand = {}, stockCat = 'ALL', quoteCat = 'All', activeScreen = 'stock';
 let bundles = [], reece = [], knowledge = [], quote = [];
 let dataLoaded = false;
-let recognition = null, isListening = false;
+let recognition = null, isListening = false, pendingAdd = null; // pendingAdd: {qty, item}
 let aiRecognition = null, aiListening = false;
 let searchTimer = null, aiTimer = null;
+
+// iPadOS reports as "MacIntel" but has touch points, unlike real Macs.
+function isIOSDevice() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+// iOS Safari's SpeechRecognition has a much lower accuracy ceiling than the
+// keyboard's built-in dictation — no page-level fix can close that gap. Hide
+// our mic buttons on iOS and point people at the keyboard mic instead.
+function deemphasiseMicOnIOS() {
+  if (!isIOSDevice()) return;
+  const micBtn = document.getElementById('mic-btn');
+  const aiMic = document.getElementById('ai-mic');
+  if (micBtn) micBtn.style.display = 'none';
+  if (aiMic) aiMic.style.display = 'none';
+}
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 function init() {
@@ -541,6 +557,7 @@ function init() {
   renderStock();
   setupVoice();
   setupAiVoice();
+  deemphasiseMicOnIOS();
   loadQuoteData();
 }
 
@@ -1103,8 +1120,13 @@ function speakAndShow(msg) {
 
 function setupVoice() {
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){document.getElementById('mic-btn').style.display='none';return;}
-  recognition=new SR();recognition.continuous=true;recognition.interimResults=true;recognition.lang='en-AU';
+  if(!SR){document.getElementById('mic-btn').style.display='none';}
+}
+// Builds a fresh SpeechRecognition instance each time — iOS Safari can go silently
+// unresponsive to .start() on an instance reused across several stop/error cycles.
+function buildRecognition() {
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const rec=new SR();rec.continuous=true;rec.interimResults=true;rec.lang='en-AU';
   // Add plumbing speech grammar so browser recognises trade terms
   try {
     const SG = window.SpeechGrammarList || window.webkitSpeechGrammarList;
@@ -1113,11 +1135,10 @@ function setupVoice() {
       const grammar = '#JSGF V1.0; grammar plumbing; public <plumbing> = ' + terms.split(' ').join(' | ') + ';';
       const list = new SG();
       list.addFromString(grammar, 1);
-      recognition.grammars = list;
+      rec.grammars = list;
     }
   } catch(e) {}
-  let pendingAdd = null; // {qty, item}
-  recognition.onresult=e=>{
+  rec.onresult=e=>{
     let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;
     if(e.results[e.results.length-1].isFinal){
       const lower=t.toLowerCase().trim();
@@ -1171,19 +1192,33 @@ function setupVoice() {
     document.getElementById('voice-txt').textContent='"'+t+'"';
     onQSearch();
   };
-  recognition.onend=()=>{if(isListening)try{recognition.start();}catch(e){}};
-  recognition.onerror=e=>{if(e.error!=='no-speech')stopListening();};
+  rec.onend=()=>{if(isListening){try{recognition=buildRecognition();recognition.start();}catch(e){stopListening();}}};
+  rec.onerror=e=>{if(e.error!=='no-speech')stopListening();};
+  return rec;
 }
-function startListening(){if(!recognition||isListening)return;try{recognition.start();isListening=true;document.getElementById('mic-btn').classList.add('listening');document.getElementById('voice-hint').classList.add('show');}catch(e){}}
-function stopListening(){if(!recognition||!isListening)return;try{recognition.stop();}catch(e){}isListening=false;document.getElementById('mic-btn').classList.remove('listening');document.getElementById('voice-hint').classList.remove('show');}
+function startListening(){
+  if(isListening)return;
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;
+  try{recognition=buildRecognition();recognition.start();isListening=true;document.getElementById('mic-btn').classList.add('listening');document.getElementById('voice-hint').classList.add('show');}catch(e){}
+}
+function stopListening(){if(!isListening)return;try{recognition&&recognition.stop();}catch(e){}isListening=false;document.getElementById('mic-btn').classList.remove('listening');document.getElementById('voice-hint').classList.remove('show');}
 function toggleMic(){isListening?stopListening():startListening();}
 function setupAiVoice(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;
-  aiRecognition=new SR();aiRecognition.continuous=false;aiRecognition.interimResults=false;aiRecognition.lang='en-AU';
-  aiRecognition.onresult=e=>{document.getElementById('ai-textarea').value=e.results[0][0].transcript;stopAiMic();runAiSuggest();};
-  aiRecognition.onend=()=>stopAiMic();aiRecognition.onerror=()=>stopAiMic();
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){document.getElementById('ai-mic').style.display='none';return;}
 }
-function toggleAiMic(){if(aiListening){stopAiMic();return;}try{aiRecognition.start();aiListening=true;document.getElementById('ai-mic').classList.add('listening');}catch(e){}}
+function buildAiRecognition(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const rec=new SR();rec.continuous=false;rec.interimResults=false;rec.lang='en-AU';
+  rec.onresult=e=>{document.getElementById('ai-textarea').value=e.results[0][0].transcript;stopAiMic();runAiSuggest();};
+  rec.onend=()=>stopAiMic();rec.onerror=()=>stopAiMic();
+  return rec;
+}
+function toggleAiMic(){
+  if(aiListening){stopAiMic();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;
+  try{aiRecognition=buildAiRecognition();aiRecognition.start();aiListening=true;document.getElementById('ai-mic').classList.add('listening');}catch(e){}
+}
 function stopAiMic(){if(!aiListening)return;try{aiRecognition.stop();}catch(e){}aiListening=false;document.getElementById('ai-mic').classList.remove('listening');}
 
 // ── UTILS ─────────────────────────────────────────────────────────────────────
