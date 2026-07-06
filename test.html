@@ -670,7 +670,7 @@ async function loadQuoteData() {
     dataLoaded = true;
     document.getElementById('q-sdot').className = 's-dot';
     document.getElementById('q-stext').textContent = bundles.length+' bundles · '+reece.length.toLocaleString()+' Reece products';
-    buildQCats(); renderKB();
+    buildQCats(); renderKB(); renderQResults();
   } catch(e) {
     document.getElementById('q-sdot').className = 's-dot err';
     document.getElementById('q-stext').textContent = 'Could not load — check Settings';
@@ -700,7 +700,11 @@ function renderQResults() {
   const q = raw ? normaliseTerm(raw) : '';
   const container = document.getElementById('q-list');
   if (!dataLoaded) { container.innerHTML = '<div class="state-box"><div class="big-spin"></div><p>Loading...</p></div>'; return; }
-  if (!q && quoteCat==='All') { container.innerHTML = '<div class="state-box"><span class="state-icon">🔍</span><p>Search or tap mic to speak</p></div>'; return; }
+  if (!q && quoteCat==='All') {
+    const hint = isIOSDevice() ? 'Search, or use your keyboard\'s 🎤 dictation button' : 'Search or tap mic to speak';
+    container.innerHTML = '<div class="state-box"><span class="state-icon">🔍</span><p>'+hint+'</p></div>';
+    return;
+  }
   const mB = q
     ? bundles.filter(b=>quoteCat==='All'||b.category===quoteCat).map(b=>({...b,_s:scoreItem(b.name,b.code,b.category,q)})).filter(b=>b._s>0).sort((a,b)=>b._s-a._s).slice(0,50)
     : bundles.filter(b=>quoteCat!=='All'&&b.category===quoteCat).slice(0,50);

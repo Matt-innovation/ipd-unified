@@ -400,6 +400,7 @@ body.dark input,body.dark textarea{color:#e8eaf0;background:#242938}
         <div id="ai-band-content" class="ai-chips-wrap"><div class="mini-load"><div class="spin"></div>Finding...</div></div>
       </div>
       <div class="screen-scroll" id="q-list"><div class="state-box"><span class="state-icon">🔍</span><p>Search or tap the mic to speak</p></div></div>
+      <!-- initial static text above is replaced by renderQResults()/isIOSDevice() as soon as JS runs -->
     </div>
 
     <!-- AI -->
@@ -1727,7 +1728,7 @@ async function loadQuoteData() {
     dataLoaded = true;
     document.getElementById('q-sdot').className = 's-dot';
     document.getElementById('q-stext').textContent = bundles.length+' bundles · Reece catalogue live';
-    buildQCats(); renderKB();
+    buildQCats(); renderKB(); renderQResults();
   } catch(e) {
     document.getElementById('q-sdot').className = 's-dot err';
     document.getElementById('q-stext').textContent = 'Could not load — check Settings';
@@ -1757,7 +1758,11 @@ function renderQResults() {
   const q = raw ? normaliseTerm(raw) : '';
   const container = document.getElementById('q-list');
   if (!dataLoaded) { container.innerHTML = '<div class="state-box"><div class="big-spin"></div><p>Loading...</p></div>'; return; }
-  if (!q && quoteCat==='All') { container.innerHTML = '<div class="state-box"><span class="state-icon">🔍</span><p>Search or tap mic to speak</p></div>'; return; }
+  if (!q && quoteCat==='All') {
+    const hint = isIOSDevice() ? 'Search, or use your keyboard\'s 🎤 dictation button' : 'Search or tap mic to speak';
+    container.innerHTML = '<div class="state-box"><span class="state-icon">🔍</span><p>'+hint+'</p></div>';
+    return;
+  }
   const searchTab = window._searchTab || 'reece';
   const showBundles = searchTab === 'bundles';
   const showReece = searchTab === 'reece';
