@@ -703,7 +703,7 @@ function reeceCard(r) {
   const id='r_'+r.code; const inQ=quote.find(i=>i.id===id);
   const p=parseFloat(r.retail); const retail=(!isNaN(p)&&p>0)?'$'+p.toFixed(2):'';
   const cp=parseFloat(r.costIncGst)||(parseFloat(r.cost)*1.1);
-  return `<div class="item-card"><div class="item-icon reece">🏪</div><div class="item-body"><div class="item-name">${esc(r.name)}</div><div class="item-code">${esc(r.code||'')}</div><span class="item-cat">${esc(r.category||'')}</span>${(!isNaN(cp)&&cp>0)?`<div class="item-markup">Cost $${cp.toFixed(2)} · ${r.markup}% markup</div>`:''}</div><div class="item-right"><div class="item-price ${retail?'':'dim'}">${retail||'—'}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${id}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${id}',1)">+</button></div>`:`<button class="add-btn" onclick="addReece('${esc(r.code)}')">+</button>`}</div></div>`;
+  return `<div class="item-card"><div class="item-icon reece">🏪</div><div class="item-body"><div class="item-name">${esc(r.name)}</div><div class="item-code">${esc(r.code||'')}</div><span class="item-cat">${esc(r.category||'')}</span>${(!isNaN(cp)&&cp>0)?`<div class="item-markup">Cost $${cp.toFixed(2)}</div>`:''}</div><div class="item-right"><div class="item-price ${retail?'':'dim'}">${retail||'—'}</div>${inQ?`<div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${id}',-1)">−</button><span class="qty-num">${inQ.qty}</span><button class="qty-btn" onclick="chQty('${id}',1)">+</button></div>`:`<button class="add-btn" onclick="addReece('${esc(r.code)}')">+</button>`}</div></div>`;
 }
 
 // ── AI BAND ───────────────────────────────────────────────────────────────────
