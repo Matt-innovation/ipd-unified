@@ -1,0 +1,11 @@
+{
+  "name": "IPD · Innovation Plumbing + Design",
+  "short_name": "IPD",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f0f2f5",
+  "theme_color": "#f97316",
+  "icons": [
+    { "src": "icon-400.png", "sizes": "400x400", "type": "image/png", "purpose": "any" }
+  ]
+}
