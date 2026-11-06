@@ -1428,6 +1428,8 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
 const PROXY = 'https://ipd-proxy-server.onrender.com';
 const SHEET_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbz5yp8BmAwococSxcEQSJePYFLcZDfSaCMmQx4aWc0Tcdlvzqv3jC5iJfmQq_hoEo3SvA/exec';
 let SHEET_URL = localStorage.getItem('ipd_sheet_url') || SHEET_URL_DEFAULT;
+// Knowledge entries live only in the original Sheet; bundles come from SHEET_URL above.
+const KNOWLEDGE_URL = 'https://script.google.com/macros/s/AKfycbwiRPh_vfpvNwFXxoe5u02tLvWfHAA76juq7NcrC1uH77RHSNOJAoBqU4aatnpP8-zn/exec';
 
 const initialStock = [
   { code: "9800482", category: "BRASSWARE", name: "15mm Compression Tee", target: 3 },
@@ -1614,6 +1616,7 @@ const CAT_COLORS = {
 let onHand = {}, stockCat = 'ALL', quoteCat = 'All', activeScreen = 'stock';
 let reeceCache = {};
 let bundles = [], reece = [], knowledge = [], quote = [];
+let knowledgeState = 'loading'; // 'loading' | 'ok' | error message shown on the Knowledge tab
 let dataLoaded = false;
 let recognition = null, isListening = false, pendingAdd = null; // pendingAdd: {qty, item} waiting for yes/no
 let aiRecognition = null, aiListening = false;
@@ -1755,6 +1758,7 @@ async function sendOrder() {
 
 // ── QUOTE DATA ────────────────────────────────────────────────────────────────
 async function loadQuoteData() {
+  loadKnowledge(); // separate Sheet; runs alongside, a failure there doesn't affect bundles
   if (!SHEET_URL) return;
   document.getElementById('q-sdot').className = 's-dot warn';
   document.getElementById('q-stext').textContent = 'Connecting...';
@@ -1765,7 +1769,6 @@ async function loadQuoteData() {
     bundles = (d.bundles||[]).map(b=>({uuid:String(b.uuid||''),code:String(b.code||''),name:String(b.name||''),category:String(b.category||''),price:b.price!=null&&b.price!==''?String(b.price):'',notes:String(b.notes||'')}));
     // Reece products now come from CSV via server /reece-search endpoint — not the sheet
     reece = []; // populated on-demand per search
-    knowledge = d.knowledge||[];
     dataLoaded = true;
     document.getElementById('q-sdot').className = 's-dot';
     document.getElementById('q-stext').textContent = bundles.length+' bundles · Reece catalogue live';
@@ -1774,6 +1777,24 @@ async function loadQuoteData() {
     document.getElementById('q-sdot').className = 's-dot err';
     document.getElementById('q-stext').textContent = 'Could not load — check Settings';
   }
+}
+
+// ── KNOWLEDGE DATA (original Sheet) ───────────────────────────────────────────
+async function loadKnowledge() {
+  knowledgeState = 'loading';
+  renderKB();
+  try {
+    const r = await fetch(KNOWLEDGE_URL+(KNOWLEDGE_URL.includes('?')?'&':'?')+'action=all&t='+Date.now());
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+    if (!Array.isArray(d.knowledge) || !d.knowledge.length) throw new Error('the Sheet returned no Knowledge entries');
+    knowledge = d.knowledge;
+    knowledgeState = 'ok';
+  } catch(e) {
+    knowledge = [];
+    knowledgeState = 'Could not load Knowledge from the Knowledge Sheet ('+(e && e.message ? e.message : 'unknown error')+').';
+  }
+  renderKB();
 }
 
 // ── SEARCH ────────────────────────────────────────────────────────────────────
@@ -2076,6 +2097,8 @@ async function runWebSearch() {
 function renderKB() {
   const q=(document.getElementById('kb-search').value||'').toLowerCase();
   const c=document.getElementById('kb-list');
+  if(knowledgeState==='loading'){c.innerHTML='<div class="state-box"><div class="big-spin"></div><p>Loading knowledge...</p></div>';return;}
+  if(knowledgeState!=='ok'){c.innerHTML='<div class="state-box"><span class="state-icon">⚠️</span><p>'+esc(knowledgeState)+'</p><span class="hint">Check the Knowledge Sheet is still deployed, then reopen the app.</span></div>';return;}
   if(!knowledge.length){c.innerHTML='<div class="state-box"><span class="state-icon">📚</span><p>No knowledge entries yet.</p></div>';return;}
   const cats=['All',...new Set(knowledge.map(k=>k.category||'').filter(Boolean))];
   const activeCat=window._kbCat||'All';
