@@ -32,7 +32,10 @@
   --nav-h:58px;--top-h:54px;--radius:12px;--radius-sm:8px;
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);-webkit-tap-highlight-color:transparent}
-#app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;background:var(--bg)}
+/* Height = the VISIBLE screen. 100vh alone is Safari's toolbar-hidden height, which
+   pushed the bottom nav behind Safari's toolbar. 100dvh (iOS 15.4+) tracks the real
+   visible height; -webkit-fill-available covers older iOS; 100vh is the last fallback. */
+#app{display:flex;flex-direction:column;height:100vh;height:-webkit-fill-available;height:100dvh;max-width:480px;margin:0 auto;background:var(--bg)}
 .top-bar{height:var(--top-h);background:var(--bar-bg);border-bottom:1px solid var(--bar-bg);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;z-index:10}
 .top-logo{display:flex;align-items:center;gap:9px}
 .top-logo-mark{width:30px;height:30px;background:var(--orange);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
@@ -44,7 +47,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .screen{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden}
 .screen.active{display:flex}
 .screen-scroll{flex:1;overflow-y:auto;min-height:0}
-.bottom-nav{height:var(--nav-h);background:var(--bar-bg);border-top:1px solid var(--bar-bg);display:flex;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom);z-index:10}
+/* The home-bar safe area is ADDED to the nav height, not taken out of it — with
+   border-box sizing it used to eat 34px of the 58px on iPhone, squashing the icons. */
+.bottom-nav{height:calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));background:var(--bar-bg);border-top:1px solid var(--bar-bg);display:flex;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom, 0px);z-index:10}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border:none;background:none;color:var(--bar-dim);font-family:var(--font);padding:5px 2px;position:relative;transition:color .15s}
 .nav-btn.active{color:var(--orange)}
 .nav-btn .nav-icon{font-size:20px;line-height:1}
