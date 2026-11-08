@@ -1987,7 +1987,7 @@ function renderQuote() {
   if (!quote.length) { list.innerHTML='<div class="state-box"><span class="state-icon">📋</span><p>No items yet.<br>Add from Search or AI tab.</p></div>'; totals.style.display='none'; return; }
   list.innerHTML = quote.map(item => {
     const line = item.price*item.qty; const isB = item.type==='bundle';
-    return `<div class="quote-item"><div class="qi-top"><div class="qi-name">${esc(item.name)} <span class="type-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span></div><div class="qi-line">$${line.toFixed(2)}</div></div><div class="qi-bot"><div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${item.id}',-1)">−</button><span class="qty-num">${item.qty}</span><button class="qty-btn" onclick="chQty('${item.id}',1)">+</button></div><div class="qi-meta">$${item.price.toFixed(2)} ea${item.cost?` · Cost $${item.cost.toFixed(2)}`:''}</div><button class="qi-rm" onclick="chQty('${item.id}',${-item.qty})">✕</button></div></div>`;
+    return `<div class="quote-item"><div class="qi-top"><div class="qi-name">${esc(item.name)} <span class="type-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span></div><div class="qi-line">$${line.toFixed(2)}</div></div><div class="qi-bot"><div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${item.id}',-1)">−</button><span class="qty-num">${item.qty}</span><button class="qty-btn" onclick="chQty('${item.id}',1)">+</button></div><div class="qi-meta">$${item.price.toFixed(2)} ea</div><button class="qi-rm" onclick="chQty('${item.id}',${-item.qty})">✕</button></div></div>`;
   }).join('');
   const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0); const gst=totalInc/11; const sub=totalInc-gst;
   document.getElementById('t-sub').textContent='$'+sub.toFixed(2);
