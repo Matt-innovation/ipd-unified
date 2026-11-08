@@ -2734,6 +2734,7 @@ function addLabourToQuote() {
     second:     parseFloat(document.getElementById('rate-second')?.value)      || 160,
     builder:    parseFloat(document.getElementById('rate-builder')?.value)     || 195,
     apprentice: parseFloat(document.getElementById('rate-apprentice')?.value)  || 100,
+    service:    parseFloat(document.getElementById('rate-service')?.value)     || 88,
   };
   const labels = { standard:'Standard Labour', second:'2nd Tradesman', builder:'Builder Rate', apprentice:'Apprentice Labour', service:'Service Fee' };
   let added = 0;
