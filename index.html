@@ -643,6 +643,22 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             <button class="add-labour-btn" onclick="addLabourToQuote()">➕ Add Labour to Quote</button>
           </div>
         </div>
+
+        <div class="labour-card">
+          <div class="labour-card-hd"><span>📈 Uplift</span><span style="text-transform:none;letter-spacing:0">$1.10 inc GST each</span></div>
+          <div class="hours-row">
+            <div class="hours-label">Uplift units</div>
+            <div class="hours-ctrl">
+              <button class="h-btn" onclick="chUplift(-1)">−</button>
+              <input class="labour-input" id="uplift-qty" type="number" min="0" step="1" value="0" inputmode="numeric" oninput="setUpliftQty(this.value)">
+              <button class="h-btn" onclick="chUplift(1)">+</button>
+            </div>
+          </div>
+          <div style="padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px">
+            <button class="add-labour-btn" style="margin-top:0" onclick="addUpliftToQuote()">➕ Add Uplift to Quote</button>
+            <button class="q-btn" style="flex:none;width:100%;padding:11px" onclick="addUpliftToTarget()">🎯 Add uplift to reach target</button>
+          </div>
+        </div>
       </div>
       </div>
     </div>
@@ -1463,6 +1479,12 @@ const GP_SETTINGS = {
   },
 };
 
+// ── UPLIFT SETTINGS — a per-unit line staff can add on the Labour screen ────
+const UPLIFT = {
+  sellIncGst: 1.10,          // each unit sells for $1.10 inc GST ($1.00 ex GST)
+  costExGst:  0.01,          // each unit costs IPD $0.01 ex GST (GP display only, never sent)
+};
+
 const PROXY = 'https://ipd-proxy-server.onrender.com';
 const SHEET_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbz5yp8BmAwococSxcEQSJePYFLcZDfSaCMmQx4aWc0Tcdlvzqv3jC5iJfmQq_hoEo3SvA/exec';
 let SHEET_URL = localStorage.getItem('ipd_sheet_url') || SHEET_URL_DEFAULT;
@@ -2063,6 +2085,9 @@ function exportQuote() {
 }
 async function sendQuoteToSM8() {
   if(!quote.length){showToast('Nothing to send');return;}
+  // Never send a null/NaN price or quantity — stop and say which line instead.
+  const badLines = quote.filter(i => !Number.isFinite(Number(i.price)) || !Number.isFinite(Number(i.qty)));
+  if (badLines.length) { showToast('❌ Not sent — no valid price on: ' + badLines.map(i => i.name).join(', ')); return; }
   const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0);
   const jobNumber=(document.getElementById('job-number-input')?.value||'').trim();
   showToast('Sending to ServiceM8...');
@@ -2754,6 +2779,46 @@ function addLabourToQuote() {
   });
   if (added) { updateQuoteUI(); showToast('Labour added to quote'); goScreen('quote'); }
   else showToast('Set some hours first');
+}
+
+// ── UPLIFT ────────────────────────────────────────────────────────────────────
+// Added to the quote as one labour-type line: qty = units, price = UPLIFT.sellIncGst each.
+// Not affected by the Labour screen's surcharge/discount.
+let upliftQty = 0;
+function setUpliftQty(v) { upliftQty = Math.max(0, Math.floor(parseFloat(v) || 0)); }
+function chUplift(delta) {
+  setUpliftQty(upliftQty + delta);
+  const el = document.getElementById('uplift-qty'); if (el) el.value = upliftQty;
+}
+function addUpliftLine(qty) {
+  const ex = quote.find(i => i.id === 'uplift');
+  if (ex) ex.qty += qty;
+  else quote.push({ id: 'uplift', type: 'labour', name: 'Uplift', code: '', price: UPLIFT.sellIncGst, qty, gpCost: UPLIFT.costExGst });
+}
+function addUpliftToQuote() {
+  if (upliftQty <= 0) { showToast('Set an uplift quantity first'); return; }
+  addUpliftLine(upliftQty); updateQuoteUI(); showToast('Uplift ×' + upliftQty + ' added to quote'); goScreen('quote');
+}
+// Units of uplift needed so GP reaches the job-type target, rounded UP.
+// With no discount this is exactly: uplift ex GST = (cost − sell ex × (1 − target)) / (0.99 − target)
+function upliftUnitsToTarget(g, target) {
+  const unitSellEx = UPLIFT.sellIncGst / 1.1;                       // $1.00
+  const perUnitGain = unitSellEx * (1 - target) - UPLIFT.costExGst; // 0.99 − target when unit = $1.00
+  const upliftEx = (g.cost - g.sellEx * (1 - target)) / perUnitGain * unitSellEx;
+  return Math.max(1, Math.ceil(upliftEx / unitSellEx - 1e-9));
+}
+function addUpliftToTarget() {
+  if (!quoteJobType) { showToast('Choose the job type on the Quote screen first'); goScreen('quote'); return; }
+  const target = GP_SETTINGS.targets[quoteJobType];
+  const g = calcGP();
+  if (g.sellEx <= 0) { showToast('Add items to the quote first'); return; }
+  const gp = (g.sellEx - g.cost) / g.sellEx;
+  if (gp >= target - 1e-9) { showToast('GP is already ' + (gp * 100).toFixed(1) + '% — at or above target, no uplift added'); return; }
+  const units = upliftUnitsToTarget(g, target);
+  addUpliftLine(units); updateQuoteUI();
+  const g2 = calcGP();
+  showToast('Added ' + units + ' uplift units — GP now ' + ((g2.sellEx - g2.cost) / g2.sellEx * 100).toFixed(1) + '%');
+  goScreen('quote');
 }
 
 // ── UTILS ─────────────────────────────────────────────────────────────────────
