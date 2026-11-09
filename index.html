@@ -1691,6 +1691,9 @@ let bundles = [], reece = [], knowledge = [], quote = [];
 let quoteJobType = null; // 'maintenance' | 'construction' — asked at the start of each new quote
 let quoteDiscountPct = 0; // whole-quote % discount (0–50), shown as its own "Discount (x%)" line
 let knowledgeState = 'loading'; // 'loading' | 'ok' | error message shown on the Knowledge tab
+// Bundle costs (ex GST) from the server's /bundle-costs, keyed by ServiceM8 bundle uuid.
+// Used only inside the GP calculation — never shown to staff, never sent to ServiceM8.
+let bundleCosts = null;          // null = not loaded (bundles are then left out of GP)
 let dataLoaded = false;
 let recognition = null, isListening = false, pendingAdd = null; // pendingAdd: {qty, item} waiting for yes/no
 let aiRecognition = null, aiListening = false;
@@ -1831,8 +1834,18 @@ async function sendOrder() {
 }
 
 // ── QUOTE DATA ────────────────────────────────────────────────────────────────
+async function loadBundleCosts() {
+  try {
+    const r = await fetch(PROXY + '/bundle-costs');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    bundleCosts = d && d.bundles ? d.bundles : null;
+  } catch (e) { bundleCosts = null; }
+  if (activeScreen === 'quote') renderGP();
+}
 async function loadQuoteData() {
   loadKnowledge(); // separate Sheet; runs alongside, a failure there doesn't affect bundles
+  loadBundleCosts(); // server; runs alongside, a failure just leaves bundles out of GP
   if (!SHEET_URL) return;
   document.getElementById('q-sdot').className = 's-dot warn';
   document.getElementById('q-stext').textContent = 'Connecting...';
@@ -2033,21 +2046,27 @@ function renderQuote() {
   totals.style.display='block';
 }
 // ── GP (gross profit) — display only, never sent to ServiceM8 ────────────────
-// All maths ex GST. Bundle lines have no cost yet, so they're left out of GP
-// entirely (their price too — counting their price with no cost would overstate GP).
+// All maths ex GST. Bundle lines use the server's bundle cost (parts × qty, ex GST). A bundle with
+// no known cost — costs not loaded, or any part the server couldn't cost — is left out of GP
+// entirely (its price too — counting its price without its full cost would overstate GP).
 function setQuoteJobType(t) { quoteJobType = t; renderGP(); }
 function isGstFreeLine(i) {
   // Reece lines carry the price file's GST % (10 or 0) as `markup`.
   return i.type === 'reece' && i.markup !== undefined && i.markup !== null && i.markup !== '' && Number(i.markup) === 0;
 }
 function calcGP() {
-  let sellInc = 0, sellEx = 0, cost = 0, hasBundle = false, noCost = 0;
+  let sellInc = 0, sellEx = 0, cost = 0, hasBundle = false, noCost = 0, bundlesNoCost = 0;
   for (const i of quote) {
     if (i.id === 'discount') continue;                // applied below as a % of the counted sell
     const lineInc = (parseFloat(i.price) || 0) * i.qty;
-    if (i.type === 'bundle') { hasBundle = true; continue; }
     let lineCost;
-    if (i.type === 'labour') lineCost = (parseFloat(i.gpCost) || 0) * i.qty;
+    if (i.type === 'bundle') {
+      const bc = bundleCosts && bundleCosts[i.id];
+      // A fully-costed bundle counts even at $0 (e.g. hire of our own equipment).
+      if (!bc || bc.unresolved > 0 || !(bc.cost >= 0)) { hasBundle = true; bundlesNoCost++; continue; }
+      lineCost = bc.cost * i.qty;
+    }
+    else if (i.type === 'labour') lineCost = (parseFloat(i.gpCost) || 0) * i.qty;
     else {
       const c = parseFloat(i.cost) || 0;           // materials cost, ex GST, per unit
       if (c <= 0) { noCost++; continue; }          // no cost known — leave out rather than show 100%
@@ -2060,7 +2079,7 @@ function calcGP() {
   // Whole-quote discount reduces the sell of every counted line by the same %; cost is unchanged.
   const sellExFull = sellEx, d = discountFraction();
   sellInc *= (1 - d); sellEx *= (1 - d);
-  return { sellInc, sellEx, cost, hasBundle, noCost, sellExFull };
+  return { sellInc, sellEx, cost, hasBundle, noCost, sellExFull, bundlesNoCost };
 }
 
 // ── QUOTE DISCOUNT (whole quote, %) ──────────────────────────────────────────
@@ -2135,7 +2154,7 @@ function renderGP() {
       + `<div class="gp-row"><span>Room to discount</span><b class="${room < 0 ? 'neg' : ''}">${money(room)}</b></div>`;
   }
   const notes = [];
-  if (g.hasBundle) notes.push('GP excludes bundle costs');
+  if (g.bundlesNoCost) notes.push(`GP excludes ${g.bundlesNoCost} bundle${g.bundlesNoCost === 1 ? '' : 's'} with no cost`);
   if (g.noCost) notes.push(`GP excludes ${g.noCost} item${g.noCost === 1 ? '' : 's'} with no cost price`);
   panel.innerHTML = typeRow + body + (notes.length ? `<div class="gp-note">${notes.join(' · ')}</div>` : '');
 }
