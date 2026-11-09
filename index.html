@@ -2685,6 +2685,25 @@ async function loadReeceImages(container) {
 }
 
 let reeceSearchTimer = null;
+const REECE_PAGE = 20;
+let reeceShown = { list: [], n: 0, total: 0, container: null };
+function showMoreReece() {
+  const s = reeceShown; if (!s.container) return;
+  const box = s.container.querySelector('.reece-cards'); if (!box) return;
+  const next = s.list.slice(s.n, s.n + REECE_PAGE);
+  const chunk = document.createElement('div');
+  chunk.innerHTML = next.map(r => reeceCard(r)).join('');
+  box.appendChild(chunk);
+  loadReeceImages(chunk);                       // fire-and-forget: images for the new cards only
+  s.n += next.length;
+  s.container.querySelector('.reece-count').textContent = s.n < s.total ? s.n + ' of ' + s.total : String(s.total);
+  const left = s.list.length - s.n, more = s.container.querySelector('.reece-more');
+  more.hidden = left <= 0;
+  more.textContent = 'Show more (' + Math.min(REECE_PAGE, left) + ' more of ' + left + ')';
+  const cap = s.container.querySelector('.reece-cap');
+  cap.hidden = !(left <= 0 && s.total > s.list.length);
+  cap.querySelector('p').textContent = 'Showing the top ' + s.list.length + ' of ' + s.total + ' matches — add another word to narrow it down.';
+}
 async function fetchReeceSearch(q, container) {
   clearTimeout(reeceSearchTimer);
   reeceSearchTimer = setTimeout(async () => {
@@ -2695,11 +2714,13 @@ async function fetchReeceSearch(q, container) {
         container.innerHTML = '<div class="state-box"><span class="state-icon">🤷</span><p>No Reece products found.<br><span class="hint">Try different keywords.</span></p></div>';
         return;
       }
-      const total = data.total || data.products.length;
-      let html = `<div class="section-hd" style="color:#f87171">🏪 Reece Products (${total > 60 ? '60 of ' + total : total})</div>`;
-      html += data.products.map(r => reeceCard(r)).join('');
-      container.innerHTML = html;
-      loadReeceImages(container); // fire-and-forget: images appear as they load
+      // Server sends up to 200 ranked results (most-used first); show 20 at a time.
+      reeceShown = { list: data.products, n: 0, total: data.total || data.products.length, container };
+      container.innerHTML = `<div class="section-hd" style="color:#f87171">🏪 Products (<span class="reece-count"></span>)</div>`
+        + `<div class="reece-cards"></div>`
+        + `<button class="q-btn reece-more" style="flex:none;width:calc(100% - 24px);margin:10px 12px" onclick="showMoreReece()"></button>`
+        + `<div class="state-box reece-cap" style="padding:8px 16px 16px" hidden><p class="hint"></p></div>`;
+      showMoreReece();
     } catch(e) {
       container.innerHTML = '<div class="state-box"><span class="state-icon">❌</span><p>Could not reach server.<br><span class="hint">Check connection.</span></p></div>';
     }
