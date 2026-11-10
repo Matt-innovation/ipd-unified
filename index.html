@@ -133,6 +133,26 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .ai-mic-btn{width:36px;height:36px;border-radius:var(--radius-sm);background:var(--red-lt);border:1px solid var(--red);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--red)}
 .ai-mic-btn.listening{background:var(--red);color:#fff}
 .ai-results-area{flex:1;overflow-y:auto;min-height:0}
+/* ── ASK (AI assistant) ── */
+.ask-loc{font-size:12px;color:var(--text-mid);display:flex;align-items:center;gap:6px}
+.ask-card{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 14px}
+.ask-q{font-weight:700;font-size:13px;margin-bottom:6px;color:var(--text)}
+.ask-body{font-size:13px;line-height:1.55;color:var(--text)}
+.ask-wait{font-size:12px;color:var(--text-mid);text-align:center}
+.ask-ref{color:var(--orange);font-weight:700;text-decoration:none}
+.ask-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.ask-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--btn2-bg);color:var(--btn2-text)}
+.ask-badge.warn{background:#fbbf24;color:#111111}
+.ask-place{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:12px;color:var(--text)}
+.ask-place span{color:var(--text-mid)}
+.ask-place a{text-decoration:none;white-space:nowrap}
+.ask-sources{margin-top:10px;display:flex;flex-direction:column;gap:4px;font-size:12px}
+.ask-sources a{color:var(--text);text-decoration:underline;word-break:break-word}
+.ask-sources.none{color:var(--text-mid)}
+.ask-src-hd{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-mid);letter-spacing:.5px}
+.ask-fb{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--text-mid);flex-wrap:wrap}
+.ask-fb button{border:1px solid var(--border2);background:var(--surface2);color:var(--text);border-radius:999px;padding:4px 10px;font-size:14px;cursor:pointer}
+.ask-fb-text{min-height:50px;flex:1 1 100%}
 .quote-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
 .quote-list{flex:1;overflow-y:auto;min-height:0}
 .quote-item{padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface)}
@@ -472,40 +492,16 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
     <div class="screen" id="screen-ai">
       <div class="ai-wrap">
         <div class="ai-input-area">
-          <!-- Tab switcher -->
-          <div style="display:flex;gap:0;margin-bottom:10px;border:1px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden">
-            <button id="ai-tab-search" onclick="setAiTab('search')" style="flex:1;padding:8px;border:none;background:var(--orange);color:#fff;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer">🔍 Find Items</button>
-            <button id="ai-tab-web" onclick="setAiTab('web')" style="flex:1;padding:8px;border:none;background:var(--surface2);color:var(--text-mid);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer">🌐 Ask AI</button>
-          </div>
-          <!-- Find Items tab -->
-          <div id="ai-panel-search">
-            <div class="ai-card">
-              <div class="ai-card-hd"><span>✨</span><span>Describe the job</span></div>
-              <textarea class="ai-textarea" id="ai-textarea" placeholder="e.g. blocked drain · 50mm bend · hot water unit · toilet suite..."></textarea>
-              <div class="ai-card-ft">
-                <span class="hint">Keywords work best</span>
-                <div style="display:flex;gap:8px;align-items:center">
-                  <div class="ai-mic-btn" id="ai-mic" onclick="toggleAiMic()">🎤</div>
-                  <button class="ai-go" onclick="runAiSuggest()">🔍 Find Items</button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- Ask AI tab -->
-          <div id="ai-panel-web" style="display:none">
-            <div class="ai-card">
-              <div class="ai-card-hd"><span>🌐</span><span>Ask anything — Standards, Regs, Products</span></div>
-              <textarea class="ai-textarea" id="ai-web-textarea" placeholder="e.g. What is AS3500? · Min pipe fall for drainage? · Alternative to Thermann? · QBCC requirements for hot water..."></textarea>
-              <div class="ai-card-ft">
-                <span class="hint">Searches the web for current info</span>
-                <div style="display:flex;gap:8px;align-items:center">
-                  <button class="ai-go" onclick="runWebSearch()">🌐 Search</button>
-                </div>
-              </div>
+          <div class="ai-card">
+            <div class="ai-card-hd"><span>🤖</span><span>Ask — standards, products, local suppliers</span></div>
+            <textarea class="ai-textarea" id="ask-q" maxlength="1000" placeholder="e.g. Minimum fall for a 100mm sewer drain? · Which tempering valve do we use? · Closest landscaping supplies?"></textarea>
+            <div class="ai-card-ft">
+              <label class="ask-loc"><input type="checkbox" id="ask-use-loc"> Use my location</label>
+              <button class="ai-go" id="ask-go" onclick="askAssistant()">Ask</button>
             </div>
           </div>
         </div>
-        <div class="ai-results-area" id="ai-results"><div class="state-box"><span class="state-icon">💡</span><p>Describe the job above<br><span class="hint">e.g. "blocked drain" · "50mm bend" · "hot water"</span></p></div></div>
+        <div class="ai-results-area" id="ask-results"><div class="state-box"><span class="state-icon">💡</span><p>Ask a question above.<br><span class="hint">Every answer shows its sources. For standards it only uses official sources and says when it can't find one.</span></p></div></div>
       </div>
     </div>
 
@@ -2671,7 +2667,8 @@ function stopListening() {
 function toggleMic() { isListening ? stopListening() : startListening(); }
 function setupAiVoice(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){ document.getElementById('ai-mic').style.display='none'; }
+  const aiMicBtn=document.getElementById('ai-mic');   // the old AI screen's mic is gone (Ask screen replaced it)
+  if(!SR && aiMicBtn){ aiMicBtn.style.display='none'; }
 }
 function buildAiRecognition(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -2927,6 +2924,80 @@ function addUpliftToTarget() {
   const g2 = calcGP();
   showToast('Added ' + units + ' uplift units — GP now ' + ((g2.sellEx - g2.cost) / g2.sellEx * 100).toFixed(1) + '%');
   goScreen('quote');
+}
+
+// ── AI ASSISTANT (Ask screen) ────────────────────────────────────────────────
+// Questions go to our server's /ai-ask, which asks Claude with web search. No API key in the app.
+// Answers show numbered sources; product info is names and sell prices only (never costs or GP).
+function askDeviceId() {
+  let id = null;
+  try { id = localStorage.getItem('ipd_device_id'); } catch (e) {}
+  if (!id || !/^[A-Za-z0-9-]{8,64}$/.test(id)) {
+    id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('d' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12));
+    try { localStorage.setItem('ipd_device_id', id); } catch (e) {}
+  }
+  return id;
+}
+function askLocation() {   // asks the phone for permission the first time; resolves null if refused
+  return new Promise(resolve => {
+    if (!navigator.geolocation) return resolve(null);
+    navigator.geolocation.getCurrentPosition(p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }), () => resolve(null),
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
+  });
+}
+function askAnswerHtml(text, sources) {   // escape, keep line breaks, turn [n] into links to that source
+  const byN = new Map(sources.map(s => [s.n, s]));
+  return esc(text).replace(/\[(\d+)\]/g, (m, n) => {
+    const s = byN.get(+n); if (!s) return m;
+    return s.url ? `<a class="ask-ref" href="${esc(s.url)}" target="_blank" rel="noopener">[${n}]</a>` : `<span class="ask-ref">[${n}]</span>`;   // quick reference has no link
+  }).replace(/\n/g, '<br>');
+}
+async function askAssistant() {
+  const box = document.getElementById('ask-q'), btn = document.getElementById('ask-go'), list = document.getElementById('ask-results');
+  const question = (box.value || '').trim();
+  if (question.length < 3) { showToast('Type a question first'); return; }
+  btn.disabled = true; btn.textContent = 'Thinking…';
+  if (list.querySelector('.state-box')) list.innerHTML = '';
+  const card = document.createElement('div'); card.className = 'ask-card';
+  card.innerHTML = `<div class="ask-q">${esc(question)}</div><div class="ask-body"><div class="big-spin"></div><p class="ask-wait">Searching sources…</p></div>`;
+  list.prepend(card);
+  try {
+    const location = document.getElementById('ask-use-loc').checked ? await askLocation() : null;
+    const res = await fetch(PROXY + '/ai-ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deviceId: askDeviceId(), question, location }) });
+    const d = await res.json().catch(() => ({ error: 'Unexpected reply from the server' }));
+    if (!res.ok || d.error) throw new Error(d.error || ('HTTP ' + res.status));
+    renderAskCard(card, question, d);
+    box.value = '';
+  } catch (e) {
+    card.querySelector('.ask-body').innerHTML = `<div class="status-msg error">❌ ${esc(e.message)}</div>`;
+  }
+  btn.disabled = false; btn.textContent = 'Ask';
+}
+function renderAskCard(card, question, d) {
+  const badges = (d.compliance ? '<span class="ask-badge">Compliance · official sources only</span>' : '')
+    + (d.unverified ? '<span class="ask-badge warn">⚠ A clause number couldn’t be verified</span>' : '')
+    + (d.usedQuickRef ? '<span class="ask-badge">Uses our quick reference</span>' : '');
+  const places = (d.places || []).map(p => `<div class="ask-place"><div><b>${esc(p.name)}</b><br><span>${esc(p.suburb)}</span></div><a class="gp-max-btn" href="${esc(p.mapsUrl)}" target="_blank" rel="noopener">Open in Maps</a></div>`).join('');
+  const srcs = d.sources || [];
+  const sources = srcs.length
+    ? '<div class="ask-sources"><div class="ask-src-hd">Sources</div>' + srcs.map(s => s.url
+        ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">[${s.n}] ${esc(s.title)}</a>`
+        : `<span>[${s.n}] ${esc(s.title)}</span>`).join('') + '</div>'
+    : '<div class="ask-sources none">No sources found for this answer.</div>';
+  card.innerHTML = `<div class="ask-q">${esc(question)}</div>${badges ? '<div class="ask-badges">' + badges + '</div>' : ''}<div class="ask-body">${askAnswerHtml(d.answer || '', srcs)}</div>${places}${sources}`
+    + `<div class="ask-fb" data-id="${esc(d.id || '')}"><span>Was this right?</span><button onclick="askFeedback(this,'up')">👍</button><button onclick="askFeedback(this,'down')">👎</button></div>`;
+}
+function askFeedback(btn, vote) {
+  const row = btn.closest('.ask-fb');
+  if (vote === 'up') { askSendFeedback(row, 'up', ''); return; }
+  row.innerHTML = `<textarea class="settings-input ask-fb-text" maxlength="500" placeholder="What was wrong? (optional)"></textarea><button class="gp-max-btn" onclick="askSendFeedback(this.closest('.ask-fb'),'down',this.previousElementSibling.value)">Send</button>`;
+}
+async function askSendFeedback(row, vote, comment) {
+  try {
+    const r = await fetch(PROXY + '/ai-feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deviceId: askDeviceId(), id: row.dataset.id, vote, comment }) });
+    if (!r.ok) throw new Error();
+    row.innerHTML = '<span>Thanks — Matt reviews this feedback.</span>';
+  } catch (e) { showToast('Could not send feedback'); }
 }
 
 // ── UTILS ─────────────────────────────────────────────────────────────────────
