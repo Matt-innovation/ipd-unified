@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-[hidden]{display:none!important}
+body.pilot [hidden]{display:none!important}
 :root{
   --orange:#F26A1B;--blue:#3b82f6;--blue-lt:rgba(59,130,246,0.15);
   --red:#DC2626;--red-lt:rgba(220,38,38,0.12);
@@ -194,7 +194,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .qhint{padding:8px 12px;font-size:12px;color:var(--on-bg)}
 .qline .qi-bot{flex-wrap:wrap;gap:8px}
 .qi-btns{display:flex;gap:6px;margin-left:auto}
-body.on-quote .toast{bottom:150px}
+body.pilot.on-quote .toast{bottom:150px}
 .qi-btn{font-family:var(--font);font-size:14px;font-weight:600;min-height:40px;padding:8px 12px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer}
 .qi-btn.del{border-color:#c62828;color:#c62828}
 .qline{position:relative;overflow:hidden}
@@ -272,7 +272,8 @@ body.on-quote .toast{bottom:150px}
 .kb-desc{font-size:11px;color:var(--text-dim);margin-top:1px}
 .kb-cat{font-size:9px;background:var(--surface2);color:var(--text-mid);padding:2px 5px;border-radius:3px;margin-top:3px;display:inline-block;text-transform:uppercase}
 .settings-wrap{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:0}
-.settings-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden;flex-shrink:0}
+.settings-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden}
+body.pilot .settings-card{flex-shrink:0}
 .settings-card-hd{padding:9px 12px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px}
 .settings-row{padding:10px 12px;display:flex;flex-direction:column;gap:6px}
 .settings-label{font-size:12px;color:var(--text-mid)}
@@ -281,12 +282,12 @@ body.on-quote .toast{bottom:150px}
 .settings-btn{padding:8px 14px;border-radius:var(--radius-sm);background:var(--btn-bg);color:var(--btn-text);border:none;font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;align-self:flex-start}
 .settings-hint{font-size:11px;color:var(--text-dim);line-height:1.5}
 /* iPhone/iPad: nothing in a Settings card may be cut off */
-.settings-row>*{max-width:100%;min-width:0}
-.settings-label,.settings-hint,.settings-card-hd{overflow-wrap:anywhere}
-.settings-input{font-size:16px;min-height:44px;line-height:1.3;padding:10px 12px}
-select.settings-input,.user-actions select{-webkit-appearance:none;appearance:none;padding-right:34px;background-repeat:no-repeat;background-position:right 12px center;background-size:12px 8px;
+body.pilot .settings-row>*{max-width:100%;min-width:0}
+body.pilot .settings-label,body.pilot .settings-hint,body.pilot .settings-card-hd{overflow-wrap:anywhere}
+body.pilot .settings-input{font-size:16px;min-height:44px;line-height:1.3;padding:10px 12px}
+body.pilot select.settings-input,body.pilot .user-actions select{-webkit-appearance:none;appearance:none;padding-right:34px;background-repeat:no-repeat;background-position:right 12px center;background-size:12px 8px;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23888' stroke-width='2'/%3E%3C/svg%3E")}
-.settings-btn{white-space:normal;text-align:center;max-width:100%;min-height:40px;line-height:1.3}
+body.pilot .settings-btn{white-space:normal;text-align:center;max-width:100%;min-height:40px;line-height:1.3}
 .state-box{padding:30px 16px;text-align:center;color:var(--on-bg)}
 .state-box .state-icon{font-size:32px;margin-bottom:8px;display:block;opacity:.4}
 .state-box p{font-size:13px;line-height:1.6}
@@ -311,7 +312,7 @@ select.settings-input,.user-actions select{-webkit-appearance:none;appearance:no
 .home-card-desc{font-size:11px;color:var(--text-mid);line-height:1.4}
 .home-stat-row{display:flex;gap:8px}
 /* home page (step 2) — nothing may be squashed or cut off on iPhone/iPad */
-.home-wrap>*{flex-shrink:0;min-width:0}
+body.pilot .home-wrap>*{flex-shrink:0;min-width:0}
 .home-hello{padding:2px}
 .home-hello-name{font-size:24px;font-weight:700;color:var(--on-bg);line-height:1.2;overflow-wrap:anywhere}
 .home-hello-sub{font-size:13px;color:var(--on-bg);margin-top:3px;line-height:1.4;overflow-wrap:anywhere}
@@ -618,6 +619,72 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
     <!-- HOME -->
     <div class="screen active" id="screen-home">
       <div class="home-wrap">
+        <div class="home-greeting">
+          <div class="home-greeting-name">Innovation Plumbing + Design</div>
+          <div class="home-greeting-sub">What do you need today?</div>
+        </div>
+        <div class="home-stat-row">
+          <div class="home-stat"><div class="home-stat-num" id="hs-quote">0</div><div class="home-stat-label">Quote Items</div></div>
+          <div class="home-stat"><div class="home-stat-num" id="hs-order">0</div><div class="home-stat-label">To Order</div></div>
+          <div class="home-stat"><div class="home-stat-num" id="hs-checked">0</div><div class="home-stat-label">Checked</div></div>
+        </div>
+        <div class="home-grid">
+          <div class="home-card" onclick="goScreen('search')">
+            <div class="home-card-icon">🔍</div>
+            <div class="home-card-label">Search</div>
+            <div class="home-card-desc">Find Reece products &amp; bundles</div>
+          </div>
+          <div class="home-card" onclick="goScreen('quote')">
+            <div class="home-card-icon">📋</div>
+            <div class="home-card-label">Quote</div>
+            <div class="home-card-desc">Build &amp; send to ServiceM8</div>
+          </div>
+          <div class="home-card" onclick="goScreen('labour')">
+            <div class="home-card-icon">⏱</div>
+            <div class="home-card-label">Labour</div>
+            <div class="home-card-desc">Rates, hours &amp; adjustments</div>
+          </div>
+          <div class="home-card" onclick="goScreen('stock')">
+            <div class="home-card-icon">📦</div>
+            <div class="home-card-label">Stock</div>
+            <div class="home-card-desc">Count &amp; order van stock</div>
+          </div>
+          <div class="home-card" onclick="goScreen('ai')">
+            <div class="home-card-icon">✨</div>
+            <div class="home-card-label">AI Assistant</div>
+            <div class="home-card-desc">Standards, regs &amp; advice</div>
+          </div>
+          <div class="home-card" onclick="goScreen('kb')">
+            <div class="home-card-icon">📚</div>
+            <div class="home-card-label">Knowledge</div>
+            <div class="home-card-desc">Bundles, codes &amp; guides</div>
+          </div>
+          <div class="home-card" onclick="goScreen('settings')">
+            <div class="home-card-icon">⚙️</div>
+            <div class="home-card-label">Settings</div>
+            <div class="home-card-desc">App config &amp; data source</div>
+          </div>
+          <div class="home-card" onclick="goScreen('training')">
+            <div class="home-card-icon">🎓</div>
+            <div class="home-card-label">Training</div>
+            <div class="home-card-desc">Step-by-step app guide</div>
+          </div>
+          <div class="home-card" onclick="goScreen('standards')">
+            <div class="home-card-icon">📐</div>
+            <div class="home-card-label">AS Standards</div>
+            <div class="home-card-desc">AS3500, AS1428, AS5601 &amp; more</div>
+          </div>
+          <a class="home-card" href="https://chat.whatsapp.com/D9bDzCG7f9UK7ZhmddIuKw" target="_blank" style="text-decoration:none;color:inherit">
+            <div class="home-card-icon">💬</div>
+            <div class="home-card-label">WhatsApp</div>
+            <div class="home-card-desc">Join the IPD BOYS group</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <template id="tpl-home-pilot">
+      <div class="home-wrap">
         <div class="home-hello">
           <div class="home-hello-name" id="home-hello">Good morning</div>
           <div class="home-hello-sub" id="home-hello-sub">Innovation Plumbing + Design</div>
@@ -662,7 +729,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
           <div class="home-stat"><div class="home-stat-num" id="hs-checked">0</div><div class="home-stat-label">Checked</div></div>
         </div>
       </div>
-    </div>
+    </template>
 
     <!-- STOCK -->
     <div class="screen" id="screen-stock">
@@ -710,7 +777,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
       <div class="ai-wrap">
         <div class="ai-input-area">
           <div class="ai-card">
-            <div class="ai-card-hd"><img class="om-hd" src="old-mate/old-mate-120.png" width="120" height="176" alt="Old Mate" decoding="async"><span>Ask Old Mate — standards, products, local suppliers</span></div>
+            <div class="ai-card-hd"><span>🤖</span><span>Ask — standards, products, local suppliers</span></div>
             <textarea class="ai-textarea" id="ask-q" maxlength="1000" placeholder="e.g. Minimum fall for a 100mm sewer drain? · Which tempering valve do we use? · Closest landscaping supplies?"></textarea>
             <div class="ai-card-ft">
               <label class="ask-loc"><input type="checkbox" id="ask-use-loc"> Use my location</label>
@@ -718,12 +785,41 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             </div>
           </div>
         </div>
-        <div class="ai-results-area" id="ask-results"><div class="state-box"><img class="om-big" src="old-mate/old-mate-400.png" width="400" height="588" alt="Old Mate" loading="lazy" decoding="async"><p>G'day — ask Old Mate a question above.<br><span class="hint">Every answer shows its sources. For standards it only uses official sources and says when it can't find one.</span></p></div></div>
+        <div class="ai-results-area" id="ask-results"><div class="state-box"><span class="state-icon">💡</span><p>Ask a question above.<br><span class="hint">Every answer shows its sources. For standards it only uses official sources and says when it can't find one.</span></p></div></div>
       </div>
     </div>
 
     <!-- QUOTE -->
     <div class="screen" id="screen-quote">
+      <div class="quote-wrap">
+        <div class="gp-panel" id="gp-panel"></div>
+        <div class="gp-discount" id="gp-discount" style="display:none">
+          <span class="gp-disc-label">Discount</span>
+          <div class="pct-chip" id="qd-0" onclick="setQuoteDiscount(0)">None</div>
+          <div class="pct-chip" id="qd-5" onclick="setQuoteDiscount(5)">5%</div>
+          <div class="pct-chip" id="qd-10" onclick="setQuoteDiscount(10)">10%</div>
+          <div class="pct-chip" id="qd-15" onclick="setQuoteDiscount(15)">15%</div>
+          <span style="display:flex;align-items:center;gap:3px"><input class="labour-input" id="qd-custom" type="number" min="0" max="50" step="0.5" inputmode="decimal" placeholder="%" style="width:58px" oninput="onCustomDiscount(this)"><span style="font-size:11px;color:var(--text-mid)">%</span></span>
+          <button class="gp-max-btn" onclick="setMaxDiscount()">Max discount that holds target</button>
+        </div>
+        <div class="quote-list" id="quote-list"><div class="state-box"><span class="state-icon">📋</span><p>No items yet.<br>Add from Search or AI tab.</p></div></div>
+        <div id="quote-totals" class="totals-box" style="display:none">
+          <div class="total-row"><span>Subtotal (ex GST)</span><span id="t-sub">$0.00</span></div>
+          <div class="total-row"><span>GST (10%)</span><span id="t-gst">$0.00</span></div>
+          <div class="total-row grand"><span>Total inc GST</span><span id="t-total">$0.00</span></div>
+        </div>
+        <div style="padding:8px 12px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0">
+          <input type="text" id="job-number-input" placeholder="Job number (optional)" style="width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:13px;font-family:var(--font);outline:none">
+        </div>
+        <div class="quote-actions">
+          <button class="q-btn" onclick="clearQuote()">🗑 Clear</button>
+          <button class="q-btn" onclick="exportQuote()">⬇ Download</button>
+          <button class="q-btn primary" onclick="sendQuoteToSM8()">📤 Send to SM8</button>
+        </div>
+      </div>
+    </div>
+
+    <template id="tpl-quote-pilot">
       <div class="quote-wrap">
         <div class="q-tabs" id="q-tabs" role="tablist">
           <button data-qtab="summary">Summary <span class="qtab-count" id="qtab-count" hidden>0</span></button>
@@ -785,7 +881,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
           <button class="qbar-send" onclick="sendQuoteToSM8()">📤 Send to SM8</button>
         </div>
       </div>
-    </div>
+    </template>
 
     <!-- LABOUR -->
     <div class="screen" id="screen-labour">
@@ -2084,10 +2180,8 @@ function deemphasiseMicOnIOS() {
 // ── INIT ──────────────────────────────────────────────────────────────────────
 function init() {
   initPin();
-  setupHome();
   setupKiosk();
   setupDirectory();
-  setupQuoteTabs();
   initLogin();
   // Keys never live in the app: clear any ServiceM8 key an older version saved on this phone.
   try { localStorage.removeItem('ipd_sm8_key'); } catch (e) {}
@@ -2116,9 +2210,9 @@ function goScreen(name) {
   document.body.classList.toggle('on-quote', name === 'quote');   // lifts pop-up messages above the quote bar
   if (name !== 'search') stopListening();
   if (name === 'kb') renderKB();
-  if (name === 'quote') { renderQuote(); setQTab('summary'); }   // the quote page always opens on Summary
+  if (name === 'quote') { renderQuote(); if (PILOT_UI) setQTab('summary'); }   // the quote page always opens on Summary
   if (name === 'labour') updateLabourTotals();
-  if (name === 'home') { updateHomeStats(); renderHome(); if (CURRENT_USER) kioskRefreshSummary(); }
+  if (name === 'home') { updateHomeStats(); if (PILOT_UI) { renderHome(); kioskRefreshSummary(); } }
 }
 
 function saveSheetUrl() {
@@ -2394,7 +2488,24 @@ function updateHomeStats() {
   if (hs_order) hs_order.textContent = orderItems().length;
   if (hs_checked) hs_checked.textContent = Object.values(onHand).filter(v=>v!=='').length;
 }
-function renderQuote() {
+function renderQuoteClassic() {
+  const list = document.getElementById('quote-list');
+  const totals = document.getElementById('quote-totals');
+  renderGP();
+  if (!quote.length) { list.innerHTML='<div class="state-box"><span class="state-icon">📋</span><p>No items yet.<br>Add from Search or AI tab.</p></div>'; totals.style.display='none'; return; }
+  list.innerHTML = quote.map(item => {
+    if (item.id === 'discount') return `<div class="quote-item"><div class="qi-top"><div class="qi-name">${esc(item.name)}</div><div class="qi-line" style="color:var(--red)">−$${Math.abs(item.price).toFixed(2)}</div></div><div class="qi-bot"><div class="qi-meta">On the whole quote</div><button class="qi-rm" onclick="setQuoteDiscount(0)">✕</button></div></div>`;
+    const line = item.price*item.qty; const isB = item.type==='bundle';
+    return `<div class="quote-item"><div class="qi-top"><div class="qi-name">${esc(item.name)} <span class="type-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span></div><div class="qi-line">$${line.toFixed(2)}</div></div><div class="qi-bot"><div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${item.id}',-1)">−</button><span class="qty-num">${item.qty}</span><button class="qty-btn" onclick="chQty('${item.id}',1)">+</button></div><div class="qi-meta">$${item.price.toFixed(2)} ea</div><button class="qi-rm" onclick="chQty('${item.id}',${-item.qty})">✕</button></div></div>`;
+  }).join('');
+  const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0); const gst=totalInc/11; const sub=totalInc-gst;
+  document.getElementById('t-sub').textContent='$'+sub.toFixed(2);
+  document.getElementById('t-gst').textContent='$'+gst.toFixed(2);
+  document.getElementById('t-total').textContent='$'+totalInc.toFixed(2);
+  totals.style.display='block';
+}
+
+function renderQuotePilot() {
   const list = document.getElementById('quote-list');
   const totals = document.getElementById('quote-totals');
   renderGP();
@@ -2412,6 +2523,8 @@ function renderQuote() {
   updateQuoteBar();
   if (typeof qWatchImages === 'function') qWatchImages(list);
 }
+
+function renderQuote() { return PILOT_UI ? renderQuotePilot() : renderQuoteClassic(); }
 // ── GP (gross profit) — display only, never sent to ServiceM8 ────────────────
 // All maths ex GST. Bundle lines use the server's bundle cost (parts × qty, ex GST). A bundle with
 // no known cost — costs not loaded, or any part the server couldn't cost — is left out of GP
@@ -3679,6 +3792,26 @@ function stdSearch(q) {
   document.getElementById('std-no-result').style.display = anyMatch ? 'none' : 'block';
 }
 
+// ── PILOT UI ─────────────────────────────────────────────────────────────────
+// Off for everyone on the shared PIN (today's app, unchanged). Switched on only after a successful login.
+let PILOT_UI = false;
+function enablePilotUI() {
+  if (PILOT_UI) return;
+  PILOT_UI = true;
+  document.body.classList.add('pilot');
+  for (const name of ['home', 'quote']) {
+    const tpl = document.getElementById('tpl-' + name + '-pilot'), scr = document.getElementById('screen-' + name);
+    if (tpl && scr) { scr.innerHTML = ''; scr.appendChild(tpl.content.cloneNode(true)); }
+  }
+  const hd = document.querySelector('#screen-ai .ai-card-hd'); if (hd) hd.innerHTML = "<img class=\"om-hd\" src=\"old-mate/old-mate-120.png\" width=\"120\" height=\"176\" alt=\"Old Mate\" decoding=\"async\"><span>Ask Old Mate — standards, products, local suppliers</span>";
+  const res = document.getElementById('ask-results'); if (res && res.querySelector('.state-box')) res.innerHTML = "<div class=\"state-box\"><img class=\"om-big\" src=\"old-mate/old-mate-400.png\" width=\"400\" height=\"588\" alt=\"Old Mate\" loading=\"lazy\" decoding=\"async\"><p>G'day — ask Old Mate a question above.<br><span class=\"hint\">Every answer shows its sources. For standards it only uses official sources and says when it can't find one.</span></p></div>";
+  const kb = document.getElementById('kb-search'); if (kb) kb.placeholder = 'Search the IPD Knowledge Centre...';
+  setupHome();
+  setupQuoteTabs();
+  renderQuote();
+  if (activeScreen === 'home') goScreen('home');
+}
+
 // ── STAFF LOGIN (step 1) ─────────────────────────────────────────────────────
 // When the server has logins switched on, each person logs in with a one-time code and the phone keeps a
 // session token. When logins are off (or the server can't be reached and nobody has logged in on this
@@ -3703,7 +3836,9 @@ async function initLogin() {
     if (token && cached) setUser(cached);
     return;
   }
-  if (!cfg.enabled) return;                                     // logins off: PIN as before
+  const askedForPilot = /[?&]pilot=1\b/.test(location.search);
+  if (!cfg.enabled && !cfg.pilot) return;                      // logins off: PIN as before
+  if (cfg.pilot && !token && !askedForPilot) return;           // pilot: everyone else keeps the PIN and today's app
   if (token) {
     try { const j = await authFetch('/auth/me'); setUser(j.user); return; } catch (e) { /* expired or removed */ }
   }
@@ -3717,6 +3852,7 @@ function showLogin() {
 }
 function setUser(u) {
   CURRENT_USER = u;
+  enablePilotUI();
   try { localStorage.setItem(AUTH_USER_KEY, JSON.stringify(u)); } catch (e) {}
   document.getElementById('login-overlay').hidden = true;
   document.getElementById('pin-overlay').classList.add('hidden');   // a personal login replaces the PIN
@@ -3728,7 +3864,9 @@ function setUser(u) {
   if (typeof dirRefresh === 'function') dirRefresh();
 }
 function signedOut() {
+  const wasPilot = PILOT_UI;
   localStorage.removeItem(AUTH_TOKEN_KEY); localStorage.removeItem(AUTH_USER_KEY);
+  if (wasPilot) { location.replace(location.pathname + (/[?&]pilot=1\b/.test(location.search) ? '?pilot=1' : '')); return; }   // back to today's app
   CURRENT_USER = null;
   document.getElementById('me-card').hidden = true;
   if (activeScreen === 'users') goScreen('home');
@@ -3845,7 +3983,7 @@ const HOME_ACTIONS = [
   { id: 'kiosk', icon: '🗂️', label: 'Staff Kiosk', desc: 'Time off, notices and calendar', roles: ALL_ROLES, needsKiosk: true, go: () => openKiosk(),
     badge: () => { if (!kSummary) return ''; const p = []; if (kSummary.unreadNotices) p.push(kSummary.unreadNotices + ' new'); if (kSummary.isOwner && kSummary.ownerPending) p.push(kSummary.ownerPending + ' waiting'); return p.join(' · '); } },
   { id: 'suppliers', icon: '🤝', label: 'Our Suppliers and Business Partners', desc: 'Who we use — call, email or map them', roles: ALL_ROLES, needsDirectory: true, go: () => openDirectory() },
-  { id: 'kb', icon: '📚', label: 'Look up codes and guides', desc: 'Bundles, codes and how-tos', roles: ALL_ROLES, go: () => goScreen('kb') },
+  { id: 'kb', icon: '📚', label: 'IPD Knowledge Centre', desc: 'Bundles, codes and how-tos', roles: ALL_ROLES, go: () => goScreen('kb') },
   { id: 'training', icon: '🎓', label: 'Learn the app', desc: 'Step-by-step guide', roles: ALL_ROLES, go: () => goScreen('training') },
   { id: 'whatsapp', icon: '💬', label: 'Message the team', desc: 'IPD BOYS WhatsApp group', roles: ALL_ROLES, href: 'https://chat.whatsapp.com/D9bDzCG7f9UK7ZhmddIuKw' },
   { id: 'users', icon: '👥', label: 'Manage users', desc: 'Add, change or remove people', roles: ['owner'], needsManage: true, go: () => openUsers() },
