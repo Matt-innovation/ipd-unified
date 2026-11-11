@@ -322,6 +322,17 @@ select.settings-input,.user-actions select{-webkit-appearance:none;appearance:no
 .k-chip{font-size:13px;padding:6px 10px;border-radius:999px;background:var(--surface2);border:1px solid var(--border2)}
 .k-chip button{border:none;background:none;font-size:13px;cursor:pointer;color:var(--text-mid)}
 .k-pushcard{font-size:13px;line-height:1.5}
+.dir-top{flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);padding:10px;display:flex;flex-direction:column;gap:8px}
+.dir-title{font-size:17px;font-weight:800;color:var(--text);line-height:1.25}
+.dir-cats{display:flex;flex-wrap:wrap;gap:6px}
+.dir-cat{font-family:var(--font);font-size:14px;font-weight:600;padding:7px 12px;min-height:36px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;max-width:100%;overflow-wrap:anywhere;text-align:left}
+.dir-cat.on{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
+.dir-card.archived{opacity:.7}
+.dir-name{font-size:16px;overflow-wrap:anywhere}
+.dir-private{font-size:13px;line-height:1.45;background:#fff8e1;color:#5d4037;border-radius:8px;padding:6px 8px;overflow-wrap:anywhere}
+.dir-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.dir-act{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:48px;padding:8px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);text-decoration:none;font-size:15px;font-weight:700;text-align:center}
+.dir-act span{font-size:12px;font-weight:500;color:var(--text-mid);overflow-wrap:anywhere}
 .home-tile-badge{display:inline-block;margin-left:6px;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--orange);color:#fff;vertical-align:middle}
 .home-ask-head{display:flex;align-items:center;gap:10px}
 .om-img{width:48px;height:auto;aspect-ratio:120/176;flex-shrink:0}
@@ -967,6 +978,24 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-suppliers">
+      <div class="k-wrap">
+        <div class="dir-top">
+          <div class="dir-title">Our Suppliers and Business Partners</div>
+          <input class="k-input" id="dir-search" type="search" placeholder="Search name, contact, category…" autocomplete="off">
+          <div class="dir-cats" id="dir-cats"></div>
+        </div>
+        <div class="k-panels"><div class="k-panel" id="dir-panel">
+          <div class="k-card" id="dir-owner-bar" hidden>
+            <button class="k-btn big" id="dir-add">+ Add a supplier or partner</button>
+            <label class="k-check"><input type="checkbox" id="dir-archived"> Show archived entries</label>
+          </div>
+          <div class="k-card" id="dir-form" hidden></div>
+          <div id="dir-list"><div class="k-empty">Loading…</div></div>
+        </div></div>
       </div>
     </div>
 
@@ -1960,6 +1989,7 @@ function init() {
   initPin();
   setupHome();
   setupKiosk();
+  setupDirectory();
   initLogin();
   // Keys never live in the app: clear any ServiceM8 key an older version saved on this phone.
   try { localStorage.removeItem('ipd_sm8_key'); } catch (e) {}
@@ -3331,6 +3361,7 @@ function setUser(u) {
   document.getElementById('me-users-btn').hidden = !u.canManageUsers;
   if (typeof renderHome === 'function') renderHome();
   if (typeof kioskRefreshSummary === 'function') kioskRefreshSummary();
+  if (typeof dirRefresh === 'function') dirRefresh();
 }
 function signedOut() {
   localStorage.removeItem(AUTH_TOKEN_KEY); localStorage.removeItem(AUTH_USER_KEY);
@@ -3449,6 +3480,7 @@ const HOME_ACTIONS = [
   { id: 'ask', icon: '✨', img: 'old-mate/old-mate-120.png', label: 'Ask Old Mate', desc: 'Standards, products, suppliers — with sources', roles: ALL_ROLES, go: () => goScreen('ai') },
   { id: 'kiosk', icon: '🗂️', label: 'Staff Kiosk', desc: 'Time off, notices and calendar', roles: ALL_ROLES, needsKiosk: true, go: () => openKiosk(),
     badge: () => { if (!kSummary) return ''; const p = []; if (kSummary.unreadNotices) p.push(kSummary.unreadNotices + ' new'); if (kSummary.isOwner && kSummary.ownerPending) p.push(kSummary.ownerPending + ' waiting'); return p.join(' · '); } },
+  { id: 'suppliers', icon: '🤝', label: 'Our Suppliers and Business Partners', desc: 'Who we use — call, email or map them', roles: ALL_ROLES, needsDirectory: true, go: () => openDirectory() },
   { id: 'kb', icon: '📚', label: 'Look up codes and guides', desc: 'Bundles, codes and how-tos', roles: ALL_ROLES, go: () => goScreen('kb') },
   { id: 'training', icon: '🎓', label: 'Learn the app', desc: 'Step-by-step guide', roles: ALL_ROLES, go: () => goScreen('training') },
   { id: 'whatsapp', icon: '💬', label: 'Message the team', desc: 'IPD BOYS WhatsApp group', roles: ALL_ROLES, href: 'https://chat.whatsapp.com/D9bDzCG7f9UK7ZhmddIuKw' },
@@ -3470,6 +3502,7 @@ function homeAllowed(a) {
   if (!a.roles.includes(homeRole())) return false;
   if (a.needsManage) return !!(CURRENT_USER && CURRENT_USER.canManageUsers && !homeViewAs);
   if (a.needsKiosk) return !!(CURRENT_USER && kSummary && kSummary.enabled);
+  if (a.needsDirectory) return !!(CURRENT_USER && dirConfig && dirConfig.enabled);
   return true;
 }
 function homeGreeting() {
@@ -3755,6 +3788,90 @@ function setupKiosk() {
   }, true);
   if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', ev => { if (ev.data && ev.data.open === 'kiosk' && CURRENT_USER) openKiosk('notices'); });
   if (/[?&]open=kiosk/.test(location.search)) setTimeout(() => { if (CURRENT_USER) openKiosk('notices'); }, 1500);
+}
+
+// ── OUR SUPPLIERS AND BUSINESS PARTNERS ──────────────────────────────────────
+let dirConfig = null, dirData = null, dirCat = '', dirShowArchived = false, dirEditing = null;
+const DIR_FIELDS = [['name', 'Business name *'], ['contact', 'Contact person'], ['phone', 'Phone'], ['email', 'Email'], ['address', 'Address'], ['website', 'Website'], ['category', 'Category (e.g. landscape supplies)'], ['notes', 'Notes (everyone sees these)']];
+const DIR_OWNER_FIELDS = [['accountNumber', 'Account number (owners only)'], ['privateNotes', 'Private notes (owners only)']];
+const dirCap = s => String(s || '').replace(/\b\w/g, c => c.toUpperCase());
+
+async function dirRefresh() {
+  if (!CURRENT_USER) { dirConfig = null; return; }
+  try { dirConfig = await authFetch('/directory/config'); } catch (e) { dirConfig = null; }
+  if (typeof renderHome === 'function') renderHome();
+}
+function openDirectory() { goScreen('suppliers'); dirLoad(); }
+async function dirLoad() {
+  const list = document.getElementById('dir-list');
+  try {
+    dirData = await authFetch('/directory' + (dirShowArchived ? '?archived=1' : ''));
+    document.getElementById('dir-owner-bar').hidden = !dirData.isOwner;
+    dirRender();
+  } catch (e) { list.innerHTML = '<div class="k-empty">' + escHtml(e.message) + '</div>'; }
+}
+function dirRender() {
+  if (!dirData) return;
+  const q = (document.getElementById('dir-search').value || '').trim().toLowerCase();
+  document.getElementById('dir-cats').innerHTML = ['', ...dirData.categories].map(c => '<button class="dir-cat' + (c === dirCat ? ' on' : '') + '" data-dircat="' + escHtml(c) + '">' + (c ? escHtml(dirCap(c)) : 'All') + '</button>').join('');
+  const words = q.split(/\s+/).filter(Boolean);
+  const rows = dirData.entries.filter(e => (!dirCat || e.category === dirCat) && words.every(w => [e.name, e.contact, e.category, e.address, e.notes, e.phone, e.email].join(' ').toLowerCase().includes(w)));
+  const tel = p => String(p).replace(/[^\d+]/g, '');
+  document.getElementById('dir-list').innerHTML = rows.length ? rows.map(e =>
+    '<div class="k-card dir-card' + (e.status === 'archived' ? ' archived' : '') + '">' +
+    '<div class="k-row"><b class="dir-name">' + escHtml(e.name) + '</b>' + (e.category ? '<span class="k-pill">' + escHtml(dirCap(e.category)) + '</span>' : '') + (e.status === 'archived' ? '<span class="k-pill withdrawn">Archived</span>' : '') + '</div>' +
+    (e.contact ? '<div class="k-line">Contact: ' + escHtml(e.contact) + '</div>' : '') +
+    (e.address ? '<div class="k-line">' + escHtml(e.address) + '</div>' : '') +
+    (e.notes ? '<div class="k-note">' + escHtml(e.notes) + '</div>' : '') +
+    (dirData.isOwner && (e.accountNumber || e.privateNotes) ? '<div class="dir-private">🔒 ' + (e.accountNumber ? 'Account: <b>' + escHtml(e.accountNumber) + '</b>' : '') + (e.accountNumber && e.privateNotes ? '<br>' : '') + escHtml(e.privateNotes || '') + '</div>' : '') +
+    '<div class="dir-actions">' +
+      (e.phone ? '<a class="dir-act" href="tel:' + escHtml(tel(e.phone)) + '">📞 Call<span>' + escHtml(e.phone) + '</span></a>' : '') +
+      (e.email ? '<a class="dir-act" href="mailto:' + escHtml(e.email) + '">✉️ Email</a>' : '') +
+      (e.address ? '<a class="dir-act" href="https://maps.apple.com/?q=' + encodeURIComponent(e.address) + '" target="_blank" rel="noopener">🗺️ Map</a>' : '') +
+      (e.website ? '<a class="dir-act" href="' + escHtml(e.website) + '" target="_blank" rel="noopener">🌐 Website</a>' : '') +
+    '</div>' +
+    (dirData.isOwner ? '<div class="k-btns"><button class="k-btn ghost" data-diredit="' + e.id + '">Edit</button>' + (e.status === 'archived' ? '<button class="k-btn ghost" data-dirrestore="' + e.id + '">Restore</button>' : '<button class="k-btn ghost" data-dirarchive="' + e.id + '">Archive</button>') + '</div>' : '') +
+    '</div>').join('')
+    : '<div class="k-empty">' + (dirData.entries.length ? 'Nothing matches.' : 'No entries yet.' + (dirData.isOwner ? ' Tap “Add a supplier or partner”.' : '')) + '</div>';
+}
+function dirForm(entry) {
+  dirEditing = entry ? entry.id : 'new';
+  const f = document.getElementById('dir-form');
+  f.hidden = false;
+  f.innerHTML = '<div class="k-h">' + (entry ? 'Edit ' + escHtml(entry.name) : 'Add a supplier or partner') + '</div>' +
+    DIR_FIELDS.concat(DIR_OWNER_FIELDS).map(([k, label]) => '<label class="k-label">' + label +
+      (k === 'notes' || k === 'privateNotes' ? '<textarea class="k-input" rows="2" data-dirf="' + k + '">' + escHtml(entry ? entry[k] : '') + '</textarea>'
+        : '<input class="k-input" data-dirf="' + k + '" ' + (k === 'category' ? 'list="dir-catlist" ' : '') + 'type="' + ({ phone: 'tel', email: 'email', website: 'url' }[k] || 'text') + '" value="' + escHtml(entry ? entry[k] : '') + '">') + '</label>').join('') +
+    '<datalist id="dir-catlist">' + (dirData ? dirData.categories : []).map(c => '<option value="' + escHtml(c) + '">').join('') + '</datalist>' +
+    '<div class="k-btns"><button class="k-btn" data-dirsave="1">Save</button><button class="k-btn ghost" data-dircancel="1">Cancel</button></div><div class="k-msg" id="dir-msg"></div>';
+  f.scrollIntoView({ block: 'start' });
+}
+async function dirSave() {
+  const body = {};
+  document.querySelectorAll('#dir-form [data-dirf]').forEach(el => (body[el.dataset.dirf] = el.value));
+  try {
+    await authFetch(dirEditing === 'new' ? '/directory' : '/directory/' + dirEditing, { method: 'POST', body: JSON.stringify(body) });
+    document.getElementById('dir-form').hidden = true; dirEditing = null; showToast('Saved'); dirLoad();
+  } catch (e) { document.getElementById('dir-msg').textContent = e.message; }
+}
+function setupDirectory() {
+  const scr = document.getElementById('screen-suppliers');
+  document.getElementById('dir-search').addEventListener('input', dirRender);
+  scr.addEventListener('click', async e => {
+    const t = e.target;
+    const c = t.closest('[data-dircat]'); if (c) { dirCat = c.dataset.dircat; return dirRender(); }
+    if (t.closest('#dir-add')) return dirForm(null);
+    const ed = t.closest('[data-diredit]'); if (ed) return dirForm(dirData.entries.find(x => x.id === ed.dataset.diredit));
+    if (t.closest('[data-dirsave]')) return dirSave();
+    if (t.closest('[data-dircancel]')) { document.getElementById('dir-form').hidden = true; dirEditing = null; return; }
+    const ar = t.closest('[data-dirarchive]'); if (ar) {
+      const name = (dirData.entries.find(x => x.id === ar.dataset.dirarchive) || {}).name;
+      if (!confirm('Archive ' + name + '? It disappears from the list for staff but is kept, and you can restore it.')) return;
+      try { await authFetch('/directory/' + ar.dataset.dirarchive + '/archive', { method: 'POST' }); dirLoad(); } catch (err) { showToast(err.message); } return;
+    }
+    const rs = t.closest('[data-dirrestore]'); if (rs) { try { await authFetch('/directory/' + rs.dataset.dirrestore + '/restore', { method: 'POST' }); dirLoad(); } catch (err) { showToast(err.message); } return; }
+  });
+  document.getElementById('dir-archived').addEventListener('change', ev => { dirShowArchived = ev.target.checked; dirLoad(); });
 }
 
 // ── PIN LOCK ──────────────────────────────────────────────────────────────────
