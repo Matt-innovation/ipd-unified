@@ -570,10 +570,10 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
     <div class="screen" id="screen-quote">
       <div class="quote-wrap">
         <div class="q-tabs" id="q-tabs" role="tablist">
+          <button data-qtab="summary">Summary <span class="qtab-count" id="qtab-count" hidden>0</span></button>
           <button data-qtab="products">Products</button>
           <button data-qtab="bundles">Bundles</button>
           <button data-qtab="labour">Labour</button>
-          <button data-qtab="summary">Summary <span class="qtab-count" id="qtab-count" hidden>0</span></button>
           <button data-qtab="notes">Notes &amp; photos <span class="qtab-soon">soon</span></button>
         </div>
         <div class="qt-panels">
@@ -1844,7 +1844,7 @@ function goScreen(name) {
   document.body.classList.toggle('on-quote', name === 'quote');   // lifts pop-up messages above the quote bar
   if (name !== 'search') stopListening();
   if (name === 'kb') renderKB();
-  if (name === 'quote') { renderQuote(); setQTab(qTab); }
+  if (name === 'quote') { renderQuote(); setQTab('summary'); }   // the quote page always opens on Summary
   if (name === 'labour') updateLabourTotals();
   if (name === 'home') updateHomeStats();
 }
@@ -2851,7 +2851,7 @@ async function fetchReeceSearch(q, container) {
 // Products · Bundles · Labour · Summary · Notes & photos (soon), on one page, with a sticky bar
 // (total, GP %, Send) on every tab. Adding uses the existing addReece/addBundle/chQty; labour uses
 // the Labour screen's rates, surcharge and discount; GP uses calcGP(). No price or GP maths changed.
-let qTab = 'products', qpTimer = null, qpResults = [];
+let qTab = 'summary', qpTimer = null, qpResults = [];
 const Q_RECENT_KEY = 'ipd_recent_items', Q_FAV_KEY = 'ipd_fav_items';
 const qRead = k => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) { return []; } };
 const qWrite = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
@@ -3061,7 +3061,7 @@ function setupQuoteTabs() {
   document.getElementById('qp-search').addEventListener('input', () => { qpResults = []; renderQProducts(); });
   document.getElementById('qb-search').addEventListener('input', renderQBundles);
   setupQuoteSwipe();
-  setQTab('products');
+  setQTab('summary');
 }
 
 // ── DARK MODE ─────────────────────────────────────────────────────────────────
