@@ -396,6 +396,24 @@ body.pilot .home-wrap>*{flex-shrink:0;min-width:0}
 .dir-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
 .dir-act{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:48px;padding:8px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);text-decoration:none;font-size:15px;font-weight:700;text-align:center}
 .dir-act span{font-size:12px;font-weight:500;color:var(--text-mid);overflow-wrap:anywhere}
+.s-slot{display:flex;flex-direction:column;gap:6px}
+.s-row{display:flex;flex-wrap:wrap;gap:8px}
+.s-thumb{position:relative;width:96px;height:96px;border-radius:10px;overflow:hidden;background:var(--surface2)}
+.s-thumb img{width:100%;height:100%;object-fit:cover}
+.s-state{position:absolute;left:0;right:0;bottom:0;font-size:11px;font-weight:700;text-align:center;padding:3px;background:rgba(0,0,0,.6);color:#fff}
+.s-state.uploaded{background:rgba(46,125,50,.9)}
+.s-add{width:96px;height:96px;border-radius:10px;border:2px dashed var(--border2);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;cursor:pointer;background:var(--surface2);color:var(--text);text-align:center}
+.s-must{border-color:var(--orange);border-width:2px}
+#s-send[disabled]{opacity:.45}
+.s-mini{width:64px;height:64px;object-fit:cover;border-radius:8px;background:var(--surface2)}
+.s-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.s-pickbtn{position:relative;padding:0;border:3px solid transparent;border-radius:10px;overflow:hidden;background:var(--surface2);cursor:pointer;aspect-ratio:1}
+.s-pickbtn img{width:100%;height:100%;object-fit:cover;display:block}
+.s-pickbtn span{position:absolute;left:0;bottom:0;right:0;font-size:11px;background:rgba(0,0,0,.55);color:#fff;text-transform:capitalize;padding:2px}
+.s-pickbtn.on{border-color:var(--orange)}
+.s-pickbtn.on::after{content:'✓';position:absolute;top:4px;right:6px;font-size:18px;font-weight:800;color:#fff;text-shadow:0 0 4px #000}
+.s-captext{white-space:normal}
+.s-grp{border-radius:10px}
 .home-tile-badge{display:inline-block;margin-left:6px;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--orange);color:#fff;vertical-align:middle}
 .home-ask-head{display:flex;align-items:center;gap:10px}
 .om-img{width:48px;height:auto;aspect-ratio:120/176;flex-shrink:0}
@@ -1189,6 +1207,46 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
           <div class="k-card" id="dir-form" hidden></div>
           <div id="dir-list"><div class="k-empty">Loading…</div></div>
         </div></div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-social">
+      <div class="k-wrap">
+        <div class="k-tabs" id="s-tabs">
+          <button data-stab="new">New post</button>
+          <button data-stab="mine">My posts</button>
+          <button data-stab="inbox" hidden>Inbox</button>
+        </div>
+        <div class="k-panels">
+          <div class="k-panel s-panel" id="s-new">
+            <div class="k-card"><div class="k-h">Photos</div><div id="s-photos"></div>
+              <div class="k-line">Photos are shrunk and saved straight away. With no signal they wait on the phone and send when you're back in range.</div></div>
+            <div class="k-card">
+              <label class="k-label">Suburb only — never the address<input class="k-input" id="s-suburb" maxlength="40" placeholder="e.g. Sunnybank Hills" autocomplete="off"></label>
+              <label class="k-label">Job type<select class="k-input" id="s-jobtype"><option value="">Choose…</option><option>Hot water system</option><option>Blocked drain</option><option>Bathroom renovation</option><option>Kitchen renovation</option><option>Toilet</option><option>Tap and mixer</option><option>Leak repair</option><option>Gas fitting</option><option>Backflow testing</option><option>New build plumbing</option><option>Maintenance</option><option>Other</option></select></label>
+              <label class="k-label">One line on what was done<input class="k-input" id="s-summary" maxlength="160" placeholder="e.g. Swapped an old electric unit for a heat pump"></label>
+            </div>
+            <div class="k-card">
+              <label class="k-check s-must"><input type="checkbox" id="s-cust"> <b>Customer OK with photos</b></label>
+              <div class="k-sub">Privacy check — every photo has:</div>
+              <label class="k-check"><input type="checkbox" data-sprivacy="houseNumbers"> No house or unit numbers</label>
+              <label class="k-check"><input type="checkbox" data-sprivacy="faces"> No faces</label>
+              <label class="k-check"><input type="checkbox" data-sprivacy="plates"> No number plates</label>
+              <label class="k-check"><input type="checkbox" data-sprivacy="mail"> No mail, letters or names</label>
+              <label class="k-check"><input type="checkbox" data-sprivacy="personal"> No personal items or family photos</label>
+            </div>
+            <button class="k-btn big" id="s-send" disabled>Send for approval</button>
+            <div class="k-msg" id="s-send-hint"></div>
+            <div class="k-msg" id="s-msg"></div>
+          </div>
+          <div class="k-panel s-panel" id="s-mine" hidden><div id="s-mine-list"></div></div>
+          <div class="k-panel s-panel" id="s-inbox" hidden>
+            <div id="s-inbox-list"></div>
+            <div class="k-card"><div class="k-h">Group share rota</div><div id="s-groups"></div>
+              <div class="k-two"><input class="k-input" id="s-gname" placeholder="Group name"><input class="k-input" id="s-gday" placeholder="Day, e.g. Tuesday"></div>
+              <button class="k-btn ghost" id="s-gadd">Add group</button></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2182,6 +2240,7 @@ function init() {
   initPin();
   setupKiosk();
   setupDirectory();
+  setupSocial();
   initLogin();
   // Keys never live in the app: clear any ServiceM8 key an older version saved on this phone.
   try { localStorage.removeItem('ipd_sm8_key'); } catch (e) {}
@@ -3862,6 +3921,7 @@ function setUser(u) {
   if (typeof renderHome === 'function') renderHome();
   if (typeof kioskRefreshSummary === 'function') kioskRefreshSummary();
   if (typeof dirRefresh === 'function') dirRefresh();
+  if (typeof socialRefresh === 'function') socialRefresh().then(() => sUploadLoop());
 }
 function signedOut() {
   const wasPilot = PILOT_UI;
@@ -3983,6 +4043,8 @@ const HOME_ACTIONS = [
   { id: 'kiosk', icon: '🗂️', label: 'Staff Kiosk', desc: 'Time off, notices and calendar', roles: ALL_ROLES, needsKiosk: true, go: () => openKiosk(),
     badge: () => { if (!kSummary) return ''; const p = []; if (kSummary.unreadNotices) p.push(kSummary.unreadNotices + ' new'); if (kSummary.isOwner && kSummary.ownerPending) p.push(kSummary.ownerPending + ' waiting'); return p.join(' · '); } },
   { id: 'suppliers', icon: '🤝', label: 'Our Suppliers and Business Partners', desc: 'Who we use — call, email or map them', roles: ALL_ROLES, needsDirectory: true, go: () => openDirectory() },
+  { id: 'social', icon: '📸', label: 'Social Media', desc: 'Job photos for our Facebook page', roles: ALL_ROLES, needsSocial: true, go: () => openSocial(),
+    badge: () => (sConfig && sConfig.isOwner && sConfig.ownerNew ? sConfig.ownerNew + ' new' : '') },
   { id: 'kb', icon: '📚', label: 'IPD Knowledge Centre', desc: 'Bundles, codes and how-tos', roles: ALL_ROLES, go: () => goScreen('kb') },
   { id: 'training', icon: '🎓', label: 'Learn the app', desc: 'Step-by-step guide', roles: ALL_ROLES, go: () => goScreen('training') },
   { id: 'whatsapp', icon: '💬', label: 'Message the team', desc: 'IPD BOYS WhatsApp group', roles: ALL_ROLES, href: 'https://chat.whatsapp.com/D9bDzCG7f9UK7ZhmddIuKw' },
@@ -4005,6 +4067,7 @@ function homeAllowed(a) {
   if (a.needsManage) return !!(CURRENT_USER && CURRENT_USER.canManageUsers && !homeViewAs);
   if (a.needsKiosk) return !!(CURRENT_USER && kSummary && kSummary.enabled);
   if (a.needsDirectory) return !!(CURRENT_USER && dirConfig && dirConfig.enabled);
+  if (a.needsSocial) return !!(CURRENT_USER && sConfig && sConfig.enabled);
   return true;
 }
 function homeGreeting() {
@@ -4374,6 +4437,179 @@ function setupDirectory() {
     const rs = t.closest('[data-dirrestore]'); if (rs) { try { await authFetch('/directory/' + rs.dataset.dirrestore + '/restore', { method: 'POST' }); dirLoad(); } catch (err) { showToast(err.message); } return; }
   });
   document.getElementById('dir-archived').addEventListener('change', ev => { dirShowArchived = ev.target.checked; dirLoad(); });
+}
+
+// ── SOCIAL MEDIA ─────────────────────────────────────────────────────────────
+// Photos are shrunk on the phone (≈1600 px JPEG + 240 px thumbnail), kept in the phone's own database
+// (IndexedDB) until the server confirms them, then the full-size copy is deleted and only the thumbnail kept.
+let sConfig = null, sTab = 'new', sDraft = null, sBusy = false, sInbox = null;
+const S_DB = 'ipd-social', S_STORE = 'photos';
+function sDb() { return new Promise((ok, no) => { const r = indexedDB.open(S_DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(S_STORE, { keyPath: 'clientId' }); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); }); }
+async function sTx(mode, fn) { const db = await sDb(); return new Promise((ok, no) => { const t = db.transaction(S_STORE, mode), st = t.objectStore(S_STORE); const out = fn(st); t.oncomplete = () => ok(out && out.result !== undefined ? out.result : out); t.onerror = () => no(t.error); }); }
+const sAll = () => sTx('readonly', st => st.getAll());
+const sPut = rec => sTx('readwrite', st => st.put(rec));
+const sUuid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }));
+
+async function socialRefresh() {
+  if (!CURRENT_USER) { sConfig = null; return; }
+  try { sConfig = await authFetch('/social/config'); } catch (e) { sConfig = null; }
+  if (typeof renderHome === 'function') renderHome();
+}
+function openSocial() { goScreen('social'); setSTab(sTab); sUploadLoop(); }
+function setSTab(t) {
+  if (t === 'inbox' && !(sConfig && sConfig.isOwner)) t = 'new';
+  sTab = t;
+  document.querySelectorAll('#s-tabs [data-stab]').forEach(b => { b.classList.toggle('on', b.dataset.stab === t); if (b.dataset.stab === 'inbox') b.hidden = !(sConfig && sConfig.isOwner); });
+  document.querySelectorAll('.s-panel').forEach(p => (p.hidden = p.id !== 's-' + t));
+  if (t === 'new') sRenderNew();
+  if (t === 'mine') sLoadMine();
+  if (t === 'inbox') sLoadInbox();
+}
+
+// shrink a camera photo: longest side ≤ max px, JPEG
+async function sShrink(file, max, quality) {
+  const draw = (src, w, h) => { const k = Math.min(1, max / Math.max(w, h)), c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
+    c.getContext('2d').drawImage(src, 0, 0, c.width, c.height); return c.toDataURL('image/jpeg', quality); };
+  if (window.createImageBitmap) { try { const bm = await createImageBitmap(file); const out = draw(bm, bm.width, bm.height); bm.close && bm.close(); return out; } catch (e) {} }
+  return new Promise((ok, no) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => { const k = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url); ok(c.toDataURL('image/jpeg', quality)); };
+    img.onerror = () => { URL.revokeObjectURL(url); no(new Error('Could not read that photo')); };
+    img.src = url;
+  });
+}
+function sEnsureDraft() { if (!sDraft) sDraft = { postId: sUuid() }; try { localStorage.setItem('ipd_social_draft', JSON.stringify(sDraft)); } catch (e) {} return sDraft; }
+async function sAddPhoto(kind, file) {
+  const d = sEnsureDraft();
+  try {
+    const [image, thumb] = await Promise.all([sShrink(file, 1600, 0.8), sShrink(file, 240, 0.7)]);
+    await sPut({ clientId: sUuid(), postId: d.postId, kind, image, thumb, status: 'waiting', at: Date.now() });
+  } catch (e) { showToast(e.message); }
+  sRenderNew(); sUploadLoop();
+}
+// one at a time; on success the full-size photo is removed from the phone (thumbnail kept)
+async function sUploadLoop() {
+  if (sBusy || !CURRENT_USER) return;
+  sBusy = true;
+  try {
+    for (;;) {
+      const next = (await sAll()).filter(r => r.status === 'waiting').sort((a, b) => a.at - b.at)[0];
+      if (!next) break;
+      if (!navigator.onLine) break;
+      try {
+        await authFetch('/social/photos', { method: 'POST', body: JSON.stringify({ postId: next.postId, clientId: next.clientId, kind: next.kind, image: next.image, thumb: next.thumb }) });
+        await sPut({ ...next, image: null, status: 'uploaded' });
+      } catch (e) {
+        if (/HTTP 4|Only one|Up to 3|JPEG|already been sent|Not your/.test(e.message)) await sPut({ ...next, image: null, status: 'refused', error: e.message });
+        else break;                                                      // no signal / server busy: try again later
+      }
+      sRenderNew();
+    }
+  } finally { sBusy = false; sRenderNew(); }
+}
+window.addEventListener('online', () => sUploadLoop());
+setInterval(() => { if (CURRENT_USER && sConfig) sUploadLoop(); }, 30000);
+
+async function sRenderNew() {
+  const box = document.getElementById('s-photos'); if (!box) return;
+  const d = sDraft, recs = d ? (await sAll()).filter(r => r.postId === d.postId && r.status !== 'refused') : [];
+  const by = k => recs.filter(r => r.kind === k);
+  const tile = r => '<div class="s-thumb"><img src="' + r.thumb + '" alt=""><span class="s-state ' + r.status + '">' + (r.status === 'uploaded' ? '✓ Saved' : navigator.onLine ? 'Uploading…' : 'Waiting for signal') + '</span></div>';
+  const slot = (kind, label, max) => '<div class="s-slot"><div class="k-sub">' + label + '</div><div class="s-row">' + by(kind).map(tile).join('') +
+    (by(kind).length < max ? '<label class="s-add"><input type="file" accept="image/*" capture="environment" data-skind="' + kind + '" hidden>📷 ' + (max > 1 ? 'Add' : 'Take') + '</label>' : '') + '</div></div>';
+  box.innerHTML = slot('before', 'Before photo', 1) + slot('after', 'After photo', 1) + slot('extra', 'Extra photos (up to 3)', 3);
+  const allUp = recs.length && recs.every(r => r.status === 'uploaded');
+  const ticks = [...document.querySelectorAll('#s-new [data-sprivacy], #s-cust')].every(c => c.checked);
+  const ready = by('before').length && by('after').length && allUp && ticks && document.getElementById('s-suburb').value.trim() && document.getElementById('s-jobtype').value && document.getElementById('s-summary').value.trim();
+  document.getElementById('s-send').disabled = !ready;
+  document.getElementById('s-send-hint').textContent = !by('before').length || !by('after').length ? 'Take a before and an after photo.' : !allUp ? 'Waiting for photos to finish uploading…' : !document.getElementById('s-cust').checked ? 'Tick "Customer OK with photos" — the photos can\'t be sent without it.' : !ticks ? 'Tick every privacy check.' : !ready ? 'Fill in suburb, job type and what was done.' : 'Ready to send.';
+}
+async function sSend() {
+  const msg = document.getElementById('s-msg');
+  const privacy = {}; document.querySelectorAll('#s-new [data-sprivacy]').forEach(c => (privacy[c.dataset.sprivacy] = c.checked));
+  try {
+    await authFetch('/social/posts/' + sDraft.postId + '/submit', { method: 'POST', body: JSON.stringify({ suburb: document.getElementById('s-suburb').value, jobType: document.getElementById('s-jobtype').value, summary: document.getElementById('s-summary').value, customerOk: document.getElementById('s-cust').checked, privacy }) });
+    sDraft = null; try { localStorage.removeItem('ipd_social_draft'); } catch (e) {}
+    ['s-suburb', 's-summary'].forEach(id => (document.getElementById(id).value = '')); document.querySelectorAll('#s-new input[type=checkbox]').forEach(c => (c.checked = false));
+    msg.textContent = 'Sent to the owners for approval. Thanks!'; showToast('Sent for approval'); sRenderNew(); socialRefresh();
+  } catch (e) { msg.textContent = /Failed to fetch|NetworkError|Load failed/.test(e.message) ? 'No signal — your photos are saved. Tap Send again when you have signal.' : e.message; }
+}
+async function sLoadMine() {
+  const box = document.getElementById('s-mine-list');
+  try {
+    const { posts } = await authFetch('/social/mine');
+    box.innerHTML = posts.length ? posts.map(p => '<div class="k-card"><div class="k-row"><b>' + escHtml(p.jobType) + ' · ' + escHtml(p.suburb) + '</b><span class="k-pill ' + (p.status === 'submitted' ? 'pending' : p.status) + '">' + ({ submitted: 'Waiting', approved: 'Approved', declined: 'Declined' }[p.status] || p.status) + '</span></div>' +
+      '<div class="s-row">' + p.photos.map(ph => '<img class="s-mini" src="' + PROXY + ph.thumb + '" alt="" loading="lazy">').join('') + '</div>' + (p.note ? '<div class="k-note">' + escHtml(p.note) + '</div>' : '') + '</div>').join('') : '<div class="k-empty">Nothing sent yet.</div>';
+  } catch (e) { box.innerHTML = '<div class="k-empty">' + escHtml(e.message) + '</div>'; }
+}
+
+// ── owners ──
+async function sLoadInbox() {
+  const box = document.getElementById('s-inbox-list');
+  try {
+    sInbox = await authFetch('/social/inbox');
+    const groups = sInbox.groups;
+    const pend = sInbox.submitted.map(p => '<div class="k-card s-post" data-spost="' + p.id + '"><div class="k-row"><b>' + escHtml(p.jobType) + ' · ' + escHtml(p.suburb) + '</b><span class="k-line">from ' + escHtml(p.by) + '</span></div>' +
+      '<div class="k-note">' + escHtml(p.summary) + '</div><div class="k-sub">Tap 2–4 photos to use</div><div class="s-pick">' + p.photos.map(ph => '<button class="s-pickbtn" data-spick="' + ph.id + '"><img src="' + PROXY + ph.thumb + '" alt="" loading="lazy"><span>' + ph.kind + '</span></button>').join('') + '</div>' +
+      '<label class="k-label">Caption<textarea class="k-input s-caption" rows="7">' + escHtml(p.caption) + '</textarea></label><div class="s-issues"></div>' +
+      '<label class="k-check"><input type="checkbox" class="s-nonames"> No customer names in the caption or photos</label>' +
+      '<input class="k-input s-dnote" placeholder="Note if declining (optional)"><div class="k-btns"><button class="k-btn" data-sapprove="' + p.id + '">Approve</button><button class="k-btn danger" data-sdecline="' + p.id + '">Decline</button></div></div>').join('') || '<div class="k-empty">No posts waiting.</div>';
+    const appr = sInbox.approved.map(p => '<div class="k-card" data-sapproved="' + p.id + '"><div class="k-row"><b>' + escHtml(p.jobType) + ' · ' + escHtml(p.suburb) + '</b><span class="k-pill approved">Approved</span></div>' +
+      '<div class="s-row">' + p.photos.filter(ph => ph.chosen).map(ph => '<img class="s-mini" src="' + PROXY + ph.thumb + '" alt="">').join('') + '</div>' +
+      '<div class="k-note s-captext">' + escHtml(p.caption).replace(/\n/g, '<br>') + '</div>' +
+      '<div class="k-btns"><button class="k-btn" data-sshare="' + p.id + '">Save / share photos</button><button class="k-btn ghost" data-scopy="' + p.id + '">Copy caption</button></div>' +
+      (groups.length ? '<div class="k-sub">Shared to groups</div>' + groups.map(g => { const s = p.shares.find(x => x.groupId === g.id); return '<label class="k-check s-grp"><input type="checkbox" data-sgroup="' + g.id + '" data-spostid="' + p.id + '"' + (s ? ' checked disabled' : '') + '> ' + escHtml(g.name) + (g.day ? ' (' + escHtml(g.day) + ')' : '') + (s ? ' — ' + escHtml(s.by) + ', ' + new Date(s.at).toLocaleDateString('en-AU') : '') + '</label>'; }).join('') : '') + '</div>').join('') || '<div class="k-empty">Nothing approved yet.</div>';
+    box.innerHTML = '<div class="k-h k-out">Waiting for approval</div>' + pend + '<div class="k-h k-out">Approved — ready to post</div>' + appr;
+    document.getElementById('s-groups').innerHTML = groups.map(g => '<div class="k-ev"><div><b>' + escHtml(g.name) + '</b>' + (g.day ? ' · ' + escHtml(g.day) : '') + '</div><button class="k-btn ghost" data-sgarchive="' + g.id + '">Remove from rota (kept)</button></div>').join('') || '<div class="k-empty">No groups on the rota yet.</div>';
+    document.querySelectorAll('.s-caption').forEach(t => sCheckCaption(t));
+  } catch (e) { box.innerHTML = '<div class="k-empty">' + escHtml(e.message) + '</div>'; }
+}
+let sCapTimer = null;
+function sCheckCaption(t) {
+  clearTimeout(sCapTimer);
+  sCapTimer = setTimeout(async () => {
+    try { const { issues } = await authFetch('/social/captions/check', { method: 'POST', body: JSON.stringify({ caption: t.value }) });
+      t.closest('.s-post').querySelector('.s-issues').innerHTML = issues.length ? issues.map(i => '<div class="k-warn">⚠ ' + escHtml(i) + '</div>').join('') : '<div class="k-line">✓ Caption follows the rules</div>'; } catch (e) {}
+  }, 300);
+}
+async function sShare(p) {
+  const chosen = p.photos.filter(ph => ph.chosen);
+  try {
+    const files = await Promise.all(chosen.map(async (ph, i) => new File([await (await fetch(PROXY + ph.full)).blob()], 'ipd-' + (i + 1) + '.jpg', { type: 'image/jpeg' })));
+    if (navigator.canShare && navigator.canShare({ files })) { await navigator.share({ files, text: p.caption }); return; }
+  } catch (e) { if (e.name === 'AbortError') return; }
+  chosen.forEach(ph => window.open(PROXY + ph.full + '&download=1', '_blank'));                // fallback: open each photo to save
+}
+
+function setupSocial() {
+  const scr = document.getElementById('screen-social');
+  try { sDraft = JSON.parse(localStorage.getItem('ipd_social_draft') || 'null'); } catch (e) {}
+  scr.addEventListener('click', async e => {
+    const t = e.target;
+    const tab = t.closest('[data-stab]'); if (tab) return setSTab(tab.dataset.stab);
+    if (t.closest('#s-send')) return sSend();
+    const pk = t.closest('[data-spick]'); if (pk) { pk.classList.toggle('on'); return; }
+    const ap = t.closest('[data-sapprove]'), dc = t.closest('[data-sdecline]');
+    if (ap || dc) {
+      const card = (ap || dc).closest('.s-post'), id = (ap || dc).dataset.sapprove || (ap || dc).dataset.sdecline;
+      const body = ap ? { decision: 'approved', photoIds: [...card.querySelectorAll('.s-pickbtn.on')].map(b => b.dataset.spick), caption: card.querySelector('.s-caption').value, noNamesChecked: card.querySelector('.s-nonames').checked }
+                      : { decision: 'declined', note: card.querySelector('.s-dnote').value };
+      try { await authFetch('/social/posts/' + id + '/decide', { method: 'POST', body: JSON.stringify(body) }); showToast(ap ? 'Approved' : 'Declined'); sLoadInbox(); socialRefresh(); } catch (err) { showToast(err.message); }
+      return;
+    }
+    const sh = t.closest('[data-sshare]'); if (sh) return sShare(sInbox.approved.find(p => p.id === sh.dataset.sshare));
+    const cp = t.closest('[data-scopy]'); if (cp) { const p = sInbox.approved.find(x => x.id === cp.dataset.scopy); try { await navigator.clipboard.writeText(p.caption); showToast('Caption copied'); } catch (err) { showToast('Press and hold the caption to copy it'); } return; }
+    if (t.closest('#s-gadd')) { try { await authFetch('/social/groups', { method: 'POST', body: JSON.stringify({ name: document.getElementById('s-gname').value, day: document.getElementById('s-gday').value }) }); document.getElementById('s-gname').value = ''; sLoadInbox(); } catch (err) { showToast(err.message); } return; }
+    const ga = t.closest('[data-sgarchive]'); if (ga) { try { await authFetch('/social/groups/' + ga.dataset.sgarchive + '/archive', { method: 'POST' }); sLoadInbox(); } catch (err) { showToast(err.message); } return; }
+  });
+  scr.addEventListener('change', async e => {
+    const f = e.target.closest('[data-skind]'); if (f && f.files && f.files[0]) { await sAddPhoto(f.dataset.skind, f.files[0]); f.value = ''; return; }
+    const g = e.target.closest('[data-sgroup]'); if (g && g.checked) { try { await authFetch('/social/posts/' + g.dataset.spostid + '/share', { method: 'POST', body: JSON.stringify({ groupId: g.dataset.sgroup }) }); sLoadInbox(); } catch (err) { g.checked = false; showToast(err.message); } return; }
+    if (e.target.closest('#s-new')) sRenderNew();
+  });
+  // (file boxes are left alone here: redrawing would remove them before their 'change' event arrives)
+  scr.addEventListener('input', e => { if (e.target.classList.contains('s-caption')) sCheckCaption(e.target); if (e.target.closest('#s-new') && e.target.type !== 'file') sRenderNew(); });
 }
 
 // ── PIN LOCK ──────────────────────────────────────────────────────────────────
