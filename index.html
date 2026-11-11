@@ -267,6 +267,62 @@ select.settings-input,.user-actions select{-webkit-appearance:none;appearance:no
 .home-mic.listening{background:#c62828;border-color:#c62828}
 .home-ask-go{flex-shrink:0;font-family:var(--font);font-size:15px;font-weight:700;min-height:46px;padding:0 16px;border-radius:10px;border:none;background:var(--btn-bg);color:var(--btn-text);cursor:pointer}
 .home-chips{display:flex;flex-wrap:wrap;gap:6px}
+/* Staff Kiosk */
+.k-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.k-tabs{display:flex;gap:6px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
+.k-tabs button{flex-shrink:0;font-family:var(--font);font-size:14px;font-weight:600;padding:8px 14px;min-height:38px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer}
+.k-tabs button.on{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
+.k-count{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--orange);color:#fff;font-size:12px;line-height:20px}
+.k-panels{flex:1;min-height:0;position:relative}
+.k-panel{position:absolute;inset:0;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.k-panel>*{flex-shrink:0}
+.k-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:12px;display:flex;flex-direction:column;gap:8px;color:var(--text)}
+.k-h{font-size:15px;font-weight:800}
+.k-out{color:var(--on-bg);font-size:13px;text-transform:uppercase;letter-spacing:.5px}
+.k-label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--text-mid);min-width:0}
+.k-input{width:100%;min-width:0;font-family:var(--font);font-size:16px;min-height:44px;padding:10px 12px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text)}
+.k-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.k-btn{font-family:var(--font);font-size:15px;font-weight:700;min-height:42px;padding:8px 14px;border-radius:10px;border:none;background:var(--btn-bg);color:var(--btn-text);cursor:pointer;white-space:normal;line-height:1.3}
+.k-btn.big{min-height:48px;font-size:16px}
+.k-btn.ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+.k-btn.danger{background:#c62828;color:#fff}
+.k-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.k-msg,.k-line,.k-note,.k-empty,.k-sub{font-size:13px;line-height:1.45;overflow-wrap:anywhere}
+.k-line,.k-sub{color:var(--text-mid)}
+.k-note{background:var(--surface2);border-radius:8px;padding:6px 8px}
+.k-warn{font-size:13px;color:#b71c1c;font-weight:600}
+.k-empty{color:var(--on-bg);text-align:center;padding:12px}
+.k-row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.k-pill{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--surface2);color:var(--text)}
+.k-pill.pending{background:#f9a825;color:#111}.k-pill.approved{background:#2e7d32;color:#fff}.k-pill.declined{background:#c62828;color:#fff}.k-pill.withdrawn{background:#9e9e9e;color:#fff}
+.k-used-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.k-used{background:var(--surface2);border-radius:10px;padding:8px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.k-used b{font-size:20px}.k-used span{font-size:12px;color:var(--text-mid);line-height:1.3}
+.k-notice summary{list-style:none;cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.k-notice summary::-webkit-details-marker{display:none}
+.k-notice.unread{border-color:var(--orange);border-width:2px}
+.k-body{font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.k-calhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.k-calhead .k-btn{min-width:44px;font-size:20px}
+.k-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.k-dow{font-size:11px;text-align:center;color:var(--text-mid);font-weight:700}
+.k-day{min-height:42px;border-radius:8px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px}
+.k-day.empty{background:none}.k-day.today{outline:2px solid var(--btn-bg)}
+.k-dots{display:flex;gap:2px;min-height:6px}
+.k-dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.k-dot.holiday{background:#1565c0}.k-dot.closure{background:#424242}.k-dot.noleave{background:#c62828}.k-dot.leave{background:#2e7d32}.k-dot.notice{background:#f9a825}
+.k-legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--text-mid)}
+.k-legend span{display:flex;align-items:center;gap:4px}
+.k-ev{display:flex;gap:8px;align-items:flex-start;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:10px;font-size:14px;line-height:1.4;overflow-wrap:anywhere;color:var(--text)}
+.k-ev .k-dot{margin-top:5px}
+.k-card .k-ev{border:none;border-bottom:1px solid var(--border);border-radius:0;padding:8px 0}
+.k-to{display:flex;flex-wrap:wrap;gap:6px}
+.k-check{display:flex;align-items:center;gap:6px;font-size:14px;padding:8px 10px;border:1px solid var(--border2);border-radius:999px;background:var(--surface2)}
+.k-chips{display:flex;flex-wrap:wrap;gap:6px}
+.k-chip{font-size:13px;padding:6px 10px;border-radius:999px;background:var(--surface2);border:1px solid var(--border2)}
+.k-chip button{border:none;background:none;font-size:13px;cursor:pointer;color:var(--text-mid)}
+.k-pushcard{font-size:13px;line-height:1.5}
+.home-tile-badge{display:inline-block;margin-left:6px;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--orange);color:#fff;vertical-align:middle}
 .home-ask-head{display:flex;align-items:center;gap:10px}
 .om-img{width:48px;height:auto;aspect-ratio:120/176;flex-shrink:0}
 .home-ask-title{font-size:17px;font-weight:800;color:var(--text);line-height:1.2}
@@ -846,6 +902,71 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
           <div class="settings-row" id="audit-list"><div class="settings-hint">Loading…</div></div>
         </div>
         <div class="settings-card"><div class="settings-row"><button class="settings-btn" onclick="goScreen('settings')">Back to Settings</button></div></div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-kiosk">
+      <div class="k-wrap">
+        <div class="k-tabs" id="k-tabs">
+          <button data-ktab="timeoff">Time off</button>
+          <button data-ktab="notices">Notices <span class="k-count" id="kt-notices-count" hidden></span></button>
+          <button data-ktab="calendar">Calendar</button>
+          <button data-ktab="owner" hidden>Owner</button>
+        </div>
+        <div class="k-panels">
+          <div class="k-panel" id="k-timeoff">
+            <div class="k-card">
+              <div class="k-h">Ask for time off</div>
+              <label class="k-label">Type<select class="k-input" id="k-type"><option value="holiday">Holidays (annual leave)</option><option value="personal">Personal leave</option><option value="other">Other</option></select></label>
+              <div class="k-two"><label class="k-label">First day<input class="k-input" id="k-start" type="date"></label><label class="k-label">Last day<input class="k-input" id="k-end" type="date"></label></div>
+              <label class="k-label">Note (optional)<textarea class="k-input" id="k-note" rows="2" maxlength="500" placeholder="e.g. Family wedding"></textarea></label>
+              <button class="k-btn big" id="k-send">Send request</button>
+              <div class="k-msg" id="k-req-msg"></div>
+            </div>
+            <div class="k-card" id="k-used"></div>
+            <div class="k-h k-out">Your requests</div>
+            <div id="k-myreq"></div>
+            <div class="k-card k-pushcard" id="k-push"></div>
+          </div>
+          <div class="k-panel" id="k-notices" hidden><div id="k-notice-list"></div></div>
+          <div class="k-panel" id="k-calendar" hidden>
+            <div class="k-card">
+              <div class="k-calhead"><button class="k-btn ghost" id="k-cal-prev" aria-label="Previous month">‹</button><b id="k-cal-title"></b><button class="k-btn ghost" id="k-cal-next" aria-label="Next month">›</button></div>
+              <div class="k-cal" id="k-cal-grid"></div>
+              <div class="k-legend"><span><i class="k-dot holiday"></i>Public holiday</span><span><i class="k-dot closure"></i>Closed</span><span><i class="k-dot noleave"></i>No leave</span><span><i class="k-dot leave"></i>Leave</span><span><i class="k-dot notice"></i>TAFE / notice</span></div>
+            </div>
+            <div id="k-cal-list"></div>
+          </div>
+          <div class="k-panel" id="k-owner" hidden>
+            <div class="k-h k-out">Waiting for a decision</div>
+            <div id="k-pending"></div>
+            <div class="k-h k-out">Recent decisions</div>
+            <div class="k-card" id="k-recent"></div>
+            <div class="k-card">
+              <div class="k-h">Send a notice</div>
+              <div class="k-label">To</div><div class="k-to" id="k-to"></div>
+              <label class="k-label">Title<input class="k-input" id="k-ntitle" maxlength="120" placeholder="e.g. TAFE days this term"></label>
+              <label class="k-label">Message<textarea class="k-input" id="k-nbody" rows="3" maxlength="2000"></textarea></label>
+              <div class="k-label">Dates to show on their calendar (optional)</div>
+              <div class="k-two"><input class="k-input" id="k-ndate" type="date"><input class="k-input" id="k-ndlabel" placeholder="Label, e.g. TAFE"></div>
+              <button class="k-btn ghost" id="k-adddate">Add date</button>
+              <div class="k-chips" id="k-ndates"></div>
+              <button class="k-btn big" id="k-nsend">Send notice</button>
+              <div class="k-msg" id="k-nmsg"></div>
+            </div>
+            <div class="k-h k-out">Notices sent</div>
+            <div class="k-card" id="k-sent"></div>
+            <div class="k-card">
+              <div class="k-h">Closures and no-leave periods</div>
+              <label class="k-label">Type<select class="k-input" id="k-ckind"><option value="closure">Business closed</option><option value="noleave">No leave</option></select></label>
+              <div class="k-two"><label class="k-label">From<input class="k-input" id="k-cstart" type="date"></label><label class="k-label">To<input class="k-input" id="k-cend" type="date"></label></div>
+              <label class="k-label">Reason (staff see this)<input class="k-input" id="k-creason" maxlength="120" placeholder="e.g. Christmas shutdown"></label>
+              <button class="k-btn big" id="k-caladd">Add to calendar</button>
+              <div class="k-msg" id="k-calmsg"></div>
+              <div id="k-dates-list"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1838,6 +1959,7 @@ function deemphasiseMicOnIOS() {
 function init() {
   initPin();
   setupHome();
+  setupKiosk();
   initLogin();
   // Keys never live in the app: clear any ServiceM8 key an older version saved on this phone.
   try { localStorage.removeItem('ipd_sm8_key'); } catch (e) {}
@@ -1867,7 +1989,7 @@ function goScreen(name) {
   if (name === 'kb') renderKB();
   if (name === 'quote') renderQuote();
   if (name === 'labour') updateLabourTotals();
-  if (name === 'home') { updateHomeStats(); renderHome(); }
+  if (name === 'home') { updateHomeStats(); renderHome(); if (CURRENT_USER) kioskRefreshSummary(); }
 }
 
 function saveSheetUrl() {
@@ -3208,6 +3330,7 @@ function setUser(u) {
   document.getElementById('me-line').textContent = 'Logged in as ' + u.name + ' — ' + (ROLE_NAMES[u.role] || u.role) + (u.title ? ' (' + u.title + ')' : '');
   document.getElementById('me-users-btn').hidden = !u.canManageUsers;
   if (typeof renderHome === 'function') renderHome();
+  if (typeof kioskRefreshSummary === 'function') kioskRefreshSummary();
 }
 function signedOut() {
   localStorage.removeItem(AUTH_TOKEN_KEY); localStorage.removeItem(AUTH_USER_KEY);
@@ -3324,6 +3447,8 @@ const HOME_ACTIONS = [
   { id: 'review', icon: '🤖', label: 'Review a stock order', desc: 'Check an order before it goes to ServiceM8', roles: ['owner', 'office'], go: () => runStockReview() },
   { id: 'standards', icon: '📐', label: 'Check a standard', desc: 'AS 3500, AS 1428, AS 5601 and more', roles: ALL_ROLES, go: () => goScreen('standards') },
   { id: 'ask', icon: '✨', img: 'old-mate/old-mate-120.png', label: 'Ask Old Mate', desc: 'Standards, products, suppliers — with sources', roles: ALL_ROLES, go: () => goScreen('ai') },
+  { id: 'kiosk', icon: '🗂️', label: 'Staff Kiosk', desc: 'Time off, notices and calendar', roles: ALL_ROLES, needsKiosk: true, go: () => openKiosk(),
+    badge: () => { if (!kSummary) return ''; const p = []; if (kSummary.unreadNotices) p.push(kSummary.unreadNotices + ' new'); if (kSummary.isOwner && kSummary.ownerPending) p.push(kSummary.ownerPending + ' waiting'); return p.join(' · '); } },
   { id: 'kb', icon: '📚', label: 'Look up codes and guides', desc: 'Bundles, codes and how-tos', roles: ALL_ROLES, go: () => goScreen('kb') },
   { id: 'training', icon: '🎓', label: 'Learn the app', desc: 'Step-by-step guide', roles: ALL_ROLES, go: () => goScreen('training') },
   { id: 'whatsapp', icon: '💬', label: 'Message the team', desc: 'IPD BOYS WhatsApp group', roles: ALL_ROLES, href: 'https://chat.whatsapp.com/D9bDzCG7f9UK7ZhmddIuKw' },
@@ -3344,6 +3469,7 @@ function homeStars() { try { return JSON.parse(localStorage.getItem(homeStarKey(
 function homeAllowed(a) {
   if (!a.roles.includes(homeRole())) return false;
   if (a.needsManage) return !!(CURRENT_USER && CURRENT_USER.canManageUsers && !homeViewAs);
+  if (a.needsKiosk) return !!(CURRENT_USER && kSummary && kSummary.enabled);
   return true;
 }
 function homeGreeting() {
@@ -3374,7 +3500,7 @@ function renderHome() {
   const stars = homeStars();
   const allowed = HOME_ACTIONS.filter(homeAllowed);
   const tile = (a, small) => '<div class="home-tile' + (small ? ' small' : '') + '" data-act="' + a.id + '" role="button" tabindex="0">' +
-    '<span class="home-tile-icon">' + (a.img ? '<img class="om-tile" src="' + a.img + '" width="120" height="176" alt="" loading="lazy" decoding="async">' : a.icon) + '</span><span class="home-tile-text"><span class="home-tile-label">' + escHtml(a.label) + '</span>' +
+    '<span class="home-tile-icon">' + (a.img ? '<img class="om-tile" src="' + a.img + '" width="120" height="176" alt="" loading="lazy" decoding="async">' : a.icon) + '</span><span class="home-tile-text"><span class="home-tile-label">' + escHtml(a.label) + (a.badge && a.badge() ? '<span class="home-tile-badge">' + escHtml(a.badge()) + '</span>' : '') + '</span>' +
     (small ? '' : '<span class="home-tile-desc">' + escHtml(a.desc) + '</span>') + '</span>' +
     '<button class="home-star' + (stars.includes(a.id) ? ' on' : '') + '" data-star="' + a.id + '" aria-label="' + (stars.includes(a.id) ? 'Unpin' : 'Pin') + ' ' + escHtml(a.label) + '">' + (stars.includes(a.id) ? '★' : '☆') + '</button></div>';
   el('home-want').innerHTML = allowed.map(a => tile(a, false)).join('');
@@ -3443,6 +3569,192 @@ function setupHome() {
     }
   });
   renderHome();
+}
+
+// ── STAFF KIOSK (time off, notices, calendar; owners: pending, notices, dates) ──
+let kTab = 'timeoff', kSummary = null, kCalMonth = null, kNoticeDates = [];
+const K_STATUS = { pending: 'Waiting', approved: 'Approved', declined: 'Declined', withdrawn: 'Withdrawn' };
+const kFmt = d => new Date(d + 'T00:00:00').toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
+const kRange = (a, b) => kFmt(a) + (b && b !== a ? ' – ' + kFmt(b) : '');
+
+async function kioskRefreshSummary() {
+  if (!CURRENT_USER) { kSummary = null; return; }
+  try { kSummary = await authFetch('/kiosk/summary'); } catch (e) { kSummary = null; }
+  if (typeof renderHome === 'function') renderHome();
+}
+function openKiosk(tab) { goScreen('kiosk'); setKTab(tab || kTab); }
+function setKTab(t) {
+  if (t === 'owner' && !(kSummary && kSummary.isOwner)) t = 'timeoff';
+  kTab = t;
+  document.querySelectorAll('#k-tabs [data-ktab]').forEach(b => { b.classList.toggle('on', b.dataset.ktab === t); if (b.dataset.ktab === 'owner') b.hidden = !(kSummary && kSummary.isOwner); });
+  document.querySelectorAll('.k-panel').forEach(p => (p.hidden = p.id !== 'k-' + t));
+  if (t === 'timeoff' || t === 'notices') kLoadMe();
+  if (t === 'calendar') kLoadCalendar();
+  if (t === 'owner') kLoadOwner();
+  kPushCard();
+}
+
+async function kLoadMe() {
+  try {
+    const me = await authFetch('/kiosk/me');
+    const used = Object.keys(me.types).map(k => '<div class="k-used"><b>' + (me.daysUsed[k] || 0) + '</b><span>' + escHtml(me.types[k]) + '</span></div>').join('');
+    document.getElementById('k-used').innerHTML = '<div class="k-sub">Days taken in ' + me.year + ' (approved)</div><div class="k-used-row">' + used + '</div>';
+    document.getElementById('k-myreq').innerHTML = me.requests.length ? me.requests.map(r =>
+      '<div class="k-card"><div class="k-row"><b>' + escHtml(r.typeName) + '</b><span class="k-pill ' + r.status + '">' + K_STATUS[r.status] + '</span></div>' +
+      '<div class="k-line">' + kRange(r.start, r.end) + ' · ' + r.workingDays + ' working day' + (r.workingDays === 1 ? '' : 's') + '</div>' +
+      (r.note ? '<div class="k-note">' + escHtml(r.note) + '</div>' : '') +
+      (r.decisionNote ? '<div class="k-note">Reply: ' + escHtml(r.decisionNote) + '</div>' : '') +
+      (r.status === 'pending' ? '<button class="k-btn ghost" data-withdraw="' + r.id + '">Withdraw request</button>' : '') + '</div>').join('')
+      : '<div class="k-empty">No requests yet.</div>';
+    const unread = me.notices.filter(n => !n.readAt).length;
+    document.getElementById('k-notice-list').innerHTML = me.notices.length ? me.notices.map(n =>
+      '<details class="k-card k-notice' + (n.readAt ? '' : ' unread') + '" data-notice="' + n.id + '"><summary><span class="k-row"><b>' + escHtml(n.title) + '</b>' + (n.readAt ? '' : '<span class="k-pill pending">New</span>') + '</span>' +
+      '<span class="k-line">From ' + escHtml(n.from) + ' · ' + new Date(n.at).toLocaleDateString('en-AU') + '</span></summary>' +
+      (n.body ? '<div class="k-body">' + escHtml(n.body).replace(/\n/g, '<br>') + '</div>' : '') +
+      (n.dates.length ? '<div class="k-line">Dates: ' + n.dates.map(d => kFmt(d.date) + ' (' + escHtml(d.label) + ')').join(', ') + '</div>' : '') + '</details>').join('')
+      : '<div class="k-empty">No notices.</div>';
+    document.getElementById('kt-notices-count').textContent = unread ? String(unread) : '';
+    document.getElementById('kt-notices-count').hidden = !unread;
+  } catch (e) { document.getElementById('k-myreq').innerHTML = '<div class="k-empty">' + escHtml(e.message) + '</div>'; }
+}
+
+async function kSendRequest(confirmNoLeave) {
+  const msg = document.getElementById('k-req-msg');
+  const body = { type: document.getElementById('k-type').value, start: document.getElementById('k-start').value, end: document.getElementById('k-end').value || document.getElementById('k-start').value, note: document.getElementById('k-note').value, confirmNoLeave: !!confirmNoLeave };
+  if (!body.start) { msg.textContent = 'Choose the first day'; return; }
+  msg.textContent = 'Sending…';
+  try {
+    const r = await fetch(PROXY + '/kiosk/requests', { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 409 && j.warning) { msg.innerHTML = escHtml(j.error) + ' <button class="k-btn" data-sendanyway="1">Send anyway</button>'; return; }
+    if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status);
+    ['k-start', 'k-end', 'k-note'].forEach(id => (document.getElementById(id).value = ''));
+    msg.textContent = 'Sent — ' + j.request.workingDays + ' working day' + (j.request.workingDays === 1 ? '' : 's') + '. You\'ll be told when it\'s decided.';
+    kLoadMe(); kioskRefreshSummary();
+  } catch (e) { msg.textContent = e.message; }
+}
+
+async function kLoadCalendar() {
+  if (!kCalMonth) kCalMonth = new Date().toISOString().slice(0, 7);
+  const [y, m] = kCalMonth.split('-').map(Number);
+  const from = kCalMonth + '-01', last = new Date(Date.UTC(y, m, 0)).getUTCDate(), to = kCalMonth + '-' + String(last).padStart(2, '0');
+  document.getElementById('k-cal-title').textContent = new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('en-AU', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  try {
+    const { events } = await authFetch('/kiosk/calendar?from=' + from + '&to=' + to);
+    const on = d => events.filter(e => d >= e.start && d <= e.end);
+    const lead = (new Date(Date.UTC(y, m - 1, 1)).getUTCDay() + 6) % 7;                      // Monday first
+    let cells = '';
+    for (let i = 0; i < lead; i++) cells += '<div class="k-day empty"></div>';
+    for (let d = 1; d <= last; d++) {
+      const ds = kCalMonth + '-' + String(d).padStart(2, '0'), ev = on(ds);
+      cells += '<div class="k-day' + (ds === new Date().toISOString().slice(0, 10) ? ' today' : '') + '"><span>' + d + '</span><span class="k-dots">' + [...new Set(ev.map(e => e.kind))].map(k => '<i class="k-dot ' + k + '"></i>').join('') + '</span></div>';
+    }
+    document.getElementById('k-cal-grid').innerHTML = ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(x => '<div class="k-dow">' + x + '</div>').join('') + cells;
+    document.getElementById('k-cal-list').innerHTML = events.length ? events.map(e => '<div class="k-ev"><i class="k-dot ' + e.kind + '"></i><div><b>' + kRange(e.start, e.end) + '</b> · ' + escHtml(e.title) + (e.reason ? '<div class="k-line">Reason: ' + escHtml(e.reason) + '</div>' : '') + '</div></div>').join('') : '<div class="k-empty">Nothing on this month.</div>';
+  } catch (e) { document.getElementById('k-cal-list').innerHTML = '<div class="k-empty">' + escHtml(e.message) + '</div>'; }
+}
+
+async function kLoadOwner() {
+  try {
+    const [rq, nt, cal] = await Promise.all([authFetch('/kiosk/owner/requests'), authFetch('/kiosk/owner/notices'), authFetch('/kiosk/calendar?from=' + new Date().toISOString().slice(0, 10) + '&to=' + new Date(Date.now() + 400 * 864e5).toISOString().slice(0, 10))]);
+    document.getElementById('k-pending').innerHTML = rq.pending.length ? rq.pending.map(r =>
+      '<div class="k-card"><div class="k-row"><b>' + escHtml(r.name) + '</b><span class="k-pill pending">Waiting</span></div><div class="k-line">' + escHtml(r.typeName) + ' · ' + kRange(r.start, r.end) + ' · ' + r.workingDays + ' working day' + (r.workingDays === 1 ? '' : 's') + '</div>' +
+      (r.note ? '<div class="k-note">' + escHtml(r.note) + '</div>' : '') + (r.noLeaveWarning && r.noLeaveWarning.length ? '<div class="k-warn">In a no-leave period: ' + escHtml(r.noLeaveWarning.join(', ')) + '</div>' : '') +
+      '<input class="k-input" placeholder="Reply note (optional)" data-dnote="' + r.id + '"><div class="k-btns"><button class="k-btn" data-decide="approved" data-id="' + r.id + '">Approve</button><button class="k-btn danger" data-decide="declined" data-id="' + r.id + '">Decline</button></div></div>').join('')
+      : '<div class="k-empty">Nothing waiting.</div>';
+    document.getElementById('k-recent').innerHTML = rq.recent.slice(0, 10).map(r => '<div class="k-ev"><div><b>' + escHtml(r.name) + '</b> · ' + kRange(r.start, r.end) + ' · <span class="k-pill ' + r.status + '">' + K_STATUS[r.status] + '</span>' + (r.decidedByName ? ' by ' + escHtml(r.decidedByName) : '') + '</div></div>').join('') || '<div class="k-empty">No decisions yet.</div>';
+    document.getElementById('k-to').innerHTML = '<label class="k-check"><input type="radio" name="k-to" value="all" checked> Everyone</label>' + nt.people.filter(p => p.id !== CURRENT_USER.id).map(p => '<label class="k-check"><input type="radio" name="k-to" value="' + p.id + '"> ' + escHtml(p.name) + '</label>').join('');
+    document.getElementById('k-sent').innerHTML = nt.notices.slice(0, 10).map(n => '<div class="k-ev"><div><b>' + escHtml(n.title) + '</b> · ' + new Date(n.at).toLocaleDateString('en-AU') + '<div class="k-line">Read: ' + (escHtml(n.readBy.join(', ')) || 'nobody yet') + (n.notReadBy.length ? ' · Not read: ' + escHtml(n.notReadBy.join(', ')) : '') + '</div></div></div>').join('') || '<div class="k-empty">No notices sent yet.</div>';
+    document.getElementById('k-dates-list').innerHTML = cal.events.filter(e => e.kind === 'closure' || e.kind === 'noleave').map(e => '<div class="k-ev"><i class="k-dot ' + e.kind + '"></i><div><b>' + kRange(e.start, e.end) + '</b> · ' + (e.kind === 'closure' ? 'Business closed' : 'No leave') + '<div class="k-line">' + escHtml(e.reason) + '</div><button class="k-btn ghost" data-cancelcal="' + e.id + '">Cancel this (kept in records)</button></div></div>').join('') || '<div class="k-empty">No closures or no-leave periods set.</div>';
+    kRenderNoticeDates();
+  } catch (e) { document.getElementById('k-pending').innerHTML = '<div class="k-empty">' + escHtml(e.message) + '</div>'; }
+}
+function kRenderNoticeDates() { document.getElementById('k-ndates').innerHTML = kNoticeDates.map((d, i) => '<span class="k-chip">' + kFmt(d.date) + ' · ' + escHtml(d.label) + ' <button data-rmdate="' + i + '" aria-label="Remove">✕</button></span>').join(''); }
+
+// notifications: iPhone/iPad push only works in the home-screen app (iOS 16.4+); otherwise email
+function kPushCard() {
+  const el = document.getElementById('k-push'); if (!el) return;
+  const standalone = window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+  const can = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  if (!kSummary || !kSummary.pushKey) { el.innerHTML = 'You\'ll get an email when there\'s news for you.'; return; }
+  if (!standalone) { el.innerHTML = '<b>Want notifications on this iPhone/iPad?</b> In Safari tap <b>Share → Add to Home Screen</b>, open IPD from the new icon, then come back here. Until then you\'ll get emails.'; return; }
+  if (!can) { el.innerHTML = 'This device can\'t show app notifications — you\'ll get emails instead.'; return; }
+  if (Notification.permission === 'granted') { el.innerHTML = 'Notifications are on for this device. <button class="k-btn ghost" id="k-push-off">Turn off</button>'; return; }
+  if (Notification.permission === 'denied') { el.innerHTML = 'Notifications are blocked in Settings for IPD — you\'ll get emails instead.'; return; }
+  el.innerHTML = '<button class="k-btn" id="k-push-on">Turn on notifications</button> <span class="k-line">Otherwise you\'ll get emails.</span>';
+}
+function kKey(b64) { const p = '='.repeat((4 - b64.length % 4) % 4), s = atob((b64 + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from([...s].map(c => c.charCodeAt(0))); }
+async function kPushOn() {
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') return kPushCard();
+    const reg = await navigator.serviceWorker.register('sw.js');
+    await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: kKey(kSummary.pushKey) });
+    await authFetch('/kiosk/push/subscribe', { method: 'POST', body: JSON.stringify({ subscription: sub.toJSON(), device: /iPad/.test(navigator.userAgent) ? 'iPad' : 'iPhone' }) });
+    showToast('Notifications are on');
+  } catch (e) { showToast('Could not turn on notifications: ' + e.message); }
+  kPushCard();
+}
+async function kPushOff() {
+  try {
+    const reg = await navigator.serviceWorker.getRegistration('sw.js'), sub = reg && await reg.pushManager.getSubscription();
+    await authFetch('/kiosk/push/unsubscribe', { method: 'POST', body: JSON.stringify({ endpoint: sub ? sub.endpoint : '' }) });
+    if (sub) await sub.unsubscribe();
+    showToast('Notifications off — you\'ll get emails');
+  } catch (e) { showToast(e.message); }
+}
+
+function setupKiosk() {
+  const scr = document.getElementById('screen-kiosk');
+  scr.addEventListener('click', async e => {
+    const t = e.target;
+    const tab = t.closest('[data-ktab]'); if (tab) return setKTab(tab.dataset.ktab);
+    if (t.closest('#k-send')) return kSendRequest(false);
+    if (t.closest('[data-sendanyway]')) return kSendRequest(true);
+    const wd = t.closest('[data-withdraw]'); if (wd) { try { await authFetch('/kiosk/requests/' + wd.dataset.withdraw + '/withdraw', { method: 'POST' }); kLoadMe(); kioskRefreshSummary(); } catch (err) { showToast(err.message); } return; }
+    const dc = t.closest('[data-decide]'); if (dc) {
+      const note = (document.querySelector('[data-dnote="' + dc.dataset.id + '"]') || {}).value || '';
+      try { await authFetch('/kiosk/requests/' + dc.dataset.id + '/decide', { method: 'POST', body: JSON.stringify({ decision: dc.dataset.decide, note }) }); showToast(dc.dataset.decide === 'approved' ? 'Approved — they\'ve been told' : 'Declined — they\'ve been told'); kLoadOwner(); kioskRefreshSummary(); } catch (err) { showToast(err.message); }
+      return;
+    }
+    if (t.closest('#k-cal-prev') || t.closest('#k-cal-next')) {
+      const [y, m] = kCalMonth.split('-').map(Number), d = new Date(Date.UTC(y, m - 1 + (t.closest('#k-cal-next') ? 1 : -1), 1));
+      kCalMonth = d.toISOString().slice(0, 7); return kLoadCalendar();
+    }
+    if (t.closest('#k-adddate')) {
+      const d = document.getElementById('k-ndate').value; if (!d) return;
+      kNoticeDates.push({ date: d, label: document.getElementById('k-ndlabel').value || document.getElementById('k-ntitle').value || 'Notice' });
+      document.getElementById('k-ndate').value = ''; return kRenderNoticeDates();
+    }
+    const rm = t.closest('[data-rmdate]'); if (rm) { kNoticeDates.splice(+rm.dataset.rmdate, 1); return kRenderNoticeDates(); }
+    if (t.closest('#k-nsend')) {
+      const to = (document.querySelector('input[name="k-to"]:checked') || {}).value || 'all', msg = document.getElementById('k-nmsg');
+      try {
+        const j = await authFetch('/kiosk/notices', { method: 'POST', body: JSON.stringify({ to: to === 'all' ? 'all' : [to], title: document.getElementById('k-ntitle').value, body: document.getElementById('k-nbody').value, dates: kNoticeDates }) });
+        msg.textContent = 'Sent (' + Object.entries(j.sentBy).map(([k, v]) => v + ' by ' + k).join(', ') + ').';
+        ['k-ntitle', 'k-nbody', 'k-ndlabel'].forEach(id => (document.getElementById(id).value = '')); kNoticeDates = []; kLoadOwner();
+      } catch (err) { msg.textContent = err.message; }
+      return;
+    }
+    if (t.closest('#k-caladd')) {
+      const msg = document.getElementById('k-calmsg');
+      try {
+        await authFetch('/kiosk/calendar', { method: 'POST', body: JSON.stringify({ kind: document.getElementById('k-ckind').value, start: document.getElementById('k-cstart').value, end: document.getElementById('k-cend').value || document.getElementById('k-cstart').value, reason: document.getElementById('k-creason').value }) });
+        msg.textContent = 'Added.'; ['k-cstart', 'k-cend', 'k-creason'].forEach(id => (document.getElementById(id).value = '')); kLoadOwner();
+      } catch (err) { msg.textContent = err.message; }
+      return;
+    }
+    const cc = t.closest('[data-cancelcal]'); if (cc) { try { await authFetch('/kiosk/calendar/' + cc.dataset.cancelcal + '/cancel', { method: 'POST' }); kLoadOwner(); } catch (err) { showToast(err.message); } return; }
+    if (t.closest('#k-push-on')) return kPushOn();
+    if (t.closest('#k-push-off')) return kPushOff();
+  });
+  scr.addEventListener('toggle', async e => {
+    const d = e.target.closest && e.target.closest('details[data-notice]');
+    if (d && d.open && d.classList.contains('unread')) { d.classList.remove('unread'); try { await authFetch('/kiosk/notices/' + d.dataset.notice + '/read', { method: 'POST' }); kioskRefreshSummary(); } catch (err) {} }
+  }, true);
+  if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', ev => { if (ev.data && ev.data.open === 'kiosk' && CURRENT_USER) openKiosk('notices'); });
+  if (/[?&]open=kiosk/.test(location.search)) setTimeout(() => { if (CURRENT_USER) openKiosk('notices'); }, 1500);
 }
 
 // ── PIN LOCK ──────────────────────────────────────────────────────────────────
