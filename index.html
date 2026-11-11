@@ -14,6 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
 :root{
   --orange:#F26A1B;--blue:#3b82f6;--blue-lt:rgba(59,130,246,0.15);
   --red:#DC2626;--red-lt:rgba(220,38,38,0.12);
@@ -209,7 +210,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .kb-desc{font-size:11px;color:var(--text-dim);margin-top:1px}
 .kb-cat{font-size:9px;background:var(--surface2);color:var(--text-mid);padding:2px 5px;border-radius:3px;margin-top:3px;display:inline-block;text-transform:uppercase}
 .settings-wrap{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:0}
-.settings-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden}
+.settings-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden;flex-shrink:0}
 .settings-card-hd{padding:9px 12px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px}
 .settings-row{padding:10px 12px;display:flex;flex-direction:column;gap:6px}
 .settings-label{font-size:12px;color:var(--text-mid)}
@@ -217,6 +218,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .settings-input:focus{border-color:var(--orange)}
 .settings-btn{padding:8px 14px;border-radius:var(--radius-sm);background:var(--btn-bg);color:var(--btn-text);border:none;font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;align-self:flex-start}
 .settings-hint{font-size:11px;color:var(--text-dim);line-height:1.5}
+/* iPhone/iPad: nothing in a Settings card may be cut off */
+.settings-row>*{max-width:100%;min-width:0}
+.settings-label,.settings-hint,.settings-card-hd{overflow-wrap:anywhere}
+.settings-input{font-size:16px;min-height:44px;line-height:1.3;padding:10px 12px}
+select.settings-input,.user-actions select{-webkit-appearance:none;appearance:none;padding-right:34px;background-repeat:no-repeat;background-position:right 12px center;background-size:12px 8px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23888' stroke-width='2'/%3E%3C/svg%3E")}
+.settings-btn{white-space:normal;text-align:center;max-width:100%;min-height:40px;line-height:1.3}
 .state-box{padding:30px 16px;text-align:center;color:var(--on-bg)}
 .state-box .state-icon{font-size:32px;margin-bottom:8px;display:block;opacity:.4}
 .state-box p{font-size:13px;line-height:1.6}
@@ -240,6 +248,127 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .home-card-label{font-size:13px;font-weight:600}
 .home-card-desc{font-size:11px;color:var(--text-mid);line-height:1.4}
 .home-stat-row{display:flex;gap:8px}
+/* home page (step 2) — nothing may be squashed or cut off on iPhone/iPad */
+.home-wrap>*{flex-shrink:0;min-width:0}
+.home-hello{padding:2px}
+.home-hello-name{font-size:24px;font-weight:700;color:var(--on-bg);line-height:1.2;overflow-wrap:anywhere}
+.home-hello-sub{font-size:13px;color:var(--on-bg);margin-top:3px;line-height:1.4;overflow-wrap:anywhere}
+.viewas{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.viewas-label{font-size:12px;font-weight:700;color:var(--on-bg);text-transform:uppercase;letter-spacing:.5px}
+.viewas-seg{display:flex;background:var(--surface);border:1px solid var(--border2);border-radius:999px;padding:3px;gap:2px}
+.viewas-seg button{font-family:var(--font);font-size:14px;font-weight:600;padding:8px 14px;min-height:36px;border:none;border-radius:999px;background:none;color:var(--text);cursor:pointer}
+.viewas-seg button.on{background:var(--btn-bg);color:var(--btn-text)}
+.viewas-banner{background:var(--surface);border:2px dashed var(--btn-bg);border-radius:var(--radius);padding:10px 12px;font-size:13px;line-height:1.45;color:var(--text);overflow-wrap:anywhere}
+.viewas-banner button{font-family:var(--font);margin-left:6px;font-size:13px;font-weight:600;padding:6px 10px;min-height:32px;border-radius:8px;border:1px solid var(--border2);background:var(--btn-bg);color:var(--btn-text);cursor:pointer}
+.home-ask{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:10px;display:flex;flex-direction:column;gap:10px}
+.home-ask-row{display:flex;gap:8px;align-items:stretch}
+.home-ask-row input{flex:1;min-width:0;font-family:var(--font);font-size:16px;min-height:46px;line-height:1.3;padding:10px 12px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text)}
+.home-mic{flex-shrink:0;width:46px;min-height:46px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);font-size:20px;cursor:pointer}
+.home-mic.listening{background:#c62828;border-color:#c62828}
+.home-ask-go{flex-shrink:0;font-family:var(--font);font-size:15px;font-weight:700;min-height:46px;padding:0 16px;border-radius:10px;border:none;background:var(--btn-bg);color:var(--btn-text);cursor:pointer}
+.home-chips{display:flex;flex-wrap:wrap;gap:6px}
+/* Staff Kiosk */
+.k-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.k-tabs{display:flex;gap:6px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
+.k-tabs button{flex-shrink:0;font-family:var(--font);font-size:14px;font-weight:600;padding:8px 14px;min-height:38px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer}
+.k-tabs button.on{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
+.k-count{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--orange);color:#fff;font-size:12px;line-height:20px}
+.k-panels{flex:1;min-height:0;position:relative}
+.k-panel{position:absolute;inset:0;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.k-panel>*{flex-shrink:0}
+.k-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:12px;display:flex;flex-direction:column;gap:8px;color:var(--text)}
+.k-h{font-size:15px;font-weight:800}
+.k-out{color:var(--on-bg);font-size:13px;text-transform:uppercase;letter-spacing:.5px}
+.k-label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--text-mid);min-width:0}
+.k-input{width:100%;min-width:0;font-family:var(--font);font-size:16px;min-height:44px;padding:10px 12px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text)}
+.k-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.k-btn{font-family:var(--font);font-size:15px;font-weight:700;min-height:42px;padding:8px 14px;border-radius:10px;border:none;background:var(--btn-bg);color:var(--btn-text);cursor:pointer;white-space:normal;line-height:1.3}
+.k-btn.big{min-height:48px;font-size:16px}
+.k-btn.ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+.k-btn.danger{background:#c62828;color:#fff}
+.k-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.k-msg,.k-line,.k-note,.k-empty,.k-sub{font-size:13px;line-height:1.45;overflow-wrap:anywhere}
+.k-line,.k-sub{color:var(--text-mid)}
+.k-note{background:var(--surface2);border-radius:8px;padding:6px 8px}
+.k-warn{font-size:13px;color:#b71c1c;font-weight:600}
+.k-empty{color:var(--on-bg);text-align:center;padding:12px}
+.k-row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.k-pill{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--surface2);color:var(--text)}
+.k-pill.pending{background:#f9a825;color:#111}.k-pill.approved{background:#2e7d32;color:#fff}.k-pill.declined{background:#c62828;color:#fff}.k-pill.withdrawn{background:#9e9e9e;color:#fff}
+.k-used-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.k-used{background:var(--surface2);border-radius:10px;padding:8px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.k-used b{font-size:20px}.k-used span{font-size:12px;color:var(--text-mid);line-height:1.3}
+.k-notice summary{list-style:none;cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.k-notice summary::-webkit-details-marker{display:none}
+.k-notice.unread{border-color:var(--orange);border-width:2px}
+.k-body{font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.k-calhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.k-calhead .k-btn{min-width:44px;font-size:20px}
+.k-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.k-dow{font-size:11px;text-align:center;color:var(--text-mid);font-weight:700}
+.k-day{min-height:42px;border-radius:8px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px}
+.k-day.empty{background:none}.k-day.today{outline:2px solid var(--btn-bg)}
+.k-dots{display:flex;gap:2px;min-height:6px}
+.k-dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.k-dot.holiday{background:#1565c0}.k-dot.closure{background:#424242}.k-dot.noleave{background:#c62828}.k-dot.leave{background:#2e7d32}.k-dot.notice{background:#f9a825}
+.k-legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--text-mid)}
+.k-legend span{display:flex;align-items:center;gap:4px}
+.k-ev{display:flex;gap:8px;align-items:flex-start;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:10px;font-size:14px;line-height:1.4;overflow-wrap:anywhere;color:var(--text)}
+.k-ev .k-dot{margin-top:5px}
+.k-card .k-ev{border:none;border-bottom:1px solid var(--border);border-radius:0;padding:8px 0}
+.k-to{display:flex;flex-wrap:wrap;gap:6px}
+.k-check{display:flex;align-items:center;gap:6px;font-size:14px;padding:8px 10px;border:1px solid var(--border2);border-radius:999px;background:var(--surface2)}
+.k-chips{display:flex;flex-wrap:wrap;gap:6px}
+.k-chip{font-size:13px;padding:6px 10px;border-radius:999px;background:var(--surface2);border:1px solid var(--border2)}
+.k-chip button{border:none;background:none;font-size:13px;cursor:pointer;color:var(--text-mid)}
+.k-pushcard{font-size:13px;line-height:1.5}
+.dir-top{flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);padding:10px;display:flex;flex-direction:column;gap:8px}
+.dir-title{font-size:17px;font-weight:800;color:var(--text);line-height:1.25}
+.dir-cats{display:flex;flex-wrap:wrap;gap:6px}
+.dir-cat{font-family:var(--font);font-size:14px;font-weight:600;padding:7px 12px;min-height:36px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;max-width:100%;overflow-wrap:anywhere;text-align:left}
+.dir-cat.on{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
+.dir-card.archived{opacity:.7}
+.dir-name{font-size:16px;overflow-wrap:anywhere}
+.dir-private{font-size:13px;line-height:1.45;background:#fff8e1;color:#5d4037;border-radius:8px;padding:6px 8px;overflow-wrap:anywhere}
+.dir-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.dir-act{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:48px;padding:8px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);text-decoration:none;font-size:15px;font-weight:700;text-align:center}
+.dir-act span{font-size:12px;font-weight:500;color:var(--text-mid);overflow-wrap:anywhere}
+.home-tile-badge{display:inline-block;margin-left:6px;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--orange);color:#fff;vertical-align:middle}
+.home-ask-head{display:flex;align-items:center;gap:10px}
+.om-img{width:48px;height:auto;aspect-ratio:120/176;flex-shrink:0}
+.home-ask-title{font-size:17px;font-weight:800;color:var(--text);line-height:1.2}
+.home-ask-sub{font-size:12px;color:var(--text-mid);line-height:1.35;overflow-wrap:anywhere}
+.om-tile{width:30px;height:auto;aspect-ratio:120/176;display:block}
+.om-hd{width:26px;height:auto;aspect-ratio:120/176;flex-shrink:0}
+.om-big{width:140px;height:auto;aspect-ratio:400/588;margin:0 auto 8px;display:block}
+@media (max-height:700px){.om-big{width:84px;margin-bottom:4px}}
+.home-chip{font-family:var(--font);font-size:13px;line-height:1.35;text-align:left;padding:8px 12px;min-height:36px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;white-space:normal;max-width:100%;overflow-wrap:anywhere}
+.home-section{display:flex;flex-direction:column;gap:8px}
+.home-section-hd{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--on-bg);text-transform:uppercase;letter-spacing:.6px}
+.home-want{display:grid;grid-template-columns:1fr;gap:8px}
+.home-stars{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (min-width:600px){.home-want{grid-template-columns:1fr 1fr}.home-stars{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:1000px){.home-want{grid-template-columns:repeat(3,1fr)}.home-stars{grid-template-columns:repeat(4,1fr)}}
+.home-tile{position:relative;display:flex;align-items:center;gap:12px;min-height:64px;padding:12px 48px 12px 14px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);cursor:pointer;color:var(--text)}
+.home-tile.small{min-height:52px;padding:10px 42px 10px 12px;gap:8px}
+.home-tile-icon{font-size:26px;line-height:1;flex-shrink:0}
+.home-tile.small .home-tile-icon{font-size:20px}
+.home-tile-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+.home-tile-label{font-size:16px;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
+.home-tile.small .home-tile-label{font-size:14px}
+.home-tile-desc{font-size:12px;color:var(--text-mid);line-height:1.35;overflow-wrap:anywhere}
+.home-star{position:absolute;top:50%;right:6px;transform:translateY(-50%);width:40px;height:40px;border:none;background:none;font-size:22px;color:var(--text-dim);cursor:pointer;font-family:var(--font)}
+.home-star.on{color:#f5a623}
+.home-hint{font-size:12px;color:var(--on-bg);opacity:.9}
+.home-health-refresh{font-family:var(--font);font-size:12px;font-weight:600;text-transform:none;letter-spacing:0;padding:6px 10px;min-height:32px;border-radius:8px;border:1px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer}
+.health-list{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:6px 12px;display:flex;flex-direction:column}
+.health-row{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border)}
+.health-row:last-of-type{border-bottom:none}
+.health-dot{flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+.health-dot.ok{background:#2e7d32}.health-dot.bad{background:#c62828}.health-dot.na{background:#9e9e9e}
+.health-text{display:flex;flex-direction:column;min-width:0}
+.health-name{font-size:14px;font-weight:700;color:var(--text)}
+.health-detail{font-size:12px;color:var(--text-mid);line-height:1.4;overflow-wrap:anywhere}
 .home-stat{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px;text-align:center}
 .home-stat-num{font-size:18px;font-weight:700;color:var(--orange)}
 .home-stat-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
@@ -263,6 +392,30 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
 /* ── PIN LOCK ── */
 #pin-overlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
 #pin-overlay.hidden{display:none}
+/* staff login (step 1) */
+#login-overlay{position:fixed;inset:0;background:var(--bg);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px}
+#login-overlay[hidden]{display:none}
+.login-box{display:flex;flex-direction:column;align-items:stretch;gap:12px;width:100%;max-width:340px}
+.login-box .pin-logo-mark,.login-box .pin-title,.login-box .pin-sub{align-self:center}
+.login-input{font-family:var(--font);font-size:17px;min-height:50px;line-height:1.3;padding:12px 14px;border-radius:10px;border:1.5px solid var(--border2);background:#fff;color:#111;width:100%;box-sizing:border-box}
+.login-btn{font-family:var(--font);font-size:16px;font-weight:700;padding:12px;border:none;border-radius:10px;background:var(--btn-bg);color:var(--btn-text);min-height:50px;cursor:pointer;width:100%}
+.login-btn[disabled]{opacity:.5}
+.login-link{font-family:var(--font);background:none;border:none;color:var(--on-bg);font-size:13px;text-decoration:underline;cursor:pointer;width:100%}
+.login-msg{font-size:14px;color:var(--on-bg);min-height:18px;text-align:center;line-height:1.4;overflow-wrap:anywhere}
+.login-box .pin-sub{text-align:center;line-height:1.4}
+.users-list{display:flex;flex-direction:column;gap:8px}
+.user-row{border:1px solid var(--border2);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.user-row.removed{opacity:.6}
+.user-top{display:flex;justify-content:space-between;gap:4px 8px;flex-wrap:wrap;font-weight:700;line-height:1.35}
+.user-top>span{min-width:0;overflow-wrap:anywhere}
+.user-sub{font-size:13px;opacity:.85;overflow-wrap:anywhere;line-height:1.4}
+.user-actions{display:grid;grid-template-columns:1fr;gap:8px}
+.user-actions select,.user-actions input{width:100%;min-width:0;font-size:16px;min-height:44px;line-height:1.3;padding:10px 12px;border-radius:8px;border:1px solid var(--border2);background-color:var(--surface2);color:var(--text);font-family:var(--font)}
+.user-actions button{font-family:var(--font);min-height:44px;font-size:15px;padding:10px 14px;border-radius:8px;border:1px solid var(--border2);background:none;cursor:pointer;color:inherit;white-space:normal;line-height:1.3}
+.user-actions .user-note{font-size:13px;opacity:.85;line-height:1.4;overflow-wrap:anywhere}
+@media (min-width:600px){.user-actions{grid-template-columns:minmax(120px,1fr) minmax(140px,2fr) auto auto;align-items:center}}
+.user-actions button.danger{border-color:#c62828;color:#c62828}
+.audit-line{font-size:13px;opacity:.85;padding:5px 0;border-bottom:1px solid var(--border2);line-height:1.4;overflow-wrap:anywhere}
 .pin-box{display:flex;flex-direction:column;align-items:center;gap:16px;padding:40px 24px;width:100%;max-width:340px}
 .pin-logo-mark{width:56px;height:56px;background:var(--btn-bg);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px}
 .pin-title{font-size:22px;font-weight:700;color:var(--on-bg)}
@@ -366,6 +519,26 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
     </div>
   </div>
 </div>
+<div id="login-overlay" hidden>
+  <div class="login-box">
+    <div class="pin-logo-mark">🔧</div>
+    <div class="pin-title">IPD</div>
+    <div class="pin-sub">Log in with your work email</div>
+    <div id="login-step1">
+      <input class="login-input" id="login-id" type="email" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="Your email">
+      <div style="height:10px"></div>
+      <button class="login-btn" id="login-send" onclick="loginSendCode()">Email me a code</button>
+    </div>
+    <div id="login-step2" hidden>
+      <input class="login-input" id="login-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code">
+      <div style="height:10px"></div>
+      <button class="login-btn" id="login-verify" onclick="loginVerify()">Log in</button>
+      <div style="height:6px"></div>
+      <button class="login-link" onclick="loginBack()">Use a different login</button>
+    </div>
+    <div class="login-msg" id="login-msg"></div>
+  </div>
+</div>
 <div id="app">
   <div class="top-bar">
     <div class="top-logo">
@@ -383,66 +556,48 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
     <!-- HOME -->
     <div class="screen active" id="screen-home">
       <div class="home-wrap">
-        <div class="home-greeting">
-          <div class="home-greeting-name">Innovation Plumbing + Design</div>
-          <div class="home-greeting-sub">What do you need today?</div>
+        <div class="home-hello">
+          <div class="home-hello-name" id="home-hello">Good morning</div>
+          <div class="home-hello-sub" id="home-hello-sub">Innovation Plumbing + Design</div>
         </div>
+        <div class="viewas" id="viewas" hidden>
+          <span class="viewas-label">View as</span>
+          <div class="viewas-seg"><button data-viewas="owner">Owner</button><button data-viewas="office">Office</button><button data-viewas="tech">Tech</button></div>
+        </div>
+        <div class="viewas-banner" id="viewas-banner" hidden></div>
+
+        <div class="home-ask">
+          <div class="home-ask-head"><img class="om-img" src="old-mate/old-mate-120.png" width="120" height="176" alt="Old Mate" decoding="async">
+            <div><div class="home-ask-title">Ask Old Mate</div><div class="home-ask-sub">Standards, products, suppliers — answers with sources</div></div>
+          </div>
+          <div class="home-ask-row">
+            <input id="home-ask-q" type="text" enterkeyhint="send" autocomplete="off" placeholder="Ask Old Mate anything…">
+            <button class="home-mic" id="home-mic" aria-label="Say your question">🎤</button>
+            <button class="home-ask-go" id="home-ask-go">Ask</button>
+          </div>
+          <div class="home-chips" id="home-chips"></div>
+        </div>
+
+        <div class="home-section" id="home-stars-wrap" hidden>
+          <div class="home-section-hd">★ Your shortcuts</div>
+          <div class="home-stars" id="home-stars"></div>
+        </div>
+
+        <div class="home-section">
+          <div class="home-section-hd">I want to…</div>
+          <div class="home-want" id="home-want"></div>
+          <div class="home-hint">Tap ☆ on a button to pin it to your shortcuts.</div>
+        </div>
+
+        <div class="home-section home-health" id="home-health" hidden>
+          <div class="home-section-hd"><span>Systems health</span><button class="home-health-refresh" id="home-health-refresh">Refresh</button></div>
+          <div class="health-list" id="health-list"></div>
+        </div>
+
         <div class="home-stat-row">
-          <div class="home-stat"><div class="home-stat-num" id="hs-quote">0</div><div class="home-stat-label">Quote Items</div></div>
-          <div class="home-stat"><div class="home-stat-num" id="hs-order">0</div><div class="home-stat-label">To Order</div></div>
+          <div class="home-stat"><div class="home-stat-num" id="hs-quote">0</div><div class="home-stat-label">Quote items</div></div>
+          <div class="home-stat"><div class="home-stat-num" id="hs-order">0</div><div class="home-stat-label">To order</div></div>
           <div class="home-stat"><div class="home-stat-num" id="hs-checked">0</div><div class="home-stat-label">Checked</div></div>
-        </div>
-        <div class="home-grid">
-          <div class="home-card" onclick="goScreen('search')">
-            <div class="home-card-icon">🔍</div>
-            <div class="home-card-label">Search</div>
-            <div class="home-card-desc">Find Reece products &amp; bundles</div>
-          </div>
-          <div class="home-card" onclick="goScreen('quote')">
-            <div class="home-card-icon">📋</div>
-            <div class="home-card-label">Quote</div>
-            <div class="home-card-desc">Build &amp; send to ServiceM8</div>
-          </div>
-          <div class="home-card" onclick="goScreen('labour')">
-            <div class="home-card-icon">⏱</div>
-            <div class="home-card-label">Labour</div>
-            <div class="home-card-desc">Rates, hours &amp; adjustments</div>
-          </div>
-          <div class="home-card" onclick="goScreen('stock')">
-            <div class="home-card-icon">📦</div>
-            <div class="home-card-label">Stock</div>
-            <div class="home-card-desc">Count &amp; order van stock</div>
-          </div>
-          <div class="home-card" onclick="goScreen('ai')">
-            <div class="home-card-icon">✨</div>
-            <div class="home-card-label">AI Assistant</div>
-            <div class="home-card-desc">Standards, regs &amp; advice</div>
-          </div>
-          <div class="home-card" onclick="goScreen('kb')">
-            <div class="home-card-icon">📚</div>
-            <div class="home-card-label">Knowledge</div>
-            <div class="home-card-desc">Bundles, codes &amp; guides</div>
-          </div>
-          <div class="home-card" onclick="goScreen('settings')">
-            <div class="home-card-icon">⚙️</div>
-            <div class="home-card-label">Settings</div>
-            <div class="home-card-desc">App config &amp; data source</div>
-          </div>
-          <div class="home-card" onclick="goScreen('training')">
-            <div class="home-card-icon">🎓</div>
-            <div class="home-card-label">Training</div>
-            <div class="home-card-desc">Step-by-step app guide</div>
-          </div>
-          <div class="home-card" onclick="goScreen('standards')">
-            <div class="home-card-icon">📐</div>
-            <div class="home-card-label">AS Standards</div>
-            <div class="home-card-desc">AS3500, AS1428, AS5601 &amp; more</div>
-          </div>
-          <a class="home-card" href="https://chat.whatsapp.com/D9bDzCG7f9UK7ZhmddIuKw" target="_blank" style="text-decoration:none;color:inherit">
-            <div class="home-card-icon">💬</div>
-            <div class="home-card-label">WhatsApp</div>
-            <div class="home-card-desc">Join the IPD BOYS group</div>
-          </a>
         </div>
       </div>
     </div>
@@ -493,7 +648,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
       <div class="ai-wrap">
         <div class="ai-input-area">
           <div class="ai-card">
-            <div class="ai-card-hd"><span>🤖</span><span>Ask — standards, products, local suppliers</span></div>
+            <div class="ai-card-hd"><img class="om-hd" src="old-mate/old-mate-120.png" width="120" height="176" alt="Old Mate" decoding="async"><span>Ask Old Mate — standards, products, local suppliers</span></div>
             <textarea class="ai-textarea" id="ask-q" maxlength="1000" placeholder="e.g. Minimum fall for a 100mm sewer drain? · Which tempering valve do we use? · Closest landscaping supplies?"></textarea>
             <div class="ai-card-ft">
               <label class="ask-loc"><input type="checkbox" id="ask-use-loc"> Use my location</label>
@@ -501,7 +656,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             </div>
           </div>
         </div>
-        <div class="ai-results-area" id="ask-results"><div class="state-box"><span class="state-icon">💡</span><p>Ask a question above.<br><span class="hint">Every answer shows its sources. For standards it only uses official sources and says when it can't find one.</span></p></div></div>
+        <div class="ai-results-area" id="ask-results"><div class="state-box"><img class="om-big" src="old-mate/old-mate-400.png" width="400" height="588" alt="Old Mate" loading="lazy" decoding="async"><p>G'day — ask Old Mate a question above.<br><span class="hint">Every answer shows its sources. For standards it only uses official sources and says when it can't find one.</span></p></div></div>
       </div>
     </div>
 
@@ -682,20 +837,20 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
     <!-- SETTINGS -->
     <div class="screen" id="screen-settings">
       <div class="settings-wrap">
+        <div class="settings-card" id="me-card" hidden>
+          <div class="settings-card-hd">👤 Your login</div>
+          <div class="settings-row">
+            <div class="settings-hint" id="me-line"></div>
+            <button class="settings-btn" id="me-users-btn" hidden onclick="openUsers()">Manage users</button>
+            <button class="settings-btn" onclick="logOut()">Log out</button>
+          </div>
+        </div>
         <div class="settings-card">
           <div class="settings-card-hd">📊 Quote Data Source</div>
           <div class="settings-row">
             <div class="settings-label">Google Apps Script Web App URL</div>
             <input class="settings-input" id="sheet-url-input" type="url" placeholder="https://script.google.com/macros/s/...">
             <button class="settings-btn" onclick="saveSheetUrl()">Save & Reload</button>
-          </div>
-        </div>
-        <div class="settings-card">
-          <div class="settings-card-hd">🔧 ServiceM8 API Key</div>
-          <div class="settings-row">
-            <div class="settings-label">API Key (for stock orders)</div>
-            <input class="settings-input" id="sm8-key-input" type="text" placeholder="smk-...">
-            <button class="settings-btn" onclick="saveSM8Key()">Save</button>
           </div>
         </div>
         <div class="settings-card">
@@ -729,6 +884,118 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
           <div class="settings-card-hd">ℹ️ App Info</div>
           <div class="settings-row"><div class="settings-hint">IPD Unified App v3.0 · Innovation Plumbing & Design · 3073 2666</div></div>
         </div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-users">
+      <div class="settings-wrap">
+        <div class="settings-card">
+          <div class="settings-card-hd">👥 Users</div>
+          <div class="settings-row"><div class="users-list" id="users-list"><div class="settings-hint">Loading…</div></div></div>
+        </div>
+        <div class="settings-card">
+          <div class="settings-card-hd">➕ Add a person</div>
+          <div class="settings-row">
+            <div class="settings-label">Name</div>
+            <input class="settings-input" id="nu-name" type="text" placeholder="e.g. Andrew">
+            <div class="settings-label">Login email</div>
+            <input class="settings-input" id="nu-login" type="email" autocapitalize="off" spellcheck="false" placeholder="name@example.com">
+            <div class="settings-label">Role</div>
+            <select class="settings-input" id="nu-role"><option value="tech">Tech</option><option value="office">Office</option><option value="owner">Owner (sees everything)</option></select>
+            <div class="settings-label">Title (optional)</div>
+            <input class="settings-input" id="nu-title" type="text" placeholder="e.g. Apprentice">
+            <button class="settings-btn" onclick="addUser()">Add person</button>
+            <div class="settings-hint" id="nu-msg"></div>
+          </div>
+        </div>
+        <div class="settings-card">
+          <div class="settings-card-hd">📜 Recent changes</div>
+          <div class="settings-row" id="audit-list"><div class="settings-hint">Loading…</div></div>
+        </div>
+        <div class="settings-card"><div class="settings-row"><button class="settings-btn" onclick="goScreen('settings')">Back to Settings</button></div></div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-kiosk">
+      <div class="k-wrap">
+        <div class="k-tabs" id="k-tabs">
+          <button data-ktab="timeoff">Time off</button>
+          <button data-ktab="notices">Notices <span class="k-count" id="kt-notices-count" hidden></span></button>
+          <button data-ktab="calendar">Calendar</button>
+          <button data-ktab="owner" hidden>Owner</button>
+        </div>
+        <div class="k-panels">
+          <div class="k-panel" id="k-timeoff">
+            <div class="k-card">
+              <div class="k-h">Ask for time off</div>
+              <label class="k-label">Type<select class="k-input" id="k-type"><option value="holiday">Holidays (annual leave)</option><option value="personal">Personal leave</option><option value="other">Other</option></select></label>
+              <div class="k-two"><label class="k-label">First day<input class="k-input" id="k-start" type="date"></label><label class="k-label">Last day<input class="k-input" id="k-end" type="date"></label></div>
+              <label class="k-label">Note (optional)<textarea class="k-input" id="k-note" rows="2" maxlength="500" placeholder="e.g. Family wedding"></textarea></label>
+              <button class="k-btn big" id="k-send">Send request</button>
+              <div class="k-msg" id="k-req-msg"></div>
+            </div>
+            <div class="k-card" id="k-used"></div>
+            <div class="k-h k-out">Your requests</div>
+            <div id="k-myreq"></div>
+            <div class="k-card k-pushcard" id="k-push"></div>
+          </div>
+          <div class="k-panel" id="k-notices" hidden><div id="k-notice-list"></div></div>
+          <div class="k-panel" id="k-calendar" hidden>
+            <div class="k-card">
+              <div class="k-calhead"><button class="k-btn ghost" id="k-cal-prev" aria-label="Previous month">‹</button><b id="k-cal-title"></b><button class="k-btn ghost" id="k-cal-next" aria-label="Next month">›</button></div>
+              <div class="k-cal" id="k-cal-grid"></div>
+              <div class="k-legend"><span><i class="k-dot holiday"></i>Public holiday</span><span><i class="k-dot closure"></i>Closed</span><span><i class="k-dot noleave"></i>No leave</span><span><i class="k-dot leave"></i>Leave</span><span><i class="k-dot notice"></i>TAFE / notice</span></div>
+            </div>
+            <div id="k-cal-list"></div>
+          </div>
+          <div class="k-panel" id="k-owner" hidden>
+            <div class="k-h k-out">Waiting for a decision</div>
+            <div id="k-pending"></div>
+            <div class="k-h k-out">Recent decisions</div>
+            <div class="k-card" id="k-recent"></div>
+            <div class="k-card">
+              <div class="k-h">Send a notice</div>
+              <div class="k-label">To</div><div class="k-to" id="k-to"></div>
+              <label class="k-label">Title<input class="k-input" id="k-ntitle" maxlength="120" placeholder="e.g. TAFE days this term"></label>
+              <label class="k-label">Message<textarea class="k-input" id="k-nbody" rows="3" maxlength="2000"></textarea></label>
+              <div class="k-label">Dates to show on their calendar (optional)</div>
+              <div class="k-two"><input class="k-input" id="k-ndate" type="date"><input class="k-input" id="k-ndlabel" placeholder="Label, e.g. TAFE"></div>
+              <button class="k-btn ghost" id="k-adddate">Add date</button>
+              <div class="k-chips" id="k-ndates"></div>
+              <button class="k-btn big" id="k-nsend">Send notice</button>
+              <div class="k-msg" id="k-nmsg"></div>
+            </div>
+            <div class="k-h k-out">Notices sent</div>
+            <div class="k-card" id="k-sent"></div>
+            <div class="k-card">
+              <div class="k-h">Closures and no-leave periods</div>
+              <label class="k-label">Type<select class="k-input" id="k-ckind"><option value="closure">Business closed</option><option value="noleave">No leave</option></select></label>
+              <div class="k-two"><label class="k-label">From<input class="k-input" id="k-cstart" type="date"></label><label class="k-label">To<input class="k-input" id="k-cend" type="date"></label></div>
+              <label class="k-label">Reason (staff see this)<input class="k-input" id="k-creason" maxlength="120" placeholder="e.g. Christmas shutdown"></label>
+              <button class="k-btn big" id="k-caladd">Add to calendar</button>
+              <div class="k-msg" id="k-calmsg"></div>
+              <div id="k-dates-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-suppliers">
+      <div class="k-wrap">
+        <div class="dir-top">
+          <div class="dir-title">Our Suppliers and Business Partners</div>
+          <input class="k-input" id="dir-search" type="search" placeholder="Search name, contact, category…" autocomplete="off">
+          <div class="dir-cats" id="dir-cats"></div>
+        </div>
+        <div class="k-panels"><div class="k-panel" id="dir-panel">
+          <div class="k-card" id="dir-owner-bar" hidden>
+            <button class="k-btn big" id="dir-add">+ Add a supplier or partner</button>
+            <label class="k-check"><input type="checkbox" id="dir-archived"> Show archived entries</label>
+          </div>
+          <div class="k-card" id="dir-form" hidden></div>
+          <div id="dir-list"><div class="k-empty">Loading…</div></div>
+        </div></div>
       </div>
     </div>
 
@@ -1494,7 +1761,8 @@ const UPLIFT = {
   costExGst:  0.01,          // each unit costs IPD $0.01 ex GST (GP display only, never sent)
 };
 
-const PROXY = 'https://ipd-proxy-server.onrender.com';
+// The staff-logins preview copy of the app (hosted at ipd-app-preview…) talks to the logins test service.
+const PROXY = /^ipd-app-preview/.test(location.hostname) ? 'https://ipd-proxy-auth-test.onrender.com' : 'https://ipd-proxy-server.onrender.com';
 const SHEET_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbz5yp8BmAwococSxcEQSJePYFLcZDfSaCMmQx4aWc0Tcdlvzqv3jC5iJfmQq_hoEo3SvA/exec';
 let SHEET_URL = localStorage.getItem('ipd_sheet_url') || SHEET_URL_DEFAULT;
 // Knowledge entries live only in the original Sheet; bundles come from SHEET_URL above.
@@ -1719,8 +1987,12 @@ function deemphasiseMicOnIOS() {
 // ── INIT ──────────────────────────────────────────────────────────────────────
 function init() {
   initPin();
-  const saved = localStorage.getItem('ipd_sm8_key');
-  if (saved) document.getElementById('sm8-key-input').value = saved;
+  setupHome();
+  setupKiosk();
+  setupDirectory();
+  initLogin();
+  // Keys never live in the app: clear any ServiceM8 key an older version saved on this phone.
+  try { localStorage.removeItem('ipd_sm8_key'); } catch (e) {}
   const savedUrl = localStorage.getItem('ipd_sheet_url') || SHEET_URL_DEFAULT;
   document.getElementById('sheet-url-input').value = savedUrl;
   SHEET_URL = savedUrl;
@@ -1747,7 +2019,7 @@ function goScreen(name) {
   if (name === 'kb') renderKB();
   if (name === 'quote') renderQuote();
   if (name === 'labour') updateLabourTotals();
-  if (name === 'home') updateHomeStats();
+  if (name === 'home') { updateHomeStats(); renderHome(); if (CURRENT_USER) kioskRefreshSummary(); }
 }
 
 function saveSheetUrl() {
@@ -1756,10 +2028,6 @@ function saveSheetUrl() {
   SHEET_URL = url;
   loadQuoteData();
   showToast('Saved — reloading data');
-}
-function saveSM8Key() {
-  localStorage.setItem('ipd_sm8_key', document.getElementById('sm8-key-input').value.trim());
-  showToast('Saved');
 }
 
 // ── STOCK ─────────────────────────────────────────────────────────────────────
@@ -3045,6 +3313,565 @@ function stdSearch(q) {
     if (qrMatch) anyMatch = true;
   }
   document.getElementById('std-no-result').style.display = anyMatch ? 'none' : 'block';
+}
+
+// ── STAFF LOGIN (step 1) ─────────────────────────────────────────────────────
+// When the server has logins switched on, each person logs in with a one-time code and the phone keeps a
+// session token. When logins are off (or the server can't be reached and nobody has logged in on this
+// phone yet), the shared PIN works exactly as before.
+const AUTH_TOKEN_KEY = 'ipd_auth_token', AUTH_USER_KEY = 'ipd_auth_user';
+const ROLE_NAMES = { owner: 'Owner', office: 'Office', tech: 'Tech' };
+let CURRENT_USER = null, loginIdValue = '';
+function authHeaders() { const t = localStorage.getItem(AUTH_TOKEN_KEY); return t ? { Authorization: 'Bearer ' + t } : {}; }
+async function authFetch(path, opts = {}) {
+  const r = await fetch(PROXY + path, { ...opts, headers: { 'Content-Type': 'application/json', ...authHeaders(), ...(opts.headers || {}) } });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401 && path !== '/auth/verify') signedOut();
+  if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+  return j;
+}
+async function initLogin() {
+  let cfg = null;
+  try { cfg = await (await fetch(PROXY + '/auth/config', { signal: AbortSignal.timeout(5000) })).json(); } catch (e) {}
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  if (!cfg) {                                                   // no signal: carry on as the last person who logged in
+    let cached = null; try { cached = JSON.parse(localStorage.getItem(AUTH_USER_KEY) || 'null'); } catch (e) {}
+    if (token && cached) setUser(cached);
+    return;
+  }
+  if (!cfg.enabled) return;                                     // logins off: PIN as before
+  if (token) {
+    try { const j = await authFetch('/auth/me'); setUser(j.user); return; } catch (e) { /* expired or removed */ }
+  }
+  showLogin();
+}
+function showLogin() {
+  document.getElementById('login-overlay').hidden = false;
+  document.getElementById('login-step1').hidden = false;
+  document.getElementById('login-step2').hidden = true;
+  document.getElementById('login-msg').textContent = '';
+}
+function setUser(u) {
+  CURRENT_USER = u;
+  try { localStorage.setItem(AUTH_USER_KEY, JSON.stringify(u)); } catch (e) {}
+  document.getElementById('login-overlay').hidden = true;
+  document.getElementById('pin-overlay').classList.add('hidden');   // a personal login replaces the PIN
+  document.getElementById('me-card').hidden = false;
+  document.getElementById('me-line').textContent = 'Logged in as ' + u.name + ' — ' + (ROLE_NAMES[u.role] || u.role) + (u.title ? ' (' + u.title + ')' : '');
+  document.getElementById('me-users-btn').hidden = !u.canManageUsers;
+  if (typeof renderHome === 'function') renderHome();
+  if (typeof kioskRefreshSummary === 'function') kioskRefreshSummary();
+  if (typeof dirRefresh === 'function') dirRefresh();
+}
+function signedOut() {
+  localStorage.removeItem(AUTH_TOKEN_KEY); localStorage.removeItem(AUTH_USER_KEY);
+  CURRENT_USER = null;
+  document.getElementById('me-card').hidden = true;
+  if (activeScreen === 'users') goScreen('home');
+  if (typeof homeViewAs !== 'undefined') { homeViewAs = null; renderHome(); }
+  showLogin();
+}
+async function loginSendCode() {
+  const id = document.getElementById('login-id').value.trim();
+  const msg = document.getElementById('login-msg'), btn = document.getElementById('login-send');
+  if (!id) { msg.textContent = 'Type your email'; return; }
+  btn.disabled = true; msg.textContent = 'Sending…';
+  try {
+    const j = await authFetch('/auth/start', { method: 'POST', body: JSON.stringify({ login: id }) });
+    loginIdValue = id;
+    document.getElementById('login-step1').hidden = true;
+    document.getElementById('login-step2').hidden = false;
+    msg.textContent = j.message || 'Check for your code';
+    setTimeout(() => document.getElementById('login-code').focus(), 50);
+  } catch (e) { msg.textContent = e.message; }
+  btn.disabled = false;
+}
+async function loginVerify() {
+  const code = document.getElementById('login-code').value.trim();
+  const msg = document.getElementById('login-msg'), btn = document.getElementById('login-verify');
+  if (!/^\d{6}$/.test(code)) { msg.textContent = 'The code is 6 digits'; return; }
+  btn.disabled = true; msg.textContent = 'Checking…';
+  try {
+    const device = /iPad/.test(navigator.userAgent) ? 'iPad' : /iPhone/.test(navigator.userAgent) ? 'iPhone' : 'Browser';
+    const j = await authFetch('/auth/verify', { method: 'POST', body: JSON.stringify({ login: loginIdValue, code, device }) });
+    localStorage.setItem(AUTH_TOKEN_KEY, j.token);
+    document.getElementById('login-code').value = '';
+    setUser(j.user);
+  } catch (e) { msg.textContent = e.message; }
+  btn.disabled = false;
+}
+function loginBack() { document.getElementById('login-code').value = ''; showLogin(); }
+async function logOut() {
+  try { await authFetch('/auth/logout', { method: 'POST' }); } catch (e) {}
+  signedOut();
+}
+
+// ── USER MANAGEMENT (only shown to the person who can manage users: Matt) ─────
+function escHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+async function openUsers() {
+  if (!CURRENT_USER || !CURRENT_USER.canManageUsers) return;
+  goScreen('users');
+  await loadUsers();
+}
+function userRowHtml(x) {
+  const self = x.id === CURRENT_USER.id;
+  const roleSel = '<select data-role="' + x.id + '">' + ['tech', 'office', 'owner'].map(r => '<option value="' + r + '"' + (r === x.role ? ' selected' : '') + '>' + ROLE_NAMES[r] + '</option>').join('') + '</select>';
+  let actions;
+  if (x.canManageUsers) actions = '<span class="user-note">Manages users — can only be changed on the server</span>';
+  else if (x.status === 'active') actions = roleSel + '<input data-title="' + x.id + '" value="' + escHtml(x.title) + '" placeholder="Title (optional)">' +
+    '<button data-act="save" data-id="' + x.id + '">Save</button><button class="danger" data-act="remove" data-id="' + x.id + '">Remove</button>';
+  else actions = '<button data-act="restore" data-id="' + x.id + '">Restore login</button>';
+  return '<div class="user-row' + (x.status === 'removed' ? ' removed' : '') + '"><div class="user-top"><span>' + escHtml(x.name) + (self ? ' (you)' : '') + '</span><span>' +
+    (ROLE_NAMES[x.role] || escHtml(x.role)) + (x.title ? ' · ' + escHtml(x.title) : '') + (x.status === 'removed' ? ' · REMOVED' : '') + '</span></div>' +
+    '<div class="user-sub">' + escHtml(x.login) + (x.status === 'removed' && x.removedAt ? ' · removed ' + new Date(x.removedAt).toLocaleDateString('en-AU') + ' (records kept)' : '') + '</div>' +
+    '<div class="user-actions">' + actions + '</div></div>';
+}
+let usersCache = [];
+async function loadUsers() {
+  const list = document.getElementById('users-list'), audit = document.getElementById('audit-list');
+  try {
+    const [u, a] = await Promise.all([authFetch('/admin/users'), authFetch('/admin/audit')]);
+    usersCache = u.users;
+    const names = new Map(u.users.map(x => [x.id, x.name]));
+    list.innerHTML = u.users.map(userRowHtml).join('');
+    audit.innerHTML = a.audit.slice(0, 20).map(e => '<div class="audit-line">' + new Date(e.at).toLocaleString('en-AU') + ' — ' + escHtml(names.get(e.actor) || 'system') + ': ' + escHtml(e.action) +
+      (e.target && e.target !== e.actor ? ' (' + escHtml(names.get(e.target) || '') + ')' : '') + '</div>').join('') || '<div class="settings-hint">No changes yet</div>';
+  } catch (e) { list.innerHTML = '<div class="settings-hint">' + escHtml(e.message) + '</div>'; }
+}
+document.addEventListener('click', async ev => {
+  const b = ev.target.closest('#users-list button[data-act]'); if (!b) return;
+  const id = b.dataset.id, who = (usersCache.find(x => x.id === id) || {}).name || 'this person';
+  try {
+    if (b.dataset.act === 'save') {
+      const role = document.querySelector('[data-role="' + id + '"]').value, title = document.querySelector('[data-title="' + id + '"]').value;
+      await authFetch('/admin/users/' + id + '/role', { method: 'POST', body: JSON.stringify({ role, title }) });
+    } else if (b.dataset.act === 'remove') {
+      if (!confirm('Remove ' + who + '? Their login stops working on every phone straight away. Everything they made is kept, and you can restore them later.')) return;
+      await authFetch('/admin/users/' + id + '/remove', { method: 'POST' });
+    } else if (b.dataset.act === 'restore') {
+      await authFetch('/admin/users/' + id + '/restore', { method: 'POST' });
+    }
+    loadUsers();
+  } catch (e) { alert(e.message); }
+});
+async function addUser() {
+  const msg = document.getElementById('nu-msg');
+  const body = { name: document.getElementById('nu-name').value, login: document.getElementById('nu-login').value, role: document.getElementById('nu-role').value, title: document.getElementById('nu-title').value };
+  try {
+    await authFetch('/admin/users', { method: 'POST', body: JSON.stringify(body) });
+    ['nu-name', 'nu-login', 'nu-title'].forEach(id => (document.getElementById(id).value = ''));
+    msg.textContent = 'Added ' + body.name + '. They can now log in with ' + body.login + '.';
+    loadUsers();
+  } catch (e) { msg.textContent = e.message; }
+}
+
+// ── HOME PAGE (step 2) ───────────────────────────────────────────────────────
+// Welcome by name, Ask box (with mic and suggested questions), big "I want to…" buttons that depend on
+// the role, starred shortcuts (kept on this phone, per person), an owner-only Systems health card, and a
+// "view as" switch for owners. View-as only changes what this screen shows — never what anyone may do.
+const ALL_ROLES = ['owner', 'office', 'tech'];
+const HOME_ACTIONS = [
+  { id: 'quote', icon: '📋', label: 'Build a quote', desc: 'Price a job and send it to ServiceM8', roles: ALL_ROLES, go: () => goScreen('quote') },
+  { id: 'search', icon: '🔍', label: 'Find a product', desc: 'Reece products and our bundles', roles: ALL_ROLES, go: () => goScreen('search') },
+  { id: 'labour', icon: '⏱', label: 'Work out labour', desc: 'Rates, hours and adjustments', roles: ALL_ROLES, go: () => goScreen('labour') },
+  { id: 'stock', icon: '📦', label: 'Count and order van stock', desc: 'Check what is on the van', roles: ['owner', 'tech'], go: () => goScreen('stock') },
+  { id: 'review', icon: '🤖', label: 'Review a stock order', desc: 'Check an order before it goes to ServiceM8', roles: ['owner', 'office'], go: () => runStockReview() },
+  { id: 'standards', icon: '📐', label: 'Check a standard', desc: 'AS 3500, AS 1428, AS 5601 and more', roles: ALL_ROLES, go: () => goScreen('standards') },
+  { id: 'ask', icon: '✨', img: 'old-mate/old-mate-120.png', label: 'Ask Old Mate', desc: 'Standards, products, suppliers — with sources', roles: ALL_ROLES, go: () => goScreen('ai') },
+  { id: 'kiosk', icon: '🗂️', label: 'Staff Kiosk', desc: 'Time off, notices and calendar', roles: ALL_ROLES, needsKiosk: true, go: () => openKiosk(),
+    badge: () => { if (!kSummary) return ''; const p = []; if (kSummary.unreadNotices) p.push(kSummary.unreadNotices + ' new'); if (kSummary.isOwner && kSummary.ownerPending) p.push(kSummary.ownerPending + ' waiting'); return p.join(' · '); } },
+  { id: 'suppliers', icon: '🤝', label: 'Our Suppliers and Business Partners', desc: 'Who we use — call, email or map them', roles: ALL_ROLES, needsDirectory: true, go: () => openDirectory() },
+  { id: 'kb', icon: '📚', label: 'Look up codes and guides', desc: 'Bundles, codes and how-tos', roles: ALL_ROLES, go: () => goScreen('kb') },
+  { id: 'training', icon: '🎓', label: 'Learn the app', desc: 'Step-by-step guide', roles: ALL_ROLES, go: () => goScreen('training') },
+  { id: 'whatsapp', icon: '💬', label: 'Message the team', desc: 'IPD BOYS WhatsApp group', roles: ALL_ROLES, href: 'https://chat.whatsapp.com/D9bDzCG7f9UK7ZhmddIuKw' },
+  { id: 'users', icon: '👥', label: 'Manage users', desc: 'Add, change or remove people', roles: ['owner'], needsManage: true, go: () => openUsers() },
+  { id: 'settings', icon: '⚙️', label: 'Settings', desc: 'Your login and app settings', roles: ALL_ROLES, go: () => goScreen('settings') },
+];
+const HOME_CHIPS = {
+  tech: ['Minimum fall for a 100mm sewer drain?', 'Which tempering valve do we use?', 'Max hot water temperature at a basin?', 'Closest plumbing supplies open now?'],
+  office: ['Do I need a Form 4 for a hot water replacement?', "What's in our Thermann 160 bundle?", 'Sell price of a 100mm 45° DWV bend?', 'Does a QBCC plumbing licence cover gas fitting?'],
+  owner: ['Do I need a Form 4 for a hot water replacement?', 'Minimum fall for a 100mm sewer drain?', "What's in our Thermann 160 bundle?", 'Closest plumbing supplies open now?'],
+};
+let homeViewAs = null, homeHealthAt = 0, homeMicRec = null;
+
+function realRole() { return CURRENT_USER ? CURRENT_USER.role : null; }
+function homeRole() { return (realRole() === 'owner' && homeViewAs) || realRole() || 'owner'; }   // logins off: everything, as today
+function homeStarKey() { return 'ipd_home_stars_' + (CURRENT_USER ? CURRENT_USER.id : 'device'); }
+function homeStars() { try { return JSON.parse(localStorage.getItem(homeStarKey()) || '[]'); } catch (e) { return []; } }
+function homeAllowed(a) {
+  if (!a.roles.includes(homeRole())) return false;
+  if (a.needsManage) return !!(CURRENT_USER && CURRENT_USER.canManageUsers && !homeViewAs);
+  if (a.needsKiosk) return !!(CURRENT_USER && kSummary && kSummary.enabled);
+  if (a.needsDirectory) return !!(CURRENT_USER && dirConfig && dirConfig.enabled);
+  return true;
+}
+function homeGreeting() {
+  const h = parseInt(new Date().toLocaleString('en-AU', { timeZone: 'Australia/Brisbane', hour: 'numeric', hour12: false }), 10);
+  return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+}
+
+function renderHome() {
+  const el = id => document.getElementById(id);
+  if (!el('home-want')) return;
+  // greeting
+  el('home-hello').textContent = homeGreeting() + (CURRENT_USER ? ', ' + CURRENT_USER.name.split(' ')[0] : '');
+  el('home-hello-sub').textContent = CURRENT_USER
+    ? (ROLE_NAMES[CURRENT_USER.role] || CURRENT_USER.role) + (CURRENT_USER.title ? ' · ' + CURRENT_USER.title : '') + ' · Innovation Plumbing + Design'
+    : 'Innovation Plumbing + Design';
+  // view-as (owners only)
+  const isOwner = realRole() === 'owner';
+  el('viewas').hidden = !isOwner;
+  if (!isOwner) homeViewAs = null;
+  document.querySelectorAll('#viewas [data-viewas]').forEach(b => b.classList.toggle('on', b.dataset.viewas === homeRole()));
+  const banner = el('viewas-banner');
+  banner.hidden = !(isOwner && homeViewAs && homeViewAs !== 'owner');
+  if (!banner.hidden) banner.innerHTML = 'Viewing as <b>' + ROLE_NAMES[homeViewAs] + '</b> — this is what a ' + ROLE_NAMES[homeViewAs].toLowerCase() +
+    ' sees here. Your own access has not changed. <button data-viewas="owner">Back to owner</button>';
+  // suggested questions
+  el('home-chips').innerHTML = (HOME_CHIPS[homeRole()] || HOME_CHIPS.owner).map(q => '<button class="home-chip" data-ask="' + escHtml(q) + '">' + escHtml(q) + '</button>').join('');
+  // "I want to…" and starred shortcuts
+  const stars = homeStars();
+  const allowed = HOME_ACTIONS.filter(homeAllowed);
+  const tile = (a, small) => '<div class="home-tile' + (small ? ' small' : '') + '" data-act="' + a.id + '" role="button" tabindex="0">' +
+    '<span class="home-tile-icon">' + (a.img ? '<img class="om-tile" src="' + a.img + '" width="120" height="176" alt="" loading="lazy" decoding="async">' : a.icon) + '</span><span class="home-tile-text"><span class="home-tile-label">' + escHtml(a.label) + (a.badge && a.badge() ? '<span class="home-tile-badge">' + escHtml(a.badge()) + '</span>' : '') + '</span>' +
+    (small ? '' : '<span class="home-tile-desc">' + escHtml(a.desc) + '</span>') + '</span>' +
+    '<button class="home-star' + (stars.includes(a.id) ? ' on' : '') + '" data-star="' + a.id + '" aria-label="' + (stars.includes(a.id) ? 'Unpin' : 'Pin') + ' ' + escHtml(a.label) + '">' + (stars.includes(a.id) ? '★' : '☆') + '</button></div>';
+  el('home-want').innerHTML = allowed.map(a => tile(a, false)).join('');
+  const starred = allowed.filter(a => stars.includes(a.id));
+  el('home-stars-wrap').hidden = !starred.length;
+  el('home-stars').innerHTML = starred.map(a => tile(a, true)).join('');
+  // Systems health: owners only, and only when not viewing as someone else
+  const showHealth = isOwner && homeRole() === 'owner';
+  el('home-health').hidden = !showHealth;
+  if (showHealth && Date.now() - homeHealthAt > 5 * 60 * 1000) loadHealth();
+}
+
+async function loadHealth() {
+  const list = document.getElementById('health-list');
+  homeHealthAt = Date.now();
+  list.innerHTML = '<div class="settings-hint">Checking…</div>';
+  try {
+    const h = await authFetch('/admin/health');
+    list.innerHTML = h.checks.map(c => '<div class="health-row"><span class="health-dot ' + (c.ok === true ? 'ok' : c.ok === false ? 'bad' : 'na') + '">' +
+      (c.ok === true ? '✓' : c.ok === false ? '!' : '–') + '</span><span class="health-text"><span class="health-name">' + escHtml(c.name) + '</span><span class="health-detail">' + escHtml(c.detail) + '</span></span></div>').join('') +
+      '<div class="settings-hint">Checked ' + new Date(h.checkedAt).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' }) + '</div>';
+  } catch (e) { list.innerHTML = '<div class="settings-hint">Could not check right now: ' + escHtml(e.message) + '</div>'; homeHealthAt = 0; }
+}
+
+function homeAsk(q) {
+  q = String(q || '').trim();
+  if (q.length < 3) { showToast('Type or say a question first'); return; }
+  document.getElementById('ask-q').value = q;
+  document.getElementById('home-ask-q').value = '';
+  goScreen('ai');
+  askAssistant();
+}
+function homeMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition, btn = document.getElementById('home-mic');
+  if (!SR) return;
+  if (homeMicRec) { try { homeMicRec.stop(); } catch (e) {} return; }
+  const r = new SR(); r.lang = 'en-AU'; r.continuous = false; r.interimResults = true;
+  r.onresult = e => { let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; document.getElementById('home-ask-q').value = t; };
+  r.onend = r.onerror = () => { homeMicRec = null; btn.classList.remove('listening'); };
+  try { r.start(); homeMicRec = r; btn.classList.add('listening'); } catch (e) { homeMicRec = null; }
+}
+function setupHome() {
+  if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) document.getElementById('home-mic').hidden = true;
+  document.getElementById('home-ask-go').onclick = () => homeAsk(document.getElementById('home-ask-q').value);
+  document.getElementById('home-ask-q').addEventListener('keydown', e => { if (e.key === 'Enter') homeAsk(e.target.value); });
+  document.getElementById('home-mic').onclick = homeMic;
+  document.getElementById('home-health-refresh').onclick = () => { homeHealthAt = 0; loadHealth(); };
+  document.getElementById('screen-home').addEventListener('click', e => {
+    const star = e.target.closest('[data-star]');
+    if (star) {
+      e.stopPropagation();
+      const s = homeStars(), id = star.dataset.star;
+      const next = s.includes(id) ? s.filter(x => x !== id) : s.concat(id);
+      try { localStorage.setItem(homeStarKey(), JSON.stringify(next)); } catch (err) {}
+      renderHome(); return;
+    }
+    const va = e.target.closest('[data-viewas]');
+    if (va && realRole() === 'owner') { homeViewAs = va.dataset.viewas === 'owner' ? null : va.dataset.viewas; renderHome(); return; }
+    const chip = e.target.closest('[data-ask]');
+    if (chip) { homeAsk(chip.dataset.ask); return; }
+    const t = e.target.closest('.home-tile');
+    if (t) {
+      const a = HOME_ACTIONS.find(x => x.id === t.dataset.act);
+      if (!a || !homeAllowed(a)) return;
+      if (a.href) window.open(a.href, '_blank'); else a.go();
+    }
+  });
+  renderHome();
+}
+
+// ── STAFF KIOSK (time off, notices, calendar; owners: pending, notices, dates) ──
+let kTab = 'timeoff', kSummary = null, kCalMonth = null, kNoticeDates = [];
+const K_STATUS = { pending: 'Waiting', approved: 'Approved', declined: 'Declined', withdrawn: 'Withdrawn' };
+const kFmt = d => new Date(d + 'T00:00:00').toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
+const kRange = (a, b) => kFmt(a) + (b && b !== a ? ' – ' + kFmt(b) : '');
+
+async function kioskRefreshSummary() {
+  if (!CURRENT_USER) { kSummary = null; return; }
+  try { kSummary = await authFetch('/kiosk/summary'); } catch (e) { kSummary = null; }
+  if (typeof renderHome === 'function') renderHome();
+}
+function openKiosk(tab) { goScreen('kiosk'); setKTab(tab || kTab); }
+function setKTab(t) {
+  if (t === 'owner' && !(kSummary && kSummary.isOwner)) t = 'timeoff';
+  kTab = t;
+  document.querySelectorAll('#k-tabs [data-ktab]').forEach(b => { b.classList.toggle('on', b.dataset.ktab === t); if (b.dataset.ktab === 'owner') b.hidden = !(kSummary && kSummary.isOwner); });
+  document.querySelectorAll('.k-panel').forEach(p => (p.hidden = p.id !== 'k-' + t));
+  if (t === 'timeoff' || t === 'notices') kLoadMe();
+  if (t === 'calendar') kLoadCalendar();
+  if (t === 'owner') kLoadOwner();
+  kPushCard();
+}
+
+async function kLoadMe() {
+  try {
+    const me = await authFetch('/kiosk/me');
+    const used = Object.keys(me.types).map(k => '<div class="k-used"><b>' + (me.daysUsed[k] || 0) + '</b><span>' + escHtml(me.types[k]) + '</span></div>').join('');
+    document.getElementById('k-used').innerHTML = '<div class="k-sub">Days taken in ' + me.year + ' (approved)</div><div class="k-used-row">' + used + '</div>';
+    document.getElementById('k-myreq').innerHTML = me.requests.length ? me.requests.map(r =>
+      '<div class="k-card"><div class="k-row"><b>' + escHtml(r.typeName) + '</b><span class="k-pill ' + r.status + '">' + K_STATUS[r.status] + '</span></div>' +
+      '<div class="k-line">' + kRange(r.start, r.end) + ' · ' + r.workingDays + ' working day' + (r.workingDays === 1 ? '' : 's') + '</div>' +
+      (r.note ? '<div class="k-note">' + escHtml(r.note) + '</div>' : '') +
+      (r.decisionNote ? '<div class="k-note">Reply: ' + escHtml(r.decisionNote) + '</div>' : '') +
+      (r.status === 'pending' ? '<button class="k-btn ghost" data-withdraw="' + r.id + '">Withdraw request</button>' : '') + '</div>').join('')
+      : '<div class="k-empty">No requests yet.</div>';
+    const unread = me.notices.filter(n => !n.readAt).length;
+    document.getElementById('k-notice-list').innerHTML = me.notices.length ? me.notices.map(n =>
+      '<details class="k-card k-notice' + (n.readAt ? '' : ' unread') + '" data-notice="' + n.id + '"><summary><span class="k-row"><b>' + escHtml(n.title) + '</b>' + (n.readAt ? '' : '<span class="k-pill pending">New</span>') + '</span>' +
+      '<span class="k-line">From ' + escHtml(n.from) + ' · ' + new Date(n.at).toLocaleDateString('en-AU') + '</span></summary>' +
+      (n.body ? '<div class="k-body">' + escHtml(n.body).replace(/\n/g, '<br>') + '</div>' : '') +
+      (n.dates.length ? '<div class="k-line">Dates: ' + n.dates.map(d => kFmt(d.date) + ' (' + escHtml(d.label) + ')').join(', ') + '</div>' : '') + '</details>').join('')
+      : '<div class="k-empty">No notices.</div>';
+    document.getElementById('kt-notices-count').textContent = unread ? String(unread) : '';
+    document.getElementById('kt-notices-count').hidden = !unread;
+  } catch (e) { document.getElementById('k-myreq').innerHTML = '<div class="k-empty">' + escHtml(e.message) + '</div>'; }
+}
+
+async function kSendRequest(confirmNoLeave) {
+  const msg = document.getElementById('k-req-msg');
+  const body = { type: document.getElementById('k-type').value, start: document.getElementById('k-start').value, end: document.getElementById('k-end').value || document.getElementById('k-start').value, note: document.getElementById('k-note').value, confirmNoLeave: !!confirmNoLeave };
+  if (!body.start) { msg.textContent = 'Choose the first day'; return; }
+  msg.textContent = 'Sending…';
+  try {
+    const r = await fetch(PROXY + '/kiosk/requests', { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 409 && j.warning) { msg.innerHTML = escHtml(j.error) + ' <button class="k-btn" data-sendanyway="1">Send anyway</button>'; return; }
+    if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status);
+    ['k-start', 'k-end', 'k-note'].forEach(id => (document.getElementById(id).value = ''));
+    msg.textContent = 'Sent — ' + j.request.workingDays + ' working day' + (j.request.workingDays === 1 ? '' : 's') + '. You\'ll be told when it\'s decided.';
+    kLoadMe(); kioskRefreshSummary();
+  } catch (e) { msg.textContent = e.message; }
+}
+
+async function kLoadCalendar() {
+  if (!kCalMonth) kCalMonth = new Date().toISOString().slice(0, 7);
+  const [y, m] = kCalMonth.split('-').map(Number);
+  const from = kCalMonth + '-01', last = new Date(Date.UTC(y, m, 0)).getUTCDate(), to = kCalMonth + '-' + String(last).padStart(2, '0');
+  document.getElementById('k-cal-title').textContent = new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('en-AU', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  try {
+    const { events } = await authFetch('/kiosk/calendar?from=' + from + '&to=' + to);
+    const on = d => events.filter(e => d >= e.start && d <= e.end);
+    const lead = (new Date(Date.UTC(y, m - 1, 1)).getUTCDay() + 6) % 7;                      // Monday first
+    let cells = '';
+    for (let i = 0; i < lead; i++) cells += '<div class="k-day empty"></div>';
+    for (let d = 1; d <= last; d++) {
+      const ds = kCalMonth + '-' + String(d).padStart(2, '0'), ev = on(ds);
+      cells += '<div class="k-day' + (ds === new Date().toISOString().slice(0, 10) ? ' today' : '') + '"><span>' + d + '</span><span class="k-dots">' + [...new Set(ev.map(e => e.kind))].map(k => '<i class="k-dot ' + k + '"></i>').join('') + '</span></div>';
+    }
+    document.getElementById('k-cal-grid').innerHTML = ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(x => '<div class="k-dow">' + x + '</div>').join('') + cells;
+    document.getElementById('k-cal-list').innerHTML = events.length ? events.map(e => '<div class="k-ev"><i class="k-dot ' + e.kind + '"></i><div><b>' + kRange(e.start, e.end) + '</b> · ' + escHtml(e.title) + (e.reason ? '<div class="k-line">Reason: ' + escHtml(e.reason) + '</div>' : '') + '</div></div>').join('') : '<div class="k-empty">Nothing on this month.</div>';
+  } catch (e) { document.getElementById('k-cal-list').innerHTML = '<div class="k-empty">' + escHtml(e.message) + '</div>'; }
+}
+
+async function kLoadOwner() {
+  try {
+    const [rq, nt, cal] = await Promise.all([authFetch('/kiosk/owner/requests'), authFetch('/kiosk/owner/notices'), authFetch('/kiosk/calendar?from=' + new Date().toISOString().slice(0, 10) + '&to=' + new Date(Date.now() + 400 * 864e5).toISOString().slice(0, 10))]);
+    document.getElementById('k-pending').innerHTML = rq.pending.length ? rq.pending.map(r =>
+      '<div class="k-card"><div class="k-row"><b>' + escHtml(r.name) + '</b><span class="k-pill pending">Waiting</span></div><div class="k-line">' + escHtml(r.typeName) + ' · ' + kRange(r.start, r.end) + ' · ' + r.workingDays + ' working day' + (r.workingDays === 1 ? '' : 's') + '</div>' +
+      (r.note ? '<div class="k-note">' + escHtml(r.note) + '</div>' : '') + (r.noLeaveWarning && r.noLeaveWarning.length ? '<div class="k-warn">In a no-leave period: ' + escHtml(r.noLeaveWarning.join(', ')) + '</div>' : '') +
+      '<input class="k-input" placeholder="Reply note (optional)" data-dnote="' + r.id + '"><div class="k-btns"><button class="k-btn" data-decide="approved" data-id="' + r.id + '">Approve</button><button class="k-btn danger" data-decide="declined" data-id="' + r.id + '">Decline</button></div></div>').join('')
+      : '<div class="k-empty">Nothing waiting.</div>';
+    document.getElementById('k-recent').innerHTML = rq.recent.slice(0, 10).map(r => '<div class="k-ev"><div><b>' + escHtml(r.name) + '</b> · ' + kRange(r.start, r.end) + ' · <span class="k-pill ' + r.status + '">' + K_STATUS[r.status] + '</span>' + (r.decidedByName ? ' by ' + escHtml(r.decidedByName) : '') + '</div></div>').join('') || '<div class="k-empty">No decisions yet.</div>';
+    document.getElementById('k-to').innerHTML = '<label class="k-check"><input type="radio" name="k-to" value="all" checked> Everyone</label>' + nt.people.filter(p => p.id !== CURRENT_USER.id).map(p => '<label class="k-check"><input type="radio" name="k-to" value="' + p.id + '"> ' + escHtml(p.name) + '</label>').join('');
+    document.getElementById('k-sent').innerHTML = nt.notices.slice(0, 10).map(n => '<div class="k-ev"><div><b>' + escHtml(n.title) + '</b> · ' + new Date(n.at).toLocaleDateString('en-AU') + '<div class="k-line">Read: ' + (escHtml(n.readBy.join(', ')) || 'nobody yet') + (n.notReadBy.length ? ' · Not read: ' + escHtml(n.notReadBy.join(', ')) : '') + '</div></div></div>').join('') || '<div class="k-empty">No notices sent yet.</div>';
+    document.getElementById('k-dates-list').innerHTML = cal.events.filter(e => e.kind === 'closure' || e.kind === 'noleave').map(e => '<div class="k-ev"><i class="k-dot ' + e.kind + '"></i><div><b>' + kRange(e.start, e.end) + '</b> · ' + (e.kind === 'closure' ? 'Business closed' : 'No leave') + '<div class="k-line">' + escHtml(e.reason) + '</div><button class="k-btn ghost" data-cancelcal="' + e.id + '">Cancel this (kept in records)</button></div></div>').join('') || '<div class="k-empty">No closures or no-leave periods set.</div>';
+    kRenderNoticeDates();
+  } catch (e) { document.getElementById('k-pending').innerHTML = '<div class="k-empty">' + escHtml(e.message) + '</div>'; }
+}
+function kRenderNoticeDates() { document.getElementById('k-ndates').innerHTML = kNoticeDates.map((d, i) => '<span class="k-chip">' + kFmt(d.date) + ' · ' + escHtml(d.label) + ' <button data-rmdate="' + i + '" aria-label="Remove">✕</button></span>').join(''); }
+
+// notifications: iPhone/iPad push only works in the home-screen app (iOS 16.4+); otherwise email
+function kPushCard() {
+  const el = document.getElementById('k-push'); if (!el) return;
+  const standalone = window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+  const can = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  if (!kSummary || !kSummary.pushKey) { el.innerHTML = 'You\'ll get an email when there\'s news for you.'; return; }
+  if (!standalone) { el.innerHTML = '<b>Want notifications on this iPhone/iPad?</b> In Safari tap <b>Share → Add to Home Screen</b>, open IPD from the new icon, then come back here. Until then you\'ll get emails.'; return; }
+  if (!can) { el.innerHTML = 'This device can\'t show app notifications — you\'ll get emails instead.'; return; }
+  if (Notification.permission === 'granted') { el.innerHTML = 'Notifications are on for this device. <button class="k-btn ghost" id="k-push-off">Turn off</button>'; return; }
+  if (Notification.permission === 'denied') { el.innerHTML = 'Notifications are blocked in Settings for IPD — you\'ll get emails instead.'; return; }
+  el.innerHTML = '<button class="k-btn" id="k-push-on">Turn on notifications</button> <span class="k-line">Otherwise you\'ll get emails.</span>';
+}
+function kKey(b64) { const p = '='.repeat((4 - b64.length % 4) % 4), s = atob((b64 + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from([...s].map(c => c.charCodeAt(0))); }
+async function kPushOn() {
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') return kPushCard();
+    const reg = await navigator.serviceWorker.register('sw.js');
+    await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: kKey(kSummary.pushKey) });
+    await authFetch('/kiosk/push/subscribe', { method: 'POST', body: JSON.stringify({ subscription: sub.toJSON(), device: /iPad/.test(navigator.userAgent) ? 'iPad' : 'iPhone' }) });
+    showToast('Notifications are on');
+  } catch (e) { showToast('Could not turn on notifications: ' + e.message); }
+  kPushCard();
+}
+async function kPushOff() {
+  try {
+    const reg = await navigator.serviceWorker.getRegistration('sw.js'), sub = reg && await reg.pushManager.getSubscription();
+    await authFetch('/kiosk/push/unsubscribe', { method: 'POST', body: JSON.stringify({ endpoint: sub ? sub.endpoint : '' }) });
+    if (sub) await sub.unsubscribe();
+    showToast('Notifications off — you\'ll get emails');
+  } catch (e) { showToast(e.message); }
+}
+
+function setupKiosk() {
+  const scr = document.getElementById('screen-kiosk');
+  scr.addEventListener('click', async e => {
+    const t = e.target;
+    const tab = t.closest('[data-ktab]'); if (tab) return setKTab(tab.dataset.ktab);
+    if (t.closest('#k-send')) return kSendRequest(false);
+    if (t.closest('[data-sendanyway]')) return kSendRequest(true);
+    const wd = t.closest('[data-withdraw]'); if (wd) { try { await authFetch('/kiosk/requests/' + wd.dataset.withdraw + '/withdraw', { method: 'POST' }); kLoadMe(); kioskRefreshSummary(); } catch (err) { showToast(err.message); } return; }
+    const dc = t.closest('[data-decide]'); if (dc) {
+      const note = (document.querySelector('[data-dnote="' + dc.dataset.id + '"]') || {}).value || '';
+      try { await authFetch('/kiosk/requests/' + dc.dataset.id + '/decide', { method: 'POST', body: JSON.stringify({ decision: dc.dataset.decide, note }) }); showToast(dc.dataset.decide === 'approved' ? 'Approved — they\'ve been told' : 'Declined — they\'ve been told'); kLoadOwner(); kioskRefreshSummary(); } catch (err) { showToast(err.message); }
+      return;
+    }
+    if (t.closest('#k-cal-prev') || t.closest('#k-cal-next')) {
+      const [y, m] = kCalMonth.split('-').map(Number), d = new Date(Date.UTC(y, m - 1 + (t.closest('#k-cal-next') ? 1 : -1), 1));
+      kCalMonth = d.toISOString().slice(0, 7); return kLoadCalendar();
+    }
+    if (t.closest('#k-adddate')) {
+      const d = document.getElementById('k-ndate').value; if (!d) return;
+      kNoticeDates.push({ date: d, label: document.getElementById('k-ndlabel').value || document.getElementById('k-ntitle').value || 'Notice' });
+      document.getElementById('k-ndate').value = ''; return kRenderNoticeDates();
+    }
+    const rm = t.closest('[data-rmdate]'); if (rm) { kNoticeDates.splice(+rm.dataset.rmdate, 1); return kRenderNoticeDates(); }
+    if (t.closest('#k-nsend')) {
+      const to = (document.querySelector('input[name="k-to"]:checked') || {}).value || 'all', msg = document.getElementById('k-nmsg');
+      try {
+        const j = await authFetch('/kiosk/notices', { method: 'POST', body: JSON.stringify({ to: to === 'all' ? 'all' : [to], title: document.getElementById('k-ntitle').value, body: document.getElementById('k-nbody').value, dates: kNoticeDates }) });
+        msg.textContent = 'Sent (' + Object.entries(j.sentBy).map(([k, v]) => v + ' by ' + k).join(', ') + ').';
+        ['k-ntitle', 'k-nbody', 'k-ndlabel'].forEach(id => (document.getElementById(id).value = '')); kNoticeDates = []; kLoadOwner();
+      } catch (err) { msg.textContent = err.message; }
+      return;
+    }
+    if (t.closest('#k-caladd')) {
+      const msg = document.getElementById('k-calmsg');
+      try {
+        await authFetch('/kiosk/calendar', { method: 'POST', body: JSON.stringify({ kind: document.getElementById('k-ckind').value, start: document.getElementById('k-cstart').value, end: document.getElementById('k-cend').value || document.getElementById('k-cstart').value, reason: document.getElementById('k-creason').value }) });
+        msg.textContent = 'Added.'; ['k-cstart', 'k-cend', 'k-creason'].forEach(id => (document.getElementById(id).value = '')); kLoadOwner();
+      } catch (err) { msg.textContent = err.message; }
+      return;
+    }
+    const cc = t.closest('[data-cancelcal]'); if (cc) { try { await authFetch('/kiosk/calendar/' + cc.dataset.cancelcal + '/cancel', { method: 'POST' }); kLoadOwner(); } catch (err) { showToast(err.message); } return; }
+    if (t.closest('#k-push-on')) return kPushOn();
+    if (t.closest('#k-push-off')) return kPushOff();
+  });
+  scr.addEventListener('toggle', async e => {
+    const d = e.target.closest && e.target.closest('details[data-notice]');
+    if (d && d.open && d.classList.contains('unread')) { d.classList.remove('unread'); try { await authFetch('/kiosk/notices/' + d.dataset.notice + '/read', { method: 'POST' }); kioskRefreshSummary(); } catch (err) {} }
+  }, true);
+  if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', ev => { if (ev.data && ev.data.open === 'kiosk' && CURRENT_USER) openKiosk('notices'); });
+  if (/[?&]open=kiosk/.test(location.search)) setTimeout(() => { if (CURRENT_USER) openKiosk('notices'); }, 1500);
+}
+
+// ── OUR SUPPLIERS AND BUSINESS PARTNERS ──────────────────────────────────────
+let dirConfig = null, dirData = null, dirCat = '', dirShowArchived = false, dirEditing = null;
+const DIR_FIELDS = [['name', 'Business name *'], ['contact', 'Contact person'], ['phone', 'Phone'], ['email', 'Email'], ['address', 'Address'], ['website', 'Website'], ['category', 'Category (e.g. landscape supplies)'], ['notes', 'Notes (everyone sees these)']];
+const DIR_OWNER_FIELDS = [['accountNumber', 'Account number (owners only)'], ['privateNotes', 'Private notes (owners only)']];
+const dirCap = s => String(s || '').replace(/\b\w/g, c => c.toUpperCase());
+
+async function dirRefresh() {
+  if (!CURRENT_USER) { dirConfig = null; return; }
+  try { dirConfig = await authFetch('/directory/config'); } catch (e) { dirConfig = null; }
+  if (typeof renderHome === 'function') renderHome();
+}
+function openDirectory() { goScreen('suppliers'); dirLoad(); }
+async function dirLoad() {
+  const list = document.getElementById('dir-list');
+  try {
+    dirData = await authFetch('/directory' + (dirShowArchived ? '?archived=1' : ''));
+    document.getElementById('dir-owner-bar').hidden = !dirData.isOwner;
+    dirRender();
+  } catch (e) { list.innerHTML = '<div class="k-empty">' + escHtml(e.message) + '</div>'; }
+}
+function dirRender() {
+  if (!dirData) return;
+  const q = (document.getElementById('dir-search').value || '').trim().toLowerCase();
+  document.getElementById('dir-cats').innerHTML = ['', ...dirData.categories].map(c => '<button class="dir-cat' + (c === dirCat ? ' on' : '') + '" data-dircat="' + escHtml(c) + '">' + (c ? escHtml(dirCap(c)) : 'All') + '</button>').join('');
+  const words = q.split(/\s+/).filter(Boolean);
+  const rows = dirData.entries.filter(e => (!dirCat || e.category === dirCat) && words.every(w => [e.name, e.contact, e.category, e.address, e.notes, e.phone, e.email].join(' ').toLowerCase().includes(w)));
+  const tel = p => String(p).replace(/[^\d+]/g, '');
+  document.getElementById('dir-list').innerHTML = rows.length ? rows.map(e =>
+    '<div class="k-card dir-card' + (e.status === 'archived' ? ' archived' : '') + '">' +
+    '<div class="k-row"><b class="dir-name">' + escHtml(e.name) + '</b>' + (e.category ? '<span class="k-pill">' + escHtml(dirCap(e.category)) + '</span>' : '') + (e.status === 'archived' ? '<span class="k-pill withdrawn">Archived</span>' : '') + '</div>' +
+    (e.contact ? '<div class="k-line">Contact: ' + escHtml(e.contact) + '</div>' : '') +
+    (e.address ? '<div class="k-line">' + escHtml(e.address) + '</div>' : '') +
+    (e.notes ? '<div class="k-note">' + escHtml(e.notes) + '</div>' : '') +
+    (dirData.isOwner && (e.accountNumber || e.privateNotes) ? '<div class="dir-private">🔒 ' + (e.accountNumber ? 'Account: <b>' + escHtml(e.accountNumber) + '</b>' : '') + (e.accountNumber && e.privateNotes ? '<br>' : '') + escHtml(e.privateNotes || '') + '</div>' : '') +
+    '<div class="dir-actions">' +
+      (e.phone ? '<a class="dir-act" href="tel:' + escHtml(tel(e.phone)) + '">📞 Call<span>' + escHtml(e.phone) + '</span></a>' : '') +
+      (e.email ? '<a class="dir-act" href="mailto:' + escHtml(e.email) + '">✉️ Email</a>' : '') +
+      (e.address ? '<a class="dir-act" href="https://maps.apple.com/?q=' + encodeURIComponent(e.address) + '" target="_blank" rel="noopener">🗺️ Map</a>' : '') +
+      (e.website ? '<a class="dir-act" href="' + escHtml(e.website) + '" target="_blank" rel="noopener">🌐 Website</a>' : '') +
+    '</div>' +
+    (dirData.isOwner ? '<div class="k-btns"><button class="k-btn ghost" data-diredit="' + e.id + '">Edit</button>' + (e.status === 'archived' ? '<button class="k-btn ghost" data-dirrestore="' + e.id + '">Restore</button>' : '<button class="k-btn ghost" data-dirarchive="' + e.id + '">Archive</button>') + '</div>' : '') +
+    '</div>').join('')
+    : '<div class="k-empty">' + (dirData.entries.length ? 'Nothing matches.' : 'No entries yet.' + (dirData.isOwner ? ' Tap “Add a supplier or partner”.' : '')) + '</div>';
+}
+function dirForm(entry) {
+  dirEditing = entry ? entry.id : 'new';
+  const f = document.getElementById('dir-form');
+  f.hidden = false;
+  f.innerHTML = '<div class="k-h">' + (entry ? 'Edit ' + escHtml(entry.name) : 'Add a supplier or partner') + '</div>' +
+    DIR_FIELDS.concat(DIR_OWNER_FIELDS).map(([k, label]) => '<label class="k-label">' + label +
+      (k === 'notes' || k === 'privateNotes' ? '<textarea class="k-input" rows="2" data-dirf="' + k + '">' + escHtml(entry ? entry[k] : '') + '</textarea>'
+        : '<input class="k-input" data-dirf="' + k + '" ' + (k === 'category' ? 'list="dir-catlist" ' : '') + 'type="' + ({ phone: 'tel', email: 'email', website: 'url' }[k] || 'text') + '" value="' + escHtml(entry ? entry[k] : '') + '">') + '</label>').join('') +
+    '<datalist id="dir-catlist">' + (dirData ? dirData.categories : []).map(c => '<option value="' + escHtml(c) + '">').join('') + '</datalist>' +
+    '<div class="k-btns"><button class="k-btn" data-dirsave="1">Save</button><button class="k-btn ghost" data-dircancel="1">Cancel</button></div><div class="k-msg" id="dir-msg"></div>';
+  f.scrollIntoView({ block: 'start' });
+}
+async function dirSave() {
+  const body = {};
+  document.querySelectorAll('#dir-form [data-dirf]').forEach(el => (body[el.dataset.dirf] = el.value));
+  try {
+    await authFetch(dirEditing === 'new' ? '/directory' : '/directory/' + dirEditing, { method: 'POST', body: JSON.stringify(body) });
+    document.getElementById('dir-form').hidden = true; dirEditing = null; showToast('Saved'); dirLoad();
+  } catch (e) { document.getElementById('dir-msg').textContent = e.message; }
+}
+function setupDirectory() {
+  const scr = document.getElementById('screen-suppliers');
+  document.getElementById('dir-search').addEventListener('input', dirRender);
+  scr.addEventListener('click', async e => {
+    const t = e.target;
+    const c = t.closest('[data-dircat]'); if (c) { dirCat = c.dataset.dircat; return dirRender(); }
+    if (t.closest('#dir-add')) return dirForm(null);
+    const ed = t.closest('[data-diredit]'); if (ed) return dirForm(dirData.entries.find(x => x.id === ed.dataset.diredit));
+    if (t.closest('[data-dirsave]')) return dirSave();
+    if (t.closest('[data-dircancel]')) { document.getElementById('dir-form').hidden = true; dirEditing = null; return; }
+    const ar = t.closest('[data-dirarchive]'); if (ar) {
+      const name = (dirData.entries.find(x => x.id === ar.dataset.dirarchive) || {}).name;
+      if (!confirm('Archive ' + name + '? It disappears from the list for staff but is kept, and you can restore it.')) return;
+      try { await authFetch('/directory/' + ar.dataset.dirarchive + '/archive', { method: 'POST' }); dirLoad(); } catch (err) { showToast(err.message); } return;
+    }
+    const rs = t.closest('[data-dirrestore]'); if (rs) { try { await authFetch('/directory/' + rs.dataset.dirrestore + '/restore', { method: 'POST' }); dirLoad(); } catch (err) { showToast(err.message); } return; }
+  });
+  document.getElementById('dir-archived').addEventListener('change', ev => { dirShowArchived = ev.target.checked; dirLoad(); });
 }
 
 // ── PIN LOCK ──────────────────────────────────────────────────────────────────
