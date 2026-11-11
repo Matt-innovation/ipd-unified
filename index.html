@@ -390,11 +390,11 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
   <div class="login-box">
     <div class="pin-logo-mark">🔧</div>
     <div class="pin-title">IPD</div>
-    <div class="pin-sub">Log in with your email or mobile</div>
+    <div class="pin-sub">Log in with your work email</div>
     <div id="login-step1">
-      <input class="login-input" id="login-id" type="text" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="Email or mobile number">
+      <input class="login-input" id="login-id" type="email" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="Your email">
       <div style="height:10px"></div>
-      <button class="login-btn" id="login-send" onclick="loginSendCode()">Send me a code</button>
+      <button class="login-btn" id="login-send" onclick="loginSendCode()">Email me a code</button>
     </div>
     <div id="login-step2" hidden>
       <input class="login-input" id="login-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code">
@@ -739,14 +739,6 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
           </div>
         </div>
         <div class="settings-card">
-          <div class="settings-card-hd">🔧 ServiceM8 API Key</div>
-          <div class="settings-row">
-            <div class="settings-label">API Key (for stock orders)</div>
-            <input class="settings-input" id="sm8-key-input" type="text" placeholder="smk-...">
-            <button class="settings-btn" onclick="saveSM8Key()">Save</button>
-          </div>
-        </div>
-        <div class="settings-card">
           <div class="settings-card-hd">📚 Knowledge Base</div>
           <div class="settings-row">
             <div class="settings-hint">Product links, Reece codes and reference guides.</div>
@@ -791,8 +783,8 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
           <div class="settings-row">
             <div class="settings-label">Name</div>
             <input class="settings-input" id="nu-name" type="text" placeholder="e.g. Andrew">
-            <div class="settings-label">Login (email or mobile)</div>
-            <input class="settings-input" id="nu-login" type="text" autocapitalize="off" spellcheck="false" placeholder="email or 04xx xxx xxx">
+            <div class="settings-label">Login email</div>
+            <input class="settings-input" id="nu-login" type="email" autocapitalize="off" spellcheck="false" placeholder="name@example.com">
             <div class="settings-label">Role</div>
             <select class="settings-input" id="nu-role"><option value="tech">Tech</option><option value="office">Office</option><option value="owner">Owner (sees everything)</option></select>
             <div class="settings-label">Title (optional)</div>
@@ -1798,8 +1790,8 @@ function deemphasiseMicOnIOS() {
 function init() {
   initPin();
   initLogin();
-  const saved = localStorage.getItem('ipd_sm8_key');
-  if (saved) document.getElementById('sm8-key-input').value = saved;
+  // Keys never live in the app: clear any ServiceM8 key an older version saved on this phone.
+  try { localStorage.removeItem('ipd_sm8_key'); } catch (e) {}
   const savedUrl = localStorage.getItem('ipd_sheet_url') || SHEET_URL_DEFAULT;
   document.getElementById('sheet-url-input').value = savedUrl;
   SHEET_URL = savedUrl;
@@ -1835,10 +1827,6 @@ function saveSheetUrl() {
   SHEET_URL = url;
   loadQuoteData();
   showToast('Saved — reloading data');
-}
-function saveSM8Key() {
-  localStorage.setItem('ipd_sm8_key', document.getElementById('sm8-key-input').value.trim());
-  showToast('Saved');
 }
 
 // ── STOCK ─────────────────────────────────────────────────────────────────────
@@ -3181,7 +3169,7 @@ function signedOut() {
 async function loginSendCode() {
   const id = document.getElementById('login-id').value.trim();
   const msg = document.getElementById('login-msg'), btn = document.getElementById('login-send');
-  if (!id) { msg.textContent = 'Type your email or mobile number'; return; }
+  if (!id) { msg.textContent = 'Type your email'; return; }
   btn.disabled = true; msg.textContent = 'Sending…';
   try {
     const j = await authFetch('/auth/start', { method: 'POST', body: JSON.stringify({ login: id }) });
