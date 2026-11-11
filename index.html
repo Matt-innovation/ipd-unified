@@ -263,6 +263,26 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
 /* ── PIN LOCK ── */
 #pin-overlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
 #pin-overlay.hidden{display:none}
+/* staff login (step 1) */
+#login-overlay{position:fixed;inset:0;background:var(--bg);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px}
+#login-overlay[hidden]{display:none}
+.login-box{display:flex;flex-direction:column;align-items:stretch;gap:12px;width:100%;max-width:340px}
+.login-box .pin-logo-mark,.login-box .pin-title,.login-box .pin-sub{align-self:center}
+.login-input{font-size:17px;padding:12px 14px;border-radius:10px;border:1.5px solid var(--border2);background:#fff;color:#111;width:100%;box-sizing:border-box}
+.login-btn{font-size:16px;font-weight:700;padding:12px;border:none;border-radius:10px;background:var(--orange);color:#fff;cursor:pointer;width:100%}
+.login-btn[disabled]{opacity:.5}
+.login-link{background:none;border:none;color:var(--on-bg);font-size:13px;text-decoration:underline;cursor:pointer;width:100%}
+.login-msg{font-size:13px;color:var(--on-bg);min-height:18px;text-align:center}
+.users-list{display:flex;flex-direction:column;gap:8px}
+.user-row{border:1px solid var(--border2);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.user-row.removed{opacity:.6}
+.user-top{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-weight:700}
+.user-sub{font-size:12px;opacity:.8;word-break:break-all}
+.user-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.user-actions select,.user-actions input{font-size:14px;padding:6px 8px;border-radius:8px;border:1px solid var(--border2)}
+.user-actions button{font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid var(--border2);background:none;cursor:pointer;color:inherit}
+.user-actions button.danger{border-color:#c62828;color:#c62828}
+.audit-line{font-size:12px;opacity:.85;padding:3px 0;border-bottom:1px solid var(--border2)}
 .pin-box{display:flex;flex-direction:column;align-items:center;gap:16px;padding:40px 24px;width:100%;max-width:340px}
 .pin-logo-mark{width:56px;height:56px;background:var(--btn-bg);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px}
 .pin-title{font-size:22px;font-weight:700;color:var(--on-bg)}
@@ -364,6 +384,26 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
       <button class="pin-key" onclick="pinKey('0')">0</button>
       <button class="pin-key pin-key-del" onclick="pinDel()">⌫</button>
     </div>
+  </div>
+</div>
+<div id="login-overlay" hidden>
+  <div class="login-box">
+    <div class="pin-logo-mark">🔧</div>
+    <div class="pin-title">IPD</div>
+    <div class="pin-sub">Log in with your email or mobile</div>
+    <div id="login-step1">
+      <input class="login-input" id="login-id" type="text" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="Email or mobile number">
+      <div style="height:10px"></div>
+      <button class="login-btn" id="login-send" onclick="loginSendCode()">Send me a code</button>
+    </div>
+    <div id="login-step2" hidden>
+      <input class="login-input" id="login-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code">
+      <div style="height:10px"></div>
+      <button class="login-btn" id="login-verify" onclick="loginVerify()">Log in</button>
+      <div style="height:6px"></div>
+      <button class="login-link" onclick="loginBack()">Use a different login</button>
+    </div>
+    <div class="login-msg" id="login-msg"></div>
   </div>
 </div>
 <div id="app">
@@ -682,6 +722,14 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
     <!-- SETTINGS -->
     <div class="screen" id="screen-settings">
       <div class="settings-wrap">
+        <div class="settings-card" id="me-card" hidden>
+          <div class="settings-card-hd">👤 Your login</div>
+          <div class="settings-row">
+            <div class="settings-hint" id="me-line"></div>
+            <button class="settings-btn" id="me-users-btn" hidden onclick="openUsers()">Manage users</button>
+            <button class="settings-btn" onclick="logOut()">Log out</button>
+          </div>
+        </div>
         <div class="settings-card">
           <div class="settings-card-hd">📊 Quote Data Source</div>
           <div class="settings-row">
@@ -729,6 +777,35 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
           <div class="settings-card-hd">ℹ️ App Info</div>
           <div class="settings-row"><div class="settings-hint">IPD Unified App v3.0 · Innovation Plumbing & Design · 3073 2666</div></div>
         </div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-users">
+      <div class="settings-wrap">
+        <div class="settings-card">
+          <div class="settings-card-hd">👥 Users</div>
+          <div class="settings-row"><div class="users-list" id="users-list"><div class="settings-hint">Loading…</div></div></div>
+        </div>
+        <div class="settings-card">
+          <div class="settings-card-hd">➕ Add a person</div>
+          <div class="settings-row">
+            <div class="settings-label">Name</div>
+            <input class="settings-input" id="nu-name" type="text" placeholder="e.g. Andrew">
+            <div class="settings-label">Login (email or mobile)</div>
+            <input class="settings-input" id="nu-login" type="text" autocapitalize="off" spellcheck="false" placeholder="email or 04xx xxx xxx">
+            <div class="settings-label">Role</div>
+            <select class="settings-input" id="nu-role"><option value="tech">Tech</option><option value="office">Office</option><option value="owner">Owner (sees everything)</option></select>
+            <div class="settings-label">Title (optional)</div>
+            <input class="settings-input" id="nu-title" type="text" placeholder="e.g. Apprentice">
+            <button class="settings-btn" onclick="addUser()">Add person</button>
+            <div class="settings-hint" id="nu-msg"></div>
+          </div>
+        </div>
+        <div class="settings-card">
+          <div class="settings-card-hd">📜 Recent changes</div>
+          <div class="settings-row" id="audit-list"><div class="settings-hint">Loading…</div></div>
+        </div>
+        <div class="settings-card"><div class="settings-row"><button class="settings-btn" onclick="goScreen('settings')">Back to Settings</button></div></div>
       </div>
     </div>
 
@@ -1494,7 +1571,8 @@ const UPLIFT = {
   costExGst:  0.01,          // each unit costs IPD $0.01 ex GST (GP display only, never sent)
 };
 
-const PROXY = 'https://ipd-proxy-server.onrender.com';
+// The staff-logins preview copy of the app (hosted at ipd-app-preview…) talks to the logins test service.
+const PROXY = /^ipd-app-preview/.test(location.hostname) ? 'https://ipd-proxy-auth-test.onrender.com' : 'https://ipd-proxy-server.onrender.com';
 const SHEET_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbz5yp8BmAwococSxcEQSJePYFLcZDfSaCMmQx4aWc0Tcdlvzqv3jC5iJfmQq_hoEo3SvA/exec';
 let SHEET_URL = localStorage.getItem('ipd_sheet_url') || SHEET_URL_DEFAULT;
 // Knowledge entries live only in the original Sheet; bundles come from SHEET_URL above.
@@ -1719,6 +1797,7 @@ function deemphasiseMicOnIOS() {
 // ── INIT ──────────────────────────────────────────────────────────────────────
 function init() {
   initPin();
+  initLogin();
   const saved = localStorage.getItem('ipd_sm8_key');
   if (saved) document.getElementById('sm8-key-input').value = saved;
   const savedUrl = localStorage.getItem('ipd_sheet_url') || SHEET_URL_DEFAULT;
@@ -3045,6 +3124,152 @@ function stdSearch(q) {
     if (qrMatch) anyMatch = true;
   }
   document.getElementById('std-no-result').style.display = anyMatch ? 'none' : 'block';
+}
+
+// ── STAFF LOGIN (step 1) ─────────────────────────────────────────────────────
+// When the server has logins switched on, each person logs in with a one-time code and the phone keeps a
+// session token. When logins are off (or the server can't be reached and nobody has logged in on this
+// phone yet), the shared PIN works exactly as before.
+const AUTH_TOKEN_KEY = 'ipd_auth_token', AUTH_USER_KEY = 'ipd_auth_user';
+const ROLE_NAMES = { owner: 'Owner', office: 'Office', tech: 'Tech' };
+let CURRENT_USER = null, loginIdValue = '';
+function authHeaders() { const t = localStorage.getItem(AUTH_TOKEN_KEY); return t ? { Authorization: 'Bearer ' + t } : {}; }
+async function authFetch(path, opts = {}) {
+  const r = await fetch(PROXY + path, { ...opts, headers: { 'Content-Type': 'application/json', ...authHeaders(), ...(opts.headers || {}) } });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401 && path !== '/auth/verify') signedOut();
+  if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+  return j;
+}
+async function initLogin() {
+  let cfg = null;
+  try { cfg = await (await fetch(PROXY + '/auth/config', { signal: AbortSignal.timeout(5000) })).json(); } catch (e) {}
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  if (!cfg) {                                                   // no signal: carry on as the last person who logged in
+    let cached = null; try { cached = JSON.parse(localStorage.getItem(AUTH_USER_KEY) || 'null'); } catch (e) {}
+    if (token && cached) setUser(cached);
+    return;
+  }
+  if (!cfg.enabled) return;                                     // logins off: PIN as before
+  if (token) {
+    try { const j = await authFetch('/auth/me'); setUser(j.user); return; } catch (e) { /* expired or removed */ }
+  }
+  showLogin();
+}
+function showLogin() {
+  document.getElementById('login-overlay').hidden = false;
+  document.getElementById('login-step1').hidden = false;
+  document.getElementById('login-step2').hidden = true;
+  document.getElementById('login-msg').textContent = '';
+}
+function setUser(u) {
+  CURRENT_USER = u;
+  try { localStorage.setItem(AUTH_USER_KEY, JSON.stringify(u)); } catch (e) {}
+  document.getElementById('login-overlay').hidden = true;
+  document.getElementById('pin-overlay').classList.add('hidden');   // a personal login replaces the PIN
+  document.getElementById('me-card').hidden = false;
+  document.getElementById('me-line').textContent = 'Logged in as ' + u.name + ' — ' + (ROLE_NAMES[u.role] || u.role) + (u.title ? ' (' + u.title + ')' : '');
+  document.getElementById('me-users-btn').hidden = !u.canManageUsers;
+}
+function signedOut() {
+  localStorage.removeItem(AUTH_TOKEN_KEY); localStorage.removeItem(AUTH_USER_KEY);
+  CURRENT_USER = null;
+  document.getElementById('me-card').hidden = true;
+  if (activeScreen === 'users') goScreen('home');
+  showLogin();
+}
+async function loginSendCode() {
+  const id = document.getElementById('login-id').value.trim();
+  const msg = document.getElementById('login-msg'), btn = document.getElementById('login-send');
+  if (!id) { msg.textContent = 'Type your email or mobile number'; return; }
+  btn.disabled = true; msg.textContent = 'Sending…';
+  try {
+    const j = await authFetch('/auth/start', { method: 'POST', body: JSON.stringify({ login: id }) });
+    loginIdValue = id;
+    document.getElementById('login-step1').hidden = true;
+    document.getElementById('login-step2').hidden = false;
+    msg.textContent = j.message || 'Check for your code';
+    setTimeout(() => document.getElementById('login-code').focus(), 50);
+  } catch (e) { msg.textContent = e.message; }
+  btn.disabled = false;
+}
+async function loginVerify() {
+  const code = document.getElementById('login-code').value.trim();
+  const msg = document.getElementById('login-msg'), btn = document.getElementById('login-verify');
+  if (!/^\d{6}$/.test(code)) { msg.textContent = 'The code is 6 digits'; return; }
+  btn.disabled = true; msg.textContent = 'Checking…';
+  try {
+    const device = /iPad/.test(navigator.userAgent) ? 'iPad' : /iPhone/.test(navigator.userAgent) ? 'iPhone' : 'Browser';
+    const j = await authFetch('/auth/verify', { method: 'POST', body: JSON.stringify({ login: loginIdValue, code, device }) });
+    localStorage.setItem(AUTH_TOKEN_KEY, j.token);
+    document.getElementById('login-code').value = '';
+    setUser(j.user);
+  } catch (e) { msg.textContent = e.message; }
+  btn.disabled = false;
+}
+function loginBack() { document.getElementById('login-code').value = ''; showLogin(); }
+async function logOut() {
+  try { await authFetch('/auth/logout', { method: 'POST' }); } catch (e) {}
+  signedOut();
+}
+
+// ── USER MANAGEMENT (only shown to the person who can manage users: Matt) ─────
+function escHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+async function openUsers() {
+  if (!CURRENT_USER || !CURRENT_USER.canManageUsers) return;
+  goScreen('users');
+  await loadUsers();
+}
+function userRowHtml(x) {
+  const self = x.id === CURRENT_USER.id;
+  const roleSel = '<select data-role="' + x.id + '">' + ['tech', 'office', 'owner'].map(r => '<option value="' + r + '"' + (r === x.role ? ' selected' : '') + '>' + ROLE_NAMES[r] + '</option>').join('') + '</select>';
+  let actions;
+  if (x.canManageUsers) actions = '<span class="user-sub">Manages users — can only be changed on the server</span>';
+  else if (x.status === 'active') actions = roleSel + '<input data-title="' + x.id + '" value="' + escHtml(x.title) + '" placeholder="Title" style="width:120px">' +
+    '<button data-act="save" data-id="' + x.id + '">Save</button><button class="danger" data-act="remove" data-id="' + x.id + '">Remove</button>';
+  else actions = '<button data-act="restore" data-id="' + x.id + '">Restore login</button>';
+  return '<div class="user-row' + (x.status === 'removed' ? ' removed' : '') + '"><div class="user-top"><span>' + escHtml(x.name) + (self ? ' (you)' : '') + '</span><span>' +
+    (ROLE_NAMES[x.role] || escHtml(x.role)) + (x.title ? ' · ' + escHtml(x.title) : '') + (x.status === 'removed' ? ' · REMOVED' : '') + '</span></div>' +
+    '<div class="user-sub">' + escHtml(x.login) + (x.status === 'removed' && x.removedAt ? ' · removed ' + new Date(x.removedAt).toLocaleDateString('en-AU') + ' (records kept)' : '') + '</div>' +
+    '<div class="user-actions">' + actions + '</div></div>';
+}
+let usersCache = [];
+async function loadUsers() {
+  const list = document.getElementById('users-list'), audit = document.getElementById('audit-list');
+  try {
+    const [u, a] = await Promise.all([authFetch('/admin/users'), authFetch('/admin/audit')]);
+    usersCache = u.users;
+    const names = new Map(u.users.map(x => [x.id, x.name]));
+    list.innerHTML = u.users.map(userRowHtml).join('');
+    audit.innerHTML = a.audit.slice(0, 20).map(e => '<div class="audit-line">' + new Date(e.at).toLocaleString('en-AU') + ' — ' + escHtml(names.get(e.actor) || 'system') + ': ' + escHtml(e.action) +
+      (e.target && e.target !== e.actor ? ' (' + escHtml(names.get(e.target) || '') + ')' : '') + '</div>').join('') || '<div class="settings-hint">No changes yet</div>';
+  } catch (e) { list.innerHTML = '<div class="settings-hint">' + escHtml(e.message) + '</div>'; }
+}
+document.addEventListener('click', async ev => {
+  const b = ev.target.closest('#users-list button[data-act]'); if (!b) return;
+  const id = b.dataset.id, who = (usersCache.find(x => x.id === id) || {}).name || 'this person';
+  try {
+    if (b.dataset.act === 'save') {
+      const role = document.querySelector('[data-role="' + id + '"]').value, title = document.querySelector('[data-title="' + id + '"]').value;
+      await authFetch('/admin/users/' + id + '/role', { method: 'POST', body: JSON.stringify({ role, title }) });
+    } else if (b.dataset.act === 'remove') {
+      if (!confirm('Remove ' + who + '? Their login stops working on every phone straight away. Everything they made is kept, and you can restore them later.')) return;
+      await authFetch('/admin/users/' + id + '/remove', { method: 'POST' });
+    } else if (b.dataset.act === 'restore') {
+      await authFetch('/admin/users/' + id + '/restore', { method: 'POST' });
+    }
+    loadUsers();
+  } catch (e) { alert(e.message); }
+});
+async function addUser() {
+  const msg = document.getElementById('nu-msg');
+  const body = { name: document.getElementById('nu-name').value, login: document.getElementById('nu-login').value, role: document.getElementById('nu-role').value, title: document.getElementById('nu-title').value };
+  try {
+    await authFetch('/admin/users', { method: 'POST', body: JSON.stringify(body) });
+    ['nu-name', 'nu-login', 'nu-title'].forEach(id => (document.getElementById(id).value = ''));
+    msg.textContent = 'Added ' + body.name + '. They can now log in with ' + body.login + '.';
+    loadUsers();
+  } catch (e) { msg.textContent = e.message; }
 }
 
 // ── PIN LOCK ──────────────────────────────────────────────────────────────────
