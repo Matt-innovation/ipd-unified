@@ -155,6 +155,68 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .ask-fb button{border:1px solid var(--border2);background:var(--surface2);color:var(--text);border-radius:999px;padding:4px 10px;font-size:14px;cursor:pointer}
 .ask-fb-text{min-height:50px;flex:1 1 100%}
 .quote-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+/* quote tabs */
+.q-tabs{display:flex;gap:6px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}
+.q-tabs button{flex-shrink:0;font-family:var(--font);font-size:14px;font-weight:600;padding:8px 14px;min-height:38px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;white-space:nowrap}
+.q-tabs button.on{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
+.qtab-count{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--orange);color:#fff;font-size:12px;line-height:20px;text-align:center}
+.qtab-soon{font-size:11px;font-weight:600;opacity:.7;margin-left:2px}
+.qt-panels{flex:1;min-height:0;position:relative}
+.qt-panel{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column}
+.qt-panel>*{flex-shrink:0}
+.qt-summary .quote-list{flex:none;overflow:visible}
+.qt-search{padding:10px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
+.qt-search input{width:100%;font-family:var(--font);font-size:16px;min-height:46px;padding:10px 12px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text)}
+.qt-list{display:flex;flex-direction:column}
+.qsec{padding:10px 12px 4px;font-size:12px;font-weight:700;color:var(--on-bg);text-transform:uppercase;letter-spacing:.5px}
+.qempty{padding:20px 16px;font-size:14px;line-height:1.5;color:var(--on-bg);text-align:center}
+.qrow{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--border)}
+.qrow-star{flex-shrink:0;width:36px;height:40px;border:none;background:none;font-size:22px;color:var(--text-dim);cursor:pointer;font-family:var(--font)}
+.qrow-star.on{color:#f5a623}
+.qrow-body{flex:1;min-width:0}
+.qrow-name{font-size:14px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.qrow-sub{font-size:12px;color:var(--text-dim);margin-top:2px;overflow-wrap:anywhere}
+.qrow-right{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.qrow-price{font-size:15px;font-weight:700;white-space:nowrap}
+.qrow-add{font-family:var(--font);font-size:14px;font-weight:700;min-height:40px;padding:8px 16px;border-radius:10px;border:none;background:var(--btn-bg);color:var(--btn-text);cursor:pointer;white-space:normal;line-height:1.3}
+.qrow-add.ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+.qty-ctrl.big{gap:6px}
+.qty-ctrl.big .qty-btn,.qline .qty-btn{width:40px;height:40px;font-size:20px;border-radius:10px}
+.qty-ctrl.big .qty-num,.qline .qty-num{min-width:26px;text-align:center;font-size:16px;font-weight:700}
+.ql-box{padding:12px;display:flex;flex-direction:column;gap:10px;background:var(--surface);border-bottom:1px solid var(--border)}
+.ql-seg{display:flex;background:var(--surface2);border:1px solid var(--border2);border-radius:999px;padding:3px;gap:3px}
+.ql-seg button{flex:1;font-family:var(--font);font-size:15px;font-weight:600;min-height:40px;border:none;border-radius:999px;background:none;color:var(--text);cursor:pointer}
+.ql-seg button.on{background:var(--btn-bg);color:var(--btn-text)}
+.ql-hours{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ql-hours button{font-family:var(--font);font-size:18px;font-weight:700;min-height:56px;border-radius:12px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer}
+.ql-rate{font-size:13px;color:var(--text-mid);line-height:1.4;overflow-wrap:anywhere}
+.ql-full{font-size:13px}
+.qhint{padding:8px 12px;font-size:12px;color:var(--on-bg)}
+.qline .qi-bot{flex-wrap:wrap;gap:8px}
+.qi-btns{display:flex;gap:6px;margin-left:auto}
+body.on-quote .toast{bottom:150px}
+.qi-btn{font-family:var(--font);font-size:14px;font-weight:600;min-height:40px;padding:8px 12px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer}
+.qi-btn.del{border-color:#c62828;color:#c62828}
+.qline{position:relative;overflow:hidden}
+.qline-actions{position:absolute;top:0;right:0;bottom:0;display:flex}
+.qline-actions button{width:75px;border:none;font-family:var(--font);font-size:14px;font-weight:700;color:#fff;cursor:pointer}
+.qa-edit{background:#455a64}.qa-del{background:#c62828}
+.qline-front{position:relative;transition:transform .18s ease}
+.qline .qi-name{font-size:14px;overflow-wrap:anywhere;flex:1;min-width:0}
+.qline .qi-top{align-items:flex-start;gap:10px}
+.qimg{width:44px;height:44px}
+.qedit{display:flex;flex-direction:column;gap:8px}
+.qedit-row{display:flex;align-items:center;gap:10px;font-size:14px}
+.qedit-row input{width:110px;font-family:var(--font);font-size:16px;min-height:44px;padding:8px 10px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text)}
+.qedit-btns{display:flex;gap:8px}
+.qt-job{padding:8px 12px;background:var(--surface);border-top:1px solid var(--border)}
+.qt-job input{width:100%;font-family:var(--font);font-size:16px;min-height:44px;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text)}
+.quote-bar{flex-shrink:0;display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border-top:2px solid var(--border2);box-shadow:0 -2px 8px rgba(0,0,0,.08)}
+.qbar-info{flex:1;min-width:0;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.qbar-total{font-size:20px;font-weight:800;color:var(--text)}
+.qbar-gp{font-size:14px;font-weight:700;padding:3px 8px;border-radius:8px;background:var(--surface2);color:var(--text-mid)}
+.qbar-gp.ok{background:#2e7d32;color:#fff}.qbar-gp.warn{background:#f9a825;color:#111}.qbar-gp.bad{background:#c62828;color:#fff}
+.qbar-send{flex-shrink:0;font-family:var(--font);font-size:15px;font-weight:700;min-height:46px;padding:0 16px;border-radius:12px;border:none;background:var(--btn-bg);color:var(--btn-text);cursor:pointer}
 .quote-list{flex:1;overflow-y:auto;min-height:0}
 .quote-item{padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface)}
 .qi-top{display:flex;justify-content:space-between;gap:8px;margin-bottom:4px}
@@ -663,29 +725,64 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
     <!-- QUOTE -->
     <div class="screen" id="screen-quote">
       <div class="quote-wrap">
-        <div class="gp-panel" id="gp-panel"></div>
-        <div class="gp-discount" id="gp-discount" style="display:none">
-          <span class="gp-disc-label">Discount</span>
-          <div class="pct-chip" id="qd-0" onclick="setQuoteDiscount(0)">None</div>
-          <div class="pct-chip" id="qd-5" onclick="setQuoteDiscount(5)">5%</div>
-          <div class="pct-chip" id="qd-10" onclick="setQuoteDiscount(10)">10%</div>
-          <div class="pct-chip" id="qd-15" onclick="setQuoteDiscount(15)">15%</div>
-          <span style="display:flex;align-items:center;gap:3px"><input class="labour-input" id="qd-custom" type="number" min="0" max="50" step="0.5" inputmode="decimal" placeholder="%" style="width:58px" oninput="onCustomDiscount(this)"><span style="font-size:11px;color:var(--text-mid)">%</span></span>
-          <button class="gp-max-btn" onclick="setMaxDiscount()">Max discount that holds target</button>
+        <div class="q-tabs" id="q-tabs" role="tablist">
+          <button data-qtab="summary">Summary <span class="qtab-count" id="qtab-count" hidden>0</span></button>
+          <button data-qtab="products">Products</button>
+          <button data-qtab="bundles">Bundles</button>
+          <button data-qtab="labour">Labour</button>
+          <button data-qtab="notes">Notes &amp; photos <span class="qtab-soon">soon</span></button>
         </div>
-        <div class="quote-list" id="quote-list"><div class="state-box"><span class="state-icon">📋</span><p>No items yet.<br>Add from Search or AI tab.</p></div></div>
-        <div id="quote-totals" class="totals-box" style="display:none">
-          <div class="total-row"><span>Subtotal (ex GST)</span><span id="t-sub">$0.00</span></div>
-          <div class="total-row"><span>GST (10%)</span><span id="t-gst">$0.00</span></div>
-          <div class="total-row grand"><span>Total inc GST</span><span id="t-total">$0.00</span></div>
+        <div class="qt-panels">
+          <div class="qt-panel" id="qt-products">
+            <div class="qt-search"><input type="search" id="qp-search" placeholder="Search Reece products…" autocomplete="off" enterkeyhint="search"></div>
+            <div class="qt-list" id="qp-results"></div>
+          </div>
+          <div class="qt-panel" id="qt-bundles" hidden>
+            <div class="qt-search"><input type="search" id="qb-search" placeholder="Search our bundles (name or code)…" autocomplete="off" enterkeyhint="search"></div>
+            <div class="qt-list" id="qb-results"></div>
+          </div>
+          <div class="qt-panel" id="qt-labour" hidden>
+            <div class="ql-box">
+              <div class="ql-seg"><button data-lkind="standard">Tradesman</button><button data-lkind="apprentice">Apprentice</button></div>
+              <div class="ql-hours"><button data-lhours="0.5">+ 0.5h</button><button data-lhours="1">+ 1h</button><button data-lhours="2">+ 2h</button></div>
+              <div class="ql-rate" id="ql-rate"></div>
+              <button class="qrow-add ghost ql-full" onclick="goScreen('labour')">Full labour calculator (2nd tradesman, builder rate, service fee, uplift)</button>
+            </div>
+            <div class="qt-list" id="ql-lines"></div>
+          </div>
+          <div class="qt-panel qt-summary" id="qt-summary" hidden>
+            <div class="gp-panel" id="gp-panel"></div>
+            <div class="gp-discount" id="gp-discount" style="display:none">
+              <span class="gp-disc-label">Discount</span>
+              <div class="pct-chip" id="qd-0" onclick="setQuoteDiscount(0)">None</div>
+              <div class="pct-chip" id="qd-5" onclick="setQuoteDiscount(5)">5%</div>
+              <div class="pct-chip" id="qd-10" onclick="setQuoteDiscount(10)">10%</div>
+              <div class="pct-chip" id="qd-15" onclick="setQuoteDiscount(15)">15%</div>
+              <span style="display:flex;align-items:center;gap:3px"><input class="labour-input" id="qd-custom" type="number" min="0" max="50" step="0.5" inputmode="decimal" placeholder="%" style="width:58px" oninput="onCustomDiscount(this)"><span style="font-size:11px;color:var(--text-mid)">%</span></span>
+              <button class="gp-max-btn" onclick="setMaxDiscount()">Max discount that holds target</button>
+            </div>
+            <div class="qhint">Swipe a line left, or tap Edit / Delete.</div>
+            <div class="quote-list" id="quote-list"><div class="state-box"><span class="state-icon">📋</span><p>No items yet.<br>Add from Products, Bundles or Labour.</p></div></div>
+            <div id="quote-totals" class="totals-box" style="display:none">
+              <div class="total-row"><span>Subtotal (ex GST)</span><span id="t-sub">$0.00</span></div>
+              <div class="total-row"><span>GST (10%)</span><span id="t-gst">$0.00</span></div>
+              <div class="total-row grand"><span>Total inc GST</span><span id="t-total">$0.00</span></div>
+            </div>
+            <div class="qt-job">
+              <input type="text" id="job-number-input" placeholder="Job number (optional)">
+            </div>
+            <div class="quote-actions">
+              <button class="q-btn" onclick="clearQuote()">🗑 Clear</button>
+              <button class="q-btn" onclick="exportQuote()">⬇ Download</button>
+            </div>
+          </div>
+          <div class="qt-panel" id="qt-notes" hidden>
+            <div class="qempty">Job notes and photos for the ServiceM8 job diary are coming here in a later step.</div>
+          </div>
         </div>
-        <div style="padding:8px 12px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0">
-          <input type="text" id="job-number-input" placeholder="Job number (optional)" style="width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:13px;font-family:var(--font);outline:none">
-        </div>
-        <div class="quote-actions">
-          <button class="q-btn" onclick="clearQuote()">🗑 Clear</button>
-          <button class="q-btn" onclick="exportQuote()">⬇ Download</button>
-          <button class="q-btn primary" onclick="sendQuoteToSM8()">📤 Send to SM8</button>
+        <div class="quote-bar">
+          <div class="qbar-info"><div class="qbar-total" id="qbar-total">$0.00</div><div class="qbar-gp" id="qbar-gp">GP —</div></div>
+          <button class="qbar-send" onclick="sendQuoteToSM8()">📤 Send to SM8</button>
         </div>
       </div>
     </div>
@@ -1761,7 +1858,7 @@ const UPLIFT = {
   costExGst:  0.01,          // each unit costs IPD $0.01 ex GST (GP display only, never sent)
 };
 
-// The staff-logins preview copy of the app (hosted at ipd-app-preview…) talks to the logins test service.
+// Preview copies of the app (hosted at ipd-app-preview…) talk to the test server, never the live one.
 const PROXY = /^ipd-app-preview/.test(location.hostname) ? 'https://ipd-proxy-auth-test.onrender.com' : 'https://ipd-proxy-server.onrender.com';
 const SHEET_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbz5yp8BmAwococSxcEQSJePYFLcZDfSaCMmQx4aWc0Tcdlvzqv3jC5iJfmQq_hoEo3SvA/exec';
 let SHEET_URL = localStorage.getItem('ipd_sheet_url') || SHEET_URL_DEFAULT;
@@ -1990,6 +2087,7 @@ function init() {
   setupHome();
   setupKiosk();
   setupDirectory();
+  setupQuoteTabs();
   initLogin();
   // Keys never live in the app: clear any ServiceM8 key an older version saved on this phone.
   try { localStorage.removeItem('ipd_sm8_key'); } catch (e) {}
@@ -2015,9 +2113,10 @@ function goScreen(name) {
   const nav = document.getElementById('nav-' + name);
   if (nav) nav.classList.add('active');
   activeScreen = name;
+  document.body.classList.toggle('on-quote', name === 'quote');   // lifts pop-up messages above the quote bar
   if (name !== 'search') stopListening();
   if (name === 'kb') renderKB();
-  if (name === 'quote') renderQuote();
+  if (name === 'quote') { renderQuote(); setQTab('summary'); }   // the quote page always opens on Summary
   if (name === 'labour') updateLabourTotals();
   if (name === 'home') { updateHomeStats(); renderHome(); if (CURRENT_USER) kioskRefreshSummary(); }
 }
@@ -2285,6 +2384,7 @@ function updateQuoteUI() {
   document.getElementById('quote-pill-txt').textContent = count+(count===1?' item':' items');
   if(activeScreen==='quote') renderQuote();
   updateHomeStats();
+  if (typeof updateQuoteBar === 'function') updateQuoteBar();
 }
 function updateHomeStats() {
   const hs_quote = document.getElementById('hs-quote');
@@ -2298,23 +2398,25 @@ function renderQuote() {
   const list = document.getElementById('quote-list');
   const totals = document.getElementById('quote-totals');
   renderGP();
-  if (!quote.length) { list.innerHTML='<div class="state-box"><span class="state-icon">📋</span><p>No items yet.<br>Add from Search or AI tab.</p></div>'; totals.style.display='none'; return; }
+  if (!quote.length) { list.innerHTML='<div class="state-box"><span class="state-icon">📋</span><p>No items yet.<br>Add from Products, Bundles or Labour.</p></div>'; totals.style.display='none'; updateQuoteBar(); return; }
   list.innerHTML = quote.map(item => {
-    if (item.id === 'discount') return `<div class="quote-item"><div class="qi-top"><div class="qi-name">${esc(item.name)}</div><div class="qi-line" style="color:var(--red)">−$${Math.abs(item.price).toFixed(2)}</div></div><div class="qi-bot"><div class="qi-meta">On the whole quote</div><button class="qi-rm" onclick="setQuoteDiscount(0)">✕</button></div></div>`;
+    if (item.id === 'discount') return `<div class="qline" data-id="discount"><div class="qline-actions"><button class="qa-del" data-del="discount">Delete</button></div><div class="quote-item qline-front"><div class="qi-top"><div class="qi-name">${esc(item.name)}</div><div class="qi-line" style="color:var(--red)">−$${Math.abs(item.price).toFixed(2)}</div></div><div class="qi-bot"><div class="qi-meta">On the whole quote</div><span class="qi-btns"><button class="qi-btn del" data-del="discount">Delete</button></span></div></div></div>`;
     const line = item.price*item.qty; const isB = item.type==='bundle';
-    return `<div class="quote-item"><div class="qi-top"><div class="qi-name">${esc(item.name)} <span class="type-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span></div><div class="qi-line">$${line.toFixed(2)}</div></div><div class="qi-bot"><div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${item.id}',-1)">−</button><span class="qty-num">${item.qty}</span><button class="qty-btn" onclick="chQty('${item.id}',1)">+</button></div><div class="qi-meta">$${item.price.toFixed(2)} ea</div><button class="qi-rm" onclick="chQty('${item.id}',${-item.qty})">✕</button></div></div>`;
+    return `<div class="qline" data-id="${esc(item.id)}"><div class="qline-actions"><button class="qa-edit" data-edit="${esc(item.id)}">Edit</button><button class="qa-del" data-del="${esc(item.id)}">Delete</button></div><div class="quote-item qline-front"><div class="qi-top">${item.type==='reece'&&item.code?qImgTag(item.code):''}<div class="qi-name">${esc(item.name)} <span class="type-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span></div><div class="qi-line">$${line.toFixed(2)}</div></div><div class="qi-bot"><div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${item.id}',-1)">−</button><span class="qty-num">${item.qty}</span><button class="qty-btn" onclick="chQty('${item.id}',1)">+</button></div><div class="qi-meta">$${item.price.toFixed(2)} ea</div><span class="qi-btns"><button class="qi-btn" data-edit="${esc(item.id)}">Edit</button><button class="qi-btn del" data-del="${esc(item.id)}">Delete</button></span></div></div></div>`;
   }).join('');
   const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0); const gst=totalInc/11; const sub=totalInc-gst;
   document.getElementById('t-sub').textContent='$'+sub.toFixed(2);
   document.getElementById('t-gst').textContent='$'+gst.toFixed(2);
   document.getElementById('t-total').textContent='$'+totalInc.toFixed(2);
   totals.style.display='block';
+  updateQuoteBar();
+  if (typeof qWatchImages === 'function') qWatchImages(list);
 }
 // ── GP (gross profit) — display only, never sent to ServiceM8 ────────────────
 // All maths ex GST. Bundle lines use the server's bundle cost (parts × qty, ex GST). A bundle with
 // no known cost — costs not loaded, or any part the server couldn't cost — is left out of GP
 // entirely (its price too — counting its price without its full cost would overstate GP).
-function setQuoteJobType(t) { quoteJobType = t; renderGP(); }
+function setQuoteJobType(t) { quoteJobType = t; renderGP(); updateQuoteBar(); }
 function isGstFreeLine(i) {
   // Reece lines carry the price file's GST % (10 or 0) as `markup`.
   return i.type === 'reece' && i.markup !== undefined && i.markup !== null && i.markup !== '' && Number(i.markup) === 0;
@@ -3012,6 +3114,268 @@ async function fetchReeceSearch(q, container) {
       container.innerHTML = '<div class="state-box"><span class="state-icon">❌</span><p>Could not reach server.<br><span class="hint">Check connection.</span></p></div>';
     }
   }, 300);
+}
+
+// ── QUOTE PAGE TABS (quote-tabs branch) ──────────────────────────────────────
+// Products · Bundles · Labour · Summary · Notes & photos (soon), on one page, with a sticky bar
+// (total, GP %, Send) on every tab. Adding uses the existing addReece/addBundle/chQty; labour uses
+// the Labour screen's rates, surcharge and discount; GP uses calcGP(). No price or GP maths changed.
+let qTab = 'summary', qpTimer = null, qpResults = [];
+const Q_RECENT_KEY = 'ipd_recent_items', Q_FAV_KEY = 'ipd_fav_items';
+const qRead = k => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) { return []; } };
+const qWrite = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const qKey = it => it.type === 'bundle' ? 'b:' + it.uuid : 'r:' + it.code;
+
+// Product photos: only for rows that come into view, 20 codes per request, the photo address remembered
+// on this phone (so each product is looked up once), image downloaded lazily. No photo → plain placeholder.
+const Q_IMG_KEY = 'ipd_img_urls';
+let qImgUrls = (() => { try { return JSON.parse(localStorage.getItem(Q_IMG_KEY) || '{}'); } catch (e) { return {}; } })();
+let qImgQueue = new Set(), qImgTimer = null;
+const qImgObserver = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+  entries.forEach(en => { if (en.isIntersecting) { qImgObserver.unobserve(en.target); qImgNeed(en.target); } });
+}, { rootMargin: '200px' }) : null;
+function qImgTag(code) {
+  const u = qImgUrls[code];
+  return '<img class="reece-img qimg" data-code="' + esc(code) + '" src="' + (u || REECE_IMG_PLACEHOLDER) + '"' + (u ? '' : ' data-pending="1"') +
+    ' loading="lazy" decoding="async" width="44" height="44" alt="">';
+}
+function qImgNeed(img) {
+  const code = img.dataset.code;
+  if (code in qImgUrls) { if (qImgUrls[code]) img.src = qImgUrls[code]; return; }
+  qImgQueue.add(code);
+  clearTimeout(qImgTimer); qImgTimer = setTimeout(qImgFetch, 120);
+}
+async function qImgFetch() {
+  const codes = [...qImgQueue].slice(0, 20);
+  codes.forEach(c => qImgQueue.delete(c));
+  if (!codes.length) return;
+  try {
+    const data = await (await fetch(PROXY + '/reece-images?codes=' + codes.map(encodeURIComponent).join(','))).json();
+    codes.forEach(c => { qImgUrls[c] = data[c] || ''; });            // '' = no photo: keep the placeholder, don't ask again
+    const keys = Object.keys(qImgUrls); if (keys.length > 600) keys.slice(0, keys.length - 600).forEach(k => delete qImgUrls[k]);
+    try { localStorage.setItem(Q_IMG_KEY, JSON.stringify(qImgUrls)); } catch (e) {}
+    document.querySelectorAll('#screen-quote img.qimg[data-pending]').forEach(img => {
+      const u = qImgUrls[img.dataset.code];
+      if (u === undefined) return;
+      img.removeAttribute('data-pending');
+      if (u) { img.onerror = function () { this.onerror = null; this.src = REECE_IMG_PLACEHOLDER; }; img.src = u; }
+    });
+  } catch (e) { /* no connection: placeholders stay */ }
+  if (qImgQueue.size) qImgFetch();
+}
+function qWatchImages(container) {
+  if (!container) return;
+  container.querySelectorAll('img.qimg[data-pending]').forEach(img => (qImgObserver ? qImgObserver.observe(img) : qImgNeed(img)));
+}
+
+function setQTab(t) {
+  qTab = t;
+  document.querySelectorAll('#q-tabs [data-qtab]').forEach(b => b.classList.toggle('on', b.dataset.qtab === t));
+  document.querySelectorAll('.qt-panel').forEach(p => (p.hidden = p.id !== 'qt-' + t));
+  if (t === 'products') renderQProducts();
+  if (t === 'bundles') renderQBundles();
+  if (t === 'labour') renderQLabour();
+  if (t === 'summary') renderQuote();
+  updateQuoteBar();
+}
+
+// remember what was added (recent) and what is starred (favourites) — on this phone
+function qRemember(it) {
+  const k = qKey(it);
+  qWrite(Q_RECENT_KEY, [it].concat(qRead(Q_RECENT_KEY).filter(x => qKey(x) !== k)).slice(0, 12));
+}
+function qToggleFav(it) {
+  const k = qKey(it), favs = qRead(Q_FAV_KEY);
+  qWrite(Q_FAV_KEY, favs.some(x => qKey(x) === k) ? favs.filter(x => qKey(x) !== k) : [it].concat(favs).slice(0, 40));
+}
+const qIsFav = it => qRead(Q_FAV_KEY).some(x => qKey(x) === qKey(it));
+
+// one row for a product or bundle: name, code, sell price, ☆, and "Add" or − qty +
+function qRow(it) {
+  const inQ = quote.find(i => i.id === (it.type === 'bundle' ? it.uuid : 'r_' + it.code));
+  const p = parseFloat(it.price);
+  const data = esc(JSON.stringify(it));
+  return '<div class="qrow">' +
+    '<button class="qrow-star' + (qIsFav(it) ? ' on' : '') + '" data-fav="' + data + '" aria-label="Star">' + (qIsFav(it) ? '★' : '☆') + '</button>' +
+    (it.type === 'reece' && it.code ? qImgTag(it.code) : '') +
+    '<div class="qrow-body"><div class="qrow-name">' + esc(it.name) + '</div><div class="qrow-sub">' + (it.type === 'bundle' ? 'Bundle' : 'Reece') + (it.code ? ' · ' + esc(it.code) : '') + '</div></div>' +
+    '<div class="qrow-right"><div class="qrow-price">' + (p > 0 ? '$' + p.toFixed(2) : '—') + '</div>' +
+    (inQ ? '<div class="qty-ctrl big"><button class="qty-btn" data-qty="' + esc(inQ.id) + '" data-d="-1">−</button><span class="qty-num">' + inQ.qty + '</span><button class="qty-btn" data-qty="' + esc(inQ.id) + '" data-d="1">+</button></div>'
+          : '<button class="qrow-add" data-add="' + data + '">Add</button>') + '</div></div>';
+}
+const qFromReece = r => ({ type: 'reece', code: r.code, name: r.name, price: r.retail });
+const qFromBundle = b => ({ type: 'bundle', uuid: b.uuid, code: b.code, name: b.name, price: b.price });
+
+async function qAdd(it) {
+  if (it.type === 'bundle') {
+    if (!bundles.find(b => b.uuid === it.uuid)) { showToast('That bundle is no longer in the list'); return; }
+    addBundle(it.uuid);
+    const b = bundles.find(x => x.uuid === it.uuid); qRemember(qFromBundle(b));
+  } else {
+    if (!reeceCache[it.code]) {                                       // e.g. a recent item after the app restarted
+      try {
+        const d = await (await fetch(PROXY + '/reece-search?q=' + encodeURIComponent(it.code))).json();
+        const r = (d.products || []).find(x => String(x.code) === String(it.code));
+        if (!r) { showToast('Could not find ' + it.code + ' in the price file'); return; }
+        reeceCache[r.code] = r;
+      } catch (e) { showToast('No connection — try again'); return; }
+    }
+    addReece(it.code);                                                // same price/cost as the Search screen
+    qRemember(qFromReece(reeceCache[it.code]));
+  }
+  qRefreshLists();
+}
+function qRefreshLists() { if (qTab === 'products') renderQProducts(true); if (qTab === 'bundles') renderQBundles(); updateQuoteBar(); }
+
+function renderQProducts(keep) {
+  const box = document.getElementById('qp-results'), q = (document.getElementById('qp-search').value || '').trim();
+  if (!q) {
+    const favs = qRead(Q_FAV_KEY).filter(x => x.type === 'reece'), rec = qRead(Q_RECENT_KEY).filter(x => x.type === 'reece');
+    box.innerHTML = (favs.length ? '<div class="qsec">★ Favourites</div>' + favs.map(qRow).join('') : '') +
+      (rec.length ? '<div class="qsec">Recent</div>' + rec.map(qRow).join('') : '') +
+      (!favs.length && !rec.length ? '<div class="qempty">Search Reece products above. Items you add show here as Recent; tap ☆ to keep one as a favourite.</div>' : '');
+    qWatchImages(box);
+    return;
+  }
+  if (keep && qpResults.length) { box.innerHTML = qpResults.map(qRow).join(''); qWatchImages(box); return; }
+  box.innerHTML = '<div class="qempty">Searching…</div>';
+  clearTimeout(qpTimer);
+  qpTimer = setTimeout(async () => {
+    try {
+      const d = await (await fetch(PROXY + '/reece-search?q=' + encodeURIComponent(normaliseTerm(q)))).json();
+      (d.products || []).forEach(r => (reeceCache[r.code] = r));
+      qpResults = (d.products || []).slice(0, 40).map(qFromReece);
+      if ((document.getElementById('qp-search').value || '').trim() !== q) return;   // a newer search is running
+      box.innerHTML = qpResults.length ? qpResults.map(qRow).join('') : '<div class="qempty">No Reece products found. Try other words.</div>';
+      qWatchImages(box);
+    } catch (e) { box.innerHTML = '<div class="qempty">Could not reach the server. Check your connection.</div>'; }
+  }, 300);
+}
+
+function renderQBundles() {
+  const box = document.getElementById('qb-results'), raw = (document.getElementById('qb-search').value || '').trim();
+  if (!raw) {
+    const favs = qRead(Q_FAV_KEY).filter(x => x.type === 'bundle'), rec = qRead(Q_RECENT_KEY).filter(x => x.type === 'bundle');
+    box.innerHTML = (favs.length ? '<div class="qsec">★ Favourites</div>' + favs.map(qRow).join('') : '') +
+      (rec.length ? '<div class="qsec">Recent</div>' + rec.map(qRow).join('') : '') +
+      (!favs.length && !rec.length ? '<div class="qempty">Search our bundles above (name or code, e.g. BHWU).</div>' : '');
+    return;
+  }
+  const q = normaliseTerm(raw);
+  const list = /^B[A-Z]{1,10}$/i.test(raw)
+    ? bundles.filter(b => b.code && b.code.toUpperCase().startsWith(raw.toUpperCase()))
+    : bundles.map(b => ({ ...b, _s: scoreItem(b.name, b.code, b.category, q) })).filter(b => b._s > 0).sort((a, b) => b._s - a._s);
+  box.innerHTML = list.length ? list.slice(0, 40).map(b => qRow(qFromBundle(b))).join('') : '<div class="qempty">No bundles found.</div>';
+}
+
+// quick labour: same rates, surcharge and discount as the Labour screen (addLabourToQuote)
+let qLabourKind = 'standard';
+function qLabourRate(k) {
+  const d = { standard: 229, second: 160, builder: 195, apprentice: 100, service: 88 };
+  return parseFloat(document.getElementById('rate-' + k)?.value) || d[k];
+}
+function qLabourAdd(hours) {
+  const k = qLabourKind, id = 'qlab_' + k, label = k === 'apprentice' ? 'Apprentice Labour' : 'Standard Labour';
+  const ex = quote.find(i => i.id === id);
+  const h = Math.round(((ex ? ex.hours : 0) + hours) * 100) / 100;
+  const price = h * qLabourRate(k) * (1 + labourSurcharge / 100) * (1 - labourDiscount / 100);
+  const gpCost = h * (GP_SETTINGS.labourCostPerHour[k] || 0);
+  const line = { id, type: 'labour', name: label + ' (' + h + 'h)', code: '', price: parseFloat(price.toFixed(2)), qty: 1, gpCost: parseFloat(gpCost.toFixed(2)), hours: h };
+  if (ex) Object.assign(ex, line); else quote.push(line);
+  updateQuoteUI(); renderQLabour(); showToast('+' + hours + 'h ' + (k === 'apprentice' ? 'apprentice' : 'tradesman'));
+}
+function renderQLabour() {
+  document.querySelectorAll('#qt-labour [data-lkind]').forEach(b => b.classList.toggle('on', b.dataset.lkind === qLabourKind));
+  const lines = quote.filter(i => i.type === 'labour');
+  document.getElementById('ql-lines').innerHTML = lines.length
+    ? '<div class="qsec">Labour on this quote</div>' + lines.map(i => '<div class="qrow"><div class="qrow-body"><div class="qrow-name">' + esc(i.name) + '</div></div><div class="qrow-right"><div class="qrow-price">$' + (i.price * i.qty).toFixed(2) + '</div><button class="qrow-add ghost" data-qty="' + esc(i.id) + '" data-d="' + (-i.qty) + '">Remove</button></div></div>').join('')
+    : '<div class="qempty">No labour on this quote yet.</div>';
+  const r = qLabourRate(qLabourKind);
+  document.getElementById('ql-rate').textContent = (qLabourKind === 'apprentice' ? 'Apprentice' : 'Tradesman') + ' $' + r.toFixed(2) + '/h inc GST' +
+    (labourSurcharge ? ' · surcharge ' + labourSurcharge + '%' : '') + (labourDiscount ? ' · discount ' + labourDiscount + '%' : '');
+}
+
+// sticky bar: total, GP % (same maths as the GP panel), Send
+function updateQuoteBar() {
+  const tot = document.getElementById('qbar-total'); if (!tot) return;
+  const totalInc = quote.reduce((s, i) => s + i.price * i.qty, 0);
+  tot.textContent = '$' + totalInc.toFixed(2);
+  const gpEl = document.getElementById('qbar-gp'), g = calcGP();
+  gpEl.className = 'qbar-gp';
+  if (g.sellEx > 0) {
+    const gp = (g.sellEx - g.cost) / g.sellEx;
+    gpEl.textContent = 'GP ' + (gp * 100).toFixed(1) + '%';
+    if (quoteJobType) {
+      const target = GP_SETTINGS.targets[quoteJobType];
+      gpEl.classList.add(gp >= target - 1e-9 ? 'ok' : (discountFraction() > 0 ? 'bad' : (gp >= target - GP_SETTINGS.amberBand - 1e-9 ? 'warn' : 'bad')));
+    }
+  } else gpEl.textContent = 'GP —';
+  const n = quote.reduce((s, i) => s + (i.id === 'discount' ? 0 : i.qty), 0);
+  const badge = document.getElementById('qtab-count'); if (badge) { badge.textContent = n; badge.hidden = !n; }
+}
+
+// swipe a Summary line left to show Edit / Delete
+function setupQuoteSwipe() {
+  const list = document.getElementById('quote-list');
+  let sx = 0, sy = 0, el = null, dx = 0, horiz = null;
+  const close = except => document.querySelectorAll('#quote-list .qline.open').forEach(l => { if (l !== except) { l.classList.remove('open'); l.querySelector('.qline-front').style.transform = ''; } });
+  list.addEventListener('touchstart', e => {
+    el = e.target.closest('.qline'); if (!el || e.target.closest('button,input')) { el = null; return; }
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; dx = 0; horiz = null; close(el);
+  }, { passive: true });
+  list.addEventListener('touchmove', e => {
+    if (!el) return;
+    const mx = e.touches[0].clientX - sx, my = e.touches[0].clientY - sy;
+    if (horiz === null && (Math.abs(mx) > 8 || Math.abs(my) > 8)) horiz = Math.abs(mx) > Math.abs(my);
+    if (!horiz) return;
+    dx = Math.max(-160, Math.min(0, mx + (el.classList.contains('open') ? -150 : 0)));
+    el.querySelector('.qline-front').style.transform = 'translateX(' + dx + 'px)';
+  }, { passive: true });
+  list.addEventListener('touchend', () => {
+    if (!el || !horiz) { el = null; return; }
+    const open = dx < -60;
+    el.classList.toggle('open', open);
+    el.querySelector('.qline-front').style.transform = open ? 'translateX(-150px)' : '';
+    el = null;
+  });
+}
+function qEditLine(id) {
+  const it = quote.find(i => i.id === id); if (!it) return;
+  const isHours = id.startsWith('qlab_');
+  const row = document.querySelector('#quote-list .qline[data-id="' + CSS.escape(id) + '"] .qline-front');
+  row.innerHTML = '<div class="qedit"><div class="qrow-name">' + esc(it.name) + '</div><label class="qedit-row">' + (isHours ? 'Hours' : 'Quantity') +
+    ' <input type="number" inputmode="decimal" min="0" step="' + (isHours ? '0.5' : '1') + '" value="' + (isHours ? it.hours : it.qty) + '"></label>' +
+    '<div class="qedit-btns"><button class="qrow-add" data-save="' + esc(id) + '">Save</button><button class="qrow-add ghost" data-cancel="1">Cancel</button></div></div>';
+  row.style.transform = ''; row.closest('.qline').classList.remove('open');
+  row.querySelector('input').focus();
+}
+function qSaveLine(id, v) {
+  const it = quote.find(i => i.id === id); if (!it) return renderQuote();
+  v = parseFloat(v);
+  if (!(v > 0)) { chQty(id, -it.qty); return; }                       // 0 = remove
+  if (id.startsWith('qlab_')) { qLabourKind = id.slice(5); it.hours = 0; qLabourAdd(v); qLabourKind = 'standard'; renderQuote(); return; }
+  chQty(id, Math.round(v) - it.qty);
+}
+
+function setupQuoteTabs() {
+  const scr = document.getElementById('screen-quote');
+  scr.addEventListener('click', e => {
+    const t = e.target;
+    const tab = t.closest('[data-qtab]'); if (tab && !tab.disabled) return setQTab(tab.dataset.qtab);
+    const fav = t.closest('[data-fav]'); if (fav) { qToggleFav(JSON.parse(fav.dataset.fav)); return qRefreshLists(); }
+    const add = t.closest('[data-add]'); if (add) return qAdd(JSON.parse(add.dataset.add));
+    const q = t.closest('[data-qty]'); if (q) { chQty(q.dataset.qty, parseFloat(q.dataset.d)); qRefreshLists(); if (qTab === 'labour') renderQLabour(); return; }
+    const lk = t.closest('[data-lkind]'); if (lk) { qLabourKind = lk.dataset.lkind; return renderQLabour(); }
+    const lh = t.closest('[data-lhours]'); if (lh) return qLabourAdd(parseFloat(lh.dataset.lhours));
+    const ed = t.closest('[data-edit]'); if (ed) return qEditLine(ed.dataset.edit);
+    const del = t.closest('[data-del]'); if (del) { const it = quote.find(i => i.id === del.dataset.del); if (it) { if (it.id === 'discount') setQuoteDiscount(0); else chQty(it.id, -it.qty); } return; }
+    const sv = t.closest('[data-save]'); if (sv) return qSaveLine(sv.dataset.save, sv.closest('.qedit').querySelector('input').value);
+    if (t.closest('[data-cancel]')) return renderQuote();
+  });
+  document.getElementById('qp-search').addEventListener('input', () => { qpResults = []; renderQProducts(); });
+  document.getElementById('qb-search').addEventListener('input', renderQBundles);
+  setupQuoteSwipe();
+  setQTab('summary');
 }
 
 // ── DARK MODE ─────────────────────────────────────────────────────────────────
