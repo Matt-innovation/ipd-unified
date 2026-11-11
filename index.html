@@ -267,6 +267,14 @@ select.settings-input,.user-actions select{-webkit-appearance:none;appearance:no
 .home-mic.listening{background:#c62828;border-color:#c62828}
 .home-ask-go{flex-shrink:0;font-family:var(--font);font-size:15px;font-weight:700;min-height:46px;padding:0 16px;border-radius:10px;border:none;background:var(--btn-bg);color:var(--btn-text);cursor:pointer}
 .home-chips{display:flex;flex-wrap:wrap;gap:6px}
+.home-ask-head{display:flex;align-items:center;gap:10px}
+.om-img{width:48px;height:auto;aspect-ratio:120/176;flex-shrink:0}
+.home-ask-title{font-size:17px;font-weight:800;color:var(--text);line-height:1.2}
+.home-ask-sub{font-size:12px;color:var(--text-mid);line-height:1.35;overflow-wrap:anywhere}
+.om-tile{width:30px;height:auto;aspect-ratio:120/176;display:block}
+.om-hd{width:26px;height:auto;aspect-ratio:120/176;flex-shrink:0}
+.om-big{width:140px;height:auto;aspect-ratio:400/588;margin:0 auto 8px;display:block}
+@media (max-height:700px){.om-big{width:84px;margin-bottom:4px}}
 .home-chip{font-family:var(--font);font-size:13px;line-height:1.35;text-align:left;padding:8px 12px;min-height:36px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;white-space:normal;max-width:100%;overflow-wrap:anywhere}
 .home-section{display:flex;flex-direction:column;gap:8px}
 .home-section-hd{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--on-bg);text-transform:uppercase;letter-spacing:.6px}
@@ -492,8 +500,11 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
         <div class="viewas-banner" id="viewas-banner" hidden></div>
 
         <div class="home-ask">
+          <div class="home-ask-head"><img class="om-img" src="old-mate/old-mate-120.png" width="120" height="176" alt="Old Mate" decoding="async">
+            <div><div class="home-ask-title">Ask Old Mate</div><div class="home-ask-sub">Standards, products, suppliers — answers with sources</div></div>
+          </div>
           <div class="home-ask-row">
-            <input id="home-ask-q" type="text" enterkeyhint="send" autocomplete="off" placeholder="Ask anything — standards, products, suppliers">
+            <input id="home-ask-q" type="text" enterkeyhint="send" autocomplete="off" placeholder="Ask Old Mate anything…">
             <button class="home-mic" id="home-mic" aria-label="Say your question">🎤</button>
             <button class="home-ask-go" id="home-ask-go">Ask</button>
           </div>
@@ -570,7 +581,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
       <div class="ai-wrap">
         <div class="ai-input-area">
           <div class="ai-card">
-            <div class="ai-card-hd"><span>🤖</span><span>Ask — standards, products, local suppliers</span></div>
+            <div class="ai-card-hd"><img class="om-hd" src="old-mate/old-mate-120.png" width="120" height="176" alt="Old Mate" decoding="async"><span>Ask Old Mate — standards, products, local suppliers</span></div>
             <textarea class="ai-textarea" id="ask-q" maxlength="1000" placeholder="e.g. Minimum fall for a 100mm sewer drain? · Which tempering valve do we use? · Closest landscaping supplies?"></textarea>
             <div class="ai-card-ft">
               <label class="ask-loc"><input type="checkbox" id="ask-use-loc"> Use my location</label>
@@ -578,7 +589,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             </div>
           </div>
         </div>
-        <div class="ai-results-area" id="ask-results"><div class="state-box"><span class="state-icon">💡</span><p>Ask a question above.<br><span class="hint">Every answer shows its sources. For standards it only uses official sources and says when it can't find one.</span></p></div></div>
+        <div class="ai-results-area" id="ask-results"><div class="state-box"><img class="om-big" src="old-mate/old-mate-400.png" width="400" height="588" alt="Old Mate" loading="lazy" decoding="async"><p>G'day — ask Old Mate a question above.<br><span class="hint">Every answer shows its sources. For standards it only uses official sources and says when it can't find one.</span></p></div></div>
       </div>
     </div>
 
@@ -3312,7 +3323,7 @@ const HOME_ACTIONS = [
   { id: 'stock', icon: '📦', label: 'Count and order van stock', desc: 'Check what is on the van', roles: ['owner', 'tech'], go: () => goScreen('stock') },
   { id: 'review', icon: '🤖', label: 'Review a stock order', desc: 'Check an order before it goes to ServiceM8', roles: ['owner', 'office'], go: () => runStockReview() },
   { id: 'standards', icon: '📐', label: 'Check a standard', desc: 'AS 3500, AS 1428, AS 5601 and more', roles: ALL_ROLES, go: () => goScreen('standards') },
-  { id: 'ask', icon: '✨', label: 'Ask a question', desc: 'Answers with sources', roles: ALL_ROLES, go: () => goScreen('ai') },
+  { id: 'ask', icon: '✨', img: 'old-mate/old-mate-120.png', label: 'Ask Old Mate', desc: 'Standards, products, suppliers — with sources', roles: ALL_ROLES, go: () => goScreen('ai') },
   { id: 'kb', icon: '📚', label: 'Look up codes and guides', desc: 'Bundles, codes and how-tos', roles: ALL_ROLES, go: () => goScreen('kb') },
   { id: 'training', icon: '🎓', label: 'Learn the app', desc: 'Step-by-step guide', roles: ALL_ROLES, go: () => goScreen('training') },
   { id: 'whatsapp', icon: '💬', label: 'Message the team', desc: 'IPD BOYS WhatsApp group', roles: ALL_ROLES, href: 'https://chat.whatsapp.com/D9bDzCG7f9UK7ZhmddIuKw' },
@@ -3363,7 +3374,7 @@ function renderHome() {
   const stars = homeStars();
   const allowed = HOME_ACTIONS.filter(homeAllowed);
   const tile = (a, small) => '<div class="home-tile' + (small ? ' small' : '') + '" data-act="' + a.id + '" role="button" tabindex="0">' +
-    '<span class="home-tile-icon">' + a.icon + '</span><span class="home-tile-text"><span class="home-tile-label">' + escHtml(a.label) + '</span>' +
+    '<span class="home-tile-icon">' + (a.img ? '<img class="om-tile" src="' + a.img + '" width="120" height="176" alt="" loading="lazy" decoding="async">' : a.icon) + '</span><span class="home-tile-text"><span class="home-tile-label">' + escHtml(a.label) + '</span>' +
     (small ? '' : '<span class="home-tile-desc">' + escHtml(a.desc) + '</span>') + '</span>' +
     '<button class="home-star' + (stars.includes(a.id) ? ' on' : '') + '" data-star="' + a.id + '" aria-label="' + (stars.includes(a.id) ? 'Unpin' : 'Pin') + ' ' + escHtml(a.label) + '">' + (stars.includes(a.id) ? '★' : '☆') + '</button></div>';
   el('home-want').innerHTML = allowed.map(a => tile(a, false)).join('');
