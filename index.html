@@ -2006,10 +2006,14 @@ const GP_SETTINGS = {
   },
 };
 
+// Cost sent to ServiceM8 per unit, ex GST. Labour and uplift keep theirs in gpCost (hours × the rates above,
+// or $0.01 per uplift unit); Reece items in cost. Matt 2026-11-12: labour cost must reach ServiceM8.
+function quoteLineCost(i) { return i.type === 'labour' ? (parseFloat(i.gpCost) || 0) : (parseFloat(i.cost) || 0); }
+
 // ── UPLIFT SETTINGS — a per-unit line staff can add on the Labour screen ────
 const UPLIFT = {
   sellIncGst: 1.10,          // each unit sells for $1.10 inc GST ($1.00 ex GST)
-  costExGst:  0.01,          // each unit costs IPD $0.01 ex GST (GP display only, never sent)
+  costExGst:  0.01,          // each unit costs IPD $0.01 ex GST (also sent to ServiceM8 as the line cost)
 };
 
 // Preview copies of the app (hosted at ipd-app-preview…) talk to the test server, never the live one.
@@ -2716,7 +2720,7 @@ async function sendQuoteToSM8() {
   const jobNumber=(document.getElementById('job-number-input')?.value||'').trim();
   showToast('Sending to ServiceM8...');
   try {
-    const res=await fetch(PROXY+'/send-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quoteItems:quote.map(i=>({name:i.name,qty:i.qty,price:i.price,cost:i.cost||0,code:i.code||'',type:i.type||'reece',uuid:i.type==='bundle'?i.id:''})),totalInc,jobNumber})});
+    const res=await fetch(PROXY+'/send-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quoteItems:quote.map(i=>({name:i.name,qty:i.qty,price:i.price,cost:quoteLineCost(i),code:i.code||'',type:i.type||'reece',uuid:i.type==='bundle'?i.id:''})),totalInc,jobNumber})});
     const data=await res.json();
     if(res.ok&&data.success){
       showToast('✅ Quote sent to ServiceM8!');
@@ -3678,9 +3682,8 @@ function addLabourToQuote() {
     const finalPrice = afterSurcharge * (1 - labourDiscount / 100);
     const id = 'labour_' + k + '_' + Date.now();
     const labelSuffix = k === 'service' ? (' x' + labourHours[k]) : (' (' + labourHours[k] + 'h)');
-    // gpCost = what this labour costs IPD (ex GST), for the GP display only. Kept out of
-    // `cost` on purpose: `cost` is sent to ServiceM8, gpCost never is. Surcharge/discount
-    // change the sell price above, not this cost.
+    // gpCost = what this labour costs IPD (ex GST): used for the GP display and sent to ServiceM8 as the
+    // line cost (quoteLineCost). Surcharge/discount change the sell price above, not this cost.
     const gpCost = labourHours[k] * (GP_SETTINGS.labourCostPerHour[k] || 0);
     quote.push({ id, type: 'labour', name: labels[k] + labelSuffix, code: '', price: parseFloat(finalPrice.toFixed(2)), qty: 1, gpCost: parseFloat(gpCost.toFixed(2)) });
     added++;
