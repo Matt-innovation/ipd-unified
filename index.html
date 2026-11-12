@@ -164,6 +164,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .qt-panels{flex:1;min-height:0;position:relative}
 .qt-panel{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column}
 .qt-panel>*{flex-shrink:0}
+.qt-inv{display:flex;flex-direction:column;gap:6px;margin-top:10px;font-size:13px;font-weight:700;color:var(--text)}
+.qt-inv textarea{width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:400 15px var(--font);resize:vertical}
+.qt-inv-hint{font-size:12px;font-weight:400;color:var(--text-mid)}
 .qt-summary .quote-list{flex:none;overflow:visible}
 .qt-search{padding:10px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
 .qt-search input{width:100%;font-family:var(--font);font-size:16px;min-height:46px;padding:10px 12px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text)}
@@ -884,6 +887,10 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             </div>
             <div class="qt-job">
               <input type="text" id="job-number-input" placeholder="Job number (optional)">
+              <label class="qt-inv">Invoice description
+                <textarea id="q-invoice-desc" rows="4" maxlength="2000" placeholder="What the client sees on a Project invoice, e.g. Supply and install new 250L heat pump hot water system, remove old unit."></textarea>
+                <span class="qt-inv-hint">Sent to the job's Work Completed description in ServiceM8. A Project invoice shows this with the total only (no line items).</span>
+              </label>
             </div>
             <div class="quote-actions">
               <button class="q-btn" onclick="clearQuote()">🗑 Clear</button>
@@ -2530,7 +2537,7 @@ function chQty(id, delta) {
   updateQuoteUI();
   if(activeScreen==='quote') renderQuote(); else renderQResults();
 }
-function clearQuote() { quote=[]; quoteJobType=null; quoteDiscountPct=0; const qd=document.getElementById('qd-custom'); if(qd) qd.value=''; updateQuoteUI(); renderQuote(); renderQResults(); }
+function clearQuote() { quote=[]; quoteJobType=null; quoteDiscountPct=0; const idsc=document.getElementById('q-invoice-desc'); if(idsc) idsc.value=''; try{localStorage.removeItem('ipd_invoice_desc')}catch(e){} const qd=document.getElementById('qd-custom'); if(qd) qd.value=''; updateQuoteUI(); renderQuote(); renderQResults(); }
 function updateQuoteUI() {
   syncDiscountLine();
   const count = quote.reduce((s,i)=>s+i.qty,0);
@@ -2718,15 +2725,16 @@ async function sendQuoteToSM8() {
   if (badLines.length) { showToast('❌ Not sent — no valid price on: ' + badLines.map(i => i.name).join(', ')); return; }
   const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0);
   const jobNumber=(document.getElementById('job-number-input')?.value||'').trim();
+  const invoiceDescription=(document.getElementById('q-invoice-desc')?.value||'').trim();   // logged-in Summary tab only
   showToast('Sending to ServiceM8...');
   try {
-    const res=await fetch(PROXY+'/send-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quoteItems:quote.map(i=>({name:i.name,qty:i.qty,price:i.price,cost:quoteLineCost(i),code:i.code||'',type:i.type||'reece',uuid:i.type==='bundle'?i.id:''})),totalInc,jobNumber})});
+    const res=await fetch(PROXY+'/send-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quoteItems:quote.map(i=>({name:i.name,qty:i.qty,price:i.price,cost:quoteLineCost(i),code:i.code||'',type:i.type||'reece',uuid:i.type==='bundle'?i.id:''})),totalInc,jobNumber,...(invoiceDescription?{invoiceDescription}:{})})});
     const data=await res.json();
     if(res.ok&&data.success){
       showToast('✅ Quote sent to ServiceM8!');
       const banner=document.createElement('div');
       banner.style.cssText='padding:10px 14px;background:rgba(74,222,128,.1);font-size:12px;color:#16a34a;text-align:center;border-bottom:1px solid rgba(74,222,128,.2)';
-      banner.textContent='✅ '+data.message;
+      banner.textContent='✅ '+data.message+(data.invoiceDescription==='saved'?' Invoice description saved'+(data.replacedExisting?' (it replaced the Work Completed text that was on the job).':'.'):data.invoiceDescription==='failed'?' ⚠ Invoice description NOT saved — add it in ServiceM8.':'');
       document.getElementById('quote-list').prepend(banner);
     } else showToast('❌ '+(data.error||'Could not send'));
   } catch(e){showToast('❌ Could not reach server');}
@@ -3870,6 +3878,9 @@ function enablePilotUI() {
   const kb = document.getElementById('kb-search'); if (kb) kb.placeholder = 'Search the IPD Knowledge Centre...';
   setupHome();
   setupQuoteTabs();
+  // Invoice description: kept on the phone with the quote until it's cleared
+  const idsc = document.getElementById('q-invoice-desc');
+  if (idsc) { try { idsc.value = localStorage.getItem('ipd_invoice_desc') || ''; } catch (e) {} idsc.addEventListener('input', () => { try { localStorage.setItem('ipd_invoice_desc', idsc.value); } catch (e) {} }); }
   renderQuote();
   if (activeScreen === 'home') goScreen('home');
 }
