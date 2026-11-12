@@ -156,14 +156,34 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .ask-fb-text{min-height:50px;flex:1 1 100%}
 .quote-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
 /* quote tabs */
-.q-tabs{display:flex;gap:6px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}
-.q-tabs button{flex-shrink:0;font-family:var(--font);font-size:14px;font-weight:600;padding:8px 14px;min-height:38px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;white-space:nowrap}
+.q-tabs{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}   /* wraps to a 2nd row on narrow iPhones: no sideways scrolling */
+.q-tabs button{flex:1 1 auto;font-family:var(--font);font-size:14px;font-weight:600;padding:8px 14px;min-height:38px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;white-space:nowrap}
+@media (max-width:380px){.q-tabs,.k-tabs{gap:5px;padding:6px 8px}.q-tabs button,.k-tabs button{padding:6px 9px;min-height:36px;font-size:13.5px}}
 .q-tabs button.on{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
 .qtab-count{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--orange);color:#fff;font-size:12px;line-height:20px;text-align:center}
+/* iPhone Safari zooms in (and stays zoomed) when a text box with text under 16px is tapped, which makes the
+   page look wider than the screen. Logged-in screens only (body.pilot), so the shared-PIN app is unchanged. */
+body.pilot input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),body.pilot textarea,body.pilot select{font-size:16px!important}
+.qn-wrap{display:flex;flex-direction:column;gap:10px;padding:14px;margin:12px;background:var(--surface);border-radius:var(--radius);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.qn-job{font-size:14px;color:var(--text)}
+.qn-warn{color:#b45309;font-weight:700}
+.qn-text{width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:400 15px var(--font);resize:vertical}
+.qn-btns{display:flex;flex-wrap:wrap;gap:8px}
+.qn-btns .q-btn{flex:1 1 140px;min-height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.qn-hint{font-size:12px;color:var(--text-mid)}
+#qn-list{display:flex;flex-direction:column;gap:8px}
+.qn-item{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface)}
+.qn-thumb{width:72px;height:72px;object-fit:cover;border-radius:8px;flex-shrink:0;background:var(--surface2)}
+.qn-note{flex:1;min-width:0;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--text)}
+.qn-st{font-size:12px;font-weight:700;margin-left:auto;text-align:right;flex-shrink:0;max-width:45%}
+.qn-st.ok{color:#16a34a}.qn-st.warn{color:#b45309}.qn-st.bad{color:#dc2626}.qn-st.wait{color:var(--text-mid)}
 .qtab-soon{font-size:11px;font-weight:600;opacity:.7;margin-left:2px}
 .qt-panels{flex:1;min-height:0;position:relative}
 .qt-panel{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column}
 .qt-panel>*{flex-shrink:0}
+.qt-inv{display:flex;flex-direction:column;gap:6px;margin-top:10px;font-size:13px;font-weight:700;color:var(--text)}
+.qt-inv textarea{width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:400 15px var(--font);resize:vertical}
+.qt-inv-hint{font-size:12px;font-weight:400;color:var(--text-mid)}
 .qt-summary .quote-list{flex:none;overflow:visible}
 .qt-search{padding:10px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
 .qt-search input{width:100%;font-family:var(--font);font-size:16px;min-height:46px;padding:10px 12px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text)}
@@ -332,8 +352,8 @@ body.pilot .home-wrap>*{flex-shrink:0;min-width:0}
 .home-chips{display:flex;flex-wrap:wrap;gap:6px}
 /* Staff Kiosk */
 .k-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
-.k-tabs{display:flex;gap:6px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
-.k-tabs button{flex-shrink:0;font-family:var(--font);font-size:14px;font-weight:600;padding:8px 14px;min-height:38px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer}
+.k-tabs{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.k-tabs button{flex:1 1 auto;white-space:nowrap;font-family:var(--font);font-size:14px;font-weight:600;padding:8px 14px;min-height:38px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer}
 .k-tabs button.on{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
 .k-count{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--orange);color:#fff;font-size:12px;line-height:20px}
 .k-panels{flex:1;min-height:0;position:relative}
@@ -844,7 +864,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
           <button data-qtab="products">Products</button>
           <button data-qtab="bundles">Bundles</button>
           <button data-qtab="labour">Labour</button>
-          <button data-qtab="notes">Notes &amp; photos <span class="qtab-soon">soon</span></button>
+          <button data-qtab="notes">Notes &amp; photos</button>
         </div>
         <div class="qt-panels">
           <div class="qt-panel" id="qt-products">
@@ -884,6 +904,10 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             </div>
             <div class="qt-job">
               <input type="text" id="job-number-input" placeholder="Job number (optional)">
+              <label class="qt-inv">Invoice description
+                <textarea id="q-invoice-desc" rows="4" maxlength="2000" placeholder="What the client sees on a Project invoice, e.g. Supply and install new 250L heat pump hot water system, remove old unit."></textarea>
+                <span class="qt-inv-hint">Replaces the job's Job Description in ServiceM8 (the old text is kept in our archive). A Project invoice shows this with the total only (no line items).</span>
+              </label>
             </div>
             <div class="quote-actions">
               <button class="q-btn" onclick="clearQuote()">🗑 Clear</button>
@@ -891,7 +915,18 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             </div>
           </div>
           <div class="qt-panel" id="qt-notes" hidden>
-            <div class="qempty">Job notes and photos for the ServiceM8 job diary are coming here in a later step.</div>
+            <div class="qempty" id="qn-off" hidden>Notes &amp; photos are switched off.</div>
+            <div class="qn-wrap" id="qn-on">
+              <div class="qn-job" id="qn-job"></div>
+              <textarea id="qn-text" class="qn-text" rows="3" maxlength="4000" placeholder="Add a note for the job diary…"></textarea>
+              <div class="qn-btns">
+                <button class="q-btn qn-save" id="qn-save">💾 Save note</button>
+                <label class="q-btn qn-cam"><input type="file" accept="image/*" capture="environment" data-qnphoto hidden>📷 Take photo</label>
+                <label class="q-btn qn-cam"><input type="file" accept="image/*" multiple data-qnphoto hidden>🖼 Choose photos</label>
+              </div>
+              <div class="qn-hint">Saved to our archive and to the ServiceM8 job diary. With no signal, photos wait on the phone and send when you're back in range.</div>
+              <div id="qn-list"></div>
+            </div>
           </div>
         </div>
         <div class="quote-bar">
@@ -2006,10 +2041,14 @@ const GP_SETTINGS = {
   },
 };
 
+// Cost sent to ServiceM8 per unit, ex GST. Labour and uplift keep theirs in gpCost (hours × the rates above,
+// or $0.01 per uplift unit); Reece items in cost. Matt 2026-11-12: labour cost must reach ServiceM8.
+function quoteLineCost(i) { return i.type === 'labour' ? (parseFloat(i.gpCost) || 0) : (parseFloat(i.cost) || 0); }
+
 // ── UPLIFT SETTINGS — a per-unit line staff can add on the Labour screen ────
 const UPLIFT = {
   sellIncGst: 1.10,          // each unit sells for $1.10 inc GST ($1.00 ex GST)
-  costExGst:  0.01,          // each unit costs IPD $0.01 ex GST (GP display only, never sent)
+  costExGst:  0.01,          // each unit costs IPD $0.01 ex GST (also sent to ServiceM8 as the line cost)
 };
 
 // Preview copies of the app (hosted at ipd-app-preview…) talk to the test server, never the live one.
@@ -2526,7 +2565,7 @@ function chQty(id, delta) {
   updateQuoteUI();
   if(activeScreen==='quote') renderQuote(); else renderQResults();
 }
-function clearQuote() { quote=[]; quoteJobType=null; quoteDiscountPct=0; const qd=document.getElementById('qd-custom'); if(qd) qd.value=''; updateQuoteUI(); renderQuote(); renderQResults(); }
+function clearQuote() { quote=[]; quoteJobType=null; quoteDiscountPct=0; const idsc=document.getElementById('q-invoice-desc'); if(idsc) idsc.value=''; try{localStorage.removeItem('ipd_invoice_desc')}catch(e){} const qd=document.getElementById('qd-custom'); if(qd) qd.value=''; updateQuoteUI(); renderQuote(); renderQResults(); }
 function updateQuoteUI() {
   syncDiscountLine();
   const count = quote.reduce((s,i)=>s+i.qty,0);
@@ -2714,15 +2753,16 @@ async function sendQuoteToSM8() {
   if (badLines.length) { showToast('❌ Not sent — no valid price on: ' + badLines.map(i => i.name).join(', ')); return; }
   const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0);
   const jobNumber=(document.getElementById('job-number-input')?.value||'').trim();
+  const invoiceDescription=(document.getElementById('q-invoice-desc')?.value||'').trim();   // logged-in Summary tab only
   showToast('Sending to ServiceM8...');
   try {
-    const res=await fetch(PROXY+'/send-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quoteItems:quote.map(i=>({name:i.name,qty:i.qty,price:i.price,cost:i.cost||0,code:i.code||'',type:i.type||'reece',uuid:i.type==='bundle'?i.id:''})),totalInc,jobNumber})});
+    const res=await fetch(PROXY+'/send-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quoteItems:quote.map(i=>({name:i.name,qty:i.qty,price:i.price,cost:quoteLineCost(i),code:i.code||'',type:i.type||'reece',uuid:i.type==='bundle'?i.id:''})),totalInc,jobNumber,...(invoiceDescription?{invoiceDescription}:{})})});
     const data=await res.json();
     if(res.ok&&data.success){
       showToast('✅ Quote sent to ServiceM8!');
       const banner=document.createElement('div');
       banner.style.cssText='padding:10px 14px;background:rgba(74,222,128,.1);font-size:12px;color:#16a34a;text-align:center;border-bottom:1px solid rgba(74,222,128,.2)';
-      banner.textContent='✅ '+data.message;
+      banner.textContent='✅ '+data.message+(data.invoiceDescription==='saved'?' Invoice description saved to the Job Description'+(data.replacedExisting?' (the old Job Description is kept in our archive).':'.'):data.invoiceDescription==='failed'?' ⚠ Invoice description NOT saved — add it in ServiceM8.':'');
       document.getElementById('quote-list').prepend(banner);
     } else showToast('❌ '+(data.error||'Could not send'));
   } catch(e){showToast('❌ Could not reach server');}
@@ -3348,6 +3388,7 @@ function setQTab(t) {
   if (t === 'bundles') renderQBundles();
   if (t === 'labour') renderQLabour();
   if (t === 'summary') renderQuote();
+  if (t === 'notes') { qnServer.job = ''; qnRender(); qnUploadLoop(); }
   updateQuoteBar();
 }
 
@@ -3678,9 +3719,8 @@ function addLabourToQuote() {
     const finalPrice = afterSurcharge * (1 - labourDiscount / 100);
     const id = 'labour_' + k + '_' + Date.now();
     const labelSuffix = k === 'service' ? (' x' + labourHours[k]) : (' (' + labourHours[k] + 'h)');
-    // gpCost = what this labour costs IPD (ex GST), for the GP display only. Kept out of
-    // `cost` on purpose: `cost` is sent to ServiceM8, gpCost never is. Surcharge/discount
-    // change the sell price above, not this cost.
+    // gpCost = what this labour costs IPD (ex GST): used for the GP display and sent to ServiceM8 as the
+    // line cost (quoteLineCost). Surcharge/discount change the sell price above, not this cost.
     const gpCost = labourHours[k] * (GP_SETTINGS.labourCostPerHour[k] || 0);
     quote.push({ id, type: 'labour', name: labels[k] + labelSuffix, code: '', price: parseFloat(finalPrice.toFixed(2)), qty: 1, gpCost: parseFloat(gpCost.toFixed(2)) });
     added++;
@@ -3858,6 +3898,7 @@ function enablePilotUI() {
   if (PILOT_UI) return;
   PILOT_UI = true;
   document.body.classList.add('pilot');
+  document.documentElement.style.webkitTextSizeAdjust = '100%';     // no text enlarging when the iPhone is turned sideways
   for (const name of ['home', 'quote']) {
     const tpl = document.getElementById('tpl-' + name + '-pilot'), scr = document.getElementById('screen-' + name);
     if (tpl && scr) { scr.innerHTML = ''; scr.appendChild(tpl.content.cloneNode(true)); }
@@ -3867,6 +3908,10 @@ function enablePilotUI() {
   const kb = document.getElementById('kb-search'); if (kb) kb.placeholder = 'Search the IPD Knowledge Centre...';
   setupHome();
   setupQuoteTabs();
+  setupQuoteNotes();
+  // Invoice description: kept on the phone with the quote until it's cleared
+  const idsc = document.getElementById('q-invoice-desc');
+  if (idsc) { try { idsc.value = localStorage.getItem('ipd_invoice_desc') || ''; } catch (e) {} idsc.addEventListener('input', () => { try { localStorage.setItem('ipd_invoice_desc', idsc.value); } catch (e) {} }); }
   renderQuote();
   if (activeScreen === 'home') goScreen('home');
 }
@@ -3922,6 +3967,7 @@ function setUser(u) {
   if (typeof kioskRefreshSummary === 'function') kioskRefreshSummary();
   if (typeof dirRefresh === 'function') dirRefresh();
   if (typeof socialRefresh === 'function') socialRefresh().then(() => sUploadLoop());
+  if (typeof qnRefresh === 'function') qnRefresh().then(() => qnUploadLoop());
 }
 function signedOut() {
   const wasPilot = PILOT_UI;
@@ -4489,9 +4535,11 @@ async function sAddPhoto(kind, file) {
   sRenderNew(); sUploadLoop();
 }
 // one at a time; on success the full-size photo is removed from the phone (thumbnail kept)
+let sAgain = false;                                                 // asked to run while busy: run once more at the end
 async function sUploadLoop() {
-  if (sBusy || !CURRENT_USER) return;
-  sBusy = true;
+  if (sBusy) { sAgain = true; return; }
+  if (!CURRENT_USER) return;
+  sBusy = true; sAgain = false;
   try {
     for (;;) {
       const next = (await sAll()).filter(r => r.status === 'waiting').sort((a, b) => a.at - b.at)[0];
@@ -4502,11 +4550,11 @@ async function sUploadLoop() {
         await sPut({ ...next, image: null, status: 'uploaded' });
       } catch (e) {
         if (/HTTP 4|Only one|Up to 3|JPEG|already been sent|Not your/.test(e.message)) await sPut({ ...next, image: null, status: 'refused', error: e.message });
-        else break;                                                      // no signal / server busy: try again later
+        else { setTimeout(sUploadLoop, 5000); break; }                   // no signal / server busy: try again in 5 s (and every 30 s)
       }
       sRenderNew();
     }
-  } finally { sBusy = false; sRenderNew(); }
+  } finally { sBusy = false; sRenderNew(); if (sAgain) { sAgain = false; sUploadLoop(); } }
 }
 window.addEventListener('online', () => sUploadLoop());
 setInterval(() => { if (CURRENT_USER && sConfig) sUploadLoop(); }, 30000);
@@ -4519,6 +4567,9 @@ async function sRenderNew() {
   const slot = (kind, label, max) => '<div class="s-slot"><div class="k-sub">' + label + '</div><div class="s-row">' + by(kind).map(tile).join('') +
     (by(kind).length < max ? '<label class="s-add"><input type="file" accept="image/*" capture="environment" data-skind="' + kind + '" hidden>📷 ' + (max > 1 ? 'Add' : 'Take') + '</label>' : '') + '</div></div>';
   box.innerHTML = slot('before', 'Before photo', 1) + slot('after', 'After photo', 1) + slot('extra', 'Extra photos (up to 3)', 3);
+  // Handler on each camera button itself: if an upload finishing redraws this area while the camera is open,
+  // the photo still arrives (a handler on the screen would miss it — the old button is no longer on the page).
+  box.querySelectorAll('[data-skind]').forEach(inp => (inp.onchange = () => { const file = inp.files && inp.files[0]; if (file) { inp.value = ''; sAddPhoto(inp.dataset.skind, file); } }));
   const allUp = recs.length && recs.every(r => r.status === 'uploaded');
   const ticks = [...document.querySelectorAll('#s-new [data-sprivacy], #s-cust')].every(c => c.checked);
   const ready = by('before').length && by('after').length && allUp && ticks && document.getElementById('s-suburb').value.trim() && document.getElementById('s-jobtype').value && document.getElementById('s-summary').value.trim();
@@ -4604,12 +4655,101 @@ function setupSocial() {
     const ga = t.closest('[data-sgarchive]'); if (ga) { try { await authFetch('/social/groups/' + ga.dataset.sgarchive + '/archive', { method: 'POST' }); sLoadInbox(); } catch (err) { showToast(err.message); } return; }
   });
   scr.addEventListener('change', async e => {
-    const f = e.target.closest('[data-skind]'); if (f && f.files && f.files[0]) { await sAddPhoto(f.dataset.skind, f.files[0]); f.value = ''; return; }
+    if (e.target.closest('[data-skind]')) return;                       // handled on the button itself (sRenderNew)
     const g = e.target.closest('[data-sgroup]'); if (g && g.checked) { try { await authFetch('/social/posts/' + g.dataset.spostid + '/share', { method: 'POST', body: JSON.stringify({ groupId: g.dataset.sgroup }) }); sLoadInbox(); } catch (err) { g.checked = false; showToast(err.message); } return; }
     if (e.target.closest('#s-new')) sRenderNew();
   });
   // (file boxes are left alone here: redrawing would remove them before their 'change' event arrives)
   scr.addEventListener('input', e => { if (e.target.classList.contains('s-caption')) sCheckCaption(e.target); if (e.target.closest('#s-new') && e.target.type !== 'file') sRenderNew(); });
+}
+
+// ── QUOTE NOTES & PHOTOS (job diary) ─────────────────────────────────────────
+// Notes and photos for the job number on the Summary tab. Saved to our archive and the ServiceM8 job diary.
+// Photos are shrunk (≈1600 px + 240 px thumbnail), kept in the phone's own database until the server
+// confirms them, then only the thumbnail stays. With no signal they wait and send when back in range.
+let qnConfig = null, qnBusy = false, qnServer = { job: '', items: [] };
+const QN_DB = 'ipd-quote-notes', QN_STORE = 'items';
+function qnDb() { return new Promise((ok, no) => { const r = indexedDB.open(QN_DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(QN_STORE, { keyPath: 'clientId' }); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); }); }
+async function qnTx(mode, fn) { const db = await qnDb(); return new Promise((ok, no) => { const t = db.transaction(QN_STORE, mode), st = t.objectStore(QN_STORE); const out = fn(st); t.oncomplete = () => ok(out && out.result !== undefined ? out.result : out); t.onerror = () => no(t.error); }); }
+const qnAll = () => qnTx('readonly', st => st.getAll());
+const qnPut = rec => qnTx('readwrite', st => st.put(rec));
+const qnJob = () => (document.getElementById('job-number-input')?.value || '').trim();
+
+async function qnRefresh() {
+  if (!CURRENT_USER) { qnConfig = null; return; }
+  try { qnConfig = await authFetch('/quote-notes/config'); } catch (e) { qnConfig = null; }
+  if (qTab === 'notes') qnRender();
+}
+async function qnAdd(kind, payload) {
+  const job = qnJob();
+  if (!/^\d{1,8}$/.test(job)) { showToast('Enter the job number on the Summary tab first'); return false; }
+  await qnPut({ clientId: sUuid(), jobNumber: job, kind, status: 'waiting', at: Date.now(), ...payload });
+  qnRender(); qnUploadLoop(); return true;
+}
+async function qnAddPhoto(file) {
+  try { const [image, thumb] = await Promise.all([sShrink(file, 1600, 0.8), sShrink(file, 240, 0.7)]); await qnAdd('photo', { image, thumb }); }
+  catch (e) { showToast(e.message); }
+}
+// one at a time; when the server confirms, the full-size photo is removed from the phone (thumbnail kept)
+let qnAgain = false;                                               // asked to run while busy: run once more at the end
+async function qnUploadLoop() {
+  if (qnBusy) { qnAgain = true; return; }
+  if (!CURRENT_USER || !(qnConfig && qnConfig.enabled)) return;
+  qnBusy = true; qnAgain = false;
+  try {
+    for (;;) {
+      const next = (await qnAll()).filter(r => r.status === 'waiting').sort((a, b) => a.at - b.at)[0];
+      if (!next || !navigator.onLine) break;
+      try {
+        const body = { jobNumber: next.jobNumber, clientId: next.clientId, kind: next.kind, text: next.text || '' };
+        if (next.kind === 'photo' && next.image) Object.assign(body, { image: next.image, thumb: next.thumb });
+        const { item } = await authFetch('/quote-notes/items', { method: 'POST', body: JSON.stringify(body) });
+        await qnPut({ ...next, image: null, status: item.diary === 'saved' ? 'saved' : 'archived' });   // server has it either way
+      } catch (e) {
+        if (/HTTP 4|Enter the job|Type a note|JPEG|Bad item|Not yours/.test(e.message)) await qnPut({ ...next, image: null, status: 'refused', error: e.message });
+        else { setTimeout(qnUploadLoop, 5000); break; }                 // no signal / server busy: try again in 5 s (and every 30 s)
+      }
+      qnRender();
+    }
+  } finally { qnBusy = false; if (qnAgain) { qnAgain = false; qnUploadLoop(); } }
+}
+window.addEventListener('online', () => qnUploadLoop());
+setInterval(() => { if (CURRENT_USER && qnConfig) qnUploadLoop(); }, 30000);
+
+async function qnRender() {
+  const box = document.getElementById('qn-list'); if (!box) return;
+  const off = !(qnConfig && qnConfig.enabled);
+  document.getElementById('qn-off').hidden = !off; document.getElementById('qn-on').hidden = off;
+  if (off) return;
+  const job = qnJob();
+  document.getElementById('qn-job').innerHTML = job ? 'Job <b>' + escHtml(job) + '</b>' : '<span class="qn-warn">Enter the job number on the Summary tab first</span>';
+  if (job && qnServer.job !== job) { qnServer = { job, items: [] }; try { qnServer.items = (await authFetch('/quote-notes/job/' + encodeURIComponent(job))).items; } catch (e) {} }
+  const local = (await qnAll()).filter(r => r.jobNumber === job);
+  const onServer = new Set(qnServer.items.map(i => i.clientId));
+  const mine = local.filter(r => !onServer.has(r.clientId) || r.status === 'waiting');
+  const state = r => r.status === 'saved' ? '<span class="qn-st ok">✓ In ServiceM8 diary</span>' : r.status === 'archived' ? '<span class="qn-st warn">Saved in our archive · not in ServiceM8 yet</span>' :
+    r.status === 'refused' ? '<span class="qn-st bad">' + escHtml(r.error || 'Not accepted') + '</span>' : '<span class="qn-st wait">' + (navigator.onLine ? 'Uploading…' : 'Waiting for signal') + '</span>';
+  const row = (r, thumb) => '<div class="qn-item">' + (r.kind === 'photo' ? '<img class="qn-thumb" src="' + thumb + '" alt="">' : '<div class="qn-note">' + escHtml(r.text) + '</div>') + state(r) + '</div>';
+  const fromServer = qnServer.items.map(i => { const l = local.find(x => x.clientId === i.clientId); return row({ ...i, status: i.diary === 'saved' ? 'saved' : 'archived' }, l && l.thumb ? l.thumb : PROXY + i.thumb); });
+  box.innerHTML = (mine.map(r => row(r, r.thumb)).join('') + fromServer.join('')) || '<div class="qempty">No notes or photos for this job yet.</div>';
+  if (mine.some(r => r.status !== 'waiting')) { qnServer.job = ''; }                     // refresh from the server next time
+}
+
+function setupQuoteNotes() {
+  const scr = document.getElementById('screen-quote'); if (!scr || scr.dataset.qnReady) return;
+  scr.dataset.qnReady = '1';
+  scr.addEventListener('click', async e => {
+    if (e.target.closest('#qn-save')) {
+      const t = document.getElementById('qn-text'), text = t.value.trim();
+      if (!text) return showToast('Type a note first');
+      if (await qnAdd('note', { text })) { t.value = ''; showToast('Note saved'); }
+    }
+  });
+  scr.addEventListener('change', async e => {
+    const f = e.target.closest('[data-qnphoto]'); if (!f || !f.files) return;
+    for (const file of [...f.files]) await qnAddPhoto(file);
+    f.value = '';
+  });
 }
 
 // ── PIN LOCK ──────────────────────────────────────────────────────────────────
