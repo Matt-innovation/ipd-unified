@@ -902,7 +902,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
               <input type="text" id="job-number-input" placeholder="Job number (optional)">
               <label class="qt-inv">Invoice description
                 <textarea id="q-invoice-desc" rows="4" maxlength="2000" placeholder="What the client sees on a Project invoice, e.g. Supply and install new 250L heat pump hot water system, remove old unit."></textarea>
-                <span class="qt-inv-hint">Sent to the job's Work Completed description in ServiceM8. A Project invoice shows this with the total only (no line items).</span>
+                <span class="qt-inv-hint">Replaces the job's Job Description in ServiceM8 (the old text is kept in our archive). A Project invoice shows this with the total only (no line items).</span>
               </label>
             </div>
             <div class="quote-actions">
@@ -2758,7 +2758,7 @@ async function sendQuoteToSM8() {
       showToast('✅ Quote sent to ServiceM8!');
       const banner=document.createElement('div');
       banner.style.cssText='padding:10px 14px;background:rgba(74,222,128,.1);font-size:12px;color:#16a34a;text-align:center;border-bottom:1px solid rgba(74,222,128,.2)';
-      banner.textContent='✅ '+data.message+(data.invoiceDescription==='saved'?' Invoice description saved'+(data.replacedExisting?' (it replaced the Work Completed text that was on the job).':'.'):data.invoiceDescription==='failed'?' ⚠ Invoice description NOT saved — add it in ServiceM8.':'');
+      banner.textContent='✅ '+data.message+(data.invoiceDescription==='saved'?' Invoice description saved to the Job Description'+(data.replacedExisting?' (the old Job Description is kept in our archive).':'.'):data.invoiceDescription==='failed'?' ⚠ Invoice description NOT saved — add it in ServiceM8.':'');
       document.getElementById('quote-list').prepend(banner);
     } else showToast('❌ '+(data.error||'Could not send'));
   } catch(e){showToast('❌ Could not reach server');}
