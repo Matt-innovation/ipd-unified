@@ -14,6 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body.pilot [hidden]{display:none!important}
 :root{
   --orange:#F26A1B;--blue:#3b82f6;--blue-lt:rgba(59,130,246,0.15);
   --red:#DC2626;--red-lt:rgba(220,38,38,0.12);
@@ -154,6 +155,68 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .ask-fb button{border:1px solid var(--border2);background:var(--surface2);color:var(--text);border-radius:999px;padding:4px 10px;font-size:14px;cursor:pointer}
 .ask-fb-text{min-height:50px;flex:1 1 100%}
 .quote-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+/* quote tabs */
+.q-tabs{display:flex;gap:6px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}
+.q-tabs button{flex-shrink:0;font-family:var(--font);font-size:14px;font-weight:600;padding:8px 14px;min-height:38px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;white-space:nowrap}
+.q-tabs button.on{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
+.qtab-count{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--orange);color:#fff;font-size:12px;line-height:20px;text-align:center}
+.qtab-soon{font-size:11px;font-weight:600;opacity:.7;margin-left:2px}
+.qt-panels{flex:1;min-height:0;position:relative}
+.qt-panel{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column}
+.qt-panel>*{flex-shrink:0}
+.qt-summary .quote-list{flex:none;overflow:visible}
+.qt-search{padding:10px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
+.qt-search input{width:100%;font-family:var(--font);font-size:16px;min-height:46px;padding:10px 12px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text)}
+.qt-list{display:flex;flex-direction:column}
+.qsec{padding:10px 12px 4px;font-size:12px;font-weight:700;color:var(--on-bg);text-transform:uppercase;letter-spacing:.5px}
+.qempty{padding:20px 16px;font-size:14px;line-height:1.5;color:var(--on-bg);text-align:center}
+.qrow{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--border)}
+.qrow-star{flex-shrink:0;width:36px;height:40px;border:none;background:none;font-size:22px;color:var(--text-dim);cursor:pointer;font-family:var(--font)}
+.qrow-star.on{color:#f5a623}
+.qrow-body{flex:1;min-width:0}
+.qrow-name{font-size:14px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.qrow-sub{font-size:12px;color:var(--text-dim);margin-top:2px;overflow-wrap:anywhere}
+.qrow-right{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.qrow-price{font-size:15px;font-weight:700;white-space:nowrap}
+.qrow-add{font-family:var(--font);font-size:14px;font-weight:700;min-height:40px;padding:8px 16px;border-radius:10px;border:none;background:var(--btn-bg);color:var(--btn-text);cursor:pointer;white-space:normal;line-height:1.3}
+.qrow-add.ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+.qty-ctrl.big{gap:6px}
+.qty-ctrl.big .qty-btn,.qline .qty-btn{width:40px;height:40px;font-size:20px;border-radius:10px}
+.qty-ctrl.big .qty-num,.qline .qty-num{min-width:26px;text-align:center;font-size:16px;font-weight:700}
+.ql-box{padding:12px;display:flex;flex-direction:column;gap:10px;background:var(--surface);border-bottom:1px solid var(--border)}
+.ql-seg{display:flex;background:var(--surface2);border:1px solid var(--border2);border-radius:999px;padding:3px;gap:3px}
+.ql-seg button{flex:1;font-family:var(--font);font-size:15px;font-weight:600;min-height:40px;border:none;border-radius:999px;background:none;color:var(--text);cursor:pointer}
+.ql-seg button.on{background:var(--btn-bg);color:var(--btn-text)}
+.ql-hours{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ql-hours button{font-family:var(--font);font-size:18px;font-weight:700;min-height:56px;border-radius:12px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer}
+.ql-rate{font-size:13px;color:var(--text-mid);line-height:1.4;overflow-wrap:anywhere}
+.ql-full{font-size:13px}
+.qhint{padding:8px 12px;font-size:12px;color:var(--on-bg)}
+.qline .qi-bot{flex-wrap:wrap;gap:8px}
+.qi-btns{display:flex;gap:6px;margin-left:auto}
+body.pilot.on-quote .toast{bottom:150px}
+.qi-btn{font-family:var(--font);font-size:14px;font-weight:600;min-height:40px;padding:8px 12px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer}
+.qi-btn.del{border-color:#c62828;color:#c62828}
+.qline{position:relative;overflow:hidden}
+.qline-actions{position:absolute;top:0;right:0;bottom:0;display:flex}
+.qline-actions button{width:75px;border:none;font-family:var(--font);font-size:14px;font-weight:700;color:#fff;cursor:pointer}
+.qa-edit{background:#455a64}.qa-del{background:#c62828}
+.qline-front{position:relative;transition:transform .18s ease}
+.qline .qi-name{font-size:14px;overflow-wrap:anywhere;flex:1;min-width:0}
+.qline .qi-top{align-items:flex-start;gap:10px}
+.qimg{width:44px;height:44px}
+.qedit{display:flex;flex-direction:column;gap:8px}
+.qedit-row{display:flex;align-items:center;gap:10px;font-size:14px}
+.qedit-row input{width:110px;font-family:var(--font);font-size:16px;min-height:44px;padding:8px 10px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text)}
+.qedit-btns{display:flex;gap:8px}
+.qt-job{padding:8px 12px;background:var(--surface);border-top:1px solid var(--border)}
+.qt-job input{width:100%;font-family:var(--font);font-size:16px;min-height:44px;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text)}
+.quote-bar{flex-shrink:0;display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border-top:2px solid var(--border2);box-shadow:0 -2px 8px rgba(0,0,0,.08)}
+.qbar-info{flex:1;min-width:0;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.qbar-total{font-size:20px;font-weight:800;color:var(--text)}
+.qbar-gp{font-size:14px;font-weight:700;padding:3px 8px;border-radius:8px;background:var(--surface2);color:var(--text-mid)}
+.qbar-gp.ok{background:#2e7d32;color:#fff}.qbar-gp.warn{background:#f9a825;color:#111}.qbar-gp.bad{background:#c62828;color:#fff}
+.qbar-send{flex-shrink:0;font-family:var(--font);font-size:15px;font-weight:700;min-height:46px;padding:0 16px;border-radius:12px;border:none;background:var(--btn-bg);color:var(--btn-text);cursor:pointer}
 .quote-list{flex:1;overflow-y:auto;min-height:0}
 .quote-item{padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface)}
 .qi-top{display:flex;justify-content:space-between;gap:8px;margin-bottom:4px}
@@ -210,6 +273,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .kb-cat{font-size:9px;background:var(--surface2);color:var(--text-mid);padding:2px 5px;border-radius:3px;margin-top:3px;display:inline-block;text-transform:uppercase}
 .settings-wrap{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:0}
 .settings-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden}
+body.pilot .settings-card{flex-shrink:0}
 .settings-card-hd{padding:9px 12px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px}
 .settings-row{padding:10px 12px;display:flex;flex-direction:column;gap:6px}
 .settings-label{font-size:12px;color:var(--text-mid)}
@@ -217,6 +281,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .settings-input:focus{border-color:var(--orange)}
 .settings-btn{padding:8px 14px;border-radius:var(--radius-sm);background:var(--btn-bg);color:var(--btn-text);border:none;font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;align-self:flex-start}
 .settings-hint{font-size:11px;color:var(--text-dim);line-height:1.5}
+/* iPhone/iPad: nothing in a Settings card may be cut off */
+body.pilot .settings-row>*{max-width:100%;min-width:0}
+body.pilot .settings-label,body.pilot .settings-hint,body.pilot .settings-card-hd{overflow-wrap:anywhere}
+body.pilot .settings-input{font-size:16px;min-height:44px;line-height:1.3;padding:10px 12px}
+body.pilot select.settings-input,body.pilot .user-actions select{-webkit-appearance:none;appearance:none;padding-right:34px;background-repeat:no-repeat;background-position:right 12px center;background-size:12px 8px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23888' stroke-width='2'/%3E%3C/svg%3E")}
+body.pilot .settings-btn{white-space:normal;text-align:center;max-width:100%;min-height:40px;line-height:1.3}
 .state-box{padding:30px 16px;text-align:center;color:var(--on-bg)}
 .state-box .state-icon{font-size:32px;margin-bottom:8px;display:block;opacity:.4}
 .state-box p{font-size:13px;line-height:1.6}
@@ -240,6 +311,145 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .home-card-label{font-size:13px;font-weight:600}
 .home-card-desc{font-size:11px;color:var(--text-mid);line-height:1.4}
 .home-stat-row{display:flex;gap:8px}
+/* home page (step 2) — nothing may be squashed or cut off on iPhone/iPad */
+body.pilot .home-wrap>*{flex-shrink:0;min-width:0}
+.home-hello{padding:2px}
+.home-hello-name{font-size:24px;font-weight:700;color:var(--on-bg);line-height:1.2;overflow-wrap:anywhere}
+.home-hello-sub{font-size:13px;color:var(--on-bg);margin-top:3px;line-height:1.4;overflow-wrap:anywhere}
+.viewas{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.viewas-label{font-size:12px;font-weight:700;color:var(--on-bg);text-transform:uppercase;letter-spacing:.5px}
+.viewas-seg{display:flex;background:var(--surface);border:1px solid var(--border2);border-radius:999px;padding:3px;gap:2px}
+.viewas-seg button{font-family:var(--font);font-size:14px;font-weight:600;padding:8px 14px;min-height:36px;border:none;border-radius:999px;background:none;color:var(--text);cursor:pointer}
+.viewas-seg button.on{background:var(--btn-bg);color:var(--btn-text)}
+.viewas-banner{background:var(--surface);border:2px dashed var(--btn-bg);border-radius:var(--radius);padding:10px 12px;font-size:13px;line-height:1.45;color:var(--text);overflow-wrap:anywhere}
+.viewas-banner button{font-family:var(--font);margin-left:6px;font-size:13px;font-weight:600;padding:6px 10px;min-height:32px;border-radius:8px;border:1px solid var(--border2);background:var(--btn-bg);color:var(--btn-text);cursor:pointer}
+.home-ask{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:10px;display:flex;flex-direction:column;gap:10px}
+.home-ask-row{display:flex;gap:8px;align-items:stretch}
+.home-ask-row input{flex:1;min-width:0;font-family:var(--font);font-size:16px;min-height:46px;line-height:1.3;padding:10px 12px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text)}
+.home-mic{flex-shrink:0;width:46px;min-height:46px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);font-size:20px;cursor:pointer}
+.home-mic.listening{background:#c62828;border-color:#c62828}
+.home-ask-go{flex-shrink:0;font-family:var(--font);font-size:15px;font-weight:700;min-height:46px;padding:0 16px;border-radius:10px;border:none;background:var(--btn-bg);color:var(--btn-text);cursor:pointer}
+.home-chips{display:flex;flex-wrap:wrap;gap:6px}
+/* Staff Kiosk */
+.k-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.k-tabs{display:flex;gap:6px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
+.k-tabs button{flex-shrink:0;font-family:var(--font);font-size:14px;font-weight:600;padding:8px 14px;min-height:38px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer}
+.k-tabs button.on{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
+.k-count{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--orange);color:#fff;font-size:12px;line-height:20px}
+.k-panels{flex:1;min-height:0;position:relative}
+.k-panel{position:absolute;inset:0;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.k-panel>*{flex-shrink:0}
+.k-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:12px;display:flex;flex-direction:column;gap:8px;color:var(--text)}
+.k-h{font-size:15px;font-weight:800}
+.k-out{color:var(--on-bg);font-size:13px;text-transform:uppercase;letter-spacing:.5px}
+.k-label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--text-mid);min-width:0}
+.k-input{width:100%;min-width:0;font-family:var(--font);font-size:16px;min-height:44px;padding:10px 12px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text)}
+.k-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.k-btn{font-family:var(--font);font-size:15px;font-weight:700;min-height:42px;padding:8px 14px;border-radius:10px;border:none;background:var(--btn-bg);color:var(--btn-text);cursor:pointer;white-space:normal;line-height:1.3}
+.k-btn.big{min-height:48px;font-size:16px}
+.k-btn.ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+.k-btn.danger{background:#c62828;color:#fff}
+.k-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.k-msg,.k-line,.k-note,.k-empty,.k-sub{font-size:13px;line-height:1.45;overflow-wrap:anywhere}
+.k-line,.k-sub{color:var(--text-mid)}
+.k-note{background:var(--surface2);border-radius:8px;padding:6px 8px}
+.k-warn{font-size:13px;color:#b71c1c;font-weight:600}
+.k-empty{color:var(--on-bg);text-align:center;padding:12px}
+.k-row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.k-pill{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--surface2);color:var(--text)}
+.k-pill.pending{background:#f9a825;color:#111}.k-pill.approved{background:#2e7d32;color:#fff}.k-pill.declined{background:#c62828;color:#fff}.k-pill.withdrawn{background:#9e9e9e;color:#fff}
+.k-used-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.k-used{background:var(--surface2);border-radius:10px;padding:8px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.k-used b{font-size:20px}.k-used span{font-size:12px;color:var(--text-mid);line-height:1.3}
+.k-notice summary{list-style:none;cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.k-notice summary::-webkit-details-marker{display:none}
+.k-notice.unread{border-color:var(--orange);border-width:2px}
+.k-body{font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.k-calhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.k-calhead .k-btn{min-width:44px;font-size:20px}
+.k-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.k-dow{font-size:11px;text-align:center;color:var(--text-mid);font-weight:700}
+.k-day{min-height:42px;border-radius:8px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px}
+.k-day.empty{background:none}.k-day.today{outline:2px solid var(--btn-bg)}
+.k-dots{display:flex;gap:2px;min-height:6px}
+.k-dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.k-dot.holiday{background:#1565c0}.k-dot.closure{background:#424242}.k-dot.noleave{background:#c62828}.k-dot.leave{background:#2e7d32}.k-dot.notice{background:#f9a825}
+.k-legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--text-mid)}
+.k-legend span{display:flex;align-items:center;gap:4px}
+.k-ev{display:flex;gap:8px;align-items:flex-start;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:10px;font-size:14px;line-height:1.4;overflow-wrap:anywhere;color:var(--text)}
+.k-ev .k-dot{margin-top:5px}
+.k-card .k-ev{border:none;border-bottom:1px solid var(--border);border-radius:0;padding:8px 0}
+.k-to{display:flex;flex-wrap:wrap;gap:6px}
+.k-check{display:flex;align-items:center;gap:6px;font-size:14px;padding:8px 10px;border:1px solid var(--border2);border-radius:999px;background:var(--surface2)}
+.k-chips{display:flex;flex-wrap:wrap;gap:6px}
+.k-chip{font-size:13px;padding:6px 10px;border-radius:999px;background:var(--surface2);border:1px solid var(--border2)}
+.k-chip button{border:none;background:none;font-size:13px;cursor:pointer;color:var(--text-mid)}
+.k-pushcard{font-size:13px;line-height:1.5}
+.dir-top{flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);padding:10px;display:flex;flex-direction:column;gap:8px}
+.dir-title{font-size:17px;font-weight:800;color:var(--text);line-height:1.25}
+.dir-cats{display:flex;flex-wrap:wrap;gap:6px}
+.dir-cat{font-family:var(--font);font-size:14px;font-weight:600;padding:7px 12px;min-height:36px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;max-width:100%;overflow-wrap:anywhere;text-align:left}
+.dir-cat.on{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
+.dir-card.archived{opacity:.7}
+.dir-name{font-size:16px;overflow-wrap:anywhere}
+.dir-private{font-size:13px;line-height:1.45;background:#fff8e1;color:#5d4037;border-radius:8px;padding:6px 8px;overflow-wrap:anywhere}
+.dir-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.dir-act{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:48px;padding:8px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);text-decoration:none;font-size:15px;font-weight:700;text-align:center}
+.dir-act span{font-size:12px;font-weight:500;color:var(--text-mid);overflow-wrap:anywhere}
+.s-slot{display:flex;flex-direction:column;gap:6px}
+.s-row{display:flex;flex-wrap:wrap;gap:8px}
+.s-thumb{position:relative;width:96px;height:96px;border-radius:10px;overflow:hidden;background:var(--surface2)}
+.s-thumb img{width:100%;height:100%;object-fit:cover}
+.s-state{position:absolute;left:0;right:0;bottom:0;font-size:11px;font-weight:700;text-align:center;padding:3px;background:rgba(0,0,0,.6);color:#fff}
+.s-state.uploaded{background:rgba(46,125,50,.9)}
+.s-add{width:96px;height:96px;border-radius:10px;border:2px dashed var(--border2);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;cursor:pointer;background:var(--surface2);color:var(--text);text-align:center}
+.s-must{border-color:var(--orange);border-width:2px}
+#s-send[disabled]{opacity:.45}
+.s-mini{width:64px;height:64px;object-fit:cover;border-radius:8px;background:var(--surface2)}
+.s-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.s-pickbtn{position:relative;padding:0;border:3px solid transparent;border-radius:10px;overflow:hidden;background:var(--surface2);cursor:pointer;aspect-ratio:1}
+.s-pickbtn img{width:100%;height:100%;object-fit:cover;display:block}
+.s-pickbtn span{position:absolute;left:0;bottom:0;right:0;font-size:11px;background:rgba(0,0,0,.55);color:#fff;text-transform:capitalize;padding:2px}
+.s-pickbtn.on{border-color:var(--orange)}
+.s-pickbtn.on::after{content:'✓';position:absolute;top:4px;right:6px;font-size:18px;font-weight:800;color:#fff;text-shadow:0 0 4px #000}
+.s-captext{white-space:normal}
+.s-grp{border-radius:10px}
+.home-tile-badge{display:inline-block;margin-left:6px;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--orange);color:#fff;vertical-align:middle}
+.home-ask-head{display:flex;align-items:center;gap:10px}
+.om-img{width:48px;height:auto;aspect-ratio:120/176;flex-shrink:0}
+.home-ask-title{font-size:17px;font-weight:800;color:var(--text);line-height:1.2}
+.home-ask-sub{font-size:12px;color:var(--text-mid);line-height:1.35;overflow-wrap:anywhere}
+.om-tile{width:30px;height:auto;aspect-ratio:120/176;display:block}
+.om-hd{width:26px;height:auto;aspect-ratio:120/176;flex-shrink:0}
+.om-big{width:140px;height:auto;aspect-ratio:400/588;margin:0 auto 8px;display:block}
+@media (max-height:700px){.om-big{width:84px;margin-bottom:4px}}
+.home-chip{font-family:var(--font);font-size:13px;line-height:1.35;text-align:left;padding:8px 12px;min-height:36px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;white-space:normal;max-width:100%;overflow-wrap:anywhere}
+.home-section{display:flex;flex-direction:column;gap:8px}
+.home-section-hd{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--on-bg);text-transform:uppercase;letter-spacing:.6px}
+.home-want{display:grid;grid-template-columns:1fr;gap:8px}
+.home-stars{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (min-width:600px){.home-want{grid-template-columns:1fr 1fr}.home-stars{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:1000px){.home-want{grid-template-columns:repeat(3,1fr)}.home-stars{grid-template-columns:repeat(4,1fr)}}
+.home-tile{position:relative;display:flex;align-items:center;gap:12px;min-height:64px;padding:12px 48px 12px 14px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);cursor:pointer;color:var(--text)}
+.home-tile.small{min-height:52px;padding:10px 42px 10px 12px;gap:8px}
+.home-tile-icon{font-size:26px;line-height:1;flex-shrink:0}
+.home-tile.small .home-tile-icon{font-size:20px}
+.home-tile-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+.home-tile-label{font-size:16px;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
+.home-tile.small .home-tile-label{font-size:14px}
+.home-tile-desc{font-size:12px;color:var(--text-mid);line-height:1.35;overflow-wrap:anywhere}
+.home-star{position:absolute;top:50%;right:6px;transform:translateY(-50%);width:40px;height:40px;border:none;background:none;font-size:22px;color:var(--text-dim);cursor:pointer;font-family:var(--font)}
+.home-star.on{color:#f5a623}
+.home-hint{font-size:12px;color:var(--on-bg);opacity:.9}
+.home-health-refresh{font-family:var(--font);font-size:12px;font-weight:600;text-transform:none;letter-spacing:0;padding:6px 10px;min-height:32px;border-radius:8px;border:1px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer}
+.health-list{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:6px 12px;display:flex;flex-direction:column}
+.health-row{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border)}
+.health-row:last-of-type{border-bottom:none}
+.health-dot{flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+.health-dot.ok{background:#2e7d32}.health-dot.bad{background:#c62828}.health-dot.na{background:#9e9e9e}
+.health-text{display:flex;flex-direction:column;min-width:0}
+.health-name{font-size:14px;font-weight:700;color:var(--text)}
+.health-detail{font-size:12px;color:var(--text-mid);line-height:1.4;overflow-wrap:anywhere}
 .home-stat{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px;text-align:center}
 .home-stat-num{font-size:18px;font-weight:700;color:var(--orange)}
 .home-stat-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
@@ -263,6 +473,30 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
 /* ── PIN LOCK ── */
 #pin-overlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
 #pin-overlay.hidden{display:none}
+/* staff login (step 1) */
+#login-overlay{position:fixed;inset:0;background:var(--bg);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px}
+#login-overlay[hidden]{display:none}
+.login-box{display:flex;flex-direction:column;align-items:stretch;gap:12px;width:100%;max-width:340px}
+.login-box .pin-logo-mark,.login-box .pin-title,.login-box .pin-sub{align-self:center}
+.login-input{font-family:var(--font);font-size:17px;min-height:50px;line-height:1.3;padding:12px 14px;border-radius:10px;border:1.5px solid var(--border2);background:#fff;color:#111;width:100%;box-sizing:border-box}
+.login-btn{font-family:var(--font);font-size:16px;font-weight:700;padding:12px;border:none;border-radius:10px;background:var(--btn-bg);color:var(--btn-text);min-height:50px;cursor:pointer;width:100%}
+.login-btn[disabled]{opacity:.5}
+.login-link{font-family:var(--font);background:none;border:none;color:var(--on-bg);font-size:13px;text-decoration:underline;cursor:pointer;width:100%}
+.login-msg{font-size:14px;color:var(--on-bg);min-height:18px;text-align:center;line-height:1.4;overflow-wrap:anywhere}
+.login-box .pin-sub{text-align:center;line-height:1.4}
+.users-list{display:flex;flex-direction:column;gap:8px}
+.user-row{border:1px solid var(--border2);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.user-row.removed{opacity:.6}
+.user-top{display:flex;justify-content:space-between;gap:4px 8px;flex-wrap:wrap;font-weight:700;line-height:1.35}
+.user-top>span{min-width:0;overflow-wrap:anywhere}
+.user-sub{font-size:13px;opacity:.85;overflow-wrap:anywhere;line-height:1.4}
+.user-actions{display:grid;grid-template-columns:1fr;gap:8px}
+.user-actions select,.user-actions input{width:100%;min-width:0;font-size:16px;min-height:44px;line-height:1.3;padding:10px 12px;border-radius:8px;border:1px solid var(--border2);background-color:var(--surface2);color:var(--text);font-family:var(--font)}
+.user-actions button{font-family:var(--font);min-height:44px;font-size:15px;padding:10px 14px;border-radius:8px;border:1px solid var(--border2);background:none;cursor:pointer;color:inherit;white-space:normal;line-height:1.3}
+.user-actions .user-note{font-size:13px;opacity:.85;line-height:1.4;overflow-wrap:anywhere}
+@media (min-width:600px){.user-actions{grid-template-columns:minmax(120px,1fr) minmax(140px,2fr) auto auto;align-items:center}}
+.user-actions button.danger{border-color:#c62828;color:#c62828}
+.audit-line{font-size:13px;opacity:.85;padding:5px 0;border-bottom:1px solid var(--border2);line-height:1.4;overflow-wrap:anywhere}
 .pin-box{display:flex;flex-direction:column;align-items:center;gap:16px;padding:40px 24px;width:100%;max-width:340px}
 .pin-logo-mark{width:56px;height:56px;background:var(--btn-bg);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px}
 .pin-title{font-size:22px;font-weight:700;color:var(--on-bg)}
@@ -366,6 +600,26 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
     </div>
   </div>
 </div>
+<div id="login-overlay" hidden>
+  <div class="login-box">
+    <div class="pin-logo-mark">🔧</div>
+    <div class="pin-title">IPD</div>
+    <div class="pin-sub">Log in with your work email</div>
+    <div id="login-step1">
+      <input class="login-input" id="login-id" type="email" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="Your email">
+      <div style="height:10px"></div>
+      <button class="login-btn" id="login-send" onclick="loginSendCode()">Email me a code</button>
+    </div>
+    <div id="login-step2" hidden>
+      <input class="login-input" id="login-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code">
+      <div style="height:10px"></div>
+      <button class="login-btn" id="login-verify" onclick="loginVerify()">Log in</button>
+      <div style="height:6px"></div>
+      <button class="login-link" onclick="loginBack()">Use a different login</button>
+    </div>
+    <div class="login-msg" id="login-msg"></div>
+  </div>
+</div>
 <div id="app">
   <div class="top-bar">
     <div class="top-logo">
@@ -446,6 +700,54 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
         </div>
       </div>
     </div>
+
+    <template id="tpl-home-pilot">
+      <div class="home-wrap">
+        <div class="home-hello">
+          <div class="home-hello-name" id="home-hello">Good morning</div>
+          <div class="home-hello-sub" id="home-hello-sub">Innovation Plumbing + Design</div>
+        </div>
+        <div class="viewas" id="viewas" hidden>
+          <span class="viewas-label">View as</span>
+          <div class="viewas-seg"><button data-viewas="owner">Owner</button><button data-viewas="office">Office</button><button data-viewas="tech">Tech</button></div>
+        </div>
+        <div class="viewas-banner" id="viewas-banner" hidden></div>
+
+        <div class="home-ask">
+          <div class="home-ask-head"><img class="om-img" src="old-mate/old-mate-120.png" width="120" height="176" alt="Old Mate" decoding="async">
+            <div><div class="home-ask-title">Ask Old Mate</div><div class="home-ask-sub">Standards, products, suppliers — answers with sources</div></div>
+          </div>
+          <div class="home-ask-row">
+            <input id="home-ask-q" type="text" enterkeyhint="send" autocomplete="off" placeholder="Ask Old Mate anything…">
+            <button class="home-mic" id="home-mic" aria-label="Say your question">🎤</button>
+            <button class="home-ask-go" id="home-ask-go">Ask</button>
+          </div>
+          <div class="home-chips" id="home-chips"></div>
+        </div>
+
+        <div class="home-section" id="home-stars-wrap" hidden>
+          <div class="home-section-hd">★ Your shortcuts</div>
+          <div class="home-stars" id="home-stars"></div>
+        </div>
+
+        <div class="home-section">
+          <div class="home-section-hd">I want to…</div>
+          <div class="home-want" id="home-want"></div>
+          <div class="home-hint">Tap ☆ on a button to pin it to your shortcuts.</div>
+        </div>
+
+        <div class="home-section home-health" id="home-health" hidden>
+          <div class="home-section-hd"><span>Systems health</span><button class="home-health-refresh" id="home-health-refresh">Refresh</button></div>
+          <div class="health-list" id="health-list"></div>
+        </div>
+
+        <div class="home-stat-row">
+          <div class="home-stat"><div class="home-stat-num" id="hs-quote">0</div><div class="home-stat-label">Quote items</div></div>
+          <div class="home-stat"><div class="home-stat-num" id="hs-order">0</div><div class="home-stat-label">To order</div></div>
+          <div class="home-stat"><div class="home-stat-num" id="hs-checked">0</div><div class="home-stat-label">Checked</div></div>
+        </div>
+      </div>
+    </template>
 
     <!-- STOCK -->
     <div class="screen" id="screen-stock">
@@ -534,6 +836,70 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
         </div>
       </div>
     </div>
+
+    <template id="tpl-quote-pilot">
+      <div class="quote-wrap">
+        <div class="q-tabs" id="q-tabs" role="tablist">
+          <button data-qtab="summary">Summary <span class="qtab-count" id="qtab-count" hidden>0</span></button>
+          <button data-qtab="products">Products</button>
+          <button data-qtab="bundles">Bundles</button>
+          <button data-qtab="labour">Labour</button>
+          <button data-qtab="notes">Notes &amp; photos <span class="qtab-soon">soon</span></button>
+        </div>
+        <div class="qt-panels">
+          <div class="qt-panel" id="qt-products">
+            <div class="qt-search"><input type="search" id="qp-search" placeholder="Search Reece products…" autocomplete="off" enterkeyhint="search"></div>
+            <div class="qt-list" id="qp-results"></div>
+          </div>
+          <div class="qt-panel" id="qt-bundles" hidden>
+            <div class="qt-search"><input type="search" id="qb-search" placeholder="Search our bundles (name or code)…" autocomplete="off" enterkeyhint="search"></div>
+            <div class="qt-list" id="qb-results"></div>
+          </div>
+          <div class="qt-panel" id="qt-labour" hidden>
+            <div class="ql-box">
+              <div class="ql-seg"><button data-lkind="standard">Tradesman</button><button data-lkind="apprentice">Apprentice</button></div>
+              <div class="ql-hours"><button data-lhours="0.5">+ 0.5h</button><button data-lhours="1">+ 1h</button><button data-lhours="2">+ 2h</button></div>
+              <div class="ql-rate" id="ql-rate"></div>
+              <button class="qrow-add ghost ql-full" onclick="goScreen('labour')">Full labour calculator (2nd tradesman, builder rate, service fee, uplift)</button>
+            </div>
+            <div class="qt-list" id="ql-lines"></div>
+          </div>
+          <div class="qt-panel qt-summary" id="qt-summary" hidden>
+            <div class="gp-panel" id="gp-panel"></div>
+            <div class="gp-discount" id="gp-discount" style="display:none">
+              <span class="gp-disc-label">Discount</span>
+              <div class="pct-chip" id="qd-0" onclick="setQuoteDiscount(0)">None</div>
+              <div class="pct-chip" id="qd-5" onclick="setQuoteDiscount(5)">5%</div>
+              <div class="pct-chip" id="qd-10" onclick="setQuoteDiscount(10)">10%</div>
+              <div class="pct-chip" id="qd-15" onclick="setQuoteDiscount(15)">15%</div>
+              <span style="display:flex;align-items:center;gap:3px"><input class="labour-input" id="qd-custom" type="number" min="0" max="50" step="0.5" inputmode="decimal" placeholder="%" style="width:58px" oninput="onCustomDiscount(this)"><span style="font-size:11px;color:var(--text-mid)">%</span></span>
+              <button class="gp-max-btn" onclick="setMaxDiscount()">Max discount that holds target</button>
+            </div>
+            <div class="qhint">Swipe a line left, or tap Edit / Delete.</div>
+            <div class="quote-list" id="quote-list"><div class="state-box"><span class="state-icon">📋</span><p>No items yet.<br>Add from Products, Bundles or Labour.</p></div></div>
+            <div id="quote-totals" class="totals-box" style="display:none">
+              <div class="total-row"><span>Subtotal (ex GST)</span><span id="t-sub">$0.00</span></div>
+              <div class="total-row"><span>GST (10%)</span><span id="t-gst">$0.00</span></div>
+              <div class="total-row grand"><span>Total inc GST</span><span id="t-total">$0.00</span></div>
+            </div>
+            <div class="qt-job">
+              <input type="text" id="job-number-input" placeholder="Job number (optional)">
+            </div>
+            <div class="quote-actions">
+              <button class="q-btn" onclick="clearQuote()">🗑 Clear</button>
+              <button class="q-btn" onclick="exportQuote()">⬇ Download</button>
+            </div>
+          </div>
+          <div class="qt-panel" id="qt-notes" hidden>
+            <div class="qempty">Job notes and photos for the ServiceM8 job diary are coming here in a later step.</div>
+          </div>
+        </div>
+        <div class="quote-bar">
+          <div class="qbar-info"><div class="qbar-total" id="qbar-total">$0.00</div><div class="qbar-gp" id="qbar-gp">GP —</div></div>
+          <button class="qbar-send" onclick="sendQuoteToSM8()">📤 Send to SM8</button>
+        </div>
+      </div>
+    </template>
 
     <!-- LABOUR -->
     <div class="screen" id="screen-labour">
@@ -682,20 +1048,20 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
     <!-- SETTINGS -->
     <div class="screen" id="screen-settings">
       <div class="settings-wrap">
+        <div class="settings-card" id="me-card" hidden>
+          <div class="settings-card-hd">👤 Your login</div>
+          <div class="settings-row">
+            <div class="settings-hint" id="me-line"></div>
+            <button class="settings-btn" id="me-users-btn" hidden onclick="openUsers()">Manage users</button>
+            <button class="settings-btn" onclick="logOut()">Log out</button>
+          </div>
+        </div>
         <div class="settings-card">
           <div class="settings-card-hd">📊 Quote Data Source</div>
           <div class="settings-row">
             <div class="settings-label">Google Apps Script Web App URL</div>
             <input class="settings-input" id="sheet-url-input" type="url" placeholder="https://script.google.com/macros/s/...">
             <button class="settings-btn" onclick="saveSheetUrl()">Save & Reload</button>
-          </div>
-        </div>
-        <div class="settings-card">
-          <div class="settings-card-hd">🔧 ServiceM8 API Key</div>
-          <div class="settings-row">
-            <div class="settings-label">API Key (for stock orders)</div>
-            <input class="settings-input" id="sm8-key-input" type="text" placeholder="smk-...">
-            <button class="settings-btn" onclick="saveSM8Key()">Save</button>
           </div>
         </div>
         <div class="settings-card">
@@ -728,6 +1094,158 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
         <div class="settings-card">
           <div class="settings-card-hd">ℹ️ App Info</div>
           <div class="settings-row"><div class="settings-hint">IPD Unified App v3.0 · Innovation Plumbing & Design · 3073 2666</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-users">
+      <div class="settings-wrap">
+        <div class="settings-card">
+          <div class="settings-card-hd">👥 Users</div>
+          <div class="settings-row"><div class="users-list" id="users-list"><div class="settings-hint">Loading…</div></div></div>
+        </div>
+        <div class="settings-card">
+          <div class="settings-card-hd">➕ Add a person</div>
+          <div class="settings-row">
+            <div class="settings-label">Name</div>
+            <input class="settings-input" id="nu-name" type="text" placeholder="e.g. Andrew">
+            <div class="settings-label">Login email</div>
+            <input class="settings-input" id="nu-login" type="email" autocapitalize="off" spellcheck="false" placeholder="name@example.com">
+            <div class="settings-label">Role</div>
+            <select class="settings-input" id="nu-role"><option value="tech">Tech</option><option value="office">Office</option><option value="owner">Owner (sees everything)</option></select>
+            <div class="settings-label">Title (optional)</div>
+            <input class="settings-input" id="nu-title" type="text" placeholder="e.g. Apprentice">
+            <button class="settings-btn" onclick="addUser()">Add person</button>
+            <div class="settings-hint" id="nu-msg"></div>
+          </div>
+        </div>
+        <div class="settings-card">
+          <div class="settings-card-hd">📜 Recent changes</div>
+          <div class="settings-row" id="audit-list"><div class="settings-hint">Loading…</div></div>
+        </div>
+        <div class="settings-card"><div class="settings-row"><button class="settings-btn" onclick="goScreen('settings')">Back to Settings</button></div></div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-kiosk">
+      <div class="k-wrap">
+        <div class="k-tabs" id="k-tabs">
+          <button data-ktab="timeoff">Time off</button>
+          <button data-ktab="notices">Notices <span class="k-count" id="kt-notices-count" hidden></span></button>
+          <button data-ktab="calendar">Calendar</button>
+          <button data-ktab="owner" hidden>Owner</button>
+        </div>
+        <div class="k-panels">
+          <div class="k-panel" id="k-timeoff">
+            <div class="k-card">
+              <div class="k-h">Ask for time off</div>
+              <label class="k-label">Type<select class="k-input" id="k-type"><option value="holiday">Holidays (annual leave)</option><option value="personal">Personal leave</option><option value="other">Other</option></select></label>
+              <div class="k-two"><label class="k-label">First day<input class="k-input" id="k-start" type="date"></label><label class="k-label">Last day<input class="k-input" id="k-end" type="date"></label></div>
+              <label class="k-label">Note (optional)<textarea class="k-input" id="k-note" rows="2" maxlength="500" placeholder="e.g. Family wedding"></textarea></label>
+              <button class="k-btn big" id="k-send">Send request</button>
+              <div class="k-msg" id="k-req-msg"></div>
+            </div>
+            <div class="k-card" id="k-used"></div>
+            <div class="k-h k-out">Your requests</div>
+            <div id="k-myreq"></div>
+            <div class="k-card k-pushcard" id="k-push"></div>
+          </div>
+          <div class="k-panel" id="k-notices" hidden><div id="k-notice-list"></div></div>
+          <div class="k-panel" id="k-calendar" hidden>
+            <div class="k-card">
+              <div class="k-calhead"><button class="k-btn ghost" id="k-cal-prev" aria-label="Previous month">‹</button><b id="k-cal-title"></b><button class="k-btn ghost" id="k-cal-next" aria-label="Next month">›</button></div>
+              <div class="k-cal" id="k-cal-grid"></div>
+              <div class="k-legend"><span><i class="k-dot holiday"></i>Public holiday</span><span><i class="k-dot closure"></i>Closed</span><span><i class="k-dot noleave"></i>No leave</span><span><i class="k-dot leave"></i>Leave</span><span><i class="k-dot notice"></i>TAFE / notice</span></div>
+            </div>
+            <div id="k-cal-list"></div>
+          </div>
+          <div class="k-panel" id="k-owner" hidden>
+            <div class="k-h k-out">Waiting for a decision</div>
+            <div id="k-pending"></div>
+            <div class="k-h k-out">Recent decisions</div>
+            <div class="k-card" id="k-recent"></div>
+            <div class="k-card">
+              <div class="k-h">Send a notice</div>
+              <div class="k-label">To</div><div class="k-to" id="k-to"></div>
+              <label class="k-label">Title<input class="k-input" id="k-ntitle" maxlength="120" placeholder="e.g. TAFE days this term"></label>
+              <label class="k-label">Message<textarea class="k-input" id="k-nbody" rows="3" maxlength="2000"></textarea></label>
+              <div class="k-label">Dates to show on their calendar (optional)</div>
+              <div class="k-two"><input class="k-input" id="k-ndate" type="date"><input class="k-input" id="k-ndlabel" placeholder="Label, e.g. TAFE"></div>
+              <button class="k-btn ghost" id="k-adddate">Add date</button>
+              <div class="k-chips" id="k-ndates"></div>
+              <button class="k-btn big" id="k-nsend">Send notice</button>
+              <div class="k-msg" id="k-nmsg"></div>
+            </div>
+            <div class="k-h k-out">Notices sent</div>
+            <div class="k-card" id="k-sent"></div>
+            <div class="k-card">
+              <div class="k-h">Closures and no-leave periods</div>
+              <label class="k-label">Type<select class="k-input" id="k-ckind"><option value="closure">Business closed</option><option value="noleave">No leave</option></select></label>
+              <div class="k-two"><label class="k-label">From<input class="k-input" id="k-cstart" type="date"></label><label class="k-label">To<input class="k-input" id="k-cend" type="date"></label></div>
+              <label class="k-label">Reason (staff see this)<input class="k-input" id="k-creason" maxlength="120" placeholder="e.g. Christmas shutdown"></label>
+              <button class="k-btn big" id="k-caladd">Add to calendar</button>
+              <div class="k-msg" id="k-calmsg"></div>
+              <div id="k-dates-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-suppliers">
+      <div class="k-wrap">
+        <div class="dir-top">
+          <div class="dir-title">Our Suppliers and Business Partners</div>
+          <input class="k-input" id="dir-search" type="search" placeholder="Search name, contact, category…" autocomplete="off">
+          <div class="dir-cats" id="dir-cats"></div>
+        </div>
+        <div class="k-panels"><div class="k-panel" id="dir-panel">
+          <div class="k-card" id="dir-owner-bar" hidden>
+            <button class="k-btn big" id="dir-add">+ Add a supplier or partner</button>
+            <label class="k-check"><input type="checkbox" id="dir-archived"> Show archived entries</label>
+          </div>
+          <div class="k-card" id="dir-form" hidden></div>
+          <div id="dir-list"><div class="k-empty">Loading…</div></div>
+        </div></div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-social">
+      <div class="k-wrap">
+        <div class="k-tabs" id="s-tabs">
+          <button data-stab="new">New post</button>
+          <button data-stab="mine">My posts</button>
+          <button data-stab="inbox" hidden>Inbox</button>
+        </div>
+        <div class="k-panels">
+          <div class="k-panel s-panel" id="s-new">
+            <div class="k-card"><div class="k-h">Photos</div><div id="s-photos"></div>
+              <div class="k-line">Photos are shrunk and saved straight away. With no signal they wait on the phone and send when you're back in range.</div></div>
+            <div class="k-card">
+              <label class="k-label">Suburb only — never the address<input class="k-input" id="s-suburb" maxlength="40" placeholder="e.g. Sunnybank Hills" autocomplete="off"></label>
+              <label class="k-label">Job type<select class="k-input" id="s-jobtype"><option value="">Choose…</option><option>Hot water system</option><option>Blocked drain</option><option>Bathroom renovation</option><option>Kitchen renovation</option><option>Toilet</option><option>Tap and mixer</option><option>Leak repair</option><option>Gas fitting</option><option>Backflow testing</option><option>New build plumbing</option><option>Maintenance</option><option>Other</option></select></label>
+              <label class="k-label">One line on what was done<input class="k-input" id="s-summary" maxlength="160" placeholder="e.g. Swapped an old electric unit for a heat pump"></label>
+            </div>
+            <div class="k-card">
+              <label class="k-check s-must"><input type="checkbox" id="s-cust"> <b>Customer OK with photos</b></label>
+              <div class="k-sub">Privacy check — every photo has:</div>
+              <label class="k-check"><input type="checkbox" data-sprivacy="houseNumbers"> No house or unit numbers</label>
+              <label class="k-check"><input type="checkbox" data-sprivacy="faces"> No faces</label>
+              <label class="k-check"><input type="checkbox" data-sprivacy="plates"> No number plates</label>
+              <label class="k-check"><input type="checkbox" data-sprivacy="mail"> No mail, letters or names</label>
+              <label class="k-check"><input type="checkbox" data-sprivacy="personal"> No personal items or family photos</label>
+            </div>
+            <button class="k-btn big" id="s-send" disabled>Send for approval</button>
+            <div class="k-msg" id="s-send-hint"></div>
+            <div class="k-msg" id="s-msg"></div>
+          </div>
+          <div class="k-panel s-panel" id="s-mine" hidden><div id="s-mine-list"></div></div>
+          <div class="k-panel s-panel" id="s-inbox" hidden>
+            <div id="s-inbox-list"></div>
+            <div class="k-card"><div class="k-h">Group share rota</div><div id="s-groups"></div>
+              <div class="k-two"><input class="k-input" id="s-gname" placeholder="Group name"><input class="k-input" id="s-gday" placeholder="Day, e.g. Tuesday"></div>
+              <button class="k-btn ghost" id="s-gadd">Add group</button></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1494,7 +2012,8 @@ const UPLIFT = {
   costExGst:  0.01,          // each unit costs IPD $0.01 ex GST (GP display only, never sent)
 };
 
-const PROXY = 'https://ipd-proxy-server.onrender.com';
+// Preview copies of the app (hosted at ipd-app-preview…) talk to the test server, never the live one.
+const PROXY = /^ipd-app-preview/.test(location.hostname) ? 'https://ipd-proxy-auth-test.onrender.com' : 'https://ipd-proxy-server.onrender.com';
 const SHEET_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbz5yp8BmAwococSxcEQSJePYFLcZDfSaCMmQx4aWc0Tcdlvzqv3jC5iJfmQq_hoEo3SvA/exec';
 let SHEET_URL = localStorage.getItem('ipd_sheet_url') || SHEET_URL_DEFAULT;
 // Knowledge entries live only in the original Sheet; bundles come from SHEET_URL above.
@@ -1719,8 +2238,12 @@ function deemphasiseMicOnIOS() {
 // ── INIT ──────────────────────────────────────────────────────────────────────
 function init() {
   initPin();
-  const saved = localStorage.getItem('ipd_sm8_key');
-  if (saved) document.getElementById('sm8-key-input').value = saved;
+  setupKiosk();
+  setupDirectory();
+  setupSocial();
+  initLogin();
+  // Keys never live in the app: clear any ServiceM8 key an older version saved on this phone.
+  try { localStorage.removeItem('ipd_sm8_key'); } catch (e) {}
   const savedUrl = localStorage.getItem('ipd_sheet_url') || SHEET_URL_DEFAULT;
   document.getElementById('sheet-url-input').value = savedUrl;
   SHEET_URL = savedUrl;
@@ -1743,11 +2266,12 @@ function goScreen(name) {
   const nav = document.getElementById('nav-' + name);
   if (nav) nav.classList.add('active');
   activeScreen = name;
+  document.body.classList.toggle('on-quote', name === 'quote');   // lifts pop-up messages above the quote bar
   if (name !== 'search') stopListening();
   if (name === 'kb') renderKB();
-  if (name === 'quote') renderQuote();
+  if (name === 'quote') { renderQuote(); if (PILOT_UI) setQTab('summary'); }   // the quote page always opens on Summary
   if (name === 'labour') updateLabourTotals();
-  if (name === 'home') updateHomeStats();
+  if (name === 'home') { updateHomeStats(); if (PILOT_UI) { renderHome(); kioskRefreshSummary(); } }
 }
 
 function saveSheetUrl() {
@@ -1756,10 +2280,6 @@ function saveSheetUrl() {
   SHEET_URL = url;
   loadQuoteData();
   showToast('Saved — reloading data');
-}
-function saveSM8Key() {
-  localStorage.setItem('ipd_sm8_key', document.getElementById('sm8-key-input').value.trim());
-  showToast('Saved');
 }
 
 // ── STOCK ─────────────────────────────────────────────────────────────────────
@@ -2017,6 +2537,7 @@ function updateQuoteUI() {
   document.getElementById('quote-pill-txt').textContent = count+(count===1?' item':' items');
   if(activeScreen==='quote') renderQuote();
   updateHomeStats();
+  if (typeof updateQuoteBar === 'function') updateQuoteBar();
 }
 function updateHomeStats() {
   const hs_quote = document.getElementById('hs-quote');
@@ -2026,7 +2547,7 @@ function updateHomeStats() {
   if (hs_order) hs_order.textContent = orderItems().length;
   if (hs_checked) hs_checked.textContent = Object.values(onHand).filter(v=>v!=='').length;
 }
-function renderQuote() {
+function renderQuoteClassic() {
   const list = document.getElementById('quote-list');
   const totals = document.getElementById('quote-totals');
   renderGP();
@@ -2042,11 +2563,32 @@ function renderQuote() {
   document.getElementById('t-total').textContent='$'+totalInc.toFixed(2);
   totals.style.display='block';
 }
+
+function renderQuotePilot() {
+  const list = document.getElementById('quote-list');
+  const totals = document.getElementById('quote-totals');
+  renderGP();
+  if (!quote.length) { list.innerHTML='<div class="state-box"><span class="state-icon">📋</span><p>No items yet.<br>Add from Products, Bundles or Labour.</p></div>'; totals.style.display='none'; updateQuoteBar(); return; }
+  list.innerHTML = quote.map(item => {
+    if (item.id === 'discount') return `<div class="qline" data-id="discount"><div class="qline-actions"><button class="qa-del" data-del="discount">Delete</button></div><div class="quote-item qline-front"><div class="qi-top"><div class="qi-name">${esc(item.name)}</div><div class="qi-line" style="color:var(--red)">−$${Math.abs(item.price).toFixed(2)}</div></div><div class="qi-bot"><div class="qi-meta">On the whole quote</div><span class="qi-btns"><button class="qi-btn del" data-del="discount">Delete</button></span></div></div></div>`;
+    const line = item.price*item.qty; const isB = item.type==='bundle';
+    return `<div class="qline" data-id="${esc(item.id)}"><div class="qline-actions"><button class="qa-edit" data-edit="${esc(item.id)}">Edit</button><button class="qa-del" data-del="${esc(item.id)}">Delete</button></div><div class="quote-item qline-front"><div class="qi-top">${item.type==='reece'&&item.code?qImgTag(item.code):''}<div class="qi-name">${esc(item.name)} <span class="type-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span></div><div class="qi-line">$${line.toFixed(2)}</div></div><div class="qi-bot"><div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${item.id}',-1)">−</button><span class="qty-num">${item.qty}</span><button class="qty-btn" onclick="chQty('${item.id}',1)">+</button></div><div class="qi-meta">$${item.price.toFixed(2)} ea</div><span class="qi-btns"><button class="qi-btn" data-edit="${esc(item.id)}">Edit</button><button class="qi-btn del" data-del="${esc(item.id)}">Delete</button></span></div></div></div>`;
+  }).join('');
+  const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0); const gst=totalInc/11; const sub=totalInc-gst;
+  document.getElementById('t-sub').textContent='$'+sub.toFixed(2);
+  document.getElementById('t-gst').textContent='$'+gst.toFixed(2);
+  document.getElementById('t-total').textContent='$'+totalInc.toFixed(2);
+  totals.style.display='block';
+  updateQuoteBar();
+  if (typeof qWatchImages === 'function') qWatchImages(list);
+}
+
+function renderQuote() { return PILOT_UI ? renderQuotePilot() : renderQuoteClassic(); }
 // ── GP (gross profit) — display only, never sent to ServiceM8 ────────────────
 // All maths ex GST. Bundle lines use the server's bundle cost (parts × qty, ex GST). A bundle with
 // no known cost — costs not loaded, or any part the server couldn't cost — is left out of GP
 // entirely (its price too — counting its price without its full cost would overstate GP).
-function setQuoteJobType(t) { quoteJobType = t; renderGP(); }
+function setQuoteJobType(t) { quoteJobType = t; renderGP(); updateQuoteBar(); }
 function isGstFreeLine(i) {
   // Reece lines carry the price file's GST % (10 or 0) as `markup`.
   return i.type === 'reece' && i.markup !== undefined && i.markup !== null && i.markup !== '' && Number(i.markup) === 0;
@@ -2746,6 +3288,268 @@ async function fetchReeceSearch(q, container) {
   }, 300);
 }
 
+// ── QUOTE PAGE TABS (quote-tabs branch) ──────────────────────────────────────
+// Products · Bundles · Labour · Summary · Notes & photos (soon), on one page, with a sticky bar
+// (total, GP %, Send) on every tab. Adding uses the existing addReece/addBundle/chQty; labour uses
+// the Labour screen's rates, surcharge and discount; GP uses calcGP(). No price or GP maths changed.
+let qTab = 'summary', qpTimer = null, qpResults = [];
+const Q_RECENT_KEY = 'ipd_recent_items', Q_FAV_KEY = 'ipd_fav_items';
+const qRead = k => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) { return []; } };
+const qWrite = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const qKey = it => it.type === 'bundle' ? 'b:' + it.uuid : 'r:' + it.code;
+
+// Product photos: only for rows that come into view, 20 codes per request, the photo address remembered
+// on this phone (so each product is looked up once), image downloaded lazily. No photo → plain placeholder.
+const Q_IMG_KEY = 'ipd_img_urls';
+let qImgUrls = (() => { try { return JSON.parse(localStorage.getItem(Q_IMG_KEY) || '{}'); } catch (e) { return {}; } })();
+let qImgQueue = new Set(), qImgTimer = null;
+const qImgObserver = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+  entries.forEach(en => { if (en.isIntersecting) { qImgObserver.unobserve(en.target); qImgNeed(en.target); } });
+}, { rootMargin: '200px' }) : null;
+function qImgTag(code) {
+  const u = qImgUrls[code];
+  return '<img class="reece-img qimg" data-code="' + esc(code) + '" src="' + (u || REECE_IMG_PLACEHOLDER) + '"' + (u ? '' : ' data-pending="1"') +
+    ' loading="lazy" decoding="async" width="44" height="44" alt="">';
+}
+function qImgNeed(img) {
+  const code = img.dataset.code;
+  if (code in qImgUrls) { if (qImgUrls[code]) img.src = qImgUrls[code]; return; }
+  qImgQueue.add(code);
+  clearTimeout(qImgTimer); qImgTimer = setTimeout(qImgFetch, 120);
+}
+async function qImgFetch() {
+  const codes = [...qImgQueue].slice(0, 20);
+  codes.forEach(c => qImgQueue.delete(c));
+  if (!codes.length) return;
+  try {
+    const data = await (await fetch(PROXY + '/reece-images?codes=' + codes.map(encodeURIComponent).join(','))).json();
+    codes.forEach(c => { qImgUrls[c] = data[c] || ''; });            // '' = no photo: keep the placeholder, don't ask again
+    const keys = Object.keys(qImgUrls); if (keys.length > 600) keys.slice(0, keys.length - 600).forEach(k => delete qImgUrls[k]);
+    try { localStorage.setItem(Q_IMG_KEY, JSON.stringify(qImgUrls)); } catch (e) {}
+    document.querySelectorAll('#screen-quote img.qimg[data-pending]').forEach(img => {
+      const u = qImgUrls[img.dataset.code];
+      if (u === undefined) return;
+      img.removeAttribute('data-pending');
+      if (u) { img.onerror = function () { this.onerror = null; this.src = REECE_IMG_PLACEHOLDER; }; img.src = u; }
+    });
+  } catch (e) { /* no connection: placeholders stay */ }
+  if (qImgQueue.size) qImgFetch();
+}
+function qWatchImages(container) {
+  if (!container) return;
+  container.querySelectorAll('img.qimg[data-pending]').forEach(img => (qImgObserver ? qImgObserver.observe(img) : qImgNeed(img)));
+}
+
+function setQTab(t) {
+  qTab = t;
+  document.querySelectorAll('#q-tabs [data-qtab]').forEach(b => b.classList.toggle('on', b.dataset.qtab === t));
+  document.querySelectorAll('.qt-panel').forEach(p => (p.hidden = p.id !== 'qt-' + t));
+  if (t === 'products') renderQProducts();
+  if (t === 'bundles') renderQBundles();
+  if (t === 'labour') renderQLabour();
+  if (t === 'summary') renderQuote();
+  updateQuoteBar();
+}
+
+// remember what was added (recent) and what is starred (favourites) — on this phone
+function qRemember(it) {
+  const k = qKey(it);
+  qWrite(Q_RECENT_KEY, [it].concat(qRead(Q_RECENT_KEY).filter(x => qKey(x) !== k)).slice(0, 12));
+}
+function qToggleFav(it) {
+  const k = qKey(it), favs = qRead(Q_FAV_KEY);
+  qWrite(Q_FAV_KEY, favs.some(x => qKey(x) === k) ? favs.filter(x => qKey(x) !== k) : [it].concat(favs).slice(0, 40));
+}
+const qIsFav = it => qRead(Q_FAV_KEY).some(x => qKey(x) === qKey(it));
+
+// one row for a product or bundle: name, code, sell price, ☆, and "Add" or − qty +
+function qRow(it) {
+  const inQ = quote.find(i => i.id === (it.type === 'bundle' ? it.uuid : 'r_' + it.code));
+  const p = parseFloat(it.price);
+  const data = esc(JSON.stringify(it));
+  return '<div class="qrow">' +
+    '<button class="qrow-star' + (qIsFav(it) ? ' on' : '') + '" data-fav="' + data + '" aria-label="Star">' + (qIsFav(it) ? '★' : '☆') + '</button>' +
+    (it.type === 'reece' && it.code ? qImgTag(it.code) : '') +
+    '<div class="qrow-body"><div class="qrow-name">' + esc(it.name) + '</div><div class="qrow-sub">' + (it.type === 'bundle' ? 'Bundle' : 'Reece') + (it.code ? ' · ' + esc(it.code) : '') + '</div></div>' +
+    '<div class="qrow-right"><div class="qrow-price">' + (p > 0 ? '$' + p.toFixed(2) : '—') + '</div>' +
+    (inQ ? '<div class="qty-ctrl big"><button class="qty-btn" data-qty="' + esc(inQ.id) + '" data-d="-1">−</button><span class="qty-num">' + inQ.qty + '</span><button class="qty-btn" data-qty="' + esc(inQ.id) + '" data-d="1">+</button></div>'
+          : '<button class="qrow-add" data-add="' + data + '">Add</button>') + '</div></div>';
+}
+const qFromReece = r => ({ type: 'reece', code: r.code, name: r.name, price: r.retail });
+const qFromBundle = b => ({ type: 'bundle', uuid: b.uuid, code: b.code, name: b.name, price: b.price });
+
+async function qAdd(it) {
+  if (it.type === 'bundle') {
+    if (!bundles.find(b => b.uuid === it.uuid)) { showToast('That bundle is no longer in the list'); return; }
+    addBundle(it.uuid);
+    const b = bundles.find(x => x.uuid === it.uuid); qRemember(qFromBundle(b));
+  } else {
+    if (!reeceCache[it.code]) {                                       // e.g. a recent item after the app restarted
+      try {
+        const d = await (await fetch(PROXY + '/reece-search?q=' + encodeURIComponent(it.code))).json();
+        const r = (d.products || []).find(x => String(x.code) === String(it.code));
+        if (!r) { showToast('Could not find ' + it.code + ' in the price file'); return; }
+        reeceCache[r.code] = r;
+      } catch (e) { showToast('No connection — try again'); return; }
+    }
+    addReece(it.code);                                                // same price/cost as the Search screen
+    qRemember(qFromReece(reeceCache[it.code]));
+  }
+  qRefreshLists();
+}
+function qRefreshLists() { if (qTab === 'products') renderQProducts(true); if (qTab === 'bundles') renderQBundles(); updateQuoteBar(); }
+
+function renderQProducts(keep) {
+  const box = document.getElementById('qp-results'), q = (document.getElementById('qp-search').value || '').trim();
+  if (!q) {
+    const favs = qRead(Q_FAV_KEY).filter(x => x.type === 'reece'), rec = qRead(Q_RECENT_KEY).filter(x => x.type === 'reece');
+    box.innerHTML = (favs.length ? '<div class="qsec">★ Favourites</div>' + favs.map(qRow).join('') : '') +
+      (rec.length ? '<div class="qsec">Recent</div>' + rec.map(qRow).join('') : '') +
+      (!favs.length && !rec.length ? '<div class="qempty">Search Reece products above. Items you add show here as Recent; tap ☆ to keep one as a favourite.</div>' : '');
+    qWatchImages(box);
+    return;
+  }
+  if (keep && qpResults.length) { box.innerHTML = qpResults.map(qRow).join(''); qWatchImages(box); return; }
+  box.innerHTML = '<div class="qempty">Searching…</div>';
+  clearTimeout(qpTimer);
+  qpTimer = setTimeout(async () => {
+    try {
+      const d = await (await fetch(PROXY + '/reece-search?q=' + encodeURIComponent(normaliseTerm(q)))).json();
+      (d.products || []).forEach(r => (reeceCache[r.code] = r));
+      qpResults = (d.products || []).slice(0, 40).map(qFromReece);
+      if ((document.getElementById('qp-search').value || '').trim() !== q) return;   // a newer search is running
+      box.innerHTML = qpResults.length ? qpResults.map(qRow).join('') : '<div class="qempty">No Reece products found. Try other words.</div>';
+      qWatchImages(box);
+    } catch (e) { box.innerHTML = '<div class="qempty">Could not reach the server. Check your connection.</div>'; }
+  }, 300);
+}
+
+function renderQBundles() {
+  const box = document.getElementById('qb-results'), raw = (document.getElementById('qb-search').value || '').trim();
+  if (!raw) {
+    const favs = qRead(Q_FAV_KEY).filter(x => x.type === 'bundle'), rec = qRead(Q_RECENT_KEY).filter(x => x.type === 'bundle');
+    box.innerHTML = (favs.length ? '<div class="qsec">★ Favourites</div>' + favs.map(qRow).join('') : '') +
+      (rec.length ? '<div class="qsec">Recent</div>' + rec.map(qRow).join('') : '') +
+      (!favs.length && !rec.length ? '<div class="qempty">Search our bundles above (name or code, e.g. BHWU).</div>' : '');
+    return;
+  }
+  const q = normaliseTerm(raw);
+  const list = /^B[A-Z]{1,10}$/i.test(raw)
+    ? bundles.filter(b => b.code && b.code.toUpperCase().startsWith(raw.toUpperCase()))
+    : bundles.map(b => ({ ...b, _s: scoreItem(b.name, b.code, b.category, q) })).filter(b => b._s > 0).sort((a, b) => b._s - a._s);
+  box.innerHTML = list.length ? list.slice(0, 40).map(b => qRow(qFromBundle(b))).join('') : '<div class="qempty">No bundles found.</div>';
+}
+
+// quick labour: same rates, surcharge and discount as the Labour screen (addLabourToQuote)
+let qLabourKind = 'standard';
+function qLabourRate(k) {
+  const d = { standard: 229, second: 160, builder: 195, apprentice: 100, service: 88 };
+  return parseFloat(document.getElementById('rate-' + k)?.value) || d[k];
+}
+function qLabourAdd(hours) {
+  const k = qLabourKind, id = 'qlab_' + k, label = k === 'apprentice' ? 'Apprentice Labour' : 'Standard Labour';
+  const ex = quote.find(i => i.id === id);
+  const h = Math.round(((ex ? ex.hours : 0) + hours) * 100) / 100;
+  const price = h * qLabourRate(k) * (1 + labourSurcharge / 100) * (1 - labourDiscount / 100);
+  const gpCost = h * (GP_SETTINGS.labourCostPerHour[k] || 0);
+  const line = { id, type: 'labour', name: label + ' (' + h + 'h)', code: '', price: parseFloat(price.toFixed(2)), qty: 1, gpCost: parseFloat(gpCost.toFixed(2)), hours: h };
+  if (ex) Object.assign(ex, line); else quote.push(line);
+  updateQuoteUI(); renderQLabour(); showToast('+' + hours + 'h ' + (k === 'apprentice' ? 'apprentice' : 'tradesman'));
+}
+function renderQLabour() {
+  document.querySelectorAll('#qt-labour [data-lkind]').forEach(b => b.classList.toggle('on', b.dataset.lkind === qLabourKind));
+  const lines = quote.filter(i => i.type === 'labour');
+  document.getElementById('ql-lines').innerHTML = lines.length
+    ? '<div class="qsec">Labour on this quote</div>' + lines.map(i => '<div class="qrow"><div class="qrow-body"><div class="qrow-name">' + esc(i.name) + '</div></div><div class="qrow-right"><div class="qrow-price">$' + (i.price * i.qty).toFixed(2) + '</div><button class="qrow-add ghost" data-qty="' + esc(i.id) + '" data-d="' + (-i.qty) + '">Remove</button></div></div>').join('')
+    : '<div class="qempty">No labour on this quote yet.</div>';
+  const r = qLabourRate(qLabourKind);
+  document.getElementById('ql-rate').textContent = (qLabourKind === 'apprentice' ? 'Apprentice' : 'Tradesman') + ' $' + r.toFixed(2) + '/h inc GST' +
+    (labourSurcharge ? ' · surcharge ' + labourSurcharge + '%' : '') + (labourDiscount ? ' · discount ' + labourDiscount + '%' : '');
+}
+
+// sticky bar: total, GP % (same maths as the GP panel), Send
+function updateQuoteBar() {
+  const tot = document.getElementById('qbar-total'); if (!tot) return;
+  const totalInc = quote.reduce((s, i) => s + i.price * i.qty, 0);
+  tot.textContent = '$' + totalInc.toFixed(2);
+  const gpEl = document.getElementById('qbar-gp'), g = calcGP();
+  gpEl.className = 'qbar-gp';
+  if (g.sellEx > 0) {
+    const gp = (g.sellEx - g.cost) / g.sellEx;
+    gpEl.textContent = 'GP ' + (gp * 100).toFixed(1) + '%';
+    if (quoteJobType) {
+      const target = GP_SETTINGS.targets[quoteJobType];
+      gpEl.classList.add(gp >= target - 1e-9 ? 'ok' : (discountFraction() > 0 ? 'bad' : (gp >= target - GP_SETTINGS.amberBand - 1e-9 ? 'warn' : 'bad')));
+    }
+  } else gpEl.textContent = 'GP —';
+  const n = quote.reduce((s, i) => s + (i.id === 'discount' ? 0 : i.qty), 0);
+  const badge = document.getElementById('qtab-count'); if (badge) { badge.textContent = n; badge.hidden = !n; }
+}
+
+// swipe a Summary line left to show Edit / Delete
+function setupQuoteSwipe() {
+  const list = document.getElementById('quote-list');
+  let sx = 0, sy = 0, el = null, dx = 0, horiz = null;
+  const close = except => document.querySelectorAll('#quote-list .qline.open').forEach(l => { if (l !== except) { l.classList.remove('open'); l.querySelector('.qline-front').style.transform = ''; } });
+  list.addEventListener('touchstart', e => {
+    el = e.target.closest('.qline'); if (!el || e.target.closest('button,input')) { el = null; return; }
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; dx = 0; horiz = null; close(el);
+  }, { passive: true });
+  list.addEventListener('touchmove', e => {
+    if (!el) return;
+    const mx = e.touches[0].clientX - sx, my = e.touches[0].clientY - sy;
+    if (horiz === null && (Math.abs(mx) > 8 || Math.abs(my) > 8)) horiz = Math.abs(mx) > Math.abs(my);
+    if (!horiz) return;
+    dx = Math.max(-160, Math.min(0, mx + (el.classList.contains('open') ? -150 : 0)));
+    el.querySelector('.qline-front').style.transform = 'translateX(' + dx + 'px)';
+  }, { passive: true });
+  list.addEventListener('touchend', () => {
+    if (!el || !horiz) { el = null; return; }
+    const open = dx < -60;
+    el.classList.toggle('open', open);
+    el.querySelector('.qline-front').style.transform = open ? 'translateX(-150px)' : '';
+    el = null;
+  });
+}
+function qEditLine(id) {
+  const it = quote.find(i => i.id === id); if (!it) return;
+  const isHours = id.startsWith('qlab_');
+  const row = document.querySelector('#quote-list .qline[data-id="' + CSS.escape(id) + '"] .qline-front');
+  row.innerHTML = '<div class="qedit"><div class="qrow-name">' + esc(it.name) + '</div><label class="qedit-row">' + (isHours ? 'Hours' : 'Quantity') +
+    ' <input type="number" inputmode="decimal" min="0" step="' + (isHours ? '0.5' : '1') + '" value="' + (isHours ? it.hours : it.qty) + '"></label>' +
+    '<div class="qedit-btns"><button class="qrow-add" data-save="' + esc(id) + '">Save</button><button class="qrow-add ghost" data-cancel="1">Cancel</button></div></div>';
+  row.style.transform = ''; row.closest('.qline').classList.remove('open');
+  row.querySelector('input').focus();
+}
+function qSaveLine(id, v) {
+  const it = quote.find(i => i.id === id); if (!it) return renderQuote();
+  v = parseFloat(v);
+  if (!(v > 0)) { chQty(id, -it.qty); return; }                       // 0 = remove
+  if (id.startsWith('qlab_')) { qLabourKind = id.slice(5); it.hours = 0; qLabourAdd(v); qLabourKind = 'standard'; renderQuote(); return; }
+  chQty(id, Math.round(v) - it.qty);
+}
+
+function setupQuoteTabs() {
+  const scr = document.getElementById('screen-quote');
+  scr.addEventListener('click', e => {
+    const t = e.target;
+    const tab = t.closest('[data-qtab]'); if (tab && !tab.disabled) return setQTab(tab.dataset.qtab);
+    const fav = t.closest('[data-fav]'); if (fav) { qToggleFav(JSON.parse(fav.dataset.fav)); return qRefreshLists(); }
+    const add = t.closest('[data-add]'); if (add) return qAdd(JSON.parse(add.dataset.add));
+    const q = t.closest('[data-qty]'); if (q) { chQty(q.dataset.qty, parseFloat(q.dataset.d)); qRefreshLists(); if (qTab === 'labour') renderQLabour(); return; }
+    const lk = t.closest('[data-lkind]'); if (lk) { qLabourKind = lk.dataset.lkind; return renderQLabour(); }
+    const lh = t.closest('[data-lhours]'); if (lh) return qLabourAdd(parseFloat(lh.dataset.lhours));
+    const ed = t.closest('[data-edit]'); if (ed) return qEditLine(ed.dataset.edit);
+    const del = t.closest('[data-del]'); if (del) { const it = quote.find(i => i.id === del.dataset.del); if (it) { if (it.id === 'discount') setQuoteDiscount(0); else chQty(it.id, -it.qty); } return; }
+    const sv = t.closest('[data-save]'); if (sv) return qSaveLine(sv.dataset.save, sv.closest('.qedit').querySelector('input').value);
+    if (t.closest('[data-cancel]')) return renderQuote();
+  });
+  document.getElementById('qp-search').addEventListener('input', () => { qpResults = []; renderQProducts(); });
+  document.getElementById('qb-search').addEventListener('input', renderQBundles);
+  setupQuoteSwipe();
+  setQTab('summary');
+}
+
 // ── DARK MODE ─────────────────────────────────────────────────────────────────
 function initDarkMode() {
   const saved = localStorage.getItem('ipd_dark');
@@ -3045,6 +3849,767 @@ function stdSearch(q) {
     if (qrMatch) anyMatch = true;
   }
   document.getElementById('std-no-result').style.display = anyMatch ? 'none' : 'block';
+}
+
+// ── PILOT UI ─────────────────────────────────────────────────────────────────
+// Off for everyone on the shared PIN (today's app, unchanged). Switched on only after a successful login.
+let PILOT_UI = false;
+function enablePilotUI() {
+  if (PILOT_UI) return;
+  PILOT_UI = true;
+  document.body.classList.add('pilot');
+  for (const name of ['home', 'quote']) {
+    const tpl = document.getElementById('tpl-' + name + '-pilot'), scr = document.getElementById('screen-' + name);
+    if (tpl && scr) { scr.innerHTML = ''; scr.appendChild(tpl.content.cloneNode(true)); }
+  }
+  const hd = document.querySelector('#screen-ai .ai-card-hd'); if (hd) hd.innerHTML = "<img class=\"om-hd\" src=\"old-mate/old-mate-120.png\" width=\"120\" height=\"176\" alt=\"Old Mate\" decoding=\"async\"><span>Ask Old Mate — standards, products, local suppliers</span>";
+  const res = document.getElementById('ask-results'); if (res && res.querySelector('.state-box')) res.innerHTML = "<div class=\"state-box\"><img class=\"om-big\" src=\"old-mate/old-mate-400.png\" width=\"400\" height=\"588\" alt=\"Old Mate\" loading=\"lazy\" decoding=\"async\"><p>G'day — ask Old Mate a question above.<br><span class=\"hint\">Every answer shows its sources. For standards it only uses official sources and says when it can't find one.</span></p></div>";
+  const kb = document.getElementById('kb-search'); if (kb) kb.placeholder = 'Search the IPD Knowledge Centre...';
+  setupHome();
+  setupQuoteTabs();
+  renderQuote();
+  if (activeScreen === 'home') goScreen('home');
+}
+
+// ── STAFF LOGIN (step 1) ─────────────────────────────────────────────────────
+// When the server has logins switched on, each person logs in with a one-time code and the phone keeps a
+// session token. When logins are off (or the server can't be reached and nobody has logged in on this
+// phone yet), the shared PIN works exactly as before.
+const AUTH_TOKEN_KEY = 'ipd_auth_token', AUTH_USER_KEY = 'ipd_auth_user';
+const ROLE_NAMES = { owner: 'Owner', office: 'Office', tech: 'Tech' };
+let CURRENT_USER = null, loginIdValue = '';
+function authHeaders() { const t = localStorage.getItem(AUTH_TOKEN_KEY); return t ? { Authorization: 'Bearer ' + t } : {}; }
+async function authFetch(path, opts = {}) {
+  const r = await fetch(PROXY + path, { ...opts, headers: { 'Content-Type': 'application/json', ...authHeaders(), ...(opts.headers || {}) } });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401 && path !== '/auth/verify') signedOut();
+  if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+  return j;
+}
+async function initLogin() {
+  let cfg = null;
+  try { cfg = await (await fetch(PROXY + '/auth/config', { signal: AbortSignal.timeout(5000) })).json(); } catch (e) {}
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  if (!cfg) {                                                   // no signal: carry on as the last person who logged in
+    let cached = null; try { cached = JSON.parse(localStorage.getItem(AUTH_USER_KEY) || 'null'); } catch (e) {}
+    if (token && cached) setUser(cached);
+    return;
+  }
+  const askedForPilot = /[?&]pilot=1\b/.test(location.search);
+  if (!cfg.enabled && !cfg.pilot) return;                      // logins off: PIN as before
+  if (cfg.pilot && !token && !askedForPilot) return;           // pilot: everyone else keeps the PIN and today's app
+  if (token) {
+    try { const j = await authFetch('/auth/me'); setUser(j.user); return; } catch (e) { /* expired or removed */ }
+  }
+  showLogin();
+}
+function showLogin() {
+  document.getElementById('login-overlay').hidden = false;
+  document.getElementById('login-step1').hidden = false;
+  document.getElementById('login-step2').hidden = true;
+  document.getElementById('login-msg').textContent = '';
+}
+function setUser(u) {
+  CURRENT_USER = u;
+  enablePilotUI();
+  try { localStorage.setItem(AUTH_USER_KEY, JSON.stringify(u)); } catch (e) {}
+  document.getElementById('login-overlay').hidden = true;
+  document.getElementById('pin-overlay').classList.add('hidden');   // a personal login replaces the PIN
+  document.getElementById('me-card').hidden = false;
+  document.getElementById('me-line').textContent = 'Logged in as ' + u.name + ' — ' + (ROLE_NAMES[u.role] || u.role) + (u.title ? ' (' + u.title + ')' : '');
+  document.getElementById('me-users-btn').hidden = !u.canManageUsers;
+  if (typeof renderHome === 'function') renderHome();
+  if (typeof kioskRefreshSummary === 'function') kioskRefreshSummary();
+  if (typeof dirRefresh === 'function') dirRefresh();
+  if (typeof socialRefresh === 'function') socialRefresh().then(() => sUploadLoop());
+}
+function signedOut() {
+  const wasPilot = PILOT_UI;
+  localStorage.removeItem(AUTH_TOKEN_KEY); localStorage.removeItem(AUTH_USER_KEY);
+  if (wasPilot) { location.replace(location.pathname + (/[?&]pilot=1\b/.test(location.search) ? '?pilot=1' : '')); return; }   // back to today's app
+  CURRENT_USER = null;
+  document.getElementById('me-card').hidden = true;
+  if (activeScreen === 'users') goScreen('home');
+  if (typeof homeViewAs !== 'undefined') { homeViewAs = null; renderHome(); }
+  showLogin();
+}
+async function loginSendCode() {
+  const id = document.getElementById('login-id').value.trim();
+  const msg = document.getElementById('login-msg'), btn = document.getElementById('login-send');
+  if (!id) { msg.textContent = 'Type your email'; return; }
+  btn.disabled = true; msg.textContent = 'Sending…';
+  try {
+    const j = await authFetch('/auth/start', { method: 'POST', body: JSON.stringify({ login: id }) });
+    loginIdValue = id;
+    document.getElementById('login-step1').hidden = true;
+    document.getElementById('login-step2').hidden = false;
+    msg.textContent = j.message || 'Check for your code';
+    setTimeout(() => document.getElementById('login-code').focus(), 50);
+  } catch (e) { msg.textContent = e.message; }
+  btn.disabled = false;
+}
+async function loginVerify() {
+  const code = document.getElementById('login-code').value.trim();
+  const msg = document.getElementById('login-msg'), btn = document.getElementById('login-verify');
+  if (!/^\d{6}$/.test(code)) { msg.textContent = 'The code is 6 digits'; return; }
+  btn.disabled = true; msg.textContent = 'Checking…';
+  try {
+    const device = /iPad/.test(navigator.userAgent) ? 'iPad' : /iPhone/.test(navigator.userAgent) ? 'iPhone' : 'Browser';
+    const j = await authFetch('/auth/verify', { method: 'POST', body: JSON.stringify({ login: loginIdValue, code, device }) });
+    localStorage.setItem(AUTH_TOKEN_KEY, j.token);
+    document.getElementById('login-code').value = '';
+    setUser(j.user);
+  } catch (e) { msg.textContent = e.message; }
+  btn.disabled = false;
+}
+function loginBack() { document.getElementById('login-code').value = ''; showLogin(); }
+async function logOut() {
+  try { await authFetch('/auth/logout', { method: 'POST' }); } catch (e) {}
+  signedOut();
+}
+
+// ── USER MANAGEMENT (only shown to the person who can manage users: Matt) ─────
+function escHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+async function openUsers() {
+  if (!CURRENT_USER || !CURRENT_USER.canManageUsers) return;
+  goScreen('users');
+  await loadUsers();
+}
+function userRowHtml(x) {
+  const self = x.id === CURRENT_USER.id;
+  const roleSel = '<select data-role="' + x.id + '">' + ['tech', 'office', 'owner'].map(r => '<option value="' + r + '"' + (r === x.role ? ' selected' : '') + '>' + ROLE_NAMES[r] + '</option>').join('') + '</select>';
+  let actions;
+  if (x.canManageUsers) actions = '<span class="user-note">Manages users — can only be changed on the server</span>';
+  else if (x.status === 'active') actions = roleSel + '<input data-title="' + x.id + '" value="' + escHtml(x.title) + '" placeholder="Title (optional)">' +
+    '<button data-act="save" data-id="' + x.id + '">Save</button><button class="danger" data-act="remove" data-id="' + x.id + '">Remove</button>';
+  else actions = '<button data-act="restore" data-id="' + x.id + '">Restore login</button>';
+  return '<div class="user-row' + (x.status === 'removed' ? ' removed' : '') + '"><div class="user-top"><span>' + escHtml(x.name) + (self ? ' (you)' : '') + '</span><span>' +
+    (ROLE_NAMES[x.role] || escHtml(x.role)) + (x.title ? ' · ' + escHtml(x.title) : '') + (x.status === 'removed' ? ' · REMOVED' : '') + '</span></div>' +
+    '<div class="user-sub">' + escHtml(x.login) + (x.status === 'removed' && x.removedAt ? ' · removed ' + new Date(x.removedAt).toLocaleDateString('en-AU') + ' (records kept)' : '') + '</div>' +
+    '<div class="user-actions">' + actions + '</div></div>';
+}
+let usersCache = [];
+async function loadUsers() {
+  const list = document.getElementById('users-list'), audit = document.getElementById('audit-list');
+  try {
+    const [u, a] = await Promise.all([authFetch('/admin/users'), authFetch('/admin/audit')]);
+    usersCache = u.users;
+    const names = new Map(u.users.map(x => [x.id, x.name]));
+    list.innerHTML = u.users.map(userRowHtml).join('');
+    audit.innerHTML = a.audit.slice(0, 20).map(e => '<div class="audit-line">' + new Date(e.at).toLocaleString('en-AU') + ' — ' + escHtml(names.get(e.actor) || 'system') + ': ' + escHtml(e.action) +
+      (e.target && e.target !== e.actor ? ' (' + escHtml(names.get(e.target) || '') + ')' : '') + '</div>').join('') || '<div class="settings-hint">No changes yet</div>';
+  } catch (e) { list.innerHTML = '<div class="settings-hint">' + escHtml(e.message) + '</div>'; }
+}
+document.addEventListener('click', async ev => {
+  const b = ev.target.closest('#users-list button[data-act]'); if (!b) return;
+  const id = b.dataset.id, who = (usersCache.find(x => x.id === id) || {}).name || 'this person';
+  try {
+    if (b.dataset.act === 'save') {
+      const role = document.querySelector('[data-role="' + id + '"]').value, title = document.querySelector('[data-title="' + id + '"]').value;
+      await authFetch('/admin/users/' + id + '/role', { method: 'POST', body: JSON.stringify({ role, title }) });
+    } else if (b.dataset.act === 'remove') {
+      if (!confirm('Remove ' + who + '? Their login stops working on every phone straight away. Everything they made is kept, and you can restore them later.')) return;
+      await authFetch('/admin/users/' + id + '/remove', { method: 'POST' });
+    } else if (b.dataset.act === 'restore') {
+      await authFetch('/admin/users/' + id + '/restore', { method: 'POST' });
+    }
+    loadUsers();
+  } catch (e) { alert(e.message); }
+});
+async function addUser() {
+  const msg = document.getElementById('nu-msg');
+  const body = { name: document.getElementById('nu-name').value, login: document.getElementById('nu-login').value, role: document.getElementById('nu-role').value, title: document.getElementById('nu-title').value };
+  try {
+    await authFetch('/admin/users', { method: 'POST', body: JSON.stringify(body) });
+    ['nu-name', 'nu-login', 'nu-title'].forEach(id => (document.getElementById(id).value = ''));
+    msg.textContent = 'Added ' + body.name + '. They can now log in with ' + body.login + '.';
+    loadUsers();
+  } catch (e) { msg.textContent = e.message; }
+}
+
+// ── HOME PAGE (step 2) ───────────────────────────────────────────────────────
+// Welcome by name, Ask box (with mic and suggested questions), big "I want to…" buttons that depend on
+// the role, starred shortcuts (kept on this phone, per person), an owner-only Systems health card, and a
+// "view as" switch for owners. View-as only changes what this screen shows — never what anyone may do.
+const ALL_ROLES = ['owner', 'office', 'tech'];
+const HOME_ACTIONS = [
+  { id: 'quote', icon: '📋', label: 'Build a quote', desc: 'Price a job and send it to ServiceM8', roles: ALL_ROLES, go: () => goScreen('quote') },
+  { id: 'search', icon: '🔍', label: 'Find a product', desc: 'Reece products and our bundles', roles: ALL_ROLES, go: () => goScreen('search') },
+  { id: 'labour', icon: '⏱', label: 'Work out labour', desc: 'Rates, hours and adjustments', roles: ALL_ROLES, go: () => goScreen('labour') },
+  { id: 'stock', icon: '📦', label: 'Count and order van stock', desc: 'Check what is on the van', roles: ['owner', 'tech'], go: () => goScreen('stock') },
+  { id: 'review', icon: '🤖', label: 'Review a stock order', desc: 'Check an order before it goes to ServiceM8', roles: ['owner', 'office'], go: () => runStockReview() },
+  { id: 'standards', icon: '📐', label: 'Check a standard', desc: 'AS 3500, AS 1428, AS 5601 and more', roles: ALL_ROLES, go: () => goScreen('standards') },
+  { id: 'ask', icon: '✨', img: 'old-mate/old-mate-120.png', label: 'Ask Old Mate', desc: 'Standards, products, suppliers — with sources', roles: ALL_ROLES, go: () => goScreen('ai') },
+  { id: 'kiosk', icon: '🗂️', label: 'Staff Kiosk', desc: 'Time off, notices and calendar', roles: ALL_ROLES, needsKiosk: true, go: () => openKiosk(),
+    badge: () => { if (!kSummary) return ''; const p = []; if (kSummary.unreadNotices) p.push(kSummary.unreadNotices + ' new'); if (kSummary.isOwner && kSummary.ownerPending) p.push(kSummary.ownerPending + ' waiting'); return p.join(' · '); } },
+  { id: 'suppliers', icon: '🤝', label: 'Our Suppliers and Business Partners', desc: 'Who we use — call, email or map them', roles: ALL_ROLES, needsDirectory: true, go: () => openDirectory() },
+  { id: 'social', icon: '📸', label: 'Social Media', desc: 'Job photos for our Facebook page', roles: ALL_ROLES, needsSocial: true, go: () => openSocial(),
+    badge: () => (sConfig && sConfig.isOwner && sConfig.ownerNew ? sConfig.ownerNew + ' new' : '') },
+  { id: 'kb', icon: '📚', label: 'IPD Knowledge Centre', desc: 'Bundles, codes and how-tos', roles: ALL_ROLES, go: () => goScreen('kb') },
+  { id: 'training', icon: '🎓', label: 'Learn the app', desc: 'Step-by-step guide', roles: ALL_ROLES, go: () => goScreen('training') },
+  { id: 'whatsapp', icon: '💬', label: 'Message the team', desc: 'IPD BOYS WhatsApp group', roles: ALL_ROLES, href: 'https://chat.whatsapp.com/D9bDzCG7f9UK7ZhmddIuKw' },
+  { id: 'users', icon: '👥', label: 'Manage users', desc: 'Add, change or remove people', roles: ['owner'], needsManage: true, go: () => openUsers() },
+  { id: 'settings', icon: '⚙️', label: 'Settings', desc: 'Your login and app settings', roles: ALL_ROLES, go: () => goScreen('settings') },
+];
+const HOME_CHIPS = {
+  tech: ['Minimum fall for a 100mm sewer drain?', 'Which tempering valve do we use?', 'Max hot water temperature at a basin?', 'Closest plumbing supplies open now?'],
+  office: ['Do I need a Form 4 for a hot water replacement?', "What's in our Thermann 160 bundle?", 'Sell price of a 100mm 45° DWV bend?', 'Does a QBCC plumbing licence cover gas fitting?'],
+  owner: ['Do I need a Form 4 for a hot water replacement?', 'Minimum fall for a 100mm sewer drain?', "What's in our Thermann 160 bundle?", 'Closest plumbing supplies open now?'],
+};
+let homeViewAs = null, homeHealthAt = 0, homeMicRec = null;
+
+function realRole() { return CURRENT_USER ? CURRENT_USER.role : null; }
+function homeRole() { return (realRole() === 'owner' && homeViewAs) || realRole() || 'owner'; }   // logins off: everything, as today
+function homeStarKey() { return 'ipd_home_stars_' + (CURRENT_USER ? CURRENT_USER.id : 'device'); }
+function homeStars() { try { return JSON.parse(localStorage.getItem(homeStarKey()) || '[]'); } catch (e) { return []; } }
+function homeAllowed(a) {
+  if (!a.roles.includes(homeRole())) return false;
+  if (a.needsManage) return !!(CURRENT_USER && CURRENT_USER.canManageUsers && !homeViewAs);
+  if (a.needsKiosk) return !!(CURRENT_USER && kSummary && kSummary.enabled);
+  if (a.needsDirectory) return !!(CURRENT_USER && dirConfig && dirConfig.enabled);
+  if (a.needsSocial) return !!(CURRENT_USER && sConfig && sConfig.enabled);
+  return true;
+}
+function homeGreeting() {
+  const h = parseInt(new Date().toLocaleString('en-AU', { timeZone: 'Australia/Brisbane', hour: 'numeric', hour12: false }), 10);
+  return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+}
+
+function renderHome() {
+  const el = id => document.getElementById(id);
+  if (!el('home-want')) return;
+  // greeting
+  el('home-hello').textContent = homeGreeting() + (CURRENT_USER ? ', ' + CURRENT_USER.name.split(' ')[0] : '');
+  el('home-hello-sub').textContent = CURRENT_USER
+    ? (ROLE_NAMES[CURRENT_USER.role] || CURRENT_USER.role) + (CURRENT_USER.title ? ' · ' + CURRENT_USER.title : '') + ' · Innovation Plumbing + Design'
+    : 'Innovation Plumbing + Design';
+  // view-as (owners only)
+  const isOwner = realRole() === 'owner';
+  el('viewas').hidden = !isOwner;
+  if (!isOwner) homeViewAs = null;
+  document.querySelectorAll('#viewas [data-viewas]').forEach(b => b.classList.toggle('on', b.dataset.viewas === homeRole()));
+  const banner = el('viewas-banner');
+  banner.hidden = !(isOwner && homeViewAs && homeViewAs !== 'owner');
+  if (!banner.hidden) banner.innerHTML = 'Viewing as <b>' + ROLE_NAMES[homeViewAs] + '</b> — this is what a ' + ROLE_NAMES[homeViewAs].toLowerCase() +
+    ' sees here. Your own access has not changed. <button data-viewas="owner">Back to owner</button>';
+  // suggested questions
+  el('home-chips').innerHTML = (HOME_CHIPS[homeRole()] || HOME_CHIPS.owner).map(q => '<button class="home-chip" data-ask="' + escHtml(q) + '">' + escHtml(q) + '</button>').join('');
+  // "I want to…" and starred shortcuts
+  const stars = homeStars();
+  const allowed = HOME_ACTIONS.filter(homeAllowed);
+  const tile = (a, small) => '<div class="home-tile' + (small ? ' small' : '') + '" data-act="' + a.id + '" role="button" tabindex="0">' +
+    '<span class="home-tile-icon">' + (a.img ? '<img class="om-tile" src="' + a.img + '" width="120" height="176" alt="" loading="lazy" decoding="async">' : a.icon) + '</span><span class="home-tile-text"><span class="home-tile-label">' + escHtml(a.label) + (a.badge && a.badge() ? '<span class="home-tile-badge">' + escHtml(a.badge()) + '</span>' : '') + '</span>' +
+    (small ? '' : '<span class="home-tile-desc">' + escHtml(a.desc) + '</span>') + '</span>' +
+    '<button class="home-star' + (stars.includes(a.id) ? ' on' : '') + '" data-star="' + a.id + '" aria-label="' + (stars.includes(a.id) ? 'Unpin' : 'Pin') + ' ' + escHtml(a.label) + '">' + (stars.includes(a.id) ? '★' : '☆') + '</button></div>';
+  el('home-want').innerHTML = allowed.map(a => tile(a, false)).join('');
+  const starred = allowed.filter(a => stars.includes(a.id));
+  el('home-stars-wrap').hidden = !starred.length;
+  el('home-stars').innerHTML = starred.map(a => tile(a, true)).join('');
+  // Systems health: owners only, and only when not viewing as someone else
+  const showHealth = isOwner && homeRole() === 'owner';
+  el('home-health').hidden = !showHealth;
+  if (showHealth && Date.now() - homeHealthAt > 5 * 60 * 1000) loadHealth();
+}
+
+async function loadHealth() {
+  const list = document.getElementById('health-list');
+  homeHealthAt = Date.now();
+  list.innerHTML = '<div class="settings-hint">Checking…</div>';
+  try {
+    const h = await authFetch('/admin/health');
+    list.innerHTML = h.checks.map(c => '<div class="health-row"><span class="health-dot ' + (c.ok === true ? 'ok' : c.ok === false ? 'bad' : 'na') + '">' +
+      (c.ok === true ? '✓' : c.ok === false ? '!' : '–') + '</span><span class="health-text"><span class="health-name">' + escHtml(c.name) + '</span><span class="health-detail">' + escHtml(c.detail) + '</span></span></div>').join('') +
+      '<div class="settings-hint">Checked ' + new Date(h.checkedAt).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' }) + '</div>';
+  } catch (e) { list.innerHTML = '<div class="settings-hint">Could not check right now: ' + escHtml(e.message) + '</div>'; homeHealthAt = 0; }
+}
+
+function homeAsk(q) {
+  q = String(q || '').trim();
+  if (q.length < 3) { showToast('Type or say a question first'); return; }
+  document.getElementById('ask-q').value = q;
+  document.getElementById('home-ask-q').value = '';
+  goScreen('ai');
+  askAssistant();
+}
+function homeMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition, btn = document.getElementById('home-mic');
+  if (!SR) return;
+  if (homeMicRec) { try { homeMicRec.stop(); } catch (e) {} return; }
+  const r = new SR(); r.lang = 'en-AU'; r.continuous = false; r.interimResults = true;
+  r.onresult = e => { let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; document.getElementById('home-ask-q').value = t; };
+  r.onend = r.onerror = () => { homeMicRec = null; btn.classList.remove('listening'); };
+  try { r.start(); homeMicRec = r; btn.classList.add('listening'); } catch (e) { homeMicRec = null; }
+}
+function setupHome() {
+  if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) document.getElementById('home-mic').hidden = true;
+  document.getElementById('home-ask-go').onclick = () => homeAsk(document.getElementById('home-ask-q').value);
+  document.getElementById('home-ask-q').addEventListener('keydown', e => { if (e.key === 'Enter') homeAsk(e.target.value); });
+  document.getElementById('home-mic').onclick = homeMic;
+  document.getElementById('home-health-refresh').onclick = () => { homeHealthAt = 0; loadHealth(); };
+  document.getElementById('screen-home').addEventListener('click', e => {
+    const star = e.target.closest('[data-star]');
+    if (star) {
+      e.stopPropagation();
+      const s = homeStars(), id = star.dataset.star;
+      const next = s.includes(id) ? s.filter(x => x !== id) : s.concat(id);
+      try { localStorage.setItem(homeStarKey(), JSON.stringify(next)); } catch (err) {}
+      renderHome(); return;
+    }
+    const va = e.target.closest('[data-viewas]');
+    if (va && realRole() === 'owner') { homeViewAs = va.dataset.viewas === 'owner' ? null : va.dataset.viewas; renderHome(); return; }
+    const chip = e.target.closest('[data-ask]');
+    if (chip) { homeAsk(chip.dataset.ask); return; }
+    const t = e.target.closest('.home-tile');
+    if (t) {
+      const a = HOME_ACTIONS.find(x => x.id === t.dataset.act);
+      if (!a || !homeAllowed(a)) return;
+      if (a.href) window.open(a.href, '_blank'); else a.go();
+    }
+  });
+  renderHome();
+}
+
+// ── STAFF KIOSK (time off, notices, calendar; owners: pending, notices, dates) ──
+let kTab = 'timeoff', kSummary = null, kCalMonth = null, kNoticeDates = [];
+const K_STATUS = { pending: 'Waiting', approved: 'Approved', declined: 'Declined', withdrawn: 'Withdrawn' };
+const kFmt = d => new Date(d + 'T00:00:00').toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
+const kRange = (a, b) => kFmt(a) + (b && b !== a ? ' – ' + kFmt(b) : '');
+
+async function kioskRefreshSummary() {
+  if (!CURRENT_USER) { kSummary = null; return; }
+  try { kSummary = await authFetch('/kiosk/summary'); } catch (e) { kSummary = null; }
+  if (typeof renderHome === 'function') renderHome();
+}
+function openKiosk(tab) { goScreen('kiosk'); setKTab(tab || kTab); }
+function setKTab(t) {
+  if (t === 'owner' && !(kSummary && kSummary.isOwner)) t = 'timeoff';
+  kTab = t;
+  document.querySelectorAll('#k-tabs [data-ktab]').forEach(b => { b.classList.toggle('on', b.dataset.ktab === t); if (b.dataset.ktab === 'owner') b.hidden = !(kSummary && kSummary.isOwner); });
+  document.querySelectorAll('.k-panel').forEach(p => (p.hidden = p.id !== 'k-' + t));
+  if (t === 'timeoff' || t === 'notices') kLoadMe();
+  if (t === 'calendar') kLoadCalendar();
+  if (t === 'owner') kLoadOwner();
+  kPushCard();
+}
+
+async function kLoadMe() {
+  try {
+    const me = await authFetch('/kiosk/me');
+    const used = Object.keys(me.types).map(k => '<div class="k-used"><b>' + (me.daysUsed[k] || 0) + '</b><span>' + escHtml(me.types[k]) + '</span></div>').join('');
+    document.getElementById('k-used').innerHTML = '<div class="k-sub">Days taken in ' + me.year + ' (approved)</div><div class="k-used-row">' + used + '</div>';
+    document.getElementById('k-myreq').innerHTML = me.requests.length ? me.requests.map(r =>
+      '<div class="k-card"><div class="k-row"><b>' + escHtml(r.typeName) + '</b><span class="k-pill ' + r.status + '">' + K_STATUS[r.status] + '</span></div>' +
+      '<div class="k-line">' + kRange(r.start, r.end) + ' · ' + r.workingDays + ' working day' + (r.workingDays === 1 ? '' : 's') + '</div>' +
+      (r.note ? '<div class="k-note">' + escHtml(r.note) + '</div>' : '') +
+      (r.decisionNote ? '<div class="k-note">Reply: ' + escHtml(r.decisionNote) + '</div>' : '') +
+      (r.status === 'pending' ? '<button class="k-btn ghost" data-withdraw="' + r.id + '">Withdraw request</button>' : '') + '</div>').join('')
+      : '<div class="k-empty">No requests yet.</div>';
+    const unread = me.notices.filter(n => !n.readAt).length;
+    document.getElementById('k-notice-list').innerHTML = me.notices.length ? me.notices.map(n =>
+      '<details class="k-card k-notice' + (n.readAt ? '' : ' unread') + '" data-notice="' + n.id + '"><summary><span class="k-row"><b>' + escHtml(n.title) + '</b>' + (n.readAt ? '' : '<span class="k-pill pending">New</span>') + '</span>' +
+      '<span class="k-line">From ' + escHtml(n.from) + ' · ' + new Date(n.at).toLocaleDateString('en-AU') + '</span></summary>' +
+      (n.body ? '<div class="k-body">' + escHtml(n.body).replace(/\n/g, '<br>') + '</div>' : '') +
+      (n.dates.length ? '<div class="k-line">Dates: ' + n.dates.map(d => kFmt(d.date) + ' (' + escHtml(d.label) + ')').join(', ') + '</div>' : '') + '</details>').join('')
+      : '<div class="k-empty">No notices.</div>';
+    document.getElementById('kt-notices-count').textContent = unread ? String(unread) : '';
+    document.getElementById('kt-notices-count').hidden = !unread;
+  } catch (e) { document.getElementById('k-myreq').innerHTML = '<div class="k-empty">' + escHtml(e.message) + '</div>'; }
+}
+
+async function kSendRequest(confirmNoLeave) {
+  const msg = document.getElementById('k-req-msg');
+  const body = { type: document.getElementById('k-type').value, start: document.getElementById('k-start').value, end: document.getElementById('k-end').value || document.getElementById('k-start').value, note: document.getElementById('k-note').value, confirmNoLeave: !!confirmNoLeave };
+  if (!body.start) { msg.textContent = 'Choose the first day'; return; }
+  msg.textContent = 'Sending…';
+  try {
+    const r = await fetch(PROXY + '/kiosk/requests', { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 409 && j.warning) { msg.innerHTML = escHtml(j.error) + ' <button class="k-btn" data-sendanyway="1">Send anyway</button>'; return; }
+    if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status);
+    ['k-start', 'k-end', 'k-note'].forEach(id => (document.getElementById(id).value = ''));
+    msg.textContent = 'Sent — ' + j.request.workingDays + ' working day' + (j.request.workingDays === 1 ? '' : 's') + '. You\'ll be told when it\'s decided.';
+    kLoadMe(); kioskRefreshSummary();
+  } catch (e) { msg.textContent = e.message; }
+}
+
+async function kLoadCalendar() {
+  if (!kCalMonth) kCalMonth = new Date().toISOString().slice(0, 7);
+  const [y, m] = kCalMonth.split('-').map(Number);
+  const from = kCalMonth + '-01', last = new Date(Date.UTC(y, m, 0)).getUTCDate(), to = kCalMonth + '-' + String(last).padStart(2, '0');
+  document.getElementById('k-cal-title').textContent = new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('en-AU', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  try {
+    const { events } = await authFetch('/kiosk/calendar?from=' + from + '&to=' + to);
+    const on = d => events.filter(e => d >= e.start && d <= e.end);
+    const lead = (new Date(Date.UTC(y, m - 1, 1)).getUTCDay() + 6) % 7;                      // Monday first
+    let cells = '';
+    for (let i = 0; i < lead; i++) cells += '<div class="k-day empty"></div>';
+    for (let d = 1; d <= last; d++) {
+      const ds = kCalMonth + '-' + String(d).padStart(2, '0'), ev = on(ds);
+      cells += '<div class="k-day' + (ds === new Date().toISOString().slice(0, 10) ? ' today' : '') + '"><span>' + d + '</span><span class="k-dots">' + [...new Set(ev.map(e => e.kind))].map(k => '<i class="k-dot ' + k + '"></i>').join('') + '</span></div>';
+    }
+    document.getElementById('k-cal-grid').innerHTML = ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(x => '<div class="k-dow">' + x + '</div>').join('') + cells;
+    document.getElementById('k-cal-list').innerHTML = events.length ? events.map(e => '<div class="k-ev"><i class="k-dot ' + e.kind + '"></i><div><b>' + kRange(e.start, e.end) + '</b> · ' + escHtml(e.title) + (e.reason ? '<div class="k-line">Reason: ' + escHtml(e.reason) + '</div>' : '') + '</div></div>').join('') : '<div class="k-empty">Nothing on this month.</div>';
+  } catch (e) { document.getElementById('k-cal-list').innerHTML = '<div class="k-empty">' + escHtml(e.message) + '</div>'; }
+}
+
+async function kLoadOwner() {
+  try {
+    const [rq, nt, cal] = await Promise.all([authFetch('/kiosk/owner/requests'), authFetch('/kiosk/owner/notices'), authFetch('/kiosk/calendar?from=' + new Date().toISOString().slice(0, 10) + '&to=' + new Date(Date.now() + 400 * 864e5).toISOString().slice(0, 10))]);
+    document.getElementById('k-pending').innerHTML = rq.pending.length ? rq.pending.map(r =>
+      '<div class="k-card"><div class="k-row"><b>' + escHtml(r.name) + '</b><span class="k-pill pending">Waiting</span></div><div class="k-line">' + escHtml(r.typeName) + ' · ' + kRange(r.start, r.end) + ' · ' + r.workingDays + ' working day' + (r.workingDays === 1 ? '' : 's') + '</div>' +
+      (r.note ? '<div class="k-note">' + escHtml(r.note) + '</div>' : '') + (r.noLeaveWarning && r.noLeaveWarning.length ? '<div class="k-warn">In a no-leave period: ' + escHtml(r.noLeaveWarning.join(', ')) + '</div>' : '') +
+      '<input class="k-input" placeholder="Reply note (optional)" data-dnote="' + r.id + '"><div class="k-btns"><button class="k-btn" data-decide="approved" data-id="' + r.id + '">Approve</button><button class="k-btn danger" data-decide="declined" data-id="' + r.id + '">Decline</button></div></div>').join('')
+      : '<div class="k-empty">Nothing waiting.</div>';
+    document.getElementById('k-recent').innerHTML = rq.recent.slice(0, 10).map(r => '<div class="k-ev"><div><b>' + escHtml(r.name) + '</b> · ' + kRange(r.start, r.end) + ' · <span class="k-pill ' + r.status + '">' + K_STATUS[r.status] + '</span>' + (r.decidedByName ? ' by ' + escHtml(r.decidedByName) : '') + '</div></div>').join('') || '<div class="k-empty">No decisions yet.</div>';
+    document.getElementById('k-to').innerHTML = '<label class="k-check"><input type="radio" name="k-to" value="all" checked> Everyone</label>' + nt.people.filter(p => p.id !== CURRENT_USER.id).map(p => '<label class="k-check"><input type="radio" name="k-to" value="' + p.id + '"> ' + escHtml(p.name) + '</label>').join('');
+    document.getElementById('k-sent').innerHTML = nt.notices.slice(0, 10).map(n => '<div class="k-ev"><div><b>' + escHtml(n.title) + '</b> · ' + new Date(n.at).toLocaleDateString('en-AU') + '<div class="k-line">Read: ' + (escHtml(n.readBy.join(', ')) || 'nobody yet') + (n.notReadBy.length ? ' · Not read: ' + escHtml(n.notReadBy.join(', ')) : '') + '</div></div></div>').join('') || '<div class="k-empty">No notices sent yet.</div>';
+    document.getElementById('k-dates-list').innerHTML = cal.events.filter(e => e.kind === 'closure' || e.kind === 'noleave').map(e => '<div class="k-ev"><i class="k-dot ' + e.kind + '"></i><div><b>' + kRange(e.start, e.end) + '</b> · ' + (e.kind === 'closure' ? 'Business closed' : 'No leave') + '<div class="k-line">' + escHtml(e.reason) + '</div><button class="k-btn ghost" data-cancelcal="' + e.id + '">Cancel this (kept in records)</button></div></div>').join('') || '<div class="k-empty">No closures or no-leave periods set.</div>';
+    kRenderNoticeDates();
+  } catch (e) { document.getElementById('k-pending').innerHTML = '<div class="k-empty">' + escHtml(e.message) + '</div>'; }
+}
+function kRenderNoticeDates() { document.getElementById('k-ndates').innerHTML = kNoticeDates.map((d, i) => '<span class="k-chip">' + kFmt(d.date) + ' · ' + escHtml(d.label) + ' <button data-rmdate="' + i + '" aria-label="Remove">✕</button></span>').join(''); }
+
+// notifications: iPhone/iPad push only works in the home-screen app (iOS 16.4+); otherwise email
+function kPushCard() {
+  const el = document.getElementById('k-push'); if (!el) return;
+  const standalone = window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+  const can = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  if (!kSummary || !kSummary.pushKey) { el.innerHTML = 'You\'ll get an email when there\'s news for you.'; return; }
+  if (!standalone) { el.innerHTML = '<b>Want notifications on this iPhone/iPad?</b> In Safari tap <b>Share → Add to Home Screen</b>, open IPD from the new icon, then come back here. Until then you\'ll get emails.'; return; }
+  if (!can) { el.innerHTML = 'This device can\'t show app notifications — you\'ll get emails instead.'; return; }
+  if (Notification.permission === 'granted') { el.innerHTML = 'Notifications are on for this device. <button class="k-btn ghost" id="k-push-off">Turn off</button>'; return; }
+  if (Notification.permission === 'denied') { el.innerHTML = 'Notifications are blocked in Settings for IPD — you\'ll get emails instead.'; return; }
+  el.innerHTML = '<button class="k-btn" id="k-push-on">Turn on notifications</button> <span class="k-line">Otherwise you\'ll get emails.</span>';
+}
+function kKey(b64) { const p = '='.repeat((4 - b64.length % 4) % 4), s = atob((b64 + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from([...s].map(c => c.charCodeAt(0))); }
+async function kPushOn() {
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') return kPushCard();
+    const reg = await navigator.serviceWorker.register('sw.js');
+    await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: kKey(kSummary.pushKey) });
+    await authFetch('/kiosk/push/subscribe', { method: 'POST', body: JSON.stringify({ subscription: sub.toJSON(), device: /iPad/.test(navigator.userAgent) ? 'iPad' : 'iPhone' }) });
+    showToast('Notifications are on');
+  } catch (e) { showToast('Could not turn on notifications: ' + e.message); }
+  kPushCard();
+}
+async function kPushOff() {
+  try {
+    const reg = await navigator.serviceWorker.getRegistration('sw.js'), sub = reg && await reg.pushManager.getSubscription();
+    await authFetch('/kiosk/push/unsubscribe', { method: 'POST', body: JSON.stringify({ endpoint: sub ? sub.endpoint : '' }) });
+    if (sub) await sub.unsubscribe();
+    showToast('Notifications off — you\'ll get emails');
+  } catch (e) { showToast(e.message); }
+}
+
+function setupKiosk() {
+  const scr = document.getElementById('screen-kiosk');
+  scr.addEventListener('click', async e => {
+    const t = e.target;
+    const tab = t.closest('[data-ktab]'); if (tab) return setKTab(tab.dataset.ktab);
+    if (t.closest('#k-send')) return kSendRequest(false);
+    if (t.closest('[data-sendanyway]')) return kSendRequest(true);
+    const wd = t.closest('[data-withdraw]'); if (wd) { try { await authFetch('/kiosk/requests/' + wd.dataset.withdraw + '/withdraw', { method: 'POST' }); kLoadMe(); kioskRefreshSummary(); } catch (err) { showToast(err.message); } return; }
+    const dc = t.closest('[data-decide]'); if (dc) {
+      const note = (document.querySelector('[data-dnote="' + dc.dataset.id + '"]') || {}).value || '';
+      try { await authFetch('/kiosk/requests/' + dc.dataset.id + '/decide', { method: 'POST', body: JSON.stringify({ decision: dc.dataset.decide, note }) }); showToast(dc.dataset.decide === 'approved' ? 'Approved — they\'ve been told' : 'Declined — they\'ve been told'); kLoadOwner(); kioskRefreshSummary(); } catch (err) { showToast(err.message); }
+      return;
+    }
+    if (t.closest('#k-cal-prev') || t.closest('#k-cal-next')) {
+      const [y, m] = kCalMonth.split('-').map(Number), d = new Date(Date.UTC(y, m - 1 + (t.closest('#k-cal-next') ? 1 : -1), 1));
+      kCalMonth = d.toISOString().slice(0, 7); return kLoadCalendar();
+    }
+    if (t.closest('#k-adddate')) {
+      const d = document.getElementById('k-ndate').value; if (!d) return;
+      kNoticeDates.push({ date: d, label: document.getElementById('k-ndlabel').value || document.getElementById('k-ntitle').value || 'Notice' });
+      document.getElementById('k-ndate').value = ''; return kRenderNoticeDates();
+    }
+    const rm = t.closest('[data-rmdate]'); if (rm) { kNoticeDates.splice(+rm.dataset.rmdate, 1); return kRenderNoticeDates(); }
+    if (t.closest('#k-nsend')) {
+      const to = (document.querySelector('input[name="k-to"]:checked') || {}).value || 'all', msg = document.getElementById('k-nmsg');
+      try {
+        const j = await authFetch('/kiosk/notices', { method: 'POST', body: JSON.stringify({ to: to === 'all' ? 'all' : [to], title: document.getElementById('k-ntitle').value, body: document.getElementById('k-nbody').value, dates: kNoticeDates }) });
+        msg.textContent = 'Sent (' + Object.entries(j.sentBy).map(([k, v]) => v + ' by ' + k).join(', ') + ').';
+        ['k-ntitle', 'k-nbody', 'k-ndlabel'].forEach(id => (document.getElementById(id).value = '')); kNoticeDates = []; kLoadOwner();
+      } catch (err) { msg.textContent = err.message; }
+      return;
+    }
+    if (t.closest('#k-caladd')) {
+      const msg = document.getElementById('k-calmsg');
+      try {
+        await authFetch('/kiosk/calendar', { method: 'POST', body: JSON.stringify({ kind: document.getElementById('k-ckind').value, start: document.getElementById('k-cstart').value, end: document.getElementById('k-cend').value || document.getElementById('k-cstart').value, reason: document.getElementById('k-creason').value }) });
+        msg.textContent = 'Added.'; ['k-cstart', 'k-cend', 'k-creason'].forEach(id => (document.getElementById(id).value = '')); kLoadOwner();
+      } catch (err) { msg.textContent = err.message; }
+      return;
+    }
+    const cc = t.closest('[data-cancelcal]'); if (cc) { try { await authFetch('/kiosk/calendar/' + cc.dataset.cancelcal + '/cancel', { method: 'POST' }); kLoadOwner(); } catch (err) { showToast(err.message); } return; }
+    if (t.closest('#k-push-on')) return kPushOn();
+    if (t.closest('#k-push-off')) return kPushOff();
+  });
+  scr.addEventListener('toggle', async e => {
+    const d = e.target.closest && e.target.closest('details[data-notice]');
+    if (d && d.open && d.classList.contains('unread')) { d.classList.remove('unread'); try { await authFetch('/kiosk/notices/' + d.dataset.notice + '/read', { method: 'POST' }); kioskRefreshSummary(); } catch (err) {} }
+  }, true);
+  if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', ev => { if (ev.data && ev.data.open === 'kiosk' && CURRENT_USER) openKiosk('notices'); });
+  if (/[?&]open=kiosk/.test(location.search)) setTimeout(() => { if (CURRENT_USER) openKiosk('notices'); }, 1500);
+}
+
+// ── OUR SUPPLIERS AND BUSINESS PARTNERS ──────────────────────────────────────
+let dirConfig = null, dirData = null, dirCat = '', dirShowArchived = false, dirEditing = null;
+const DIR_FIELDS = [['name', 'Business name *'], ['contact', 'Contact person'], ['phone', 'Phone'], ['email', 'Email'], ['address', 'Address'], ['website', 'Website'], ['category', 'Category (e.g. landscape supplies)'], ['notes', 'Notes (everyone sees these)']];
+const DIR_OWNER_FIELDS = [['accountNumber', 'Account number (owners only)'], ['privateNotes', 'Private notes (owners only)']];
+const dirCap = s => String(s || '').replace(/\b\w/g, c => c.toUpperCase());
+
+async function dirRefresh() {
+  if (!CURRENT_USER) { dirConfig = null; return; }
+  try { dirConfig = await authFetch('/directory/config'); } catch (e) { dirConfig = null; }
+  if (typeof renderHome === 'function') renderHome();
+}
+function openDirectory() { goScreen('suppliers'); dirLoad(); }
+async function dirLoad() {
+  const list = document.getElementById('dir-list');
+  try {
+    dirData = await authFetch('/directory' + (dirShowArchived ? '?archived=1' : ''));
+    document.getElementById('dir-owner-bar').hidden = !dirData.isOwner;
+    dirRender();
+  } catch (e) { list.innerHTML = '<div class="k-empty">' + escHtml(e.message) + '</div>'; }
+}
+function dirRender() {
+  if (!dirData) return;
+  const q = (document.getElementById('dir-search').value || '').trim().toLowerCase();
+  document.getElementById('dir-cats').innerHTML = ['', ...dirData.categories].map(c => '<button class="dir-cat' + (c === dirCat ? ' on' : '') + '" data-dircat="' + escHtml(c) + '">' + (c ? escHtml(dirCap(c)) : 'All') + '</button>').join('');
+  const words = q.split(/\s+/).filter(Boolean);
+  const rows = dirData.entries.filter(e => (!dirCat || e.category === dirCat) && words.every(w => [e.name, e.contact, e.category, e.address, e.notes, e.phone, e.email].join(' ').toLowerCase().includes(w)));
+  const tel = p => String(p).replace(/[^\d+]/g, '');
+  document.getElementById('dir-list').innerHTML = rows.length ? rows.map(e =>
+    '<div class="k-card dir-card' + (e.status === 'archived' ? ' archived' : '') + '">' +
+    '<div class="k-row"><b class="dir-name">' + escHtml(e.name) + '</b>' + (e.category ? '<span class="k-pill">' + escHtml(dirCap(e.category)) + '</span>' : '') + (e.status === 'archived' ? '<span class="k-pill withdrawn">Archived</span>' : '') + '</div>' +
+    (e.contact ? '<div class="k-line">Contact: ' + escHtml(e.contact) + '</div>' : '') +
+    (e.address ? '<div class="k-line">' + escHtml(e.address) + '</div>' : '') +
+    (e.notes ? '<div class="k-note">' + escHtml(e.notes) + '</div>' : '') +
+    (dirData.isOwner && (e.accountNumber || e.privateNotes) ? '<div class="dir-private">🔒 ' + (e.accountNumber ? 'Account: <b>' + escHtml(e.accountNumber) + '</b>' : '') + (e.accountNumber && e.privateNotes ? '<br>' : '') + escHtml(e.privateNotes || '') + '</div>' : '') +
+    '<div class="dir-actions">' +
+      (e.phone ? '<a class="dir-act" href="tel:' + escHtml(tel(e.phone)) + '">📞 Call<span>' + escHtml(e.phone) + '</span></a>' : '') +
+      (e.email ? '<a class="dir-act" href="mailto:' + escHtml(e.email) + '">✉️ Email</a>' : '') +
+      (e.address ? '<a class="dir-act" href="https://maps.apple.com/?q=' + encodeURIComponent(e.address) + '" target="_blank" rel="noopener">🗺️ Map</a>' : '') +
+      (e.website ? '<a class="dir-act" href="' + escHtml(e.website) + '" target="_blank" rel="noopener">🌐 Website</a>' : '') +
+    '</div>' +
+    (dirData.isOwner ? '<div class="k-btns"><button class="k-btn ghost" data-diredit="' + e.id + '">Edit</button>' + (e.status === 'archived' ? '<button class="k-btn ghost" data-dirrestore="' + e.id + '">Restore</button>' : '<button class="k-btn ghost" data-dirarchive="' + e.id + '">Archive</button>') + '</div>' : '') +
+    '</div>').join('')
+    : '<div class="k-empty">' + (dirData.entries.length ? 'Nothing matches.' : 'No entries yet.' + (dirData.isOwner ? ' Tap “Add a supplier or partner”.' : '')) + '</div>';
+}
+function dirForm(entry) {
+  dirEditing = entry ? entry.id : 'new';
+  const f = document.getElementById('dir-form');
+  f.hidden = false;
+  f.innerHTML = '<div class="k-h">' + (entry ? 'Edit ' + escHtml(entry.name) : 'Add a supplier or partner') + '</div>' +
+    DIR_FIELDS.concat(DIR_OWNER_FIELDS).map(([k, label]) => '<label class="k-label">' + label +
+      (k === 'notes' || k === 'privateNotes' ? '<textarea class="k-input" rows="2" data-dirf="' + k + '">' + escHtml(entry ? entry[k] : '') + '</textarea>'
+        : '<input class="k-input" data-dirf="' + k + '" ' + (k === 'category' ? 'list="dir-catlist" ' : '') + 'type="' + ({ phone: 'tel', email: 'email', website: 'url' }[k] || 'text') + '" value="' + escHtml(entry ? entry[k] : '') + '">') + '</label>').join('') +
+    '<datalist id="dir-catlist">' + (dirData ? dirData.categories : []).map(c => '<option value="' + escHtml(c) + '">').join('') + '</datalist>' +
+    '<div class="k-btns"><button class="k-btn" data-dirsave="1">Save</button><button class="k-btn ghost" data-dircancel="1">Cancel</button></div><div class="k-msg" id="dir-msg"></div>';
+  f.scrollIntoView({ block: 'start' });
+}
+async function dirSave() {
+  const body = {};
+  document.querySelectorAll('#dir-form [data-dirf]').forEach(el => (body[el.dataset.dirf] = el.value));
+  try {
+    await authFetch(dirEditing === 'new' ? '/directory' : '/directory/' + dirEditing, { method: 'POST', body: JSON.stringify(body) });
+    document.getElementById('dir-form').hidden = true; dirEditing = null; showToast('Saved'); dirLoad();
+  } catch (e) { document.getElementById('dir-msg').textContent = e.message; }
+}
+function setupDirectory() {
+  const scr = document.getElementById('screen-suppliers');
+  document.getElementById('dir-search').addEventListener('input', dirRender);
+  scr.addEventListener('click', async e => {
+    const t = e.target;
+    const c = t.closest('[data-dircat]'); if (c) { dirCat = c.dataset.dircat; return dirRender(); }
+    if (t.closest('#dir-add')) return dirForm(null);
+    const ed = t.closest('[data-diredit]'); if (ed) return dirForm(dirData.entries.find(x => x.id === ed.dataset.diredit));
+    if (t.closest('[data-dirsave]')) return dirSave();
+    if (t.closest('[data-dircancel]')) { document.getElementById('dir-form').hidden = true; dirEditing = null; return; }
+    const ar = t.closest('[data-dirarchive]'); if (ar) {
+      const name = (dirData.entries.find(x => x.id === ar.dataset.dirarchive) || {}).name;
+      if (!confirm('Archive ' + name + '? It disappears from the list for staff but is kept, and you can restore it.')) return;
+      try { await authFetch('/directory/' + ar.dataset.dirarchive + '/archive', { method: 'POST' }); dirLoad(); } catch (err) { showToast(err.message); } return;
+    }
+    const rs = t.closest('[data-dirrestore]'); if (rs) { try { await authFetch('/directory/' + rs.dataset.dirrestore + '/restore', { method: 'POST' }); dirLoad(); } catch (err) { showToast(err.message); } return; }
+  });
+  document.getElementById('dir-archived').addEventListener('change', ev => { dirShowArchived = ev.target.checked; dirLoad(); });
+}
+
+// ── SOCIAL MEDIA ─────────────────────────────────────────────────────────────
+// Photos are shrunk on the phone (≈1600 px JPEG + 240 px thumbnail), kept in the phone's own database
+// (IndexedDB) until the server confirms them, then the full-size copy is deleted and only the thumbnail kept.
+let sConfig = null, sTab = 'new', sDraft = null, sBusy = false, sInbox = null;
+const S_DB = 'ipd-social', S_STORE = 'photos';
+function sDb() { return new Promise((ok, no) => { const r = indexedDB.open(S_DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(S_STORE, { keyPath: 'clientId' }); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); }); }
+async function sTx(mode, fn) { const db = await sDb(); return new Promise((ok, no) => { const t = db.transaction(S_STORE, mode), st = t.objectStore(S_STORE); const out = fn(st); t.oncomplete = () => ok(out && out.result !== undefined ? out.result : out); t.onerror = () => no(t.error); }); }
+const sAll = () => sTx('readonly', st => st.getAll());
+const sPut = rec => sTx('readwrite', st => st.put(rec));
+const sUuid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }));
+
+async function socialRefresh() {
+  if (!CURRENT_USER) { sConfig = null; return; }
+  try { sConfig = await authFetch('/social/config'); } catch (e) { sConfig = null; }
+  if (typeof renderHome === 'function') renderHome();
+}
+function openSocial() { goScreen('social'); setSTab(sTab); sUploadLoop(); }
+function setSTab(t) {
+  if (t === 'inbox' && !(sConfig && sConfig.isOwner)) t = 'new';
+  sTab = t;
+  document.querySelectorAll('#s-tabs [data-stab]').forEach(b => { b.classList.toggle('on', b.dataset.stab === t); if (b.dataset.stab === 'inbox') b.hidden = !(sConfig && sConfig.isOwner); });
+  document.querySelectorAll('.s-panel').forEach(p => (p.hidden = p.id !== 's-' + t));
+  if (t === 'new') sRenderNew();
+  if (t === 'mine') sLoadMine();
+  if (t === 'inbox') sLoadInbox();
+}
+
+// shrink a camera photo: longest side ≤ max px, JPEG
+async function sShrink(file, max, quality) {
+  const draw = (src, w, h) => { const k = Math.min(1, max / Math.max(w, h)), c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
+    c.getContext('2d').drawImage(src, 0, 0, c.width, c.height); return c.toDataURL('image/jpeg', quality); };
+  if (window.createImageBitmap) { try { const bm = await createImageBitmap(file); const out = draw(bm, bm.width, bm.height); bm.close && bm.close(); return out; } catch (e) {} }
+  return new Promise((ok, no) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => { const k = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url); ok(c.toDataURL('image/jpeg', quality)); };
+    img.onerror = () => { URL.revokeObjectURL(url); no(new Error('Could not read that photo')); };
+    img.src = url;
+  });
+}
+function sEnsureDraft() { if (!sDraft) sDraft = { postId: sUuid() }; try { localStorage.setItem('ipd_social_draft', JSON.stringify(sDraft)); } catch (e) {} return sDraft; }
+async function sAddPhoto(kind, file) {
+  const d = sEnsureDraft();
+  try {
+    const [image, thumb] = await Promise.all([sShrink(file, 1600, 0.8), sShrink(file, 240, 0.7)]);
+    await sPut({ clientId: sUuid(), postId: d.postId, kind, image, thumb, status: 'waiting', at: Date.now() });
+  } catch (e) { showToast(e.message); }
+  sRenderNew(); sUploadLoop();
+}
+// one at a time; on success the full-size photo is removed from the phone (thumbnail kept)
+async function sUploadLoop() {
+  if (sBusy || !CURRENT_USER) return;
+  sBusy = true;
+  try {
+    for (;;) {
+      const next = (await sAll()).filter(r => r.status === 'waiting').sort((a, b) => a.at - b.at)[0];
+      if (!next) break;
+      if (!navigator.onLine) break;
+      try {
+        await authFetch('/social/photos', { method: 'POST', body: JSON.stringify({ postId: next.postId, clientId: next.clientId, kind: next.kind, image: next.image, thumb: next.thumb }) });
+        await sPut({ ...next, image: null, status: 'uploaded' });
+      } catch (e) {
+        if (/HTTP 4|Only one|Up to 3|JPEG|already been sent|Not your/.test(e.message)) await sPut({ ...next, image: null, status: 'refused', error: e.message });
+        else break;                                                      // no signal / server busy: try again later
+      }
+      sRenderNew();
+    }
+  } finally { sBusy = false; sRenderNew(); }
+}
+window.addEventListener('online', () => sUploadLoop());
+setInterval(() => { if (CURRENT_USER && sConfig) sUploadLoop(); }, 30000);
+
+async function sRenderNew() {
+  const box = document.getElementById('s-photos'); if (!box) return;
+  const d = sDraft, recs = d ? (await sAll()).filter(r => r.postId === d.postId && r.status !== 'refused') : [];
+  const by = k => recs.filter(r => r.kind === k);
+  const tile = r => '<div class="s-thumb"><img src="' + r.thumb + '" alt=""><span class="s-state ' + r.status + '">' + (r.status === 'uploaded' ? '✓ Saved' : navigator.onLine ? 'Uploading…' : 'Waiting for signal') + '</span></div>';
+  const slot = (kind, label, max) => '<div class="s-slot"><div class="k-sub">' + label + '</div><div class="s-row">' + by(kind).map(tile).join('') +
+    (by(kind).length < max ? '<label class="s-add"><input type="file" accept="image/*" capture="environment" data-skind="' + kind + '" hidden>📷 ' + (max > 1 ? 'Add' : 'Take') + '</label>' : '') + '</div></div>';
+  box.innerHTML = slot('before', 'Before photo', 1) + slot('after', 'After photo', 1) + slot('extra', 'Extra photos (up to 3)', 3);
+  const allUp = recs.length && recs.every(r => r.status === 'uploaded');
+  const ticks = [...document.querySelectorAll('#s-new [data-sprivacy], #s-cust')].every(c => c.checked);
+  const ready = by('before').length && by('after').length && allUp && ticks && document.getElementById('s-suburb').value.trim() && document.getElementById('s-jobtype').value && document.getElementById('s-summary').value.trim();
+  document.getElementById('s-send').disabled = !ready;
+  document.getElementById('s-send-hint').textContent = !by('before').length || !by('after').length ? 'Take a before and an after photo.' : !allUp ? 'Waiting for photos to finish uploading…' : !document.getElementById('s-cust').checked ? 'Tick "Customer OK with photos" — the photos can\'t be sent without it.' : !ticks ? 'Tick every privacy check.' : !ready ? 'Fill in suburb, job type and what was done.' : 'Ready to send.';
+}
+async function sSend() {
+  const msg = document.getElementById('s-msg');
+  const privacy = {}; document.querySelectorAll('#s-new [data-sprivacy]').forEach(c => (privacy[c.dataset.sprivacy] = c.checked));
+  try {
+    await authFetch('/social/posts/' + sDraft.postId + '/submit', { method: 'POST', body: JSON.stringify({ suburb: document.getElementById('s-suburb').value, jobType: document.getElementById('s-jobtype').value, summary: document.getElementById('s-summary').value, customerOk: document.getElementById('s-cust').checked, privacy }) });
+    sDraft = null; try { localStorage.removeItem('ipd_social_draft'); } catch (e) {}
+    ['s-suburb', 's-summary'].forEach(id => (document.getElementById(id).value = '')); document.querySelectorAll('#s-new input[type=checkbox]').forEach(c => (c.checked = false));
+    msg.textContent = 'Sent to the owners for approval. Thanks!'; showToast('Sent for approval'); sRenderNew(); socialRefresh();
+  } catch (e) { msg.textContent = /Failed to fetch|NetworkError|Load failed/.test(e.message) ? 'No signal — your photos are saved. Tap Send again when you have signal.' : e.message; }
+}
+async function sLoadMine() {
+  const box = document.getElementById('s-mine-list');
+  try {
+    const { posts } = await authFetch('/social/mine');
+    box.innerHTML = posts.length ? posts.map(p => '<div class="k-card"><div class="k-row"><b>' + escHtml(p.jobType) + ' · ' + escHtml(p.suburb) + '</b><span class="k-pill ' + (p.status === 'submitted' ? 'pending' : p.status) + '">' + ({ submitted: 'Waiting', approved: 'Approved', declined: 'Declined' }[p.status] || p.status) + '</span></div>' +
+      '<div class="s-row">' + p.photos.map(ph => '<img class="s-mini" src="' + PROXY + ph.thumb + '" alt="" loading="lazy">').join('') + '</div>' + (p.note ? '<div class="k-note">' + escHtml(p.note) + '</div>' : '') + '</div>').join('') : '<div class="k-empty">Nothing sent yet.</div>';
+  } catch (e) { box.innerHTML = '<div class="k-empty">' + escHtml(e.message) + '</div>'; }
+}
+
+// ── owners ──
+async function sLoadInbox() {
+  const box = document.getElementById('s-inbox-list');
+  try {
+    sInbox = await authFetch('/social/inbox');
+    const groups = sInbox.groups;
+    const pend = sInbox.submitted.map(p => '<div class="k-card s-post" data-spost="' + p.id + '"><div class="k-row"><b>' + escHtml(p.jobType) + ' · ' + escHtml(p.suburb) + '</b><span class="k-line">from ' + escHtml(p.by) + '</span></div>' +
+      '<div class="k-note">' + escHtml(p.summary) + '</div><div class="k-sub">Tap 2–4 photos to use</div><div class="s-pick">' + p.photos.map(ph => '<button class="s-pickbtn" data-spick="' + ph.id + '"><img src="' + PROXY + ph.thumb + '" alt="" loading="lazy"><span>' + ph.kind + '</span></button>').join('') + '</div>' +
+      '<label class="k-label">Caption<textarea class="k-input s-caption" rows="7">' + escHtml(p.caption) + '</textarea></label><div class="s-issues"></div>' +
+      '<label class="k-check"><input type="checkbox" class="s-nonames"> No customer names in the caption or photos</label>' +
+      '<input class="k-input s-dnote" placeholder="Note if declining (optional)"><div class="k-btns"><button class="k-btn" data-sapprove="' + p.id + '">Approve</button><button class="k-btn danger" data-sdecline="' + p.id + '">Decline</button></div></div>').join('') || '<div class="k-empty">No posts waiting.</div>';
+    const appr = sInbox.approved.map(p => '<div class="k-card" data-sapproved="' + p.id + '"><div class="k-row"><b>' + escHtml(p.jobType) + ' · ' + escHtml(p.suburb) + '</b><span class="k-pill approved">Approved</span></div>' +
+      '<div class="s-row">' + p.photos.filter(ph => ph.chosen).map(ph => '<img class="s-mini" src="' + PROXY + ph.thumb + '" alt="">').join('') + '</div>' +
+      '<div class="k-note s-captext">' + escHtml(p.caption).replace(/\n/g, '<br>') + '</div>' +
+      '<div class="k-btns"><button class="k-btn" data-sshare="' + p.id + '">Save / share photos</button><button class="k-btn ghost" data-scopy="' + p.id + '">Copy caption</button></div>' +
+      (groups.length ? '<div class="k-sub">Shared to groups</div>' + groups.map(g => { const s = p.shares.find(x => x.groupId === g.id); return '<label class="k-check s-grp"><input type="checkbox" data-sgroup="' + g.id + '" data-spostid="' + p.id + '"' + (s ? ' checked disabled' : '') + '> ' + escHtml(g.name) + (g.day ? ' (' + escHtml(g.day) + ')' : '') + (s ? ' — ' + escHtml(s.by) + ', ' + new Date(s.at).toLocaleDateString('en-AU') : '') + '</label>'; }).join('') : '') + '</div>').join('') || '<div class="k-empty">Nothing approved yet.</div>';
+    box.innerHTML = '<div class="k-h k-out">Waiting for approval</div>' + pend + '<div class="k-h k-out">Approved — ready to post</div>' + appr;
+    document.getElementById('s-groups').innerHTML = groups.map(g => '<div class="k-ev"><div><b>' + escHtml(g.name) + '</b>' + (g.day ? ' · ' + escHtml(g.day) : '') + '</div><button class="k-btn ghost" data-sgarchive="' + g.id + '">Remove from rota (kept)</button></div>').join('') || '<div class="k-empty">No groups on the rota yet.</div>';
+    document.querySelectorAll('.s-caption').forEach(t => sCheckCaption(t));
+  } catch (e) { box.innerHTML = '<div class="k-empty">' + escHtml(e.message) + '</div>'; }
+}
+let sCapTimer = null;
+function sCheckCaption(t) {
+  clearTimeout(sCapTimer);
+  sCapTimer = setTimeout(async () => {
+    try { const { issues } = await authFetch('/social/captions/check', { method: 'POST', body: JSON.stringify({ caption: t.value }) });
+      t.closest('.s-post').querySelector('.s-issues').innerHTML = issues.length ? issues.map(i => '<div class="k-warn">⚠ ' + escHtml(i) + '</div>').join('') : '<div class="k-line">✓ Caption follows the rules</div>'; } catch (e) {}
+  }, 300);
+}
+async function sShare(p) {
+  const chosen = p.photos.filter(ph => ph.chosen);
+  try {
+    const files = await Promise.all(chosen.map(async (ph, i) => new File([await (await fetch(PROXY + ph.full)).blob()], 'ipd-' + (i + 1) + '.jpg', { type: 'image/jpeg' })));
+    if (navigator.canShare && navigator.canShare({ files })) { await navigator.share({ files, text: p.caption }); return; }
+  } catch (e) { if (e.name === 'AbortError') return; }
+  chosen.forEach(ph => window.open(PROXY + ph.full + '&download=1', '_blank'));                // fallback: open each photo to save
+}
+
+function setupSocial() {
+  const scr = document.getElementById('screen-social');
+  try { sDraft = JSON.parse(localStorage.getItem('ipd_social_draft') || 'null'); } catch (e) {}
+  scr.addEventListener('click', async e => {
+    const t = e.target;
+    const tab = t.closest('[data-stab]'); if (tab) return setSTab(tab.dataset.stab);
+    if (t.closest('#s-send')) return sSend();
+    const pk = t.closest('[data-spick]'); if (pk) { pk.classList.toggle('on'); return; }
+    const ap = t.closest('[data-sapprove]'), dc = t.closest('[data-sdecline]');
+    if (ap || dc) {
+      const card = (ap || dc).closest('.s-post'), id = (ap || dc).dataset.sapprove || (ap || dc).dataset.sdecline;
+      const body = ap ? { decision: 'approved', photoIds: [...card.querySelectorAll('.s-pickbtn.on')].map(b => b.dataset.spick), caption: card.querySelector('.s-caption').value, noNamesChecked: card.querySelector('.s-nonames').checked }
+                      : { decision: 'declined', note: card.querySelector('.s-dnote').value };
+      try { await authFetch('/social/posts/' + id + '/decide', { method: 'POST', body: JSON.stringify(body) }); showToast(ap ? 'Approved' : 'Declined'); sLoadInbox(); socialRefresh(); } catch (err) { showToast(err.message); }
+      return;
+    }
+    const sh = t.closest('[data-sshare]'); if (sh) return sShare(sInbox.approved.find(p => p.id === sh.dataset.sshare));
+    const cp = t.closest('[data-scopy]'); if (cp) { const p = sInbox.approved.find(x => x.id === cp.dataset.scopy); try { await navigator.clipboard.writeText(p.caption); showToast('Caption copied'); } catch (err) { showToast('Press and hold the caption to copy it'); } return; }
+    if (t.closest('#s-gadd')) { try { await authFetch('/social/groups', { method: 'POST', body: JSON.stringify({ name: document.getElementById('s-gname').value, day: document.getElementById('s-gday').value }) }); document.getElementById('s-gname').value = ''; sLoadInbox(); } catch (err) { showToast(err.message); } return; }
+    const ga = t.closest('[data-sgarchive]'); if (ga) { try { await authFetch('/social/groups/' + ga.dataset.sgarchive + '/archive', { method: 'POST' }); sLoadInbox(); } catch (err) { showToast(err.message); } return; }
+  });
+  scr.addEventListener('change', async e => {
+    const f = e.target.closest('[data-skind]'); if (f && f.files && f.files[0]) { await sAddPhoto(f.dataset.skind, f.files[0]); f.value = ''; return; }
+    const g = e.target.closest('[data-sgroup]'); if (g && g.checked) { try { await authFetch('/social/posts/' + g.dataset.spostid + '/share', { method: 'POST', body: JSON.stringify({ groupId: g.dataset.sgroup }) }); sLoadInbox(); } catch (err) { g.checked = false; showToast(err.message); } return; }
+    if (e.target.closest('#s-new')) sRenderNew();
+  });
+  // (file boxes are left alone here: redrawing would remove them before their 'change' event arrives)
+  scr.addEventListener('input', e => { if (e.target.classList.contains('s-caption')) sCheckCaption(e.target); if (e.target.closest('#s-new') && e.target.type !== 'file') sRenderNew(); });
 }
 
 // ── PIN LOCK ──────────────────────────────────────────────────────────────────
