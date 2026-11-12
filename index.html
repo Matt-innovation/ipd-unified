@@ -160,6 +160,19 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .q-tabs button{flex-shrink:0;font-family:var(--font);font-size:14px;font-weight:600;padding:8px 14px;min-height:38px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;white-space:nowrap}
 .q-tabs button.on{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
 .qtab-count{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--orange);color:#fff;font-size:12px;line-height:20px;text-align:center}
+.qn-wrap{display:flex;flex-direction:column;gap:10px;padding:14px;margin:12px;background:var(--surface);border-radius:var(--radius);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.qn-job{font-size:14px;color:var(--text)}
+.qn-warn{color:#b45309;font-weight:700}
+.qn-text{width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:400 15px var(--font);resize:vertical}
+.qn-btns{display:flex;flex-wrap:wrap;gap:8px}
+.qn-btns .q-btn{flex:1 1 140px;min-height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.qn-hint{font-size:12px;color:var(--text-mid)}
+#qn-list{display:flex;flex-direction:column;gap:8px}
+.qn-item{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface)}
+.qn-thumb{width:72px;height:72px;object-fit:cover;border-radius:8px;flex-shrink:0;background:var(--surface2)}
+.qn-note{flex:1;min-width:0;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--text)}
+.qn-st{font-size:12px;font-weight:700;margin-left:auto;text-align:right;flex-shrink:0;max-width:45%}
+.qn-st.ok{color:#16a34a}.qn-st.warn{color:#b45309}.qn-st.bad{color:#dc2626}.qn-st.wait{color:var(--text-mid)}
 .qtab-soon{font-size:11px;font-weight:600;opacity:.7;margin-left:2px}
 .qt-panels{flex:1;min-height:0;position:relative}
 .qt-panel{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column}
@@ -847,7 +860,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
           <button data-qtab="products">Products</button>
           <button data-qtab="bundles">Bundles</button>
           <button data-qtab="labour">Labour</button>
-          <button data-qtab="notes">Notes &amp; photos <span class="qtab-soon">soon</span></button>
+          <button data-qtab="notes">Notes &amp; photos</button>
         </div>
         <div class="qt-panels">
           <div class="qt-panel" id="qt-products">
@@ -898,7 +911,18 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             </div>
           </div>
           <div class="qt-panel" id="qt-notes" hidden>
-            <div class="qempty">Job notes and photos for the ServiceM8 job diary are coming here in a later step.</div>
+            <div class="qempty" id="qn-off" hidden>Notes &amp; photos are switched off.</div>
+            <div class="qn-wrap" id="qn-on">
+              <div class="qn-job" id="qn-job"></div>
+              <textarea id="qn-text" class="qn-text" rows="3" maxlength="4000" placeholder="Add a note for the job diary…"></textarea>
+              <div class="qn-btns">
+                <button class="q-btn qn-save" id="qn-save">💾 Save note</button>
+                <label class="q-btn qn-cam"><input type="file" accept="image/*" capture="environment" data-qnphoto hidden>📷 Take photo</label>
+                <label class="q-btn qn-cam"><input type="file" accept="image/*" multiple data-qnphoto hidden>🖼 Choose photos</label>
+              </div>
+              <div class="qn-hint">Saved to our archive and to the ServiceM8 job diary. With no signal, photos wait on the phone and send when you're back in range.</div>
+              <div id="qn-list"></div>
+            </div>
           </div>
         </div>
         <div class="quote-bar">
@@ -3360,6 +3384,7 @@ function setQTab(t) {
   if (t === 'bundles') renderQBundles();
   if (t === 'labour') renderQLabour();
   if (t === 'summary') renderQuote();
+  if (t === 'notes') { qnServer.job = ''; qnRender(); qnUploadLoop(); }
   updateQuoteBar();
 }
 
@@ -3878,6 +3903,7 @@ function enablePilotUI() {
   const kb = document.getElementById('kb-search'); if (kb) kb.placeholder = 'Search the IPD Knowledge Centre...';
   setupHome();
   setupQuoteTabs();
+  setupQuoteNotes();
   // Invoice description: kept on the phone with the quote until it's cleared
   const idsc = document.getElementById('q-invoice-desc');
   if (idsc) { try { idsc.value = localStorage.getItem('ipd_invoice_desc') || ''; } catch (e) {} idsc.addEventListener('input', () => { try { localStorage.setItem('ipd_invoice_desc', idsc.value); } catch (e) {} }); }
@@ -3936,6 +3962,7 @@ function setUser(u) {
   if (typeof kioskRefreshSummary === 'function') kioskRefreshSummary();
   if (typeof dirRefresh === 'function') dirRefresh();
   if (typeof socialRefresh === 'function') socialRefresh().then(() => sUploadLoop());
+  if (typeof qnRefresh === 'function') qnRefresh().then(() => qnUploadLoop());
 }
 function signedOut() {
   const wasPilot = PILOT_UI;
@@ -4503,9 +4530,11 @@ async function sAddPhoto(kind, file) {
   sRenderNew(); sUploadLoop();
 }
 // one at a time; on success the full-size photo is removed from the phone (thumbnail kept)
+let sAgain = false;                                                 // asked to run while busy: run once more at the end
 async function sUploadLoop() {
-  if (sBusy || !CURRENT_USER) return;
-  sBusy = true;
+  if (sBusy) { sAgain = true; return; }
+  if (!CURRENT_USER) return;
+  sBusy = true; sAgain = false;
   try {
     for (;;) {
       const next = (await sAll()).filter(r => r.status === 'waiting').sort((a, b) => a.at - b.at)[0];
@@ -4516,11 +4545,11 @@ async function sUploadLoop() {
         await sPut({ ...next, image: null, status: 'uploaded' });
       } catch (e) {
         if (/HTTP 4|Only one|Up to 3|JPEG|already been sent|Not your/.test(e.message)) await sPut({ ...next, image: null, status: 'refused', error: e.message });
-        else break;                                                      // no signal / server busy: try again later
+        else { setTimeout(sUploadLoop, 5000); break; }                   // no signal / server busy: try again in 5 s (and every 30 s)
       }
       sRenderNew();
     }
-  } finally { sBusy = false; sRenderNew(); }
+  } finally { sBusy = false; sRenderNew(); if (sAgain) { sAgain = false; sUploadLoop(); } }
 }
 window.addEventListener('online', () => sUploadLoop());
 setInterval(() => { if (CURRENT_USER && sConfig) sUploadLoop(); }, 30000);
@@ -4533,6 +4562,9 @@ async function sRenderNew() {
   const slot = (kind, label, max) => '<div class="s-slot"><div class="k-sub">' + label + '</div><div class="s-row">' + by(kind).map(tile).join('') +
     (by(kind).length < max ? '<label class="s-add"><input type="file" accept="image/*" capture="environment" data-skind="' + kind + '" hidden>📷 ' + (max > 1 ? 'Add' : 'Take') + '</label>' : '') + '</div></div>';
   box.innerHTML = slot('before', 'Before photo', 1) + slot('after', 'After photo', 1) + slot('extra', 'Extra photos (up to 3)', 3);
+  // Handler on each camera button itself: if an upload finishing redraws this area while the camera is open,
+  // the photo still arrives (a handler on the screen would miss it — the old button is no longer on the page).
+  box.querySelectorAll('[data-skind]').forEach(inp => (inp.onchange = () => { const file = inp.files && inp.files[0]; if (file) { inp.value = ''; sAddPhoto(inp.dataset.skind, file); } }));
   const allUp = recs.length && recs.every(r => r.status === 'uploaded');
   const ticks = [...document.querySelectorAll('#s-new [data-sprivacy], #s-cust')].every(c => c.checked);
   const ready = by('before').length && by('after').length && allUp && ticks && document.getElementById('s-suburb').value.trim() && document.getElementById('s-jobtype').value && document.getElementById('s-summary').value.trim();
@@ -4618,12 +4650,101 @@ function setupSocial() {
     const ga = t.closest('[data-sgarchive]'); if (ga) { try { await authFetch('/social/groups/' + ga.dataset.sgarchive + '/archive', { method: 'POST' }); sLoadInbox(); } catch (err) { showToast(err.message); } return; }
   });
   scr.addEventListener('change', async e => {
-    const f = e.target.closest('[data-skind]'); if (f && f.files && f.files[0]) { await sAddPhoto(f.dataset.skind, f.files[0]); f.value = ''; return; }
+    if (e.target.closest('[data-skind]')) return;                       // handled on the button itself (sRenderNew)
     const g = e.target.closest('[data-sgroup]'); if (g && g.checked) { try { await authFetch('/social/posts/' + g.dataset.spostid + '/share', { method: 'POST', body: JSON.stringify({ groupId: g.dataset.sgroup }) }); sLoadInbox(); } catch (err) { g.checked = false; showToast(err.message); } return; }
     if (e.target.closest('#s-new')) sRenderNew();
   });
   // (file boxes are left alone here: redrawing would remove them before their 'change' event arrives)
   scr.addEventListener('input', e => { if (e.target.classList.contains('s-caption')) sCheckCaption(e.target); if (e.target.closest('#s-new') && e.target.type !== 'file') sRenderNew(); });
+}
+
+// ── QUOTE NOTES & PHOTOS (job diary) ─────────────────────────────────────────
+// Notes and photos for the job number on the Summary tab. Saved to our archive and the ServiceM8 job diary.
+// Photos are shrunk (≈1600 px + 240 px thumbnail), kept in the phone's own database until the server
+// confirms them, then only the thumbnail stays. With no signal they wait and send when back in range.
+let qnConfig = null, qnBusy = false, qnServer = { job: '', items: [] };
+const QN_DB = 'ipd-quote-notes', QN_STORE = 'items';
+function qnDb() { return new Promise((ok, no) => { const r = indexedDB.open(QN_DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(QN_STORE, { keyPath: 'clientId' }); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); }); }
+async function qnTx(mode, fn) { const db = await qnDb(); return new Promise((ok, no) => { const t = db.transaction(QN_STORE, mode), st = t.objectStore(QN_STORE); const out = fn(st); t.oncomplete = () => ok(out && out.result !== undefined ? out.result : out); t.onerror = () => no(t.error); }); }
+const qnAll = () => qnTx('readonly', st => st.getAll());
+const qnPut = rec => qnTx('readwrite', st => st.put(rec));
+const qnJob = () => (document.getElementById('job-number-input')?.value || '').trim();
+
+async function qnRefresh() {
+  if (!CURRENT_USER) { qnConfig = null; return; }
+  try { qnConfig = await authFetch('/quote-notes/config'); } catch (e) { qnConfig = null; }
+  if (qTab === 'notes') qnRender();
+}
+async function qnAdd(kind, payload) {
+  const job = qnJob();
+  if (!/^\d{1,8}$/.test(job)) { showToast('Enter the job number on the Summary tab first'); return false; }
+  await qnPut({ clientId: sUuid(), jobNumber: job, kind, status: 'waiting', at: Date.now(), ...payload });
+  qnRender(); qnUploadLoop(); return true;
+}
+async function qnAddPhoto(file) {
+  try { const [image, thumb] = await Promise.all([sShrink(file, 1600, 0.8), sShrink(file, 240, 0.7)]); await qnAdd('photo', { image, thumb }); }
+  catch (e) { showToast(e.message); }
+}
+// one at a time; when the server confirms, the full-size photo is removed from the phone (thumbnail kept)
+let qnAgain = false;                                               // asked to run while busy: run once more at the end
+async function qnUploadLoop() {
+  if (qnBusy) { qnAgain = true; return; }
+  if (!CURRENT_USER || !(qnConfig && qnConfig.enabled)) return;
+  qnBusy = true; qnAgain = false;
+  try {
+    for (;;) {
+      const next = (await qnAll()).filter(r => r.status === 'waiting').sort((a, b) => a.at - b.at)[0];
+      if (!next || !navigator.onLine) break;
+      try {
+        const body = { jobNumber: next.jobNumber, clientId: next.clientId, kind: next.kind, text: next.text || '' };
+        if (next.kind === 'photo' && next.image) Object.assign(body, { image: next.image, thumb: next.thumb });
+        const { item } = await authFetch('/quote-notes/items', { method: 'POST', body: JSON.stringify(body) });
+        await qnPut({ ...next, image: null, status: item.diary === 'saved' ? 'saved' : 'archived' });   // server has it either way
+      } catch (e) {
+        if (/HTTP 4|Enter the job|Type a note|JPEG|Bad item|Not yours/.test(e.message)) await qnPut({ ...next, image: null, status: 'refused', error: e.message });
+        else { setTimeout(qnUploadLoop, 5000); break; }                 // no signal / server busy: try again in 5 s (and every 30 s)
+      }
+      qnRender();
+    }
+  } finally { qnBusy = false; if (qnAgain) { qnAgain = false; qnUploadLoop(); } }
+}
+window.addEventListener('online', () => qnUploadLoop());
+setInterval(() => { if (CURRENT_USER && qnConfig) qnUploadLoop(); }, 30000);
+
+async function qnRender() {
+  const box = document.getElementById('qn-list'); if (!box) return;
+  const off = !(qnConfig && qnConfig.enabled);
+  document.getElementById('qn-off').hidden = !off; document.getElementById('qn-on').hidden = off;
+  if (off) return;
+  const job = qnJob();
+  document.getElementById('qn-job').innerHTML = job ? 'Job <b>' + escHtml(job) + '</b>' : '<span class="qn-warn">Enter the job number on the Summary tab first</span>';
+  if (job && qnServer.job !== job) { qnServer = { job, items: [] }; try { qnServer.items = (await authFetch('/quote-notes/job/' + encodeURIComponent(job))).items; } catch (e) {} }
+  const local = (await qnAll()).filter(r => r.jobNumber === job);
+  const onServer = new Set(qnServer.items.map(i => i.clientId));
+  const mine = local.filter(r => !onServer.has(r.clientId) || r.status === 'waiting');
+  const state = r => r.status === 'saved' ? '<span class="qn-st ok">✓ In ServiceM8 diary</span>' : r.status === 'archived' ? '<span class="qn-st warn">Saved in our archive · not in ServiceM8 yet</span>' :
+    r.status === 'refused' ? '<span class="qn-st bad">' + escHtml(r.error || 'Not accepted') + '</span>' : '<span class="qn-st wait">' + (navigator.onLine ? 'Uploading…' : 'Waiting for signal') + '</span>';
+  const row = (r, thumb) => '<div class="qn-item">' + (r.kind === 'photo' ? '<img class="qn-thumb" src="' + thumb + '" alt="">' : '<div class="qn-note">' + escHtml(r.text) + '</div>') + state(r) + '</div>';
+  const fromServer = qnServer.items.map(i => { const l = local.find(x => x.clientId === i.clientId); return row({ ...i, status: i.diary === 'saved' ? 'saved' : 'archived' }, l && l.thumb ? l.thumb : PROXY + i.thumb); });
+  box.innerHTML = (mine.map(r => row(r, r.thumb)).join('') + fromServer.join('')) || '<div class="qempty">No notes or photos for this job yet.</div>';
+  if (mine.some(r => r.status !== 'waiting')) { qnServer.job = ''; }                     // refresh from the server next time
+}
+
+function setupQuoteNotes() {
+  const scr = document.getElementById('screen-quote'); if (!scr || scr.dataset.qnReady) return;
+  scr.dataset.qnReady = '1';
+  scr.addEventListener('click', async e => {
+    if (e.target.closest('#qn-save')) {
+      const t = document.getElementById('qn-text'), text = t.value.trim();
+      if (!text) return showToast('Type a note first');
+      if (await qnAdd('note', { text })) { t.value = ''; showToast('Note saved'); }
+    }
+  });
+  scr.addEventListener('change', async e => {
+    const f = e.target.closest('[data-qnphoto]'); if (!f || !f.files) return;
+    for (const file of [...f.files]) await qnAddPhoto(file);
+    f.value = '';
+  });
 }
 
 // ── PIN LOCK ──────────────────────────────────────────────────────────────────
