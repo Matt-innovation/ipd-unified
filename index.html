@@ -156,10 +156,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .ask-fb-text{min-height:50px;flex:1 1 100%}
 .quote-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
 /* quote tabs */
-.q-tabs{display:flex;gap:6px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}
-.q-tabs button{flex-shrink:0;font-family:var(--font);font-size:14px;font-weight:600;padding:8px 14px;min-height:38px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;white-space:nowrap}
+.q-tabs{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}   /* wraps to a 2nd row on narrow iPhones: no sideways scrolling */
+.q-tabs button{flex:1 1 auto;font-family:var(--font);font-size:14px;font-weight:600;padding:8px 14px;min-height:38px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;white-space:nowrap}
+@media (max-width:380px){.q-tabs,.k-tabs{gap:5px;padding:6px 8px}.q-tabs button,.k-tabs button{padding:6px 9px;min-height:36px;font-size:13.5px}}
 .q-tabs button.on{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
 .qtab-count{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--orange);color:#fff;font-size:12px;line-height:20px;text-align:center}
+/* iPhone Safari zooms in (and stays zoomed) when a text box with text under 16px is tapped, which makes the
+   page look wider than the screen. Logged-in screens only (body.pilot), so the shared-PIN app is unchanged. */
+body.pilot input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),body.pilot textarea,body.pilot select{font-size:16px!important}
 .qn-wrap{display:flex;flex-direction:column;gap:10px;padding:14px;margin:12px;background:var(--surface);border-radius:var(--radius);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .qn-job{font-size:14px;color:var(--text)}
 .qn-warn{color:#b45309;font-weight:700}
@@ -348,8 +352,8 @@ body.pilot .home-wrap>*{flex-shrink:0;min-width:0}
 .home-chips{display:flex;flex-wrap:wrap;gap:6px}
 /* Staff Kiosk */
 .k-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
-.k-tabs{display:flex;gap:6px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
-.k-tabs button{flex-shrink:0;font-family:var(--font);font-size:14px;font-weight:600;padding:8px 14px;min-height:38px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer}
+.k-tabs{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.k-tabs button{flex:1 1 auto;white-space:nowrap;font-family:var(--font);font-size:14px;font-weight:600;padding:8px 14px;min-height:38px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer}
 .k-tabs button.on{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
 .k-count{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--orange);color:#fff;font-size:12px;line-height:20px}
 .k-panels{flex:1;min-height:0;position:relative}
@@ -3894,6 +3898,7 @@ function enablePilotUI() {
   if (PILOT_UI) return;
   PILOT_UI = true;
   document.body.classList.add('pilot');
+  document.documentElement.style.webkitTextSizeAdjust = '100%';     // no text enlarging when the iPhone is turned sideways
   for (const name of ['home', 'quote']) {
     const tpl = document.getElementById('tpl-' + name + '-pilot'), scr = document.getElementById('screen-' + name);
     if (tpl && scr) { scr.innerHTML = ''; scr.appendChild(tpl.content.cloneNode(true)); }
