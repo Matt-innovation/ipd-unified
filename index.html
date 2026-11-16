@@ -163,6 +163,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .qtab-count{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--orange);color:#fff;font-size:12px;line-height:20px;text-align:center}
 /* iPhone Safari zooms in (and stays zoomed) when a text box with text under 16px is tapped, which makes the
    page look wider than the screen. Logged-in screens only (body.pilot), so the shared-PIN app is unchanged. */
+body.pilot,body.pilot *{touch-action:manipulation}   /* no double-tap zoom; scrolling still works */
 body.pilot input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),body.pilot textarea,body.pilot select{font-size:16px!important}
 .qn-wrap{display:flex;flex-direction:column;gap:10px;padding:14px;margin:12px;background:var(--surface);border-radius:var(--radius);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .qn-job{font-size:14px;color:var(--text)}
@@ -904,10 +905,19 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             </div>
             <div class="qt-job">
               <input type="text" id="job-number-input" placeholder="Job number (optional)">
-              <label class="qt-inv">Invoice description
-                <textarea id="q-invoice-desc" rows="4" maxlength="2000" placeholder="What the client sees on a Project invoice, e.g. Supply and install new 250L heat pump hot water system, remove old unit."></textarea>
-                <span class="qt-inv-hint">Replaces the job's Job Description in ServiceM8 (the old text is kept in our archive). A Project invoice shows this with the total only (no line items).</span>
+              <label class="qt-inv">Job description
+                <textarea id="q-job-desc" data-qtext="ipd_job_desc" rows="3" maxlength="2000" placeholder="What the job is, e.g. Replace leaking 250L electric HWS with heat pump."></textarea>
+                <span class="qt-inv-hint">ServiceM8 → Details page → Job Description.</span>
               </label>
+              <label class="qt-inv">Invoice description (the client sees this)
+                <textarea id="q-invoice-desc" data-qtext="ipd_invoice_desc" rows="4" maxlength="2000" placeholder="e.g. Supply and install new 250L heat pump hot water system, remove and dispose of old unit."></textarea>
+                <span class="qt-inv-hint">ServiceM8 → Billing page → Invoice description. Shown on the invoice with the total.</span>
+              </label>
+              <label class="qt-inv">Notes / concerns for the diary
+                <textarea id="q-diary-note" data-qtext="ipd_diary_note" rows="3" maxlength="4000" placeholder="For the technicians, e.g. Gas meter close to the unit — check clearance."></textarea>
+                <span class="qt-inv-hint">ServiceM8 → Details page → Diary (a new note each time you send). Not shown to the client.</span>
+              </label>
+              <div class="qt-inv-hint">If a box replaces text already in ServiceM8, the old text is kept in our archive. Empty boxes change nothing.</div>
             </div>
             <div class="quote-actions">
               <button class="q-btn" onclick="clearQuote()">🗑 Clear</button>
@@ -2565,7 +2575,7 @@ function chQty(id, delta) {
   updateQuoteUI();
   if(activeScreen==='quote') renderQuote(); else renderQResults();
 }
-function clearQuote() { quote=[]; quoteJobType=null; quoteDiscountPct=0; const idsc=document.getElementById('q-invoice-desc'); if(idsc) idsc.value=''; try{localStorage.removeItem('ipd_invoice_desc')}catch(e){} const qd=document.getElementById('qd-custom'); if(qd) qd.value=''; updateQuoteUI(); renderQuote(); renderQResults(); }
+function clearQuote() { quote=[]; quoteJobType=null; quoteDiscountPct=0; document.querySelectorAll('[data-qtext]').forEach(t=>{t.value='';try{localStorage.removeItem(t.dataset.qtext)}catch(e){}}); const qd=document.getElementById('qd-custom'); if(qd) qd.value=''; updateQuoteUI(); renderQuote(); renderQResults(); }
 function updateQuoteUI() {
   syncDiscountLine();
   const count = quote.reduce((s,i)=>s+i.qty,0);
@@ -2753,16 +2763,18 @@ async function sendQuoteToSM8() {
   if (badLines.length) { showToast('❌ Not sent — no valid price on: ' + badLines.map(i => i.name).join(', ')); return; }
   const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0);
   const jobNumber=(document.getElementById('job-number-input')?.value||'').trim();
-  const invoiceDescription=(document.getElementById('q-invoice-desc')?.value||'').trim();   // logged-in Summary tab only
+  const qt=id=>(document.getElementById(id)?.value||'').trim();                            // logged-in Summary tab only
+  const jobDescription=qt('q-job-desc'), invoiceDescription=qt('q-invoice-desc'), diaryNote=qt('q-diary-note');
   showToast('Sending to ServiceM8...');
   try {
-    const res=await fetch(PROXY+'/send-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quoteItems:quote.map(i=>({name:i.name,qty:i.qty,price:i.price,cost:quoteLineCost(i),code:i.code||'',type:i.type||'reece',uuid:i.type==='bundle'?i.id:''})),totalInc,jobNumber,...(invoiceDescription?{invoiceDescription}:{})})});
+    const res=await fetch(PROXY+'/send-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quoteItems:quote.map(i=>({name:i.name,qty:i.qty,price:i.price,cost:quoteLineCost(i),code:i.code||'',type:i.type||'reece',uuid:i.type==='bundle'?i.id:''})),totalInc,jobNumber,...(jobDescription?{jobDescription}:{}),...(invoiceDescription?{invoiceDescription}:{}),...(diaryNote?{diaryNote}:{})})});
     const data=await res.json();
     if(res.ok&&data.success){
       showToast('✅ Quote sent to ServiceM8!');
       const banner=document.createElement('div');
       banner.style.cssText='padding:10px 14px;background:rgba(74,222,128,.1);font-size:12px;color:#16a34a;text-align:center;border-bottom:1px solid rgba(74,222,128,.2)';
-      banner.textContent='✅ '+data.message+(data.invoiceDescription==='saved'?' Invoice description saved to the Job Description'+(data.replacedExisting?' (the old Job Description is kept in our archive).':'.'):data.invoiceDescription==='failed'?' ⚠ Invoice description NOT saved — add it in ServiceM8.':'');
+      const names={jobDescription:'Job description',invoiceDescription:'Invoice description',diaryNote:'Diary note'}, tx=data.texts||{};
+      banner.textContent='✅ '+data.message+Object.keys(names).filter(k=>tx[k]).map(k=>' '+(tx[k].result==='saved'?'✓ '+names[k]+' saved'+(tx[k].replaced?' (old text archived)':''):'⚠ '+names[k]+' NOT saved — add it in ServiceM8')+'.').join('');
       document.getElementById('quote-list').prepend(banner);
     } else showToast('❌ '+(data.error||'Could not send'));
   } catch(e){showToast('❌ Could not reach server');}
@@ -3894,6 +3906,16 @@ function stdSearch(q) {
 // ── PILOT UI ─────────────────────────────────────────────────────────────────
 // Off for everyone on the shared PIN (today's app, unchanged). Switched on only after a successful login.
 let PILOT_UI = false;
+// iPhone/iPad: no pinch zoom, no double-tap zoom, no zoom when a box is tapped. Logged-in screens only.
+function stopAccidentalZoom() {
+  if (stopAccidentalZoom.done) return; stopAccidentalZoom.done = true;
+  const vp = document.querySelector('meta[name="viewport"]');
+  if (vp) vp.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+  const stop = e => { if (e.cancelable) e.preventDefault(); };
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(t => document.addEventListener(t, stop, { passive: false }));   // Safari pinch (iPhone, iPad, trackpad)
+  document.addEventListener('touchmove', e => { if (e.touches && e.touches.length > 1) stop(e); }, { passive: false });   // two fingers
+  document.addEventListener('wheel', e => { if (e.ctrlKey) stop(e); }, { passive: false });                                 // trackpad pinch on iPad
+}
 function enablePilotUI() {
   if (PILOT_UI) return;
   PILOT_UI = true;
@@ -3909,9 +3931,9 @@ function enablePilotUI() {
   setupHome();
   setupQuoteTabs();
   setupQuoteNotes();
-  // Invoice description: kept on the phone with the quote until it's cleared
-  const idsc = document.getElementById('q-invoice-desc');
-  if (idsc) { try { idsc.value = localStorage.getItem('ipd_invoice_desc') || ''; } catch (e) {} idsc.addEventListener('input', () => { try { localStorage.setItem('ipd_invoice_desc', idsc.value); } catch (e) {} }); }
+  // Job / invoice description and diary note: kept on the phone with the quote until it's cleared
+  document.querySelectorAll('[data-qtext]').forEach(t => { try { t.value = localStorage.getItem(t.dataset.qtext) || ''; } catch (e) {} t.addEventListener('input', () => { try { localStorage.setItem(t.dataset.qtext, t.value); } catch (e) {} }); });
+  stopAccidentalZoom();
   renderQuote();
   if (activeScreen === 'home') goScreen('home');
 }
