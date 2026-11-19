@@ -353,6 +353,22 @@ body.pilot .home-wrap>*{flex-shrink:0;min-width:0}
 .home-chips{display:flex;flex-wrap:wrap;gap:6px}
 /* Staff Kiosk */
 .k-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.g-seg{display:flex;gap:6px;flex-wrap:wrap}
+.g-seg button{flex:1 1 140px;min-height:44px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:600 15px var(--font);cursor:pointer}
+.g-seg button.on{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
+.g-sell{font-size:28px;font-weight:800;color:var(--text)}
+.g-sell span{font-size:14px;font-weight:600;color:var(--text-mid)}
+.g-kv{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:14px;color:var(--text)}
+.g-kv span{color:var(--text-mid)}
+.g-table{display:flex;flex-direction:column;border:1px solid var(--border2);border-radius:10px;overflow:hidden}
+.g-row{display:grid;grid-template-columns:minmax(0,1fr) 72px 64px;gap:6px;padding:9px 10px;font-size:14px;border-top:1px solid var(--border2);color:var(--text)}
+.g-row span:nth-child(n+2){text-align:right}
+.g-head{border-top:none;background:var(--surface2);font-weight:700;font-size:13px;color:var(--text-mid)}
+.g-row.hit{background:rgba(242,107,29,.14)}
+.g-erow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px;gap:8px;align-items:end;margin-bottom:8px}
+.g-del{min-height:44px;padding:0}
+#g-editor{display:flex;flex-direction:column;gap:8px}
+#g-editor[hidden]{display:none}
 .k-tabs{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
 .k-tabs button{flex:1 1 auto;white-space:nowrap;font-family:var(--font);font-size:14px;font-weight:600;padding:8px 14px;min-height:38px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer}
 .k-tabs button.on{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
@@ -1231,6 +1247,36 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
               <button class="k-btn big" id="k-caladd">Add to calendar</button>
               <div class="k-msg" id="k-calmsg"></div>
               <div id="k-dates-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-guide">
+      <div class="k-wrap">
+        <div class="k-panels">
+          <div class="k-panel">
+            <div class="k-card">
+              <div class="k-h">Calculator</div>
+              <label class="k-label">Cost<input class="k-input" id="g-cost" inputmode="decimal" placeholder="e.g. 45.00" autocomplete="off"></label>
+              <div class="g-seg"><button data-ginc="1">Cost is inc GST</button><button data-ginc="0">Cost is ex GST</button></div>
+              <div id="g-result"></div>
+            </div>
+            <div class="k-card">
+              <div class="k-h">Markup bands</div>
+              <div class="k-sub">Markup % is on cost inc GST. GP % shows each band on its own, for information only — GP is judged on the whole job by the quote's GP bar.</div>
+              <div class="g-table" id="g-table"></div>
+              <div class="k-sub" id="g-smooth"></div>
+              <div class="k-sub" id="g-updated"></div>
+              <button class="k-btn ghost" id="g-edit-btn" hidden>Edit bands (owners)</button>
+              <div id="g-editor" hidden>
+                <div id="g-rows"></div>
+                <button class="k-btn ghost" id="g-add">+ Add a band</button>
+                <label class="k-check"><input type="checkbox" id="g-smooth-tick"> Price never drops at a band edge</label>
+                <div class="k-btns"><button class="k-btn" id="g-save">Save</button><button class="k-btn ghost" id="g-cancel">Cancel</button></div>
+                <div class="k-msg" id="g-msg"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -2289,6 +2335,7 @@ function init() {
   initPin();
   setupKiosk();
   setupDirectory();
+  setupGuide();
   setupSocial();
   initLogin();
   // Keys never live in the app: clear any ServiceM8 key an older version saved on this phone.
@@ -3988,6 +4035,7 @@ function setUser(u) {
   if (typeof renderHome === 'function') renderHome();
   if (typeof kioskRefreshSummary === 'function') kioskRefreshSummary();
   if (typeof dirRefresh === 'function') dirRefresh();
+  if (typeof guideRefresh === 'function') guideRefresh();
   if (typeof socialRefresh === 'function') socialRefresh().then(() => sUploadLoop());
   if (typeof qnRefresh === 'function') qnRefresh().then(() => qnUploadLoop());
 }
@@ -4110,6 +4158,7 @@ const HOME_ACTIONS = [
   { id: 'ask', icon: '✨', img: 'old-mate/old-mate-120.png', label: 'Ask Old Mate', desc: 'Standards, products, suppliers — with sources', roles: ALL_ROLES, go: () => goScreen('ai') },
   { id: 'kiosk', icon: '🗂️', label: 'Staff Kiosk', desc: 'Time off, notices and calendar', roles: ALL_ROLES, needsKiosk: true, go: () => openKiosk(),
     badge: () => { if (!kSummary) return ''; const p = []; if (kSummary.unreadNotices) p.push(kSummary.unreadNotices + ' new'); if (kSummary.isOwner && kSummary.ownerPending) p.push(kSummary.ownerPending + ' waiting'); return p.join(' · '); } },
+  { id: 'guide', icon: '📐', label: 'Markup guide', desc: 'Markup by cost band, with a calculator', roles: ALL_ROLES, needsGuide: true, go: () => openGuide() },
   { id: 'suppliers', icon: '🤝', label: 'Our Suppliers and Business Partners', desc: 'Who we use — call, email or map them', roles: ALL_ROLES, needsDirectory: true, go: () => openDirectory() },
   { id: 'social', icon: '📸', label: 'Social Media', desc: 'Job photos for our Facebook page', roles: ALL_ROLES, needsSocial: true, go: () => openSocial(),
     badge: () => (sConfig && sConfig.isOwner && sConfig.ownerNew ? sConfig.ownerNew + ' new' : '') },
@@ -4135,6 +4184,7 @@ function homeAllowed(a) {
   if (a.needsManage) return !!(CURRENT_USER && CURRENT_USER.canManageUsers && !homeViewAs);
   if (a.needsKiosk) return !!(CURRENT_USER && kSummary && kSummary.enabled);
   if (a.needsDirectory) return !!(CURRENT_USER && dirConfig && dirConfig.enabled);
+  if (a.needsGuide) return !!(CURRENT_USER && guideCfg && guideCfg.enabled);
   if (a.needsSocial) return !!(CURRENT_USER && sConfig && sConfig.enabled);
   return true;
 }
@@ -4771,6 +4821,86 @@ function setupQuoteNotes() {
     const f = e.target.closest('[data-qnphoto]'); if (!f || !f.files) return;
     for (const file of [...f.files]) await qnAddPhoto(file);
     f.value = '';
+  });
+}
+
+// ── MARKUP GUIDE ─────────────────────────────────────────────────────────────
+// Matt's markup bands (markup % on cost inc GST). Everyone logged in can view and use the calculator; only
+// owners can edit. Each band's GP % is information only (GP is judged on the whole job by the quote's GP bar).
+let guideCfg = null, guideEditing = null, guideInc = true;
+const gr2 = n => Math.round(n * 100) / 100;
+const gMoney = n => '$' + Number(n).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+// Same calculation as the server (markup-guide.js guidePrice).
+function guidePrice(costInc, cfg) {
+  const c = Number(costInc); cfg = cfg || guideCfg;
+  if (!(c > 0) || !cfg) return null;
+  const bands = cfg.bands, i = bands.findIndex(b => b.upTo == null || c <= b.upTo + 1e-9), band = bands[i];
+  const raw = c * (1 + band.markup / 100);
+  const floor = cfg.smoothing ? Math.max(0, ...bands.slice(0, i).map(b => b.upTo * (1 + b.markup / 100))) : 0;
+  const sell = gr2(Math.max(raw, floor));
+  return { band: i, markup: band.markup, sellInc: sell, sellEx: gr2(sell / 1.1), markupInc: gr2(sell - c), markupPct: gr2((sell / c - 1) * 100), gpPct: gr2(((sell - c) / sell) * 100), smoothed: sell > gr2(raw) };
+}
+// For the Materials allowance card (next step): suggested markup for a cost, inc or ex GST.
+function markupSuggest(cost, isInc) { const r = guidePrice(isInc ? cost : cost * 1.1); return r && { markupPct: r.markupPct, sellInc: r.sellInc }; }
+const guideBandLabel = (bands, i) => { const lo = i ? bands[i - 1].upTo + 0.01 : 0; return bands[i].upTo == null ? gMoney(lo) + ' and over' : gMoney(lo) + ' – ' + gMoney(bands[i].upTo); };
+
+async function guideRefresh() {
+  if (!CURRENT_USER) { guideCfg = null; return; }
+  try { guideCfg = await authFetch('/markup-guide'); } catch (e) { guideCfg = null; }
+  if (typeof renderHome === 'function') renderHome();
+}
+function openGuide() { goScreen('guide'); guideEditing = null; guideRender(); guideCalc(); }
+function guideRender() {
+  const box = document.getElementById('g-table'); if (!box || !guideCfg) return;
+  const b = guideCfg.bands;
+  box.innerHTML = '<div class="g-row g-head"><span>Cost (inc GST)</span><span>Markup</span><span>GP</span></div>' +
+    b.map((x, i) => '<div class="g-row" data-gband="' + i + '"><span>' + guideBandLabel(b, i) + '</span><span><b>' + x.markup + '%</b></span><span>' + x.gpPct + '%</span></div>').join('');
+  document.getElementById('g-smooth').textContent = guideCfg.smoothing ? 'Price never drops at a band edge: ON — a cost just over an edge never sells for less than one just under it.' : 'Price never drops at a band edge: OFF — prices follow the table exactly.';
+  document.getElementById('g-updated').textContent = guideCfg.updatedAt ? 'Last changed by ' + guideCfg.updatedBy + ', ' + new Date(guideCfg.updatedAt).toLocaleDateString('en-AU') : "Matt's starting table.";
+  document.getElementById('g-edit-btn').hidden = !guideCfg.canEdit;
+  document.getElementById('g-editor').hidden = !guideEditing;
+  if (guideEditing) {
+    document.getElementById('g-rows').innerHTML = guideEditing.bands.map((x, i, all) => '<div class="g-erow"><label class="k-label">' + (i === all.length - 1 ? 'Top band (no limit)' : 'Up to $ (inc GST)') +
+      (i === all.length - 1 ? '<input class="k-input" disabled value="and over">' : '<input class="k-input" inputmode="decimal" data-gup="' + i + '" value="' + x.upTo + '">') + '</label>' +
+      '<label class="k-label">Markup %<input class="k-input" inputmode="decimal" data-gmk="' + i + '" value="' + x.markup + '"></label>' +
+      (all.length > 1 ? '<button class="k-btn ghost g-del" data-gdel="' + i + '" aria-label="Remove band">✕</button>' : '') + '</div>').join('');
+    document.getElementById('g-smooth-tick').checked = guideEditing.smoothing;
+  }
+}
+function guideCalc() {
+  const out = document.getElementById('g-result'); if (!out) return;
+  const v = parseFloat(document.getElementById('g-cost').value);
+  document.querySelectorAll('[data-ginc]').forEach(b => b.classList.toggle('on', (b.dataset.ginc === '1') === guideInc));
+  document.querySelectorAll('[data-gband]').forEach(r => r.classList.remove('hit'));
+  if (!(v > 0)) { out.innerHTML = '<div class="k-sub">Type a cost to see the sell price.</div>'; return; }
+  const costInc = guideInc ? v : v * 1.1, r = guidePrice(costInc);
+  const row = document.querySelector('[data-gband="' + r.band + '"]'); if (row) row.classList.add('hit');
+  out.innerHTML = '<div class="g-sell">' + gMoney(r.sellInc) + ' <span>sell inc GST</span></div>' +
+    '<div class="g-kv"><span>Sell ex GST</span><b>' + gMoney(r.sellEx) + '</b><span>Cost inc GST</span><b>' + gMoney(costInc) + '</b>' +
+    '<span>Markup</span><b>' + r.markupPct + '% · ' + gMoney(r.markupInc) + '</b><span>GP on this item</span><b>' + r.gpPct + '%</b></div>' +
+    (r.smoothed ? '<div class="k-sub">Raised to the top of the band below, so the price doesn\'t drop at the band edge (band markup ' + r.markup + '%).</div>' : '<div class="k-sub">Band: ' + guideBandLabel(guideCfg.bands, r.band) + ' at ' + r.markup + '%.</div>');
+}
+function guideReadEditor() {
+  document.querySelectorAll('[data-gup]').forEach(i => (guideEditing.bands[+i.dataset.gup].upTo = i.value));
+  document.querySelectorAll('[data-gmk]').forEach(i => (guideEditing.bands[+i.dataset.gmk].markup = i.value));
+  guideEditing.smoothing = document.getElementById('g-smooth-tick').checked;
+}
+function setupGuide() {
+  const scr = document.getElementById('screen-guide'); if (!scr) return;
+  scr.addEventListener('input', e => { if (e.target.id === 'g-cost') guideCalc(); });
+  scr.addEventListener('click', async e => {
+    const t = e.target;
+    const inc = t.closest('[data-ginc]'); if (inc) { guideInc = inc.dataset.ginc === '1'; return guideCalc(); }
+    if (t.closest('#g-edit-btn')) { guideEditing = { bands: guideCfg.bands.map(b => ({ upTo: b.upTo, markup: b.markup })), smoothing: guideCfg.smoothing }; document.getElementById('g-msg').textContent = ''; return guideRender(); }
+    if (t.closest('#g-cancel')) { guideEditing = null; return guideRender(); }
+    const del = t.closest('[data-gdel]'); if (del) { guideReadEditor(); guideEditing.bands.splice(+del.dataset.gdel, 1); guideEditing.bands[guideEditing.bands.length - 1].upTo = null; return guideRender(); }
+    if (t.closest('#g-add')) { guideReadEditor(); const b = guideEditing.bands, last = b[b.length - 1], prevTop = b.length > 1 ? Number(b[b.length - 2].upTo) : 0; b.splice(b.length - 1, 0, { upTo: gr2((prevTop || 0) * 2 || 10), markup: last.markup }); return guideRender(); }
+    if (t.closest('#g-save')) {
+      guideReadEditor();
+      const bands = guideEditing.bands.map((b, i, all) => ({ upTo: i === all.length - 1 ? null : parseFloat(b.upTo), markup: parseFloat(b.markup) }));
+      try { guideCfg = await authFetch('/markup-guide', { method: 'POST', body: JSON.stringify({ bands, smoothing: guideEditing.smoothing }) }); guideEditing = null; showToast('Markup guide saved'); guideRender(); guideCalc(); }
+      catch (err) { document.getElementById('g-msg').textContent = err.message; }
+    }
   });
 }
 
