@@ -354,6 +354,9 @@ body.pilot .home-wrap>*{flex-shrink:0;min-width:0}
 /* Staff Kiosk */
 .k-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
 .g-seg{display:flex;gap:6px;flex-wrap:wrap}
+.mat-box{display:flex;flex-direction:column;gap:8px}
+.mat-h{font-size:15px;font-weight:800;color:var(--text)}
+.type-badge.l{background:rgba(37,99,235,.12);color:#1d4ed8}
 .g-seg button{flex:1 1 140px;min-height:44px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:600 15px var(--font);cursor:pointer}
 .g-seg button.on{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
 .g-sell{font-size:28px;font-weight:800;color:var(--text)}
@@ -893,6 +896,18 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             <div class="qt-list" id="qb-results"></div>
           </div>
           <div class="qt-panel" id="qt-labour" hidden>
+            <div class="ql-box mat-box" id="mat-box">
+              <div class="mat-h">Materials allowance</div>
+              <label class="k-label">Line name (the client sees this)<input class="k-input" id="mat-name" value="Materials" maxlength="80" autocomplete="off"></label>
+              <label class="k-label">Materials cost<input class="k-input" id="mat-cost" inputmode="decimal" placeholder="e.g. 550" autocomplete="off"></label>
+              <div class="g-seg"><button data-matinc="0">Cost is ex GST</button><button data-matinc="1">Cost is inc GST</button></div>
+              <div class="g-seg"><button data-matmode="pct">Markup %</button><button data-matmode="dollar">Markup $</button></div>
+              <label class="k-label" id="mat-mk-label">Markup %<input class="k-input" id="mat-mk" inputmode="decimal" autocomplete="off"></label>
+              <div class="k-sub" id="mat-guide"></div>
+              <div id="mat-result"></div>
+              <div class="k-btns"><button class="k-btn" id="mat-add">Add to quote</button><button class="k-btn ghost" id="mat-cancel" hidden>Cancel</button></div>
+              <div class="k-sub">The client sees one line with the sell price only — never the cost or markup.</div>
+            </div>
             <div class="ql-box">
               <div class="ql-seg"><button data-lkind="standard">Tradesman</button><button data-lkind="apprentice">Apprentice</button></div>
               <div class="ql-hours"><button data-lhours="0.5">+ 0.5h</button><button data-lhours="1">+ 1h</button><button data-lhours="2">+ 2h</button></div>
@@ -2668,7 +2683,7 @@ function renderQuotePilot() {
   list.innerHTML = quote.map(item => {
     if (item.id === 'discount') return `<div class="qline" data-id="discount"><div class="qline-actions"><button class="qa-del" data-del="discount">Delete</button></div><div class="quote-item qline-front"><div class="qi-top"><div class="qi-name">${esc(item.name)}</div><div class="qi-line" style="color:var(--red)">−$${Math.abs(item.price).toFixed(2)}</div></div><div class="qi-bot"><div class="qi-meta">On the whole quote</div><span class="qi-btns"><button class="qi-btn del" data-del="discount">Delete</button></span></div></div></div>`;
     const line = item.price*item.qty; const isB = item.type==='bundle';
-    return `<div class="qline" data-id="${esc(item.id)}"><div class="qline-actions"><button class="qa-edit" data-edit="${esc(item.id)}">Edit</button><button class="qa-del" data-del="${esc(item.id)}">Delete</button></div><div class="quote-item qline-front"><div class="qi-top">${item.type==='reece'&&item.code?qImgTag(item.code):''}<div class="qi-name">${esc(item.name)} <span class="type-badge ${isB?'b':'r'}">${isB?'Bundle':'Reece'}</span></div><div class="qi-line">$${line.toFixed(2)}</div></div><div class="qi-bot"><div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${item.id}',-1)">−</button><span class="qty-num">${item.qty}</span><button class="qty-btn" onclick="chQty('${item.id}',1)">+</button></div><div class="qi-meta">$${item.price.toFixed(2)} ea</div><span class="qi-btns"><button class="qi-btn" data-edit="${esc(item.id)}">Edit</button><button class="qi-btn del" data-del="${esc(item.id)}">Delete</button></span></div></div></div>`;
+    return `<div class="qline" data-id="${esc(item.id)}"><div class="qline-actions"><button class="qa-edit" data-edit="${esc(item.id)}">Edit</button><button class="qa-del" data-del="${esc(item.id)}">Delete</button></div><div class="quote-item qline-front"><div class="qi-top">${item.type==='reece'&&item.code?qImgTag(item.code):''}<div class="qi-name">${esc(item.name)} <span class="type-badge ${isB?'b':item.type==='labour'?'l':'r'}">${isB?'Bundle':item.type==='labour'?(item.kind==='materials'?'Materials':'Labour'):'Reece'}</span></div><div class="qi-line">$${line.toFixed(2)}</div></div><div class="qi-bot"><div class="qty-ctrl"><button class="qty-btn" onclick="chQty('${item.id}',-1)">−</button><span class="qty-num">${item.qty}</span><button class="qty-btn" onclick="chQty('${item.id}',1)">+</button></div><div class="qi-meta">$${item.price.toFixed(2)} ea</div><span class="qi-btns"><button class="qi-btn" data-edit="${esc(item.id)}">Edit</button><button class="qi-btn del" data-del="${esc(item.id)}">Delete</button></span></div></div></div>`;
   }).join('');
   const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0); const gst=totalInc/11; const sub=totalInc-gst;
   document.getElementById('t-sub').textContent='$'+sub.toFixed(2);
@@ -2814,7 +2829,7 @@ async function sendQuoteToSM8() {
   const jobDescription=qt('q-job-desc'), invoiceDescription=qt('q-invoice-desc'), diaryNote=qt('q-diary-note');
   showToast('Sending to ServiceM8...');
   try {
-    const res=await fetch(PROXY+'/send-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quoteItems:quote.map(i=>({name:i.name,qty:i.qty,price:i.price,cost:quoteLineCost(i),code:i.code||'',type:i.type||'reece',uuid:i.type==='bundle'?i.id:''})),totalInc,jobNumber,...(jobDescription?{jobDescription}:{}),...(invoiceDescription?{invoiceDescription}:{}),...(diaryNote?{diaryNote}:{})})});
+    const res=await fetch(PROXY+'/send-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quoteItems:quote.map(i=>({name:i.name,qty:i.qty,price:i.price,cost:quoteLineCost(i),code:i.code||'',type:i.type||'reece',uuid:i.type==='bundle'?i.id:'',...(i.type==='labour'?{lineKind:lineKindOf(i)}:{})})),totalInc,jobNumber,...(jobDescription?{jobDescription}:{}),...(invoiceDescription?{invoiceDescription}:{}),...(diaryNote?{diaryNote}:{})})});
     const data=await res.json();
     if(res.ok&&data.success){
       showToast('✅ Quote sent to ServiceM8!');
@@ -3613,6 +3628,7 @@ function setupQuoteSwipe() {
 }
 function qEditLine(id) {
   const it = quote.find(i => i.id === id); if (!it) return;
+  if (it.kind === 'materials' && it.mat) return matLoad(it);
   const isHours = id.startsWith('qlab_');
   const row = document.querySelector('#quote-list .qline[data-id="' + CSS.escape(id) + '"] .qline-front');
   row.innerHTML = '<div class="qedit"><div class="qrow-name">' + esc(it.name) + '</div><label class="qedit-row">' + (isHours ? 'Hours' : 'Quantity') +
@@ -3978,6 +3994,7 @@ function enablePilotUI() {
   setupHome();
   setupQuoteTabs();
   setupQuoteNotes();
+  setupMaterials();
   // Job / invoice description and diary note: kept on the phone with the quote until it's cleared
   document.querySelectorAll('[data-qtext]').forEach(t => { try { t.value = localStorage.getItem(t.dataset.qtext) || ''; } catch (e) {} t.addEventListener('input', () => { try { localStorage.setItem(t.dataset.qtext, t.value); } catch (e) {} }); });
   stopAccidentalZoom();
@@ -4902,6 +4919,82 @@ function setupGuide() {
       catch (err) { document.getElementById('g-msg').textContent = err.message; }
     }
   });
+}
+
+// ── MATERIALS ALLOWANCE (one line, cost + markup) ────────────────────────────
+// Staff type one materials cost (ex or inc GST) and a markup (% or $). The quote gets ONE line (name editable,
+// default "Materials") with the sell price inc GST; its cost is kept ex GST for the GP bar and sent to ServiceM8
+// as the line cost. The client only ever sees the line name and sell price.
+let matEdit = null, matInc = false, matMode = 'pct', matTouched = false;
+const mr2 = n => Math.round(n * 100) / 100;
+function matCalc() {
+  const c = parseFloat(document.getElementById('mat-cost').value), v = parseFloat(document.getElementById('mat-mk').value);
+  if (!(c > 0)) return null;
+  const costEx = matInc ? c / 1.1 : c, costInc = costEx * 1.1;
+  let sellEx;
+  if (matMode === 'pct') sellEx = costEx * (1 + (v > 0 ? v : 0) / 100);
+  else sellEx = costEx + (v > 0 ? v : 0);                                   // $ markup is ex GST
+  const sellInc = mr2(sellEx * 1.1); sellEx = sellInc / 1.1;
+  return { costEx: mr2(costEx), costInc: mr2(costInc), sellInc, sellEx: mr2(sellEx), markupPct: mr2((sellEx / costEx - 1) * 100), markupEx: mr2(sellEx - costEx), markupInc: mr2((sellEx - costEx) * 1.1), gpPct: mr2(((sellEx - costEx) / sellEx) * 100) };
+}
+function matRender() {
+  const box = document.getElementById('mat-box'); if (!box) return;
+  document.querySelectorAll('[data-matinc]').forEach(b => b.classList.toggle('on', (b.dataset.matinc === '1') === matInc));
+  document.querySelectorAll('[data-matmode]').forEach(b => b.classList.toggle('on', b.dataset.matmode === matMode));
+  document.getElementById('mat-mk-label').firstChild.textContent = matMode === 'pct' ? 'Markup %' : 'Markup $ (ex GST)';
+  const c = parseFloat(document.getElementById('mat-cost').value);
+  const g = c > 0 && typeof markupSuggest === 'function' ? markupSuggest(matInc ? c : c * 1.1, true) : null;
+  document.getElementById('mat-guide').innerHTML = g ? 'Markup guide suggests <b>' + g.markupPct + '%</b> (sell $' + g.sellInc.toFixed(2) + ' inc GST) <button class="qrow-add ghost" id="mat-use-guide">Use it</button>' : '';
+  const r = matCalc();
+  document.getElementById('mat-result').innerHTML = r ? '<div class="g-sell">$' + r.sellInc.toFixed(2) + ' <span>sell inc GST</span></div><div class="g-kv">' +
+    '<span>Sell ex GST</span><b>$' + r.sellEx.toFixed(2) + '</b><span>Cost ex GST</span><b>$' + r.costEx.toFixed(2) + '</b>' +
+    '<span>Markup</span><b>' + r.markupPct + '% · $' + r.markupEx.toFixed(2) + ' ex ($' + r.markupInc.toFixed(2) + ' inc)</b><span>GP on this line</span><b>' + r.gpPct + '%</b></div>' : '<div class="k-sub">Type the materials cost.</div>';
+  document.getElementById('mat-add').textContent = matEdit ? 'Update the line' : 'Add to quote';
+  document.getElementById('mat-cancel').hidden = !matEdit;
+}
+function matReset() { matEdit = null; matTouched = false; ['mat-cost', 'mat-mk'].forEach(id => (document.getElementById(id).value = '')); document.getElementById('mat-name').value = 'Materials'; matRender(); }
+function matLoad(it) {
+  setQTab('labour'); matEdit = it.id; matTouched = true; matInc = !!it.mat.inc; matMode = it.mat.mode;
+  document.getElementById('mat-name').value = it.name; document.getElementById('mat-cost').value = it.mat.cost; document.getElementById('mat-mk').value = it.mat.value;
+  matRender(); document.getElementById('mat-box').scrollIntoView({ block: 'start' });
+}
+function matSave() {
+  const r = matCalc(); if (!r) return showToast('Type the materials cost first');
+  const name = (document.getElementById('mat-name').value || '').trim() || 'Materials';
+  const line = { id: matEdit || 'mat_' + Date.now(), type: 'labour', kind: 'materials', name, price: r.sellInc, qty: 1, gpCost: r.costEx,
+    mat: { cost: parseFloat(document.getElementById('mat-cost').value), inc: matInc, mode: matMode, value: parseFloat(document.getElementById('mat-mk').value) || 0 } };
+  const ex = quote.find(i => i.id === line.id);
+  if (ex) Object.assign(ex, line); else quote.push(line);
+  showToast(matEdit ? 'Materials line updated' : 'Materials added: $' + r.sellInc.toFixed(2));
+  matReset(); updateQuoteUI(); renderQLabour();
+}
+function setupMaterials() {
+  const box = document.getElementById('mat-box'); if (!box || box.dataset.ready) return; box.dataset.ready = '1';
+  box.addEventListener('input', e => {
+    if (e.target.id === 'mat-mk') matTouched = true;
+    if (e.target.id === 'mat-cost' && !matTouched) { const c = parseFloat(e.target.value), g = c > 0 && typeof markupSuggest === 'function' ? markupSuggest(matInc ? c : c * 1.1, true) : null; if (g) { matMode = 'pct'; document.getElementById('mat-mk').value = g.markupPct; } }
+    matRender();
+  });
+  box.addEventListener('click', e => {
+    const t = e.target;
+    const inc = t.closest('[data-matinc]'); if (inc) { matInc = inc.dataset.matinc === '1'; return matRender(); }
+    const md = t.closest('[data-matmode]'); if (md && md.dataset.matmode !== matMode) {
+      const r = matCalc(); matMode = md.dataset.matmode;
+      if (r) document.getElementById('mat-mk').value = matMode === 'pct' ? r.markupPct : r.markupEx;   // same sell price, other unit
+      return matRender();
+    }
+    if (t.closest('#mat-use-guide')) { const c = parseFloat(document.getElementById('mat-cost').value), g = markupSuggest(matInc ? c : c * 1.1, true); matMode = 'pct'; document.getElementById('mat-mk').value = g.markupPct; matTouched = true; return matRender(); }
+    if (t.closest('#mat-add')) return matSave();
+    if (t.closest('#mat-cancel')) return matReset();
+  });
+  matRender();
+}
+// What each labour-type line is, so the server can link it to a fixed ServiceM8 product (no new products made).
+function lineKindOf(i) {
+  if (i.kind) return i.kind;
+  if (i.id === 'uplift' || i.id === 'discount') return i.id;
+  let m = /^qlab_(\w+)$/.exec(i.id) || /^labour_([a-z]+)_\d+$/.exec(i.id);
+  return m ? m[1] : '';
 }
 
 // ── PIN LOCK ──────────────────────────────────────────────────────────────────
