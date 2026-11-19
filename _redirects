@@ -1,0 +1,6 @@
+# Netlify: never publish the internal notes files (Matt, 19 Nov 2026). "404!" = always answer "not found".
+/CLAUDE.md   /404   404!
+/claude.md   /404   404!
+/STATUS.md   /404   404!
+/status.md   /404   404!
+/_redirects  /404   404!
