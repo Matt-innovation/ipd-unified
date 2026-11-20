@@ -1,6 +1,6 @@
 # STATUS — ipd-app
 
-Last updated: 19 Nov 2026
+Last updated: 20 Nov 2026
 
 ## Live (main, on Netlify)
 - Shared PIN app unchanged for staff without a login.
@@ -24,3 +24,7 @@ Last updated: 19 Nov 2026
 3. Quote → Summary: scroll down to the three boxes; send to job 7600; check Details, Billing and Diary in ServiceM8.
 4. Pinch and double-tap: the screen should not zoom.
 5. Home → Markup guide: try the calculator.
+
+## 20 Nov 2026
+- New branch `client-terms` (also in `preview-all`): client quote page `quote.html` + approved terms `terms/ipd-terms.txt` (v1, QBCC 1141791), version history in `terms/ipd-terms.json` and `terms/history/`. Edit terms only with `ipd-audit-scripts/terms-version.js record "what changed"`.
+- Not on the live Netlify site (main unchanged).
