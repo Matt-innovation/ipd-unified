@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Your quote · Innovation Plumbing and Design</title>
+<style>
+  :root { --ink:#1f2328; --muted:#5b636d; --line:#e3e6ea; --bg:#f5f6f8; --card:#fff; --brand:#e0672b; --brand-ink:#fff; --ok:#1d7a3e; --warn:#a33b00; }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 16px 16px calc(32px + env(safe-area-inset-bottom)); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+  header.card { display: flex; gap: 14px; align-items: center; }
+  header img { width: 76px; height: 76px; object-fit: contain; flex: none; }
+  header .co { min-width: 0; font-size: 13.5px; color: var(--muted); overflow-wrap: anywhere; }
+  header .co b { display: block; color: var(--ink); font-size: 16px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 0 0 10px; }
+  .meta { color: var(--muted); font-size: 14px; }
+  .meta div { overflow-wrap: anywhere; }
+  .desc { white-space: pre-wrap; margin-top: 10px; }
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+  td.q { width: 48px; text-align: center; color: var(--muted); }
+  td.a { width: 104px; text-align: right; white-space: nowrap; }
+  .tot { display: flex; justify-content: space-between; padding: 6px 0; }
+  .tot.big { font-size: 19px; font-weight: 700; border-top: 2px solid var(--ink); margin-top: 6px; padding-top: 10px; }
+  .tot.dep { color: var(--warn); font-weight: 600; }
+  ul.key { margin: 0; padding-left: 20px; }
+  ul.key li { margin-bottom: 6px; }
+  button, .btn { font: inherit; border-radius: 10px; padding: 13px 16px; border: 1px solid var(--line); background: #fff; color: var(--ink); width: 100%; cursor: pointer; touch-action: manipulation; }
+  button.primary { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); font-weight: 700; }
+  button:disabled { opacity: .5; }
+  .row { display: flex; gap: 10px; margin-top: 12px; }
+  .row > * { flex: 1; }
+  label.tick { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0; }
+  label.tick input { width: 24px; height: 24px; flex: none; margin: 0; }
+  input[type=text] { font: inherit; font-size: 16px; width: 100%; padding: 12px; border: 1px solid #c9ced4; border-radius: 10px; }
+  .note { font-size: 13.5px; color: var(--muted); }
+  .msg { margin-top: 10px; font-weight: 600; }
+  .msg.err { color: var(--warn); }
+  .done { border-color: #9fd3b0; background: #f1faf4; }
+  .done b { color: var(--ok); }
+  #terms { position: fixed; inset: 0; background: #fff; z-index: 10; display: none; flex-direction: column; }
+  #terms.open { display: flex; }
+  #terms .bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 16px; padding-top: calc(12px + env(safe-area-inset-top)); border-bottom: 1px solid var(--line); }
+  #terms .bar button { width: auto; padding: 10px 16px; }
+  #terms .body { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px 16px calc(32px + env(safe-area-inset-bottom)); max-width: 720px; margin: 0 auto; width: 100%; }
+  #terms h3 { font-size: 16px; margin: 18px 0 6px; }
+  #terms p { margin: 0 0 8px; }
+  #terms ul { margin: 0 0 8px; padding-left: 20px; }
+  .center { text-align: center; padding: 40px 16px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="center">Loading your quote…</div></div>
+
+<div id="terms" role="dialog" aria-modal="true" aria-labelledby="terms-title">
+  <div class="bar"><b id="terms-title">Terms and conditions</b><button type="button" id="terms-close">Close</button></div>
+  <div class="body" id="terms-body"></div>
+</div>
+
+<script>
+// Client quote page (Part B). Reads the quote from our server and the terms from terms/ipd-terms.txt + ipd-terms.json
+// (the version history lives there). Records: page opened, full terms opened, PDF downloaded, signed. No costs are ever
+// sent to this page. Nothing here writes to ServiceM8.
+const API = /^ipd-app-preview/.test(location.hostname) ? 'https://ipd-proxy-auth-test.onrender.com' : (window.__PROXY || 'https://ipd-proxy-server.onrender.com');
+const id = (location.hash || '').replace(/^#/, '').trim();
+const staffPreview = /[?&]staff=1\b/.test(location.search);
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const aud = n => (n < 0 ? '−' : '') + '$' + Math.abs(n).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const day = iso => new Date(iso).toLocaleDateString('en-AU', { timeZone: 'Australia/Brisbane', day: 'numeric', month: 'long', year: 'numeric' });
+const when = iso => new Date(iso).toLocaleString('en-AU', { timeZone: 'Australia/Brisbane', day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+let Q = null, TERMS = null, TERMS_TEXT = '', TERMS_SHA = '', LOGO = null;
+
+async function sha256(text) {
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text.replace(/\r\n/g, '\n')));
+  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+}
+const event = type => fetch(API + '/client-quote/' + id + '/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type }) }).catch(() => {});
+
+function termsHtml(text) {
+  const out = [];
+  let list = null;
+  for (const raw of text.replace(/\r\n/g, '\n').split('\n')) {
+    const l = raw.trim();
+    if (!l) { list = null; continue; }
+    if (/^IPD TERMS AND CONDITIONS$/.test(l)) continue;
+    if (/^\d+\.\s/.test(l)) { list = null; out.push('<h3>' + esc(l) + '</h3>'); continue; }
+    if (/^- /.test(l)) { if (!list) { list = []; out.push(list); } list.push('<li>' + esc(l.slice(2)) + '</li>'); continue; }
+    list = null; out.push('<p>' + esc(l) + '</p>');
+  }
+  return out.map(x => Array.isArray(x) ? '<ul>' + x.join('') + '</ul>' : x).join('');
+}
+
+function render() {
+  const q = Q, co = TERMS.business, c = q.company || {};
+  const name = c.name || co.name, abn = c.abn ? c.abn.replace(/^(\d{2})(\d{3})(\d{3})(\d{3})$/, '$1 $2 $3 $4') : co.abn;
+  const lines = q.lines.map(l => `<tr><td>${esc(l.name)}</td><td class="q">${l.qty === 1 ? '' : esc(l.qty)}</td><td class="a">${aud(l.qty * l.priceInc)}</td></tr>`).join('');
+  const s = q.signed;
+  $('#app').innerHTML = `
+    <header class="card">
+      <img src="${esc(co.logo)}" alt="IPD logo">
+      <div class="co"><b>${esc(name)}</b>ABN ${esc(abn)} · QBCC Licence ${esc(co.qbcc)}<br>${esc(co.address)}<br>${esc(co.phone)} · ${esc(co.email)}</div>
+    </header>
+    <section class="card">
+      <h1>Quote for job #${esc(q.jobNumber)}</h1>
+      <div class="meta">
+        ${q.client && q.client.name ? `<div>For: ${esc(q.client.name)}</div>` : ''}
+        ${q.client && q.client.address ? `<div>${esc(q.client.address)}</div>` : ''}
+        <div>Issued ${day(q.issuedAt)} · ${q.expired ? '<b style="color:var(--warn)">Expired ' + day(q.expiresAt) + '</b>' : 'Valid until ' + day(q.expiresAt)}</div>
+      </div>
+      ${q.description ? `<div class="desc">${esc(q.description)}</div>` : ''}
+    </section>
+    <section class="card">
+      <h2>What's included</h2>
+      <table><tbody>${lines}</tbody></table>
+      <div class="tot big"><span>Total (inc GST)</span><span>${aud(q.totalInc)}</span></div>
+      <div class="tot note"><span>Includes GST of</span><span>${aud(q.gstInc)}</span></div>
+      ${q.deposit ? `<div class="tot dep"><span>Deposit due on acceptance (20%)</span><span>${aud(q.deposit)}</span></div>` : ''}
+    </section>
+    <section class="card">
+      <h2>Key terms</h2>
+      <ul class="key">${TERMS.keyTerms.map(k => '<li>' + esc(k) + '</li>').join('')}</ul>
+      <div class="row"><button type="button" id="open-terms">Read the full terms and conditions</button></div>
+      <p class="note">Terms version ${TERMS.current.version}, ${day(TERMS.current.date + 'T00:00:00+10:00')}.</p>
+    </section>
+    <section class="card ${s ? 'done' : ''}" id="accept">
+      ${s ? `<h2>Accepted</h2><p><b>Accepted by ${esc(s.name)}</b> on ${when(s.at)}, under terms version ${esc(s.termsVersion)}.</p><p class="note">${s.photoOk ? 'Photo permission given.' : 'No photo permission.'} Thank you — we'll be in touch to book the work.</p>`
+      : q.expired ? `<h2>This quote has expired</h2><p>Please contact us on ${esc(co.phone)} for an updated quote.</p>`
+      : `<h2>Accept this quote</h2>
+        <label for="sig-name">Your full name</label>
+        <input type="text" id="sig-name" autocomplete="name" maxlength="100">
+        <label class="tick"><input type="checkbox" id="sig-agree"><span>I accept this quote and the <a href="#" id="open-terms-2">terms and conditions</a> (version ${TERMS.current.version}).</span></label>
+        <label class="tick"><input type="checkbox" id="sig-photo"><span>Optional: you may use photos of the finished work on your website and social media (suburb only, never my name or street address).</span></label>
+        <button type="button" class="primary" id="sign">Accept and sign</button>
+        <div class="msg" id="sig-msg"></div>`}
+    </section>
+    <div class="row"><button type="button" id="pdf">Download PDF</button></div>`;
+  $('#open-terms').onclick = openTerms;
+  const t2 = $('#open-terms-2'); if (t2) t2.onclick = e => { e.preventDefault(); openTerms(); };
+  const sg = $('#sign'); if (sg) sg.onclick = sign;
+  $('#pdf').onclick = pdf;
+}
+
+let termsLogged = false;
+function openTerms() {
+  $('#terms').classList.add('open'); document.body.style.overflow = 'hidden';
+  if (!termsLogged && !staffPreview) { termsLogged = true; event('terms-opened'); }
+}
+$('#terms-close').onclick = () => { $('#terms').classList.remove('open'); document.body.style.overflow = ''; };
+
+async function sign() {
+  const msg = $('#sig-msg'), btn = $('#sign');
+  const name = $('#sig-name').value.trim();
+  msg.className = 'msg err';
+  if (name.length < 2) { msg.textContent = 'Please type your full name.'; return; }
+  if (!$('#sig-agree').checked) { msg.textContent = 'Please tick that you accept the quote and the terms.'; return; }
+  btn.disabled = true; msg.className = 'msg'; msg.textContent = 'Sending…';
+  try {
+    const r = await fetch(API + '/client-quote/' + id + '/sign', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, agree: true, photoOk: $('#sig-photo').checked, termsVersion: TERMS.current.version, termsSha: TERMS_SHA }) });
+    const j = await r.json();
+    if (!r.ok) { msg.className = 'msg err'; msg.textContent = j.error || 'That did not work. Please try again.'; btn.disabled = false; return; }
+    Q.signed = j.signed; render(); $('#accept').scrollIntoView({ behavior: 'smooth' });
+  } catch (e) { msg.className = 'msg err'; msg.textContent = 'No connection. Please try again.'; btn.disabled = false; }
+}
+
+function loadScript(src) { return new Promise((ok, bad) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = bad; document.head.appendChild(s); }); }
+async function logoData() {
+  if (LOGO) return LOGO;
+  const b = await (await fetch(TERMS.business.logo)).blob();
+  LOGO = await new Promise(ok => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(b); });
+  return LOGO;
+}
+async function pdf() {
+  const btn = $('#pdf'); btn.disabled = true; btn.textContent = 'Making the PDF…';
+  try {
+    if (!window.jspdf) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    const doc = buildPdf(new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' }), await logoData());
+    doc.save('IPD-quote-' + Q.jobNumber + '.pdf');
+    if (!staffPreview) event('pdf-downloaded');
+  } catch (e) { alert('The PDF could not be made. Please try again.'); }
+  btn.disabled = false; btn.textContent = 'Download PDF';
+}
+function buildPdf(doc, logo) {
+  const q = Q, co = TERMS.business, c = q.company || {}, s = q.signed;
+  const name = c.name || co.name, abn = c.abn ? c.abn.replace(/^(\d{2})(\d{3})(\d{3})(\d{3})$/, '$1 $2 $3 $4') : co.abn;
+  const L = 15, R = 195, W = R - L, BOTTOM = 280;
+  let y = 15;
+  const need = h => { if (y + h > BOTTOM) { doc.addPage(); y = 18; } };
+  const para = (text, size = 10, style = 'normal', indent = 0) => {
+    doc.setFont('helvetica', style); doc.setFontSize(size);
+    for (const ln of doc.splitTextToSize(String(text), W - indent)) { need(size * 0.45); doc.text(ln, L + indent, y); y += size * 0.45; }
+  };
+  // header: logo, company, ABN, QBCC
+  doc.addImage(logo, 'JPEG', L, y, 26, 27);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.text(name, 46, y + 5);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5);
+  [`ABN ${abn}  ·  QBCC Licence ${co.qbcc}`, co.address, `${co.phone}  ·  ${co.email}`, co.website].forEach((t, i) => doc.text(t, 46, y + 11 + i * 4.6));
+  y += 33; doc.setDrawColor(200); doc.line(L, y, R, y); y += 8;
+  para(`Quote for job #${q.jobNumber}`, 15, 'bold'); y += 1;
+  if (q.client && q.client.name) para('For: ' + q.client.name, 10);
+  if (q.client && q.client.address) para(q.client.address, 10);
+  para(`Issued ${day(q.issuedAt)}  ·  Valid until ${day(q.expiresAt)}`, 10);
+  if (q.description) { y += 3; para(q.description, 10); }
+  y += 5;
+  // lines
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(10); need(8);
+  doc.text('Item', L, y); doc.text('Qty', 160, y, { align: 'right' }); doc.text('Amount', R, y, { align: 'right' }); y += 2; doc.line(L, y, R, y); y += 5;
+  doc.setFont('helvetica', 'normal');
+  for (const l of q.lines) {
+    const parts = doc.splitTextToSize(l.name, 128); need(parts.length * 4.5 + 2);
+    doc.text(parts, L, y); doc.text(String(l.qty), 160, y, { align: 'right' }); doc.text(aud(l.qty * l.priceInc).replace('−', '-'), R, y, { align: 'right' });
+    y += parts.length * 4.5 + 2;
+  }
+  doc.line(L, y - 2, R, y - 2); y += 4; need(20);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text('Total (inc GST)', 120, y); doc.text(aud(q.totalInc), R, y, { align: 'right' }); y += 5.5;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.text('Includes GST of', 120, y); doc.text(aud(q.gstInc), R, y, { align: 'right' }); y += 5;
+  if (q.deposit) { doc.setFont('helvetica', 'bold'); doc.text('Deposit due on acceptance (20%)', 120, y); doc.text(aud(q.deposit), R, y, { align: 'right' }); y += 5; }
+  y += 6;
+  para('Key terms', 12, 'bold'); y += 1;
+  for (const k of TERMS.keyTerms) { need(5); doc.setFontSize(9.5); doc.text('•', L + 1, y); para(k, 9.5, 'normal', 5); y += 1; }
+  y += 3;
+  if (s) { para(`Accepted by ${s.name} on ${when(s.at)}, under terms version ${s.termsVersion}. ${s.photoOk ? 'Photo permission given.' : 'No photo permission.'}`, 10, 'bold'); }
+  else { para('To accept, open your quote link and sign, or contact us. The full terms and conditions follow.', 9.5, 'italic'); }
+  // full terms
+  doc.addPage(); y = 18;
+  para(`Terms and conditions (version ${TERMS.current.version}, ${day(TERMS.current.date + 'T00:00:00+10:00')})`, 13, 'bold'); y += 2;
+  for (const raw of TERMS_TEXT.replace(/\r\n/g, '\n').split('\n')) {
+    const l = raw.trim();
+    if (!l || l === 'IPD TERMS AND CONDITIONS') { y += 1; continue; }
+    if (/^\d+\.\s/.test(l)) { y += 2; need(10); para(l, 10.5, 'bold'); }
+    else if (/^- /.test(l)) { need(5); doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.text('•', L + 1, y); para(l.slice(2), 9.5, 'normal', 5); }
+    else para(l, 9.5);
+  }
+  // footer on every page
+  const n = doc.getNumberOfPages();
+  for (let i = 1; i <= n; i++) {
+    doc.setPage(i); doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(110);
+    doc.text(`${name}  ·  ABN ${abn}  ·  QBCC Licence ${co.qbcc}  ·  Quote job #${q.jobNumber}  ·  Page ${i} of ${n}`, 105, 290, { align: 'center' });
+    doc.setTextColor(0);
+  }
+  return doc;
+}
+
+(async () => {
+  if (!/^[0-9a-f-]{36}$/.test(id)) { $('#app').innerHTML = '<div class="center">This quote link is not complete. Please open the link from your message again.</div>'; return; }
+  try {
+    const [t, txt] = await Promise.all([fetch('terms/ipd-terms.json', { cache: 'no-store' }).then(r => r.json()), fetch('terms/ipd-terms.txt', { cache: 'no-store' }).then(r => r.text())]);
+    TERMS = t; TERMS_TEXT = txt; TERMS_SHA = await sha256(txt);
+    $('#terms-body').innerHTML = termsHtml(txt) + `<p class="note">Version ${t.current.version}, ${day(t.current.date + 'T00:00:00+10:00')}. ${esc(t.business.name)} · QBCC Licence ${esc(t.business.qbcc)}</p>`;
+    const r = await fetch(API + '/client-quote/' + id + '/view', { headers: staffPreview ? { 'x-staff-preview': '1' } : {} });
+    const j = await r.json();
+    if (!r.ok) { $('#app').innerHTML = '<div class="center">' + esc(j.error || 'This quote could not be loaded.') + '</div>'; return; }
+    Q = j; render();
+  } catch (e) { $('#app').innerHTML = '<div class="center">Your quote could not be loaded. Please check your connection and try again.</div>'; }
+})();
+</script>
+</body>
+</html>
