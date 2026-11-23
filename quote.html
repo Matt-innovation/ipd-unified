@@ -76,6 +76,22 @@ const aud = n => (n < 0 ? '−' : '') + '$' + Math.abs(n).toLocaleString('en-AU'
 const day = iso => new Date(iso).toLocaleDateString('en-AU', { timeZone: 'Australia/Brisbane', day: 'numeric', month: 'long', year: 'numeric' });
 const when = iso => new Date(iso).toLocaleString('en-AU', { timeZone: 'Australia/Brisbane', day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit' });
 let Q = null, TERMS = null, TERMS_TEXT = '', TERMS_SHA = '', LOGO = null;
+// SHOWN = the terms this page shows: the current ones, or (once signed) the exact version the client signed under,
+// read from terms/history so an old signature always shows the wording it was given.
+let SHOWN = null;
+const tday = d => day(d + 'T00:00:00+10:00');
+async function shownTerms() {
+  const v = Q.signed && Q.signed.termsVersion, cur = TERMS.current;
+  const h = v && v !== cur.version ? (TERMS.history || []).find(x => x.version === v) : null;
+  if (!h) return { version: cur.version, date: cur.date, keyTerms: TERMS.keyTerms, text: TERMS_TEXT };
+  let text = `The full wording of terms version ${h.version} could not be loaded just now. Please reload the page, or contact us for a copy.`; try { text = await fetch(h.file, { cache: 'no-store' }).then(r => { if (!r.ok) throw 0; return r.text(); }); } catch (e) {}
+  return { version: h.version, date: h.date, keyTerms: h.keyTerms || TERMS.keyTerms, text };
+}
+function showTermsPanel() {
+  $('#terms-body').innerHTML = termsHtml(SHOWN.text) + `<p class="note">Version ${SHOWN.version}, ${tday(SHOWN.date)}. ${esc(TERMS.business.name)} · QBCC Licence ${esc(TERMS.business.qbcc)}</p>`;
+}
+const signedLine = s => `Accepted by ${s.name} on ${when(s.at)}, under terms version ${s.termsVersion}${s.termsDate ? ' of ' + tday(s.termsDate) : ''}.`;
+const stages = q => Array.isArray(q.stages) ? q.stages : [];
 
 async function sha256(text) {
   const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text.replace(/\r\n/g, '\n')));
@@ -123,14 +139,22 @@ function render() {
       <div class="tot note"><span>Includes GST of</span><span>${aud(q.gstInc)}</span></div>
       ${q.deposit ? `<div class="tot dep"><span>Deposit due on acceptance (20%)</span><span>${aud(q.deposit)}</span></div>` : ''}
     </section>
+    ${stages(q).length ? `<section class="card" id="schedule">
+      <h2>Payment schedule</h2>
+      <table><tbody>
+        ${q.deposit ? `<tr><td>Deposit, due on acceptance</td><td class="q"></td><td class="a">${aud(q.deposit)}</td></tr>` : ''}
+        ${stages(q).map((x, i) => `<tr><td>Stage ${i + 1}: ${esc(x.name)}<div class="note">Invoiced when this stage is complete</div></td><td class="q"></td><td class="a">${aud(x.amountInc)}</td></tr>`).join('')}
+      </tbody></table>
+      <div class="tot"><span>Total (inc GST)</span><span>${aud(q.totalInc)}</span></div>
+    </section>` : ''}
     <section class="card">
       <h2>Key terms</h2>
-      <ul class="key">${TERMS.keyTerms.map(k => '<li>' + esc(k) + '</li>').join('')}</ul>
+      <ul class="key">${SHOWN.keyTerms.map(k => '<li>' + esc(k) + '</li>').join('')}</ul>
       <div class="row"><button type="button" id="open-terms">Read the full terms and conditions</button></div>
-      <p class="note">Terms version ${TERMS.current.version}, ${day(TERMS.current.date + 'T00:00:00+10:00')}.</p>
+      <p class="note">Terms version ${SHOWN.version}, ${tday(SHOWN.date)}.</p>
     </section>
     <section class="card ${s ? 'done' : ''}" id="accept">
-      ${s ? `<h2>Accepted</h2><p><b>Accepted by ${esc(s.name)}</b> on ${when(s.at)}, under terms version ${esc(s.termsVersion)}.</p><p class="note">${s.photoOk ? 'Photo permission given.' : 'No photo permission.'} Thank you — we'll be in touch to book the work.</p>`
+      ${s ? `<h2>Accepted</h2><p><b>Accepted by ${esc(s.name)}</b> on ${when(s.at)}, under terms version ${esc(s.termsVersion)}${s.termsDate ? ' of ' + tday(s.termsDate) : ''}.</p><p class="note">${s.photoOk ? 'Photo permission given.' : 'No photo permission.'} Thank you — we'll be in touch to book the work.</p>`
       : q.expired ? `<h2>This quote has expired</h2><p>Please contact us on ${esc(co.phone)} for an updated quote.</p>`
       : `<h2>Accept this quote</h2>
         <label for="sig-name">Your full name</label>
@@ -166,7 +190,7 @@ async function sign() {
       body: JSON.stringify({ name, agree: true, photoOk: $('#sig-photo').checked, termsVersion: TERMS.current.version, termsSha: TERMS_SHA }) });
     const j = await r.json();
     if (!r.ok) { msg.className = 'msg err'; msg.textContent = j.error || 'That did not work. Please try again.'; btn.disabled = false; return; }
-    Q.signed = j.signed; render(); $('#accept').scrollIntoView({ behavior: 'smooth' });
+    Q.signed = j.signed; SHOWN = await shownTerms(); showTermsPanel(); render(); $('#accept').scrollIntoView({ behavior: 'smooth' });
   } catch (e) { msg.className = 'msg err'; msg.textContent = 'No connection. Please try again.'; btn.disabled = false; }
 }
 
@@ -223,15 +247,24 @@ function buildPdf(doc, logo) {
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.text('Includes GST of', 120, y); doc.text(aud(q.gstInc), R, y, { align: 'right' }); y += 5;
   if (q.deposit) { doc.setFont('helvetica', 'bold'); doc.text('Deposit due on acceptance (20%)', 120, y); doc.text(aud(q.deposit), R, y, { align: 'right' }); y += 5; }
   y += 6;
+  if (stages(q).length) {
+    para('Payment schedule', 12, 'bold'); y += 1;
+    const row = (label, amt, sub) => { const parts = doc.splitTextToSize(label, 140); need(parts.length * 4.5 + (sub ? 4 : 0) + 2); doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+      doc.text(parts, L, y); doc.text(aud(amt), R, y, { align: 'right' }); y += parts.length * 4.5;
+      if (sub) { doc.setFontSize(8.5); doc.setTextColor(110); doc.text(sub, L, y); doc.setTextColor(0); y += 4; } y += 2; };
+    if (q.deposit) row('Deposit, due on acceptance', q.deposit);
+    stages(q).forEach((x, i) => row(`Stage ${i + 1}: ${x.name}`, x.amountInc, 'Invoiced when this stage is complete'));
+    doc.line(L, y - 2, R, y - 2); y += 3; doc.setFont('helvetica', 'bold'); doc.text('Total (inc GST)', L, y); doc.text(aud(q.totalInc), R, y, { align: 'right' }); y += 8;
+  }
   para('Key terms', 12, 'bold'); y += 1;
-  for (const k of TERMS.keyTerms) { need(5); doc.setFontSize(9.5); doc.text('•', L + 1, y); para(k, 9.5, 'normal', 5); y += 1; }
+  for (const k of SHOWN.keyTerms) { need(5); doc.setFontSize(9.5); doc.text('•', L + 1, y); para(k, 9.5, 'normal', 5); y += 1; }
   y += 3;
-  if (s) { para(`Accepted by ${s.name} on ${when(s.at)}, under terms version ${s.termsVersion}. ${s.photoOk ? 'Photo permission given.' : 'No photo permission.'}`, 10, 'bold'); }
+  if (s) { para(`${signedLine(s)} ${s.photoOk ? 'Photo permission given.' : 'No photo permission.'}`, 10, 'bold'); }
   else { para('To accept, open your quote link and sign, or contact us. The full terms and conditions follow.', 9.5, 'italic'); }
   // full terms
   doc.addPage(); y = 18;
-  para(`Terms and conditions (version ${TERMS.current.version}, ${day(TERMS.current.date + 'T00:00:00+10:00')})`, 13, 'bold'); y += 2;
-  for (const raw of TERMS_TEXT.replace(/\r\n/g, '\n').split('\n')) {
+  para(`Terms and conditions (version ${SHOWN.version}, ${tday(SHOWN.date)})`, 13, 'bold'); y += 2;
+  for (const raw of SHOWN.text.replace(/\r\n/g, '\n').split('\n')) {
     const l = raw.trim();
     if (!l || l === 'IPD TERMS AND CONDITIONS') { y += 1; continue; }
     if (/^\d+\.\s/.test(l)) { y += 2; need(10); para(l, 10.5, 'bold'); }
@@ -254,11 +287,10 @@ function buildPdf(doc, logo) {
   try {
     const [t, txt] = await Promise.all([fetch('terms/ipd-terms.json', { cache: 'no-store' }).then(r => r.json()), fetch('terms/ipd-terms.txt', { cache: 'no-store' }).then(r => r.text())]);
     TERMS = t; TERMS_TEXT = txt; TERMS_SHA = await sha256(txt);
-    $('#terms-body').innerHTML = termsHtml(txt) + `<p class="note">Version ${t.current.version}, ${day(t.current.date + 'T00:00:00+10:00')}. ${esc(t.business.name)} · QBCC Licence ${esc(t.business.qbcc)}</p>`;
     const r = await fetch(API + '/client-quote/' + id + '/view', { headers: staffPreview ? { 'x-staff-preview': '1' } : {} });
     const j = await r.json();
     if (!r.ok) { $('#app').innerHTML = '<div class="center">' + esc(j.error || 'This quote could not be loaded.') + '</div>'; return; }
-    Q = j; render();
+    Q = j; SHOWN = await shownTerms(); showTermsPanel(); render();
   } catch (e) { $('#app').innerHTML = '<div class="center">Your quote could not be loaded. Please check your connection and try again.</div>'; }
 })();
 </script>
