@@ -214,6 +214,16 @@ body.pilot input:not([type=checkbox]):not([type=radio]):not([type=range]):not([t
 .pl-on span{flex:1;min-width:0;overflow-wrap:anywhere}
 .pl-on button{min-width:40px;min-height:36px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer}
 .rp-card input[type=text],.rp-card input[type=url],.rp-card input[type=search],.rp-card select{width:100%;box-sizing:border-box;min-height:42px;padding:8px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:400 16px var(--font)}
+/* Payment stages (QUOTE_STAGES=on) */
+.cq-stages{display:flex;flex-direction:column;gap:8px;padding:10px 0;border-top:1px solid var(--border)}
+.cq-stages label.st-tick{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:700;color:var(--text)}
+.cq-stages label.st-tick input{width:22px;height:22px;margin:0}
+.st-row{display:grid;grid-template-columns:auto minmax(0,1fr) 110px auto;gap:6px;align-items:center}
+.st-row b{font-size:12px;color:var(--text-mid)}
+.st-row input{width:100%;box-sizing:border-box;min-height:40px;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:400 16px var(--font)}
+.st-row button{min-width:40px;min-height:40px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);cursor:pointer}
+.st-sum{font-size:13px;font-weight:700}.st-sum.ok{color:#16a34a}.st-sum.bad{color:#dc2626}
+@media (max-width:380px){.st-row{grid-template-columns:minmax(0,1fr) 96px auto}.st-row b{display:none}}
 /* Report a problem */
 .rp-back{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:flex-end;justify-content:center}
 .rp-card{background:var(--surface);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px;color:var(--text);box-sizing:border-box}
@@ -1037,6 +1047,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
               <div class="cq-jobpick" id="cq-jobpick" hidden></div>
               <div id="cq-list"></div>
               <div class="qt-inv-hint">Shrunk on the phone and kept on our server only (not ServiceM8). Up to 12 per quote and 4 per line. A mock-up shows "For illustration only, final layout may vary." Once a link is made, its photos are locked.</div>
+              <div class="cq-stages" id="cq-stages" hidden></div>
               <button class="q-btn primary cq-send" type="button" id="cq-send">🔗 Send to client</button>
               <div id="cq-result"></div>
             </div>
@@ -4918,6 +4929,74 @@ async function qnRender() {
   if (mine.some(r => r.status !== 'waiting')) { qnServer.job = ''; }                     // refresh from the server next time
 }
 
+// ── PAYMENT STAGES (QUOTE_STAGES=on) ────────────────────────────────────────
+// Staged jobs: the tech names each stage and its amount (inc GST). The stages cover what's left after the
+// deposit (20% on jobs over $1,000 — same rule as the server); the link can only be made when it all adds up.
+// Kept on the phone per job. Off by default ("This is a staged job" unticked).
+const ST_MAX = 6;
+const stKey = job => 'ipd_cq_stages_' + job;
+function stGet(job) { try { const d = JSON.parse(localStorage.getItem(stKey(job)) || 'null'); if (d && Array.isArray(d.stages)) return d; } catch (e) {} return { on: false, stages: [] }; }
+function stSave(job, d) { try { localStorage.setItem(stKey(job), JSON.stringify(d)); } catch (e) {} }
+const stR2 = v => Math.round(v * 100) / 100;
+function stTotals() {
+  const total = stR2(quote.reduce((t, i) => t + (Number(i.qty) || 0) * (Number(i.price) || 0), 0));
+  const deposit = total > 1000 ? stR2(total * 0.2) : 0;
+  return { total, deposit, rest: stR2(total - deposit) };
+}
+function stCheck(d) {
+  const T = stTotals(), sum = stR2(d.stages.reduce((t, x) => t + (Number(x.amount) || 0), 0));
+  let problem = '';
+  if (!d.stages.length) problem = 'Add at least one stage, or untick "This is a staged job"';
+  else if (d.stages.some(x => !String(x.name || '').trim())) problem = 'Give every stage a name';
+  else if (d.stages.some(x => !(Number(x.amount) > 0))) problem = 'Give every stage an amount';
+  else if (Math.abs(sum - T.rest) > 0.01) problem = 'The stages add up to $' + sum.toFixed(2) + ' — they need to be $' + T.rest.toFixed(2) + (T.deposit ? ' (the total less the deposit)' : '');
+  return { ...T, sum, problem };
+}
+function stRender() {
+  const box = document.getElementById('cq-stages'); if (!box) return;
+  const job = cqJob();
+  box.hidden = !(cqFeat && cqFeat.stages) || !/^\d{1,8}$/.test(job);
+  if (box.hidden) return;
+  if (box.contains(document.activeElement) && document.activeElement.matches('input[type=text],input[inputmode]')) return stSum();   // don't rebuild while typing
+  const d = stGet(job), T = stTotals();
+  box.innerHTML = '<label class="st-tick"><input type="checkbox" id="st-on"' + (d.on ? ' checked' : '') + '>This is a staged job (payment stages)</label>'
+    + (d.on ? '<div class="qt-inv-hint">' + (T.deposit ? 'Deposit on acceptance: <b>$' + T.deposit.toFixed(2) + '</b> (20% on jobs over $1,000). The stages cover the other <b>$' + T.rest.toFixed(2) + '</b>.' : 'No deposit (under $1,000). The stages cover the whole <b>$' + T.total.toFixed(2) + '</b>.') + ' Each stage is invoiced when it is complete.</div>'
+      + d.stages.map((x, i) => '<div class="st-row" data-st="' + i + '"><b>' + (i + 1) + '</b><input type="text" data-stf="name" maxlength="120" placeholder="e.g. Rough-in complete" value="' + escHtml(x.name || '') + '"><input type="text" inputmode="decimal" data-stf="amount" placeholder="$ inc GST" value="' + escHtml(x.amount === '' || x.amount == null ? '' : String(x.amount)) + '"><button type="button" data-stdel aria-label="Remove stage">✕</button></div>').join('')
+      + '<div class="cq-row">' + (d.stages.length < ST_MAX ? '<button type="button" class="cq-cbtn" data-stadd>+ Add stage</button>' : '') + '<button type="button" class="cq-cbtn" data-stsplit="50,50">Split 50 / 50</button><button type="button" class="cq-cbtn" data-stsplit="40,40,20">40 / 40 / 20</button></div>'
+      + '<div class="st-sum" id="st-sum"></div>' : '');
+  stSum();
+}
+function stSum() {
+  const el = document.getElementById('st-sum'); if (!el) return;
+  const c = stCheck(stGet(cqJob()));
+  el.className = 'st-sum ' + (c.problem ? 'bad' : 'ok');
+  el.textContent = (c.deposit ? 'Deposit $' + c.deposit.toFixed(2) + ' + ' : '') + 'stages $' + c.sum.toFixed(2) + ' = $' + stR2(c.deposit + c.sum).toFixed(2) + ' of $' + c.total.toFixed(2) + (c.problem ? ' — ⚠ ' + c.problem : ' — ✓ adds up');
+}
+document.addEventListener('change', e => {
+  if (e.target.id !== 'st-on') return;
+  const job = cqJob(), d = stGet(job); d.on = e.target.checked;
+  if (d.on && !d.stages.length) d.stages = [{ name: 'Rough-in complete', amount: '' }, { name: 'Fit-off and handover', amount: '' }];
+  stSave(job, d); stRender();
+});
+document.addEventListener('input', e => {
+  const f = e.target.closest && e.target.closest('#cq-stages [data-stf]'); if (!f) return;
+  const job = cqJob(), d = stGet(job), i = +f.closest('[data-st]').dataset.st;
+  d.stages[i][f.dataset.stf] = f.dataset.stf === 'amount' ? f.value.replace(/[^0-9.]/g, '') : f.value; stSave(job, d); stSum();
+});
+document.addEventListener('click', e => {
+  const t = e.target; if (!t.closest || !t.closest('#cq-stages')) return;
+  const job = cqJob(), d = stGet(job);
+  if (t.closest('[data-stadd]')) { if (d.stages.length < ST_MAX) d.stages.push({ name: '', amount: '' }); stSave(job, d); return stRender(); }
+  const del = t.closest('[data-stdel]'); if (del) { d.stages.splice(+del.closest('[data-st]').dataset.st, 1); stSave(job, d); return stRender(); }
+  const sp = t.closest('[data-stsplit]');
+  if (sp) {
+    const parts = sp.dataset.stsplit.split(',').map(Number), T = stTotals(), names = ['Rough-in complete', 'Fit-off and handover', 'Final completion'];
+    let left = T.rest; const amts = parts.map((pc, i) => { const a = i === parts.length - 1 ? stR2(left) : stR2(T.rest * pc / 100); left = stR2(left - a); return a; });
+    d.stages = amts.map((a, i) => ({ name: (d.stages[i] && d.stages[i].name) || names[i] || 'Stage ' + (i + 1), amount: a.toFixed(2) }));
+    stSave(job, d); return stRender();
+  }
+});
+
 // ── PRODUCT INFORMATION LINKS (PRODUCT_LINKS=on) ─────────────────────────────
 // "📄 Product info" on each quote line (logged-in Summary only). Knowledge Centre links that match the line
 // (exact = same Reece code; possible = name/tags), a search of the whole Knowledge Centre, or a link typed by
@@ -5301,6 +5380,7 @@ async function cqRender() {
   box.hidden = !(CURRENT_USER && cqOn);
   if (box.hidden) return;
   cqClientTick();
+  if (typeof stRender === 'function') stRender();
   const seq = ++cqRenderSeq, job = cqJob(), recs = job ? await cqForJob(job) : [];
   if (seq !== cqRenderSeq) return;
   const lines = cqLines(), keys = new Set(lines.map(l => l.key));
@@ -5345,10 +5425,13 @@ async function cqSend() {
   const cd = cqClientGet(job);
   if (cd) { const prob = cqClientProblem(cd); if (prob) { cqClientRender(); return showToast(prob); } }
   const client = cd ? { name: (cd.name || '').trim(), contacts: cd.contacts.map(c => ({ name: (c.name || '').trim(), phone: (c.phone || '').trim(), email: (c.email || '').trim(), role: (c.role || '').trim() })).filter(c => c.name || c.phone || c.email) } : undefined;
+  const st = stGet(job);
+  let stages;
+  if (cqFeat.stages && st.on) { const chk = stCheck(st); if (chk.problem) { stRender(); return showToast(chk.problem); } stages = st.stages.map(x => ({ name: x.name.trim(), amountInc: Math.round(Number(x.amount) * 100) / 100 })); }
   const btn = document.getElementById('cq-send'); btn.disabled = true; btn.textContent = 'Making the link…';
   try {
     const invoiceDescription = (document.getElementById('q-invoice-desc')?.value || '').trim();
-    const j = await authFetch('/client-quote', { method: 'POST', body: JSON.stringify({ jobNumber: job, invoiceDescription, images, ...(client ? { client } : {}),
+    const j = await authFetch('/client-quote', { method: 'POST', body: JSON.stringify({ jobNumber: job, invoiceDescription, images, ...(client ? { client } : {}), ...(stages ? { stages } : {}),
       lines: quote.map(i => ({ name: i.name, qty: Number(i.qty), priceInc: Number(i.price), ...(cqFeat.productLinks && (i.links || []).length ? { links: i.links.map(k => k.source === 'kc' ? { id: k.id } : { url: k.url, title: k.title, type: k.type }) } : {}) })) }) });
     const preview = j.link.replace('/quote.html#', '/quote.html?staff=1#');
     try { localStorage.setItem('ipd_cq_last_' + job, JSON.stringify({ link: j.link, expiresAt: j.expiresAt, at: Date.now() })); } catch (e) {}
