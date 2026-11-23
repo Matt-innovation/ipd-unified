@@ -206,6 +206,8 @@ body.pilot input:not([type=checkbox]):not([type=radio]):not([type=range]):not([t
 /* Product information links (PRODUCT_LINKS=on, logged-in only) */
 .pl-btn{margin-top:6px;min-height:34px;padding:4px 10px;border:1px solid var(--border2);border-radius:999px;background:var(--surface2);color:var(--text);font:600 12.5px var(--font);cursor:pointer}
 .pl-btn.has{border-color:#3b82f6;color:#1d4ed8}
+.op-btn{margin:6px 0 0 6px;min-height:34px;padding:4px 10px;border:1px dashed var(--border2);border-radius:999px;background:var(--surface2);color:var(--text-mid);font:600 12.5px var(--font);cursor:pointer}
+.op-btn.on{border-style:solid;border-color:#d97706;color:#b45309;background:rgba(245,158,11,.1)}
 .pl-sec{font-size:12px;font-weight:800;color:var(--text-mid);text-transform:uppercase;letter-spacing:.03em;margin-top:4px}
 .pl-opt{display:flex;gap:8px;align-items:flex-start;padding:8px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:14px}
 .pl-opt input{width:22px;height:22px;flex:none;margin:0}
@@ -2803,6 +2805,7 @@ function renderQuotePilot() {
   updateQuoteBar();
   if (typeof qWatchImages === 'function') qWatchImages(list);
   if (typeof plDecorate === 'function') plDecorate(list);
+  if (typeof opDecorate === 'function') opDecorate(list);
 }
 
 function renderQuote() { return PILOT_UI ? renderQuotePilot() : renderQuoteClassic(); }
@@ -5217,6 +5220,28 @@ document.addEventListener('change', e => {
 });
 document.addEventListener('input', e => { if (e.target.id === 'pl-search') plRenderFound(); });
 
+// ── OPTIONS THE CLIENT TICKS (QUOTE_OPTIONS=on) ──────────────────────────────
+// A chip on each quote line: Required → Optional (starts unticked) → Optional (starts ticked). The client quote
+// page lets the client tick optional lines and the total updates; Send to SM8 is unchanged (all lines go).
+const OP_LABEL = it => !it.optional ? '◻ Required' : it.defaultOn ? '☑ Optional · starts ticked' : '☐ Optional · starts unticked';
+function opDecorate(list) {
+  if (!(CURRENT_USER && PILOT_UI && cqFeat && cqFeat.options)) return;
+  list.querySelectorAll('.qline[data-id]').forEach(row => {
+    const it = quote.find(i => String(i.id) === row.dataset.id); if (!it || it.id === 'discount') return;
+    const front = row.querySelector('.quote-item'); if (!front || front.querySelector('.op-btn')) return;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'op-btn' + (it.optional ? ' on' : ''); b.dataset.opt = it.id; b.textContent = OP_LABEL(it);
+    front.appendChild(b);
+  });
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('.op-btn[data-opt]'); if (!b) return;
+  e.stopPropagation();
+  const it = quote.find(i => String(i.id) === b.dataset.opt); if (!it) return;
+  if (!it.optional) { it.optional = true; it.defaultOn = false; } else if (!it.defaultOn) it.defaultOn = true; else { delete it.optional; delete it.defaultOn; }
+  if (quote.filter(i => i.id !== 'discount').every(i => i.optional)) { delete it.optional; delete it.defaultOn; showToast('At least one line must be required'); }
+  updateQuoteUI(); renderQuote();
+});
+
 // ── REPORT A PROBLEM ─────────────────────────────────────────────────────────
 // Logged-in staff only. Their words plus what the app knows (screen, version, phone, recent errors and — if
 // ticked — the job number and quote lines). Saved on our server and emailed to Matt. Never to ServiceM8.
@@ -5555,7 +5580,7 @@ async function cqSend() {
   try {
     const invoiceDescription = (document.getElementById('q-invoice-desc')?.value || '').trim();
     const j = await authFetch('/client-quote', { method: 'POST', body: JSON.stringify({ jobNumber: job, invoiceDescription, images, ...(client ? { client } : {}), ...(stages ? { stages } : {}),
-      lines: quote.map(i => ({ name: i.name, qty: Number(i.qty), priceInc: Number(i.price), ...(cqFeat.productLinks && (i.links || []).length ? { links: i.links.map(k => k.source === 'kc' ? { id: k.id } : { url: k.url, title: k.title, type: k.type }) } : {}) })) }) });
+      lines: quote.map(i => ({ name: i.name, qty: Number(i.qty), priceInc: Number(i.price), ...(cqFeat.options && i.optional ? { optional: true, defaultOn: !!i.defaultOn } : {}), ...(cqFeat.productLinks && (i.links || []).length ? { links: i.links.map(k => k.source === 'kc' ? { id: k.id } : { url: k.url, title: k.title, type: k.type }) } : {}) })) }) });
     const preview = j.link.replace('/quote.html#', '/quote.html?staff=1#');
     try { localStorage.setItem('ipd_cq_last_' + job, JSON.stringify({ link: j.link, expiresAt: j.expiresAt, at: Date.now() })); } catch (e) {}
     out.innerHTML = '<div class="cq-result"><b>✅ Link ready for job ' + escHtml(job) + (client && client.name ? ' (' + escHtml(client.name) + ')' : '') + ' — valid until ' + new Date(j.expiresAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) + '</b>'
