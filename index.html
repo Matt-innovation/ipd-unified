@@ -184,6 +184,27 @@ body.pilot input:not([type=checkbox]):not([type=radio]):not([type=range]):not([t
 .qt-inv{display:flex;flex-direction:column;gap:6px;margin-top:10px;font-size:13px;font-weight:700;color:var(--text)}
 .qt-inv textarea{width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:400 15px var(--font);resize:vertical}
 .qt-inv-hint{font-size:12px;font-weight:400;color:var(--text-mid)}
+/* Client quote link: photos & mock-ups + Send to client (logged-in Summary tab only) */
+.cq-box{display:flex;flex-direction:column;gap:10px;padding:12px;margin:10px 12px 14px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius)}
+.cq-hd{font-size:15px;font-weight:800;color:var(--text)}
+.cq-sub{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;font-weight:700;color:var(--text)}
+.cq-sub span{font-weight:400;color:var(--text-mid)}
+.cq-item{display:grid;grid-template-columns:76px minmax(0,1fr);gap:8px 10px;padding:8px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface)}
+.cq-item img{width:76px;height:76px;object-fit:cover;border-radius:8px;background:var(--surface2)}
+.cq-item .cq-f{display:flex;flex-direction:column;gap:6px;min-width:0}
+.cq-item input[type=text],.cq-item select{width:100%;box-sizing:border-box;min-height:40px;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:400 16px var(--font)}
+.cq-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.cq-row button{min-width:44px;min-height:40px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:600 14px var(--font);cursor:pointer}
+.cq-row .cq-st{font-size:12px;font-weight:700;margin-left:auto}
+.cq-st.ok{color:#16a34a}.cq-st.bad{color:#dc2626}.cq-st.wait{color:var(--text-mid)}
+.cq-mock{font-size:12px;color:#b45309}
+.cq-jobpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px}
+.cq-jobpick button{padding:0;border:2px solid transparent;border-radius:8px;background:none;cursor:pointer}
+.cq-jobpick img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;display:block}
+.cq-send{min-height:48px;font-size:15px}
+.cq-result{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:var(--radius-sm);background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.35);font-size:13px;color:var(--text)}
+.cq-link{font:400 13px ui-monospace,Menlo,monospace;overflow-wrap:anywhere;user-select:all;-webkit-user-select:all}
+.cq-result .cq-row button{flex:1 1 90px}
 .qt-summary .quote-list{flex:none;overflow:visible}
 .qt-search{padding:10px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
 .qt-search input{width:100%;font-family:var(--font);font-size:16px;min-height:46px;padding:10px 12px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text)}
@@ -912,6 +933,20 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             <div class="quote-actions">
               <button class="q-btn" onclick="clearQuote()">🗑 Clear</button>
               <button class="q-btn" onclick="exportQuote()">⬇ Download</button>
+            </div>
+            <div class="cq-box" id="cq-box" hidden>
+              <div class="cq-hd">Client quote link</div>
+              <div class="cq-sub">Photos &amp; mock-ups <span id="cq-count">0 of 12</span></div>
+              <div class="qn-btns">
+                <label class="q-btn qn-cam"><input type="file" accept="image/*" capture="environment" data-cqadd="camera" hidden>📷 Take photo</label>
+                <label class="q-btn qn-cam"><input type="file" accept="image/*" multiple data-cqadd="pick" hidden>🖼 Photos or file</label>
+                <button class="q-btn" type="button" id="cq-fromjob">🗂 From this job</button>
+              </div>
+              <div class="cq-jobpick" id="cq-jobpick" hidden></div>
+              <div id="cq-list"></div>
+              <div class="qt-inv-hint">Shrunk on the phone and kept on our server only (not ServiceM8). Up to 12 per quote and 4 per line. A mock-up shows "For illustration only, final layout may vary." Once a link is made, its photos are locked.</div>
+              <button class="q-btn primary cq-send" type="button" id="cq-send">🔗 Send to client</button>
+              <div id="cq-result"></div>
             </div>
           </div>
           <div class="qt-panel" id="qt-notes" hidden>
@@ -2577,6 +2612,7 @@ function updateQuoteUI() {
   if(activeScreen==='quote') renderQuote();
   updateHomeStats();
   if (typeof updateQuoteBar === 'function') updateQuoteBar();
+  if (typeof cqRender === 'function' && qTab === 'summary') cqRender();
 }
 function updateHomeStats() {
   const hs_quote = document.getElementById('hs-quote');
@@ -3387,7 +3423,7 @@ function setQTab(t) {
   if (t === 'products') renderQProducts();
   if (t === 'bundles') renderQBundles();
   if (t === 'labour') renderQLabour();
-  if (t === 'summary') renderQuote();
+  if (t === 'summary') { renderQuote(); if (typeof cqRender === 'function') cqRender(); }
   if (t === 'notes') { qnServer.job = ''; qnRender(); qnUploadLoop(); }
   updateQuoteBar();
 }
@@ -3968,6 +4004,7 @@ function setUser(u) {
   if (typeof dirRefresh === 'function') dirRefresh();
   if (typeof socialRefresh === 'function') socialRefresh().then(() => sUploadLoop());
   if (typeof qnRefresh === 'function') qnRefresh().then(() => qnUploadLoop());
+  if (typeof cqRefresh === 'function') cqRefresh().then(() => cqUploadLoop());
 }
 function signedOut() {
   const wasPilot = PILOT_UI;
@@ -4734,6 +4771,181 @@ async function qnRender() {
   box.innerHTML = (mine.map(r => row(r, r.thumb)).join('') + fromServer.join('')) || '<div class="qempty">No notes or photos for this job yet.</div>';
   if (mine.some(r => r.status !== 'waiting')) { qnServer.job = ''; }                     // refresh from the server next time
 }
+
+// ── CLIENT QUOTE LINK: photos & mock-ups + Send to client ───────────────────
+// Logged-in staff only (the shared PIN never sees this). Photos are shrunk on the phone (photo 1600 px, mock-up
+// 2000 px, 480 px thumbnail), kept in the phone's own database until our server confirms them, then only the
+// thumbnail stays. They go to OUR server only — never to ServiceM8. "Send to client" makes the private link.
+const CQ_DB = 'ipd-client-quote', CQ_STORE = 'images', CQ_MAX = 12, CQ_PER_LINE = 4;
+let cqOn = false, cqBusy = false, cqAgain = false;
+function cqDb() { return new Promise((ok, no) => { const r = indexedDB.open(CQ_DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(CQ_STORE, { keyPath: 'clientId' }); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); }); }
+async function cqTx(mode, fn) { const db = await cqDb(); return new Promise((ok, no) => { const t = db.transaction(CQ_STORE, mode), st = t.objectStore(CQ_STORE); const out = fn(st); t.oncomplete = () => ok(out && out.result !== undefined ? out.result : out); t.onerror = () => no(t.error); }); }
+const cqAll = () => cqTx('readonly', st => st.getAll());
+const cqPut = rec => cqTx('readwrite', st => st.put(rec));
+const cqDel = key => cqTx('readwrite', st => st.delete(key));
+const cqJob = () => (document.getElementById('job-number-input')?.value || '').trim();
+const cqForJob = async job => (await cqAll()).filter(r => r.jobNumber === job).sort((a, b) => a.order - b.order);
+const cqLineKey = (i, n) => String(i.id || ('line-' + n + '-' + i.name));
+const cqLines = () => quote.map((i, n) => ({ key: cqLineKey(i, n), name: i.name }));
+
+async function cqRefresh() {
+  cqOn = false;
+  if (CURRENT_USER) { try { cqOn = !!(await (await fetch(PROXY + '/client-quote/status', { signal: AbortSignal.timeout(6000) })).json()).on; } catch (e) {} }
+  cqRender();
+}
+// shrink onto a white background (a see-through PNG mock-up would otherwise turn black), JPEG
+async function cqShrink(file, max, quality) {
+  let src, w, h, url;
+  if (window.createImageBitmap) { try { src = await createImageBitmap(file); w = src.width; h = src.height; } catch (e) { src = null; } }
+  if (!src) src = await new Promise((ok, no) => { const i = new Image(); url = URL.createObjectURL(file); i.onload = () => ok(i); i.onerror = () => no(new Error('Could not read that picture')); i.src = url; });
+  w = w || src.width; h = h || src.height;
+  const k = Math.min(1, max / Math.max(w, h)), c = document.createElement('canvas');
+  c.width = Math.round(w * k); c.height = Math.round(h * k);
+  const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(src, 0, 0, c.width, c.height);
+  if (url) URL.revokeObjectURL(url); if (src.close) src.close();
+  return c.toDataURL('image/jpeg', quality);
+}
+async function cqAddFile(file, how) {
+  const job = cqJob();
+  if (!/^\d{1,8}$/.test(job)) { showToast('Enter the job number first'); return false; }
+  const mine = await cqForJob(job);
+  if (mine.length >= CQ_MAX) { showToast('Up to ' + CQ_MAX + ' photos and mock-ups per quote'); return false; }
+  // a picture chosen from Files, a PNG, or one named like a plan starts as a mock-up (the tech can change it)
+  const kind = how === 'pick' && (/png|pdf/i.test(file.type) || /mock|layout|plan|render|design|drawing/i.test(file.name || '')) ? 'mockup' : 'photo';
+  try {
+    const [image, thumb] = await Promise.all([cqShrink(file, kind === 'mockup' ? 2000 : 1600, kind === 'mockup' ? 0.9 : 0.8), cqShrink(file, 480, 0.7)]);
+    await cqPut({ clientId: sUuid(), jobNumber: job, kind, caption: '', attach: '', order: Date.now() + Math.random(), image, thumb, status: 'waiting', at: Date.now() });
+  } catch (e) { showToast(e.message || 'Could not read that picture'); return false; }
+  cqRender(); cqUploadLoop(); return true;
+}
+// one at a time; when the server confirms, the full-size copy is removed from the phone (thumbnail kept)
+async function cqUploadLoop() {
+  if (cqBusy) { cqAgain = true; return; }
+  if (!CURRENT_USER || !cqOn) return;
+  cqBusy = true; cqAgain = false;
+  try {
+    for (;;) {
+      const next = (await cqAll()).filter(r => r.status === 'waiting').sort((a, b) => a.at - b.at)[0];
+      if (!next || !navigator.onLine) break;
+      try {
+        const j = await authFetch('/client-quote/images', { method: 'POST', body: JSON.stringify({ clientId: next.clientId, jobNumber: next.jobNumber, image: next.image, thumb: next.thumb }) });
+        await cqPut({ ...next, image: null, status: 'uploaded', serverId: j.id });
+      } catch (e) {
+        if (/HTTP 4|JPEG|too big|Bad image|Not yours|only job|job number/.test(e.message)) await cqPut({ ...next, image: null, status: 'refused', error: e.message });
+        else { setTimeout(cqUploadLoop, 5000); break; }                // no signal / server busy: try again in 5 s (and every 30 s)
+      }
+      cqRender();
+    }
+  } finally { cqBusy = false; if (cqAgain) { cqAgain = false; cqUploadLoop(); } }
+}
+window.addEventListener('online', () => cqUploadLoop());
+setInterval(() => { if (CURRENT_USER && cqOn) cqUploadLoop(); }, 30000);
+
+let cqRenderSeq = 0;
+async function cqRender() {
+  const box = document.getElementById('cq-box'); if (!box) return;
+  box.hidden = !(CURRENT_USER && cqOn);
+  if (box.hidden) return;
+  const seq = ++cqRenderSeq, job = cqJob(), recs = job ? await cqForJob(job) : [];
+  if (seq !== cqRenderSeq) return;
+  const lines = cqLines(), keys = new Set(lines.map(l => l.key));
+  document.getElementById('cq-count').textContent = recs.length + ' of ' + CQ_MAX;
+  const st = r => r.status === 'uploaded' ? '<span class="cq-st ok">✓ Ready</span>' : r.status === 'refused' ? '<span class="cq-st bad">' + escHtml(r.error || 'Not accepted') + '</span>'
+    : '<span class="cq-st wait">' + (navigator.onLine ? 'Uploading…' : 'Waiting for signal') + '</span>';
+  const opts = r => '<option value="">Whole quote</option>' + lines.map(l => '<option value="' + escHtml(l.key) + '"' + (l.key === r.attach ? ' selected' : '') + '>Line: ' + escHtml(l.name.slice(0, 60)) + '</option>').join('');
+  document.getElementById('cq-list').innerHTML = !job ? '<div class="qt-inv-hint">Enter the job number above to add photos.</div>' : recs.map((r, i) => '<div class="cq-item" data-cq="' + r.clientId + '">'
+    + '<img src="' + r.thumb + '" alt="">'
+    + '<div class="cq-f"><input type="text" data-cqcap maxlength="300" placeholder="Caption (optional)" value="' + escHtml(r.caption || '') + '">'
+    + '<select data-cqkind aria-label="Photo or mock-up"><option value="photo"' + (r.kind === 'photo' ? ' selected' : '') + '>Photo</option><option value="mockup"' + (r.kind === 'mockup' ? ' selected' : '') + '>Mock-up</option></select>'
+    + '<select data-cqattach aria-label="Show with">' + opts(r) + '</select>'
+    + (r.attach && !keys.has(r.attach) ? '<div class="cq-mock">That line was removed — this shows with the whole quote.</div>' : '')
+    + (r.kind === 'mockup' ? '<div class="cq-mock">Client sees: "Mock-up. For illustration only, final layout may vary."</div>' : '')
+    + '<div class="cq-row"><button type="button" data-cqmove="-1" aria-label="Move up"' + (i ? '' : ' disabled') + '>↑</button><button type="button" data-cqmove="1" aria-label="Move down"' + (i < recs.length - 1 ? '' : ' disabled') + '>↓</button>'
+    + '<button type="button" data-cqdel aria-label="Remove">✕</button>' + st(r) + '</div></div></div>').join('');
+}
+
+async function cqFromJob() {
+  const pick = document.getElementById('cq-jobpick'), job = cqJob();
+  if (!pick.hidden) { pick.hidden = true; return; }
+  if (!/^\d{1,8}$/.test(job)) return showToast('Enter the job number first');
+  let items = [];
+  try { items = (await authFetch('/quote-notes/job/' + encodeURIComponent(job))).items.filter(i => i.kind === 'photo' && i.full); } catch (e) { return showToast('Could not load this job\'s photos'); }
+  pick.hidden = false;
+  pick.innerHTML = items.length ? items.map(i => '<button type="button" data-cqjob="' + escHtml(i.full) + '"><img src="' + PROXY + escHtml(i.thumb) + '" alt="Job photo"></button>').join('')
+    : '<div class="qt-inv-hint" style="grid-column:1/-1">No photos on this job yet (Notes &amp; photos tab).</div>';
+}
+
+async function cqSend() {
+  const job = cqJob(), out = document.getElementById('cq-result');
+  if (!/^\d{1,8}$/.test(job)) return showToast('Enter the job number first');
+  if (!quote.length) return showToast('The quote has no lines yet');
+  const bad = quote.filter(i => !Number.isFinite(Number(i.price)) || !Number.isFinite(Number(i.qty)));
+  if (bad.length) return showToast('No valid price on: ' + bad.map(i => i.name).join(', '));
+  const recs = await cqForJob(job), waiting = recs.filter(r => r.status === 'waiting').length;
+  if (waiting) { cqUploadLoop(); return showToast(waiting + ' photo' + (waiting === 1 ? ' is' : 's are') + ' still uploading — try again in a moment'); }
+  const lines = cqLines(), per = {};
+  const images = recs.filter(r => r.status === 'uploaded').map(r => { const n = lines.findIndex(l => l.key === r.attach); return { id: r.serverId, kind: r.kind, caption: (r.caption || '').trim(), line: n >= 0 ? n : null }; });
+  for (const x of images) if (x.line !== null) per[x.line] = (per[x.line] || 0) + 1;
+  if (Object.values(per).some(c => c > CQ_PER_LINE)) return showToast('Up to ' + CQ_PER_LINE + ' photos or mock-ups per line');
+  const btn = document.getElementById('cq-send'); btn.disabled = true; btn.textContent = 'Making the link…';
+  try {
+    const invoiceDescription = (document.getElementById('q-invoice-desc')?.value || '').trim();
+    const j = await authFetch('/client-quote', { method: 'POST', body: JSON.stringify({ jobNumber: job, invoiceDescription, images,
+      lines: quote.map(i => ({ name: i.name, qty: Number(i.qty), priceInc: Number(i.price) })) }) });
+    const preview = j.link.replace('/quote.html#', '/quote.html?staff=1#');
+    try { localStorage.setItem('ipd_cq_last_' + job, JSON.stringify({ link: j.link, expiresAt: j.expiresAt, at: Date.now() })); } catch (e) {}
+    out.innerHTML = '<div class="cq-result"><b>✅ Link ready for job ' + escHtml(job) + ' — valid until ' + new Date(j.expiresAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) + '</b>'
+      + '<div class="cq-link" id="cq-link">' + escHtml(j.link) + '</div>'
+      + '<div class="cq-row"><button type="button" id="cq-copy">📋 Copy</button>' + (navigator.share ? '<button type="button" id="cq-share">📤 Share</button>' : '') + '<a class="q-btn" style="flex:1 1 90px;display:flex;align-items:center;justify-content:center;min-height:40px;text-decoration:none" href="' + escHtml(preview) + '" target="_blank" rel="noopener">👁 Preview</a></div>'
+      + '<div class="qt-inv-hint">Send this link to the client by text or email. Preview doesn\'t count as the client opening it. Nothing was written to ServiceM8.</div></div>';
+    document.getElementById('cq-copy').onclick = async () => { try { await navigator.clipboard.writeText(j.link); showToast('Link copied'); } catch (e) { const r = document.createRange(); r.selectNodeContents(document.getElementById('cq-link')); const s2 = getSelection(); s2.removeAllRanges(); s2.addRange(r); showToast('Link selected — tap Copy'); } };
+    const sh = document.getElementById('cq-share'); if (sh) sh.onclick = () => navigator.share({ title: 'Your quote from Innovation Plumbing and Design', url: j.link }).catch(() => {});
+    out.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    showToast('✅ Client quote link made');
+  } catch (e) { out.innerHTML = '<div class="cq-result" style="background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.3)">❌ ' + escHtml(e.message) + '</div>'; }
+  btn.disabled = false; btn.textContent = '🔗 Send to client';
+}
+
+// the caption box on screen is always the latest (saving a caption and another change can overlap)
+function cqCapFromScreen(r) { const el = document.querySelector('[data-cq="' + r.clientId + '"] [data-cqcap]'); if (el) r.caption = el.value.slice(0, 300); }
+// one set of listeners for the whole page (the Summary tab is built from a template)
+document.addEventListener('change', async e => {
+  const f = e.target.closest('[data-cqadd]');
+  if (f && f.files) { for (const file of [...f.files]) if (!(await cqAddFile(file, f.dataset.cqadd))) break; f.value = ''; return; }
+  const item = e.target.closest('[data-cq]'); if (!item) return;
+  const recs = await cqAll(), r = recs.find(x => x.clientId === item.dataset.cq); if (!r) return;
+  cqCapFromScreen(r);
+  if (e.target.matches('[data-cqkind]')) { r.kind = e.target.value; await cqPut(r); cqRender(); }
+  if (e.target.matches('[data-cqattach]')) {
+    const v = e.target.value;
+    if (v && recs.filter(x => x.jobNumber === r.jobNumber && x.attach === v && x.clientId !== r.clientId).length >= CQ_PER_LINE) { showToast('Up to ' + CQ_PER_LINE + ' per line'); cqRender(); return; }
+    r.attach = v; await cqPut(r); cqRender();
+  }
+});
+document.addEventListener('input', async e => {
+  if (e.target.id === 'job-number-input') { const p = document.getElementById('cq-jobpick'); if (p) p.hidden = true; const o = document.getElementById('cq-result'); if (o) o.innerHTML = ''; cqRender(); return; }
+  if (!e.target.matches('[data-cqcap]')) return;
+  const item = e.target.closest('[data-cq]'), r = (await cqAll()).find(x => x.clientId === item.dataset.cq);
+  if (r) { r.caption = e.target.value.slice(0, 300); await cqPut(r); }
+});
+document.addEventListener('click', async e => {
+  if (e.target.closest('#cq-send')) return cqSend();
+  if (e.target.closest('#cq-fromjob')) return cqFromJob();
+  const jb = e.target.closest('[data-cqjob]');
+  if (jb) {
+    jb.disabled = true;
+    try { const blob = await (await fetch(PROXY + jb.dataset.cqjob)).blob(); await cqAddFile(new File([blob], 'job-photo.jpg', { type: 'image/jpeg' }), 'job'); jb.style.borderColor = '#16a34a'; }
+    catch (err) { showToast('Could not load that photo'); jb.disabled = false; }
+    return;
+  }
+  const item = e.target.closest('[data-cq]'); if (!item) return;
+  const mv = e.target.closest('[data-cqmove]'), del = e.target.closest('[data-cqdel]');
+  if (!mv && !del) return;
+  const recs = await cqForJob(cqJob()), i = recs.findIndex(x => x.clientId === item.dataset.cq); if (i < 0) return;
+  if (del) { if (!confirm('Remove this picture from the quote?')) return; await cqDel(recs[i].clientId); return cqRender(); }
+  const j = i + Number(mv.dataset.cqmove); if (j < 0 || j >= recs.length) return;
+  const a = recs[i], b = recs[j], t = a.order; a.order = b.order; b.order = t; cqCapFromScreen(a); cqCapFromScreen(b); await cqPut(a); await cqPut(b); cqRender();
+});
 
 function setupQuoteNotes() {
   const scr = document.getElementById('screen-quote'); if (!scr || scr.dataset.qnReady) return;
