@@ -53,6 +53,30 @@
   #terms p { margin: 0 0 8px; }
   #terms ul { margin: 0 0 8px; padding-left: 20px; }
   .center { text-align: center; padding: 40px 16px; color: var(--muted); }
+  /* photos and mock-ups */
+  .gal { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  @media (min-width: 700px) { .gal { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .gal figure { margin: 0; min-width: 0; }
+  button.img { padding: 0; border: 0; background: #eef0f3; border-radius: 10px; overflow: hidden; display: block; width: 100%; position: relative; }
+  .gal button.img { aspect-ratio: 4 / 3; }
+  button.img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  button.img.mock img { object-fit: contain; background: #fff; }
+  .badge { position: absolute; left: 6px; top: 6px; background: rgba(31,35,40,.85); color: #fff; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  figcaption { font-size: 14px; margin-top: 6px; overflow-wrap: anywhere; }
+  .mocknote { font-size: 12.5px; color: var(--warn); margin-top: 2px; }
+  .lthumbs { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .lthumbs button.img { width: 64px; height: 64px; }
+  .lthumbs .badge { font-size: 10px; padding: 1px 5px; left: 3px; top: 3px; }
+  #viewer { position: fixed; inset: 0; background: #000; z-index: 20; display: none; flex-direction: column; color: #fff; }
+  #viewer.open { display: flex; }
+  #viewer .vbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: calc(10px + env(safe-area-inset-top)) 12px 10px; }
+  #viewer .vbar button { width: auto; padding: 9px 16px; background: #222; color: #fff; border-color: #444; }
+  #viewer .stage { flex: 1; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; touch-action: none; }
+  #viewer .stage img { max-width: 100%; max-height: 100%; user-select: none; -webkit-user-select: none; -webkit-user-drag: none; will-change: transform; }
+  #viewer .cap { padding: 10px 16px calc(14px + env(safe-area-inset-bottom)); font-size: 15px; min-height: 52px; overflow-wrap: anywhere; }
+  #viewer .cap .mocknote { color: #ffb27a; }
+  #viewer .nav { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0,0,0,.55); color: #fff; border: 1px solid rgba(255,255,255,.5); font-size: 22px; line-height: 44px; }
+  #viewer .prev { left: 8px; } #viewer .next { right: 8px; }
 </style>
 </head>
 <body>
@@ -61,6 +85,12 @@
 <div id="terms" role="dialog" aria-modal="true" aria-labelledby="terms-title">
   <div class="bar"><b id="terms-title">Terms and conditions</b><button type="button" id="terms-close">Close</button></div>
   <div class="body" id="terms-body"></div>
+</div>
+
+<div id="viewer" role="dialog" aria-modal="true" aria-label="Photo">
+  <div class="vbar"><span id="v-count"></span><button type="button" id="v-close">Close</button></div>
+  <div class="stage" id="v-stage"><img id="v-img" alt=""><button type="button" class="nav prev" id="v-prev" aria-label="Previous">&#8249;</button><button type="button" class="nav next" id="v-next" aria-label="Next">&#8250;</button></div>
+  <div class="cap" id="v-cap"></div>
 </div>
 
 <script>
@@ -92,6 +122,12 @@ function showTermsPanel() {
 }
 const signedLine = s => `Accepted by ${s.name} on ${when(s.at)}, under terms version ${s.termsVersion}${s.termsDate ? ' of ' + tday(s.termsDate) : ''}.`;
 const stages = q => Array.isArray(q.stages) ? q.stages : [];
+// Photos and mock-ups: whole-quote ones first, then each line's, in the tech's order. Served only through this quote's link.
+const MOCK_NOTE = 'For illustration only, final layout may vary.';
+let ALL = [];
+const imgUrl = (x, size) => API + '/client-quote/' + id + '/image/' + x.id + '?size=' + size;
+const orderImages = q => { const im = Array.isArray(q.images) ? q.images : []; return [...im.filter(x => x.line === null || x.line === undefined), ...q.lines.flatMap((l, i) => im.filter(x => x.line === i))]; };
+const thumbBtn = (x, cls = '') => `<button type="button" class="img ${x.kind === 'mockup' ? 'mock' : ''} ${cls}" data-img="${ALL.indexOf(x)}" aria-label="Enlarge${x.caption ? ': ' + esc(x.caption) : ''}"><img src="${imgUrl(x, 'thumb')}" alt="${esc(x.caption || (x.kind === 'mockup' ? 'Mock-up' : 'Photo'))}" loading="lazy">${x.kind === 'mockup' ? '<span class="badge">Mock-up</span>' : ''}</button>`;
 
 async function sha256(text) {
   const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text.replace(/\r\n/g, '\n')));
@@ -116,7 +152,10 @@ function termsHtml(text) {
 function render() {
   const q = Q, co = TERMS.business, c = q.company || {};
   const name = c.name || co.name, abn = c.abn ? c.abn.replace(/^(\d{2})(\d{3})(\d{3})(\d{3})$/, '$1 $2 $3 $4') : co.abn;
-  const lines = q.lines.map(l => `<tr><td>${esc(l.name)}</td><td class="q">${l.qty === 1 ? '' : esc(l.qty)}</td><td class="a">${aud(l.qty * l.priceInc)}</td></tr>`).join('');
+  ALL = orderImages(q);
+  const whole = ALL.filter(x => x.line === null || x.line === undefined);
+  const lineImgs = i => ALL.filter(x => x.line === i);
+  const lines = q.lines.map((l, i) => `<tr><td>${esc(l.name)}${lineImgs(i).length ? `<div class="lthumbs">${lineImgs(i).map(x => thumbBtn(x)).join('')}</div>` : ''}</td><td class="q">${l.qty === 1 ? '' : esc(l.qty)}</td><td class="a">${aud(l.qty * l.priceInc)}</td></tr>`).join('');
   const s = q.signed;
   $('#app').innerHTML = `
     <header class="card">
@@ -132,6 +171,11 @@ function render() {
       </div>
       ${q.description ? `<div class="desc">${esc(q.description)}</div>` : ''}
     </section>
+    ${whole.length ? `<section class="card" id="gallery">
+      <h2>Photos and mock-ups</h2>
+      <div class="gal">${whole.map(x => `<figure>${thumbBtn(x)}${x.caption ? `<figcaption>${esc(x.caption)}</figcaption>` : ''}${x.kind === 'mockup' ? `<div class="mocknote">Mock-up. ${MOCK_NOTE}</div>` : ''}</figure>`).join('')}</div>
+      <p class="note">Tap a picture to see it full size.</p>
+    </section>` : ''}
     <section class="card">
       <h2>What's included</h2>
       <table><tbody>${lines}</tbody></table>
@@ -169,7 +213,56 @@ function render() {
   const t2 = $('#open-terms-2'); if (t2) t2.onclick = e => { e.preventDefault(); openTerms(); };
   const sg = $('#sign'); if (sg) sg.onclick = sign;
   $('#pdf').onclick = pdf;
+  document.querySelectorAll('[data-img]').forEach(b => (b.onclick = () => openViewer(+b.dataset.img)));
 }
+
+// ---- full-screen viewer: swipe left/right, pinch or double-tap to zoom, drag when zoomed
+let vAt = 0, vS = 1, vX = 0, vY = 0;
+const viewed = new Set();
+function vApply() { $('#v-img').style.transform = `translate(${vX}px, ${vY}px) scale(${vS})`; }
+function vShow(i) {
+  vAt = (i + ALL.length) % ALL.length; vS = 1; vX = 0; vY = 0; vApply();
+  const x = ALL[vAt];
+  $('#v-img').src = imgUrl(x, 'full'); $('#v-img').alt = x.caption || (x.kind === 'mockup' ? 'Mock-up' : 'Photo');
+  $('#v-count').textContent = ALL.length > 1 ? `${vAt + 1} of ${ALL.length}` : '';
+  const line = Number.isInteger(x.line) && Q.lines[x.line] ? `<div class="note" style="color:#bbb">For: ${esc(Q.lines[x.line].name)}</div>` : '';
+  $('#v-cap').innerHTML = (x.caption ? `<div>${esc(x.caption)}</div>` : '') + (x.kind === 'mockup' ? `<div class="mocknote">Mock-up. ${MOCK_NOTE}</div>` : '') + line;
+  $('#v-prev').hidden = $('#v-next').hidden = ALL.length < 2;
+  if (!staffPreview && !viewed.has(x.id)) { viewed.add(x.id); fetch(API + '/client-quote/' + id + '/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'image-viewed', imageId: x.id }) }).catch(() => {}); }
+}
+function openViewer(i) { $('#viewer').classList.add('open'); document.body.style.overflow = 'hidden'; vShow(i); }
+function closeViewer() { $('#viewer').classList.remove('open'); document.body.style.overflow = ''; $('#v-img').removeAttribute('src'); }
+$('#v-close').onclick = closeViewer;
+$('#v-prev').onclick = e => { e.stopPropagation(); vShow(vAt - 1); };
+$('#v-next').onclick = e => { e.stopPropagation(); vShow(vAt + 1); };
+document.addEventListener('keydown', e => { if (!$('#viewer').classList.contains('open')) return; if (e.key === 'Escape') closeViewer(); if (e.key === 'ArrowLeft') vShow(vAt - 1); if (e.key === 'ArrowRight') vShow(vAt + 1); });
+(() => {
+  const st = $('#v-stage'); let t0 = null, lastTap = 0;
+  const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  st.addEventListener('touchstart', e => {
+    if (e.target.closest('.nav')) return;
+    const t = e.touches;
+    t0 = t.length === 2 ? { pinch: dist(t), s: vS } : { x: t[0].clientX, y: t[0].clientY, vx: vX, vy: vY, at: Date.now() };
+  }, { passive: true });
+  st.addEventListener('touchmove', e => {
+    if (!t0) return; e.preventDefault(); const t = e.touches;
+    if (t.length === 2 && t0.pinch) { vS = Math.min(4, Math.max(1, t0.s * dist(t) / t0.pinch)); if (vS === 1) { vX = 0; vY = 0; } vApply(); }
+    else if (t.length === 1 && t0.x !== undefined && vS > 1) { vX = t0.vx + t[0].clientX - t0.x; vY = t0.vy + t[0].clientY - t0.y; vApply(); }
+  }, { passive: false });
+  st.addEventListener('touchend', e => {
+    if (!t0) return;
+    if (t0.x !== undefined && e.changedTouches.length && e.touches.length === 0) {
+      const dx = e.changedTouches[0].clientX - t0.x, dy = e.changedTouches[0].clientY - t0.y;
+      if (vS === 1 && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) vShow(vAt + (dx < 0 ? 1 : -1));
+      else if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+        const now = Date.now();
+        if (now - lastTap < 300) { vS = vS > 1 ? 1 : 2.5; vX = 0; vY = 0; vApply(); lastTap = 0; } else lastTap = now;
+      }
+    }
+    if (e.touches.length === 0) t0 = null;
+  });
+  st.addEventListener('dblclick', () => { vS = vS > 1 ? 1 : 2.5; vX = 0; vY = 0; vApply(); });
+})();
 
 let termsLogged = false;
 function openTerms() {
@@ -205,13 +298,22 @@ async function pdf() {
   const btn = $('#pdf'); btn.disabled = true; btn.textContent = 'Making the PDF…';
   try {
     if (!window.jspdf) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
-    const doc = buildPdf(new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' }), await logoData());
+    const doc = await buildPdf(new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' }), await logoData());
     doc.save('IPD-quote-' + Q.jobNumber + '.pdf');
     if (!staffPreview) event('pdf-downloaded');
   } catch (e) { alert('The PDF could not be made. Please try again.'); }
   btn.disabled = false; btn.textContent = 'Download PDF';
 }
-function buildPdf(doc, logo) {
+// An image for the PDF: the full-size picture scaled to 1,000 px (keeps the PDF small enough to email).
+async function pdfImage(x) {
+  const blob = await (await fetch(imgUrl(x, 'full'))).blob();
+  const src = window.createImageBitmap ? await createImageBitmap(blob) : await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = URL.createObjectURL(blob); });
+  const k = Math.min(1, 1000 / Math.max(src.width, src.height)), c = document.createElement('canvas');
+  c.width = Math.round(src.width * k); c.height = Math.round(src.height * k);
+  c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+  return { data: c.toDataURL('image/jpeg', 0.75), w: c.width, h: c.height };
+}
+async function buildPdf(doc, logo) {
   const q = Q, co = TERMS.business, c = q.company || {}, s = q.signed;
   const name = c.name || co.name, abn = c.abn ? c.abn.replace(/^(\d{2})(\d{3})(\d{3})(\d{3})$/, '$1 $2 $3 $4') : co.abn;
   const L = 15, R = 195, W = R - L, BOTTOM = 280;
@@ -261,6 +363,37 @@ function buildPdf(doc, logo) {
   y += 3;
   if (s) { para(`${signedLine(s)} ${s.photoOk ? 'Photo permission given.' : 'No photo permission.'}`, 10, 'bold'); }
   else { para('To accept, open your quote link and sign, or contact us. The full terms and conditions follow.', 9.5, 'italic'); }
+  // photos and mock-ups: whole quote first, then each line's (2 per row; a mock-up gets the full width)
+  if (ALL.length) {
+    doc.addPage(); y = 18;
+    para('Photos and mock-ups', 13, 'bold'); y += 2;
+    const groups = [{ title: '', items: ALL.filter(x => !Number.isInteger(x.line)) }, ...q.lines.map((l, i) => ({ title: 'For: ' + l.name, items: ALL.filter(x => x.line === i) }))].filter(g => g.items.length);
+    const GAP = 6, HALF = (W - GAP) / 2;
+    for (const g of groups) {
+      if (g.title) { y += 2; need(14); para(g.title, 10.5, 'bold'); y += 1.5; }
+      let col = 0, rowTop = y, rowH = 0;
+      const endRow = () => { if (col) { y = rowTop + rowH; col = 0; rowH = 0; } };
+      for (const x of g.items) {
+        let im = null; try { im = await pdfImage(x); } catch (e) {}
+        const wide = x.kind === 'mockup', boxW = wide ? W : HALF, maxH = wide ? 150 : 78;
+        let iw = boxW, ih = im ? boxW * im.h / im.w : 20; if (ih > maxH) { ih = maxH; iw = im ? ih * im.w / im.h : boxW; }
+        doc.setFontSize(9); const cap = x.caption ? doc.splitTextToSize(x.caption, boxW) : [];
+        doc.setFontSize(8.5); const mk = wide || x.kind === 'mockup' ? doc.splitTextToSize('Mock-up. ' + MOCK_NOTE, boxW) : [];
+        const h = ih + 3 + cap.length * 4 + mk.length * 3.8 + 5;
+        if (wide) endRow();
+        if (!col) { if (y + h > BOTTOM) { doc.addPage(); y = 18; } rowTop = y; }
+        const x0 = col ? L + HALF + GAP : L;
+        if (im) doc.addImage(im.data, 'JPEG', x0, rowTop, iw, ih); else { doc.setDrawColor(200); doc.rect(x0, rowTop, boxW, ih); doc.setFontSize(9); doc.text('(picture could not be loaded)', x0 + 3, rowTop + 10); }
+        let ty = rowTop + ih + 4;
+        if (cap.length) { doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(0); doc.text(cap, x0, ty); ty += cap.length * 4; }
+        if (mk.length) { doc.setFont('helvetica', 'italic'); doc.setFontSize(8.5); doc.setTextColor(163, 59, 0); doc.text(mk, x0, ty); doc.setTextColor(0); doc.setFont('helvetica', 'normal'); }
+        if (wide) { y = rowTop + h; continue; }
+        rowH = Math.max(rowH, h);
+        if (col) { y = rowTop + rowH; col = 0; rowH = 0; } else col = 1;
+      }
+      endRow();
+    }
+  }
   // full terms
   doc.addPage(); y = 18;
   para(`Terms and conditions (version ${SHOWN.version}, ${tday(SHOWN.date)})`, 13, 'bold'); y += 2;
