@@ -242,7 +242,8 @@ function buildPdf(doc, logo) {
   const n = doc.getNumberOfPages();
   for (let i = 1; i <= n; i++) {
     doc.setPage(i); doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(110);
-    doc.text(`${name}  ·  ABN ${abn}  ·  QBCC Licence ${co.qbcc}  ·  Quote job #${q.jobNumber}  ·  Page ${i} of ${n}`, 105, 290, { align: 'center' });
+    doc.text(`${name}  ·  ABN ${abn}  ·  QBCC Licence ${co.qbcc}  ·  ${co.address}`, 105, 286, { align: 'center' });
+    doc.text(`${co.phone}  ·  ${co.email}  ·  Quote job #${q.jobNumber}  ·  Page ${i} of ${n}`, 105, 290, { align: 'center' });
     doc.setTextColor(0);
   }
   return doc;
