@@ -203,6 +203,18 @@ body.pilot input:not([type=checkbox]):not([type=radio]):not([type=range]):not([t
 .cq-jobpick button{padding:0;border:2px solid transparent;border-radius:8px;background:none;cursor:pointer}
 .cq-jobpick img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;display:block}
 .cq-send{min-height:48px;font-size:15px}
+.cq-client{display:flex;flex-direction:column;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.cq-lbl{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:var(--text-mid)}
+.cq-client input{width:100%;box-sizing:border-box;min-height:40px;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:400 16px var(--font)}
+.cq-addr{font-size:13px;color:var(--text);overflow-wrap:anywhere}
+.cq-addr span,.cq-src{font-size:12px;color:var(--text-mid);font-weight:400}
+.cq-ct{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;padding:8px;border:1px solid var(--border2);border-radius:var(--radius-sm)}
+.cq-ct .cq-wide{grid-column:1/-1}
+.cq-ct-hd{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--text)}
+.cq-ct-hd button,.cq-cbtn{min-height:36px;padding:4px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:600 13px var(--font);cursor:pointer}
+.cq-edited{font-size:11px;font-weight:700;color:#b45309;background:rgba(245,158,11,.12);padding:1px 6px;border-radius:999px}
+.cq-warn{font-size:12px;color:#dc2626;font-weight:600}
+@media (max-width:380px){.cq-ct{grid-template-columns:minmax(0,1fr)}}
 .cq-result{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:var(--radius-sm);background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.35);font-size:13px;color:var(--text)}
 .cq-link{font:400 13px ui-monospace,Menlo,monospace;overflow-wrap:anywhere;user-select:all;-webkit-user-select:all}
 .cq-result .cq-row button{flex:1 1 90px}
@@ -977,6 +989,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             </div>
             <div class="cq-box" id="cq-box" hidden>
               <div class="cq-hd">Client quote link</div>
+              <div class="cq-client" id="cq-client"></div>
               <div class="cq-sub">Photos &amp; mock-ups <span id="cq-count">0 of 12</span></div>
               <div class="qn-btns">
                 <label class="q-btn qn-cam"><input type="file" accept="image/*" capture="environment" data-cqadd="camera" hidden>📷 Take photo</label>
@@ -4935,6 +4948,7 @@ async function cqRender() {
   const box = document.getElementById('cq-box'); if (!box) return;
   box.hidden = !(CURRENT_USER && cqOn);
   if (box.hidden) return;
+  cqClientTick();
   const seq = ++cqRenderSeq, job = cqJob(), recs = job ? await cqForJob(job) : [];
   if (seq !== cqRenderSeq) return;
   const lines = cqLines(), keys = new Set(lines.map(l => l.key));
@@ -4976,14 +4990,17 @@ async function cqSend() {
   const images = recs.filter(r => r.status === 'uploaded').map(r => { const n = lines.findIndex(l => l.key === r.attach); return { id: r.serverId, kind: r.kind, caption: (r.caption || '').trim(), line: n >= 0 ? n : null }; });
   for (const x of images) if (x.line !== null) per[x.line] = (per[x.line] || 0) + 1;
   if (Object.values(per).some(c => c > CQ_PER_LINE)) return showToast('Up to ' + CQ_PER_LINE + ' photos or mock-ups per line');
+  const cd = cqClientGet(job);
+  if (cd) { const prob = cqClientProblem(cd); if (prob) { cqClientRender(); return showToast(prob); } }
+  const client = cd ? { name: (cd.name || '').trim(), contacts: cd.contacts.map(c => ({ name: (c.name || '').trim(), phone: (c.phone || '').trim(), email: (c.email || '').trim(), role: (c.role || '').trim() })).filter(c => c.name || c.phone || c.email) } : undefined;
   const btn = document.getElementById('cq-send'); btn.disabled = true; btn.textContent = 'Making the link…';
   try {
     const invoiceDescription = (document.getElementById('q-invoice-desc')?.value || '').trim();
-    const j = await authFetch('/client-quote', { method: 'POST', body: JSON.stringify({ jobNumber: job, invoiceDescription, images,
+    const j = await authFetch('/client-quote', { method: 'POST', body: JSON.stringify({ jobNumber: job, invoiceDescription, images, ...(client ? { client } : {}),
       lines: quote.map(i => ({ name: i.name, qty: Number(i.qty), priceInc: Number(i.price) })) }) });
     const preview = j.link.replace('/quote.html#', '/quote.html?staff=1#');
     try { localStorage.setItem('ipd_cq_last_' + job, JSON.stringify({ link: j.link, expiresAt: j.expiresAt, at: Date.now() })); } catch (e) {}
-    out.innerHTML = '<div class="cq-result"><b>✅ Link ready for job ' + escHtml(job) + ' — valid until ' + new Date(j.expiresAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) + '</b>'
+    out.innerHTML = '<div class="cq-result"><b>✅ Link ready for job ' + escHtml(job) + (client && client.name ? ' (' + escHtml(client.name) + ')' : '') + ' — valid until ' + new Date(j.expiresAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) + '</b>'
       + '<div class="cq-link" id="cq-link">' + escHtml(j.link) + '</div>'
       + '<div class="cq-row"><button type="button" id="cq-copy">📋 Copy</button>' + (navigator.share ? '<button type="button" id="cq-share">📤 Share</button>' : '') + '<a class="q-btn" style="flex:1 1 90px;display:flex;align-items:center;justify-content:center;min-height:40px;text-decoration:none" href="' + escHtml(preview) + '" target="_blank" rel="noopener">👁 Preview</a></div>'
       + '<div class="qt-inv-hint">Send this link to the client by text or email. Preview doesn\'t count as the client opening it. Nothing was written to ServiceM8.</div></div>';
@@ -4997,6 +5014,83 @@ async function cqSend() {
 
 // the caption box on screen is always the latest (saving a caption and another change can overlap)
 function cqCapFromScreen(r) { const el = document.querySelector('[data-cq="' + r.clientId + '"] [data-cqcap]'); if (el) r.caption = el.value.slice(0, 300); }
+// ---- client details: read from ServiceM8 (read only); changes are for THIS QUOTE ONLY (never written back)
+const CQ_EMAIL = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]{2,}$/, CQ_PHONE = /^[+0-9 ()-]{6,20}$/, CQ_MAX_CONTACTS = 6;
+let cqClientJob = '', cqClientTimer = null, cqClientMsg = '';
+const cqClientKey = job => 'ipd_cq_client_' + job;
+function cqClientGet(job) { try { return JSON.parse(localStorage.getItem(cqClientKey(job)) || 'null'); } catch (e) { return null; } }
+function cqClientSave(job, d) { try { localStorage.setItem(cqClientKey(job), JSON.stringify(d)); } catch (e) {} }
+const cqSameContact = (a, b) => !!a && !!b && ['name', 'phone', 'email', 'role'].every(k => (a[k] || '') === (b[k] || ''));
+function cqClientEdited(d) { return !!d && (d.name !== d.sm8.name || d.contacts.length !== d.sm8.contacts.length || d.contacts.some((c, i) => !cqSameContact(c, d.sm8.contacts[i]))); }
+async function cqClientLoad(job, fresh) {
+  cqClientMsg = 'Reading the client from ServiceM8…'; cqClientRender();
+  try {
+    const sm = await authFetch('/client-quote/job/' + encodeURIComponent(job) + '/client');
+    if (cqJob() !== job) return;
+    const sm8 = { name: sm.name || '', address: sm.address || '', contacts: (sm.contacts || []).map(c => ({ name: c.name || '', phone: c.phone || '', email: c.email || '', role: c.role || 'Contact' })) };
+    const old = cqClientGet(job);
+    // keep the tech's changes; a fresh read only replaces them when asked ("Use ServiceM8 details")
+    const d = !old || fresh ? { sm8, name: sm8.name, contacts: sm8.contacts.slice(0, CQ_MAX_CONTACTS).map(c => ({ ...c })), at: Date.now() } : { ...old, sm8, at: Date.now() };
+    cqClientSave(job, d); cqClientMsg = '';
+  } catch (e) { cqClientMsg = e.message; }
+  cqClientRender();
+}
+function cqClientRender() {
+  const box = document.getElementById('cq-client'); if (!box) return;
+  const job = cqJob();
+  if (!/^\d{1,8}$/.test(job)) { box.innerHTML = '<div class="cq-sub">Client</div><div class="qt-inv-hint">Enter the job number above — the client\'s details come from ServiceM8.</div>'; return; }
+  const d = cqClientGet(job);
+  if (!d) { box.innerHTML = '<div class="cq-sub">Client</div><div class="qt-inv-hint">' + escHtml(cqClientMsg || 'Reading the client from ServiceM8…') + '</div>' + (cqClientMsg && !/Reading/.test(cqClientMsg) ? '<button type="button" class="cq-cbtn" data-cqcreload>↺ Try again</button>' : ''); return; }
+  const ed = cqClientEdited(d), v = x => escHtml(x || '');
+  const warn = c => [c.email && !CQ_EMAIL.test(c.email) ? 'Check the email' : '', c.phone && !CQ_PHONE.test(c.phone) ? 'Check the phone number' : ''].filter(Boolean).join(' · ');
+  box.innerHTML = '<div class="cq-sub">Client ' + (ed ? '<span class="cq-edited">Changed for this quote</span>' : '<span>From ServiceM8 (read only)</span>') + '</div>'
+    + '<label class="cq-lbl">Client name (shown on the quote)<input type="text" data-cqc="name" maxlength="120" autocomplete="off" value="' + v(d.name) + '"></label>'
+    + '<div class="cq-addr"><b>Job address:</b> ' + (d.sm8.address ? v(d.sm8.address) : '<i>none in ServiceM8</i>') + ' <span>(from ServiceM8 — change it there)</span></div>'
+    + d.contacts.map((c, i) => '<div class="cq-ct" data-cqct="' + i + '"><div class="cq-ct-hd"><span>' + (i ? 'Contact ' + (i + 1) : 'Main contact') + (cqSameContact(c, d.sm8.contacts[i]) ? '' : ' <span class="cq-edited">changed</span>') + '</span><button type="button" data-cqcdel aria-label="Remove contact">✕</button></div>'
+      + '<input type="text" data-cqc="name" placeholder="Name" maxlength="100" autocomplete="off" value="' + v(c.name) + '">'
+      + '<input type="text" data-cqc="role" placeholder="Role, e.g. Tenant" maxlength="50" autocomplete="off" value="' + v(c.role) + '">'
+      + '<input type="tel" inputmode="tel" data-cqc="phone" placeholder="Mobile / phone" maxlength="20" autocomplete="off" value="' + v(c.phone) + '">'
+      + '<input type="email" inputmode="email" data-cqc="email" placeholder="Email" maxlength="200" autocomplete="off" autocapitalize="off" value="' + v(c.email) + '">'
+      + '<div class="cq-warn cq-wide" data-cqcwarn>' + escHtml(warn(c)) + '</div></div>').join('')
+    + (d.contacts.length ? '' : '<div class="qt-inv-hint">No contacts on this job in ServiceM8.</div>')
+    + '<div class="cq-row">' + (d.contacts.length < CQ_MAX_CONTACTS ? '<button type="button" class="cq-cbtn" data-cqcadd>+ Add contact</button>' : '') + (ed ? '<button type="button" class="cq-cbtn" data-cqcreset>↺ Use ServiceM8 details</button>' : '<button type="button" class="cq-cbtn" data-cqcreload>↺ Re-read ServiceM8</button>') + '</div>'
+    + (cqClientMsg ? '<div class="cq-warn">' + escHtml(cqClientMsg) + '</div>' : '')
+    + '<div class="qt-inv-hint">Changes here are for this quote only. ServiceM8 is not changed.</div>';
+}
+function cqClientTick() {                                           // job number typed: read ServiceM8 once it settles
+  const job = cqJob();
+  if (job === cqClientJob) return cqClientRender();
+  cqClientJob = job; clearTimeout(cqClientTimer); cqClientMsg = '';
+  cqClientRender();
+  if (/^\d{1,8}$/.test(job) && CURRENT_USER && cqOn) cqClientTimer = setTimeout(() => cqClientLoad(job, false), 600);
+}
+function cqClientProblem(d) {
+  for (const [i, c] of d.contacts.entries()) {
+    if (c.email && !CQ_EMAIL.test(c.email)) return 'Check the email for ' + (c.name || 'contact ' + (i + 1));
+    if (c.phone && !CQ_PHONE.test(c.phone)) return 'Check the phone number for ' + (c.name || 'contact ' + (i + 1));
+  }
+  return '';
+}
+document.addEventListener('input', e => {
+  const f = e.target.closest('#cq-client [data-cqc]'); if (!f) return;
+  const job = cqJob(), d = cqClientGet(job); if (!d) return;
+  const ct = f.closest('[data-cqct]');
+  if (!ct) d.name = f.value; else d.contacts[+ct.dataset.cqct][f.dataset.cqc] = f.value;
+  cqClientSave(job, d);
+  if (ct) { const c = d.contacts[+ct.dataset.cqct], w = ct.querySelector('[data-cqcwarn]'); if (w) w.textContent = ''; ct.dataset.dirty = '1'; }
+});
+document.addEventListener('focusout', e => { if (e.target.closest && e.target.closest('#cq-client [data-cqc]')) setTimeout(() => { if (!document.activeElement || !document.activeElement.closest('#cq-client')) cqClientRender(); }, 0); });
+document.addEventListener('click', e => {
+  const t = e.target; if (!t.closest || !t.closest('#cq-client')) return;
+  const job = cqJob(), d = cqClientGet(job);
+  if (t.closest('[data-cqcreload]')) return cqClientLoad(job, false);
+  if (t.closest('[data-cqcreset]')) { if (confirm('Put back the details from ServiceM8 for this quote?')) cqClientLoad(job, true); return; }
+  if (!d) return;
+  if (t.closest('[data-cqcadd]')) { if (d.contacts.length >= CQ_MAX_CONTACTS) return showToast('Up to ' + CQ_MAX_CONTACTS + ' contacts'); d.contacts.push({ name: '', phone: '', email: '', role: 'Contact' }); cqClientSave(job, d); cqClientRender(); const last = document.querySelector('#cq-client [data-cqct="' + (d.contacts.length - 1) + '"] [data-cqc="name"]'); if (last) last.focus(); return; }
+  const del = t.closest('[data-cqcdel]');
+  if (del) { const i = +del.closest('[data-cqct]').dataset.cqct; if (!confirm('Remove this contact from the quote? (ServiceM8 is not changed.)')) return; d.contacts.splice(i, 1); cqClientSave(job, d); cqClientRender(); }
+});
+
 // one set of listeners for the whole page (the Summary tab is built from a template)
 document.addEventListener('change', async e => {
   const f = e.target.closest('[data-cqadd]');
