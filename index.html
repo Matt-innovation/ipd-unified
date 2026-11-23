@@ -203,6 +203,18 @@ body.pilot input:not([type=checkbox]):not([type=radio]):not([type=range]):not([t
 .cq-jobpick button{padding:0;border:2px solid transparent;border-radius:8px;background:none;cursor:pointer}
 .cq-jobpick img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;display:block}
 .cq-send{min-height:48px;font-size:15px}
+/* Report a problem */
+.rp-back{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:flex-end;justify-content:center}
+.rp-card{background:var(--surface);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px;color:var(--text);box-sizing:border-box}
+.rp-card h3{margin:0;font-size:17px}
+.rp-card textarea{width:100%;box-sizing:border-box;min-height:120px;padding:10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:400 16px var(--font);resize:vertical}
+.rp-card label.rp-tick{display:flex;gap:8px;align-items:flex-start;font-size:14px}
+.rp-card label.rp-tick input{width:22px;height:22px;flex:none;margin:0}
+.rp-card .rp-small{font-size:12px;color:var(--text-mid)}
+.rp-card .rp-row{display:flex;gap:8px}
+.rp-card .rp-row button{flex:1;min-height:46px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:700 15px var(--font);cursor:pointer}
+.rp-card .rp-row button.rp-send{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
+.rp-card .rp-msg{font-size:13px;font-weight:700}
 /* Quote drafts on this phone (logged-in only) */
 .qd-banner{margin:10px 12px 0;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surface);border:1px solid var(--border2);border-left:4px solid #3b82f6;font-size:13px;color:var(--text);display:flex;flex-direction:column;gap:8px}
 .qd-banner b{font-weight:800}
@@ -1192,6 +1204,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
           <div class="settings-row">
             <div class="settings-hint" id="me-line"></div>
             <button class="settings-btn" id="me-users-btn" hidden onclick="openUsers()">Manage users</button>
+            <button class="settings-btn" id="me-problem-btn" onclick="openProblem()">⚠️ Report a problem</button>
             <button class="settings-btn" onclick="logOut()">Log out</button>
           </div>
         </div>
@@ -4251,6 +4264,7 @@ const HOME_ACTIONS = [
   { id: 'training', icon: '🎓', label: 'Learn the app', desc: 'Step-by-step guide', roles: ALL_ROLES, go: () => goScreen('training') },
   { id: 'whatsapp', icon: '💬', label: 'Message the team', desc: 'IPD BOYS WhatsApp group', roles: ALL_ROLES, href: 'https://chat.whatsapp.com/D9bDzCG7f9UK7ZhmddIuKw' },
   { id: 'users', icon: '👥', label: 'Manage users', desc: 'Add, change or remove people', roles: ['owner'], needsManage: true, go: () => openUsers() },
+  { id: 'problem', icon: '⚠️', label: 'Report a problem', desc: 'Tell Matt what went wrong — it goes straight to him', roles: ALL_ROLES, go: () => openProblem() },
   { id: 'settings', icon: '⚙️', label: 'Settings', desc: 'Your login and app settings', roles: ALL_ROLES, go: () => goScreen('settings') },
 ];
 const HOME_CHIPS = {
@@ -4890,6 +4904,52 @@ async function qnRender() {
   const fromServer = qnServer.items.map(i => { const l = local.find(x => x.clientId === i.clientId); return row({ ...i, status: i.diary === 'saved' ? 'saved' : 'archived' }, l && l.thumb ? l.thumb : PROXY + i.thumb); });
   box.innerHTML = (mine.map(r => row(r, r.thumb)).join('') + fromServer.join('')) || '<div class="qempty">No notes or photos for this job yet.</div>';
   if (mine.some(r => r.status !== 'waiting')) { qnServer.job = ''; }                     // refresh from the server next time
+}
+
+// ── REPORT A PROBLEM ─────────────────────────────────────────────────────────
+// Logged-in staff only. Their words plus what the app knows (screen, version, phone, recent errors and — if
+// ticked — the job number and quote lines). Saved on our server and emailed to Matt. Never to ServiceM8.
+const APP_VERSION = '2026-11-23 pilot';
+const RP_ERRORS = [];
+window.addEventListener('error', e => { RP_ERRORS.push(new Date().toISOString().slice(11, 19) + ' ' + String(e.message || 'error').slice(0, 200) + (e.filename ? ' @' + String(e.filename).split('/').pop() + ':' + e.lineno : '')); if (RP_ERRORS.length > 20) RP_ERRORS.shift(); });
+window.addEventListener('unhandledrejection', e => { RP_ERRORS.push(new Date().toISOString().slice(11, 19) + ' ' + String((e.reason && e.reason.message) || e.reason || 'rejected').slice(0, 200)); if (RP_ERRORS.length > 20) RP_ERRORS.shift(); });
+function openProblem() {
+  if (!CURRENT_USER) { showToast('Log in first, or call Matt'); return; }
+  const old = document.getElementById('rp-back'); if (old) old.remove();
+  let draft = ''; try { draft = localStorage.getItem('ipd_rp_draft') || ''; } catch (e) {}
+  const job = (document.getElementById('job-number-input')?.value || '').trim();
+  const back = document.createElement('div'); back.className = 'rp-back'; back.id = 'rp-back';
+  back.innerHTML = '<div class="rp-card" role="dialog" aria-modal="true" aria-labelledby="rp-title"><h3 id="rp-title">⚠️ Report a problem</h3>'
+    + '<div class="rp-small">Say what you were doing and what went wrong. It goes straight to Matt.</div>'
+    + '<textarea id="rp-what" maxlength="2000" placeholder="e.g. I tapped Send to SM8 on job 7612 and it said Could not reach server.">' + escHtml(draft) + '</textarea>'
+    + '<label class="rp-tick"><input type="checkbox" id="rp-quote"' + (quote.length ? ' checked' : '') + '><span>Include my quote (' + (job ? 'job ' + escHtml(job) + ', ' : '') + quote.length + ' line' + (quote.length === 1 ? '' : 's') + ')</span></label>'
+    + '<div class="rp-small">Also sent: the screen you\'re on, the app version, your phone type and any recent app errors. No prices or costs unless you tick your quote.</div>'
+    + '<div class="rp-msg" id="rp-msg"></div>'
+    + '<div class="rp-row"><button type="button" id="rp-cancel">Cancel</button><button type="button" class="rp-send" id="rp-send">Send to Matt</button></div></div>';
+  document.body.appendChild(back);
+  const ta = document.getElementById('rp-what');
+  ta.addEventListener('input', () => { try { localStorage.setItem('ipd_rp_draft', ta.value); } catch (e) {} });
+  document.getElementById('rp-cancel').onclick = () => back.remove();
+  back.addEventListener('click', e => { if (e.target === back) back.remove(); });
+  document.getElementById('rp-send').onclick = async () => {
+    const what = ta.value.trim(), msg = document.getElementById('rp-msg'), btn = document.getElementById('rp-send');
+    if (what.length < 3) { msg.style.color = '#dc2626'; msg.textContent = 'Please say what happened.'; return; }
+    btn.disabled = true; btn.textContent = 'Sending…'; msg.textContent = '';
+    const total = quote.reduce((t, i) => t + (Number(i.price) || 0) * (Number(i.qty) || 0), 0);
+    const body = { what, appVersion: APP_VERSION, screen: (typeof activeScreen !== 'undefined' ? activeScreen : '') + (typeof qTab !== 'undefined' && activeScreen === 'quote' ? ' / ' + qTab : ''),
+      screenSize: innerWidth + 'x' + innerHeight, online: navigator.onLine, errors: RP_ERRORS.slice(),
+      ...(document.getElementById('rp-quote').checked ? { quote: { job, total, lines: quote.map(i => i.qty + ' x ' + i.name + ' @ $' + Number(i.price).toFixed(2)) } } : {}) };
+    try {
+      if (!navigator.onLine) throw new Error('No signal');
+      const j = await authFetch('/report-problem', { method: 'POST', body: JSON.stringify(body) });
+      try { localStorage.removeItem('ipd_rp_draft'); } catch (e) {}
+      back.querySelector('.rp-card').innerHTML = '<h3>✅ Sent to Matt</h3><div class="rp-small">Thanks — ' + (j.mailed ? 'Matt has been emailed.' : 'it\'s saved for Matt.') + ' Reference: ' + escHtml(String(j.id).slice(0, 8)) + '</div><div class="rp-row"><button type="button" onclick="document.getElementById(\'rp-back\').remove()">Close</button></div>';
+    } catch (e) {
+      msg.style.color = '#dc2626'; msg.textContent = (navigator.onLine ? e.message : 'No signal') + ' — your words are kept on the phone. Try again, or call Matt.';
+      btn.disabled = false; btn.textContent = 'Send to Matt';
+    }
+  };
+  setTimeout(() => ta.focus(), 50);
 }
 
 // ── QUOTE DRAFTS ON THIS PHONE (Step A) ─────────────────────────────────────
