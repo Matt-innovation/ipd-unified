@@ -224,6 +224,14 @@ body.pilot input:not([type=checkbox]):not([type=radio]):not([type=range]):not([t
 .st-row button{min-width:40px;min-height:40px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);cursor:pointer}
 .st-sum{font-size:13px;font-weight:700}.st-sum.ok{color:#16a34a}.st-sum.bad{color:#dc2626}
 @media (max-width:380px){.st-row{grid-template-columns:minmax(0,1fr) 96px auto}.st-row b{display:none}}
+/* Saved quote versions (QUOTE_VERSIONS=on) */
+.vr-bar{margin:8px 12px 0;display:flex;gap:6px;flex-wrap:wrap}
+.vr-bar button{flex:1 1 140px;min-height:40px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font:600 13px var(--font);cursor:pointer}
+.vr-warn{margin:8px 12px 0;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surface);border:1px solid rgba(180,83,9,.45);border-left:4px solid #d97706;font-size:13px;color:var(--text);display:flex;flex-direction:column;gap:8px}
+.vr-item{display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:13px}
+.vr-item .vr-sub{font-size:12px;color:var(--text-mid)}
+.vr-item .cq-row button{flex:1 1 110px}
+.vr-diff{font-size:12.5px;background:var(--surface2);border-radius:var(--radius-sm);padding:8px;white-space:pre-wrap;overflow-wrap:anywhere}
 /* Report a problem */
 .rp-back{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:flex-end;justify-content:center}
 .rp-card{background:var(--surface);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px;color:var(--text);box-sizing:border-box}
@@ -998,6 +1006,8 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
           <div class="qt-panel qt-summary" id="qt-summary" hidden>
             <div class="qd-banner" id="qd-banner" hidden></div>
             <div class="qd-drafts" id="qd-drafts" hidden></div>
+            <div class="vr-warn" id="vr-warn" hidden></div>
+            <div class="vr-bar" id="vr-bar" hidden><button type="button" data-vropen>🕘 Saved versions of this quote</button></div>
             <div class="gp-panel" id="gp-panel"></div>
             <div class="gp-discount" id="gp-discount" style="display:none">
               <span class="gp-disc-label">Discount</span>
@@ -2924,6 +2934,7 @@ async function sendQuoteToSM8() {
   // Never send a null/NaN price or quantity — stop and say which line instead.
   const badLines = quote.filter(i => !Number.isFinite(Number(i.price)) || !Number.isFinite(Number(i.qty)));
   if (badLines.length) { showToast('❌ Not sent — no valid price on: ' + badLines.map(i => i.name).join(', ')); return; }
+  if (typeof vrBeforeSend === 'function' && !(await vrBeforeSend())) return;
   const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0);
   const jobNumber=(document.getElementById('job-number-input')?.value||'').trim();
   const qt=id=>(document.getElementById(id)?.value||'').trim();                            // logged-in Summary tab only
@@ -2935,6 +2946,7 @@ async function sendQuoteToSM8() {
     if(res.ok&&data.success){
       showToast('✅ Quote sent to ServiceM8!');
       if (typeof qdMark === 'function') qdMark('sentAt');
+      if (typeof vrAfterSend === 'function') vrAfterSend('sm8');
       const banner=document.createElement('div');
       banner.style.cssText='padding:10px 14px;background:rgba(74,222,128,.1);font-size:12px;color:#16a34a;text-align:center;border-bottom:1px solid rgba(74,222,128,.2)';
       const names={jobDescription:'Job description',invoiceDescription:'Invoice description',diaryNote:'Diary note'}, tx=data.texts||{};
@@ -4929,6 +4941,112 @@ async function qnRender() {
   if (mine.some(r => r.status !== 'waiting')) { qnServer.job = ''; }                     // refresh from the server next time
 }
 
+// ── SAVED QUOTE VERSIONS + TWO-STAFF WARNING (QUOTE_VERSIONS=on) ─────────────
+// The phone's draft (above) is also saved on our server per job, ~20 s after the last change. One person's
+// changes within 10 minutes stay one version; sending or making a link starts a new one. Nothing is merged:
+// if someone else is working on the same job the app says so and lets you look at their version.
+let vrTimer = null, vrBusy = false, vrInfo = null;
+const vrOn = () => qdOn() && cqFeat && cqFeat.versions && /^\d{1,8}$/.test(qdJob || '');
+function vrSchedule() { if (!vrOn()) return; clearTimeout(vrTimer); vrTimer = setTimeout(vrPush, 20000); }
+const vrDraftBody = () => ({ lines: JSON.parse(JSON.stringify(quote)), jobType: quoteJobType, discountPct: quoteDiscountPct, texts: qdTexts() });
+function vrBaseGet(job) { const st = qdRead(), d = st.drafts[job]; return d && d.serverVersion || 0; }
+function vrBaseSet(job, v) { const st = qdRead(), d = st.drafts[job]; if (d) { d.serverVersion = v; qdWrite(st); } }
+async function vrPush() {
+  clearTimeout(vrTimer); vrTimer = null;
+  if (!vrOn() || vrBusy || !navigator.onLine) return;
+  const job = qdJob; if (!quote.length) return;
+  vrBusy = true;
+  try {
+    const j = await authFetch('/quote-versions/' + job, { method: 'POST', body: JSON.stringify({ draft: vrDraftBody(), baseVersion: vrBaseGet(job) }) });
+    if (job === qdJob) { vrBaseSet(job, j.version); vrWarn(job, j.others, j.newerByOthers); }
+  } catch (e) { /* no signal: the phone draft is safe; try again on the next change */ }
+  vrBusy = false;
+}
+window.addEventListener('pagehide', () => { if (vrTimer) vrPush(); });
+async function vrCheck(job) {
+  if (!vrOn() || job !== qdJob) return;
+  try { vrInfo = await authFetch('/quote-versions/' + job); if (job === qdJob) vrWarn(job, vrInfo.others, []); } catch (e) {}
+  vrRenderBar();
+}
+const vrAgo = t => { const m = Math.max(0, Math.round((Date.now() - Date.parse(t)) / 60000)); return m < 1 ? 'just now' : m === 1 ? '1 minute ago' : m < 60 ? m + ' minutes ago' : Math.round(m / 60) + ' h ago'; };
+function vrWarn(job, others, newer) {
+  const box = document.getElementById('vr-warn'); if (!box) return;
+  const o = (others || [])[0], nw = (newer || [])[0];
+  if (!o && !nw) { box.hidden = true; return; }
+  const who = o || nw;
+  box.hidden = false;
+  box.innerHTML = '<div>⚠ <b>' + escHtml(who.byName || 'Someone') + ' is also working on job ' + escHtml(job) + '</b> — last saved ' + escHtml(vrAgo(who.savedAt)) + ' (version ' + who.version + '). Your quote is kept as it is; nothing is merged.</div>'
+    + '<div class="qd-row"><button type="button" data-vrsee="' + who.version + '">See their version</button><button type="button" data-vrhide>Keep mine</button></div>';
+}
+function vrRenderBar() {
+  const bar = document.getElementById('vr-bar'); if (!bar) return;
+  bar.hidden = !vrOn();
+}
+// Send to SM8 a second time would add the lines again: ask first (reads our own records only)
+async function vrBeforeSend() {
+  if (!vrOn()) return true;
+  let info; try { info = await authFetch('/quote-versions/' + qdJob); } catch (e) { return true; }
+  const s = info.lastSm8Send;
+  if (info.recentSm8Send && s) return confirm('Job ' + qdJob + ' was already sent to ServiceM8 from the app by ' + (s.byName || 'someone') + ' on ' + qdWhen(Date.parse(s.at)) + '.\n\nSending again ADDS these lines to the job again (it does not replace them). Send anyway?');
+  return true;
+}
+async function vrAfterSend(kind, linkId) {
+  if (!vrOn()) return;
+  try {
+    const job = qdJob, j = await authFetch('/quote-versions/' + job, { method: 'POST', body: JSON.stringify({ draft: vrDraftBody(), baseVersion: vrBaseGet(job) }) });
+    await authFetch('/quote-versions/' + job + '/sent', { method: 'POST', body: JSON.stringify({ version: j.version, kind, linkId }) });
+    vrBaseSet(job, j.version);
+  } catch (e) {}
+}
+// what changed between two drafts (by line), in plain words
+function vrDiff(a, b) {
+  const key = i => String(i.id || i.name), A = new Map((a.lines || []).map(i => [key(i), i])), B = new Map((b.lines || []).map(i => [key(i), i]));
+  const out = [], m2 = v => '$' + (Number(v) || 0).toFixed(2), tot = d => (d.lines || []).reduce((t, i) => t + (Number(i.price) || 0) * (Number(i.qty) || 0), 0);
+  for (const [k, i] of B) if (!A.has(k)) out.push('+ added: ' + i.qty + ' × ' + i.name + ' (' + m2(i.price) + ')');
+  for (const [k, i] of A) if (!B.has(k)) out.push('− removed: ' + i.qty + ' × ' + i.name);
+  for (const [k, i] of B) { const o = A.get(k); if (!o) continue; if (o.qty !== i.qty) out.push('qty: ' + i.name + ' ' + o.qty + ' → ' + i.qty); if (Number(o.price) !== Number(i.price)) out.push('price: ' + i.name + ' ' + m2(o.price) + ' → ' + m2(i.price)); }
+  const ta = tot(a), tb = tot(b); if (Math.abs(ta - tb) > 0.004) out.push('total: ' + m2(ta) + ' → ' + m2(tb));
+  if ((a.texts || {}).ipd_invoice_desc !== (b.texts || {}).ipd_invoice_desc) out.push('invoice description changed');
+  return out.length ? out.join('\n') : 'No differences.';
+}
+async function vrOpenSheet(focus) {
+  const job = qdJob; if (!vrOn()) return;
+  const old = document.getElementById('vr-back'); if (old) old.remove();
+  const back = document.createElement('div'); back.className = 'rp-back'; back.id = 'vr-back';
+  back.innerHTML = '<div class="rp-card" role="dialog" aria-modal="true"><h3>🕘 Saved versions — job ' + escHtml(job) + '</h3><div id="vr-list"><div class="rp-small">Loading…</div></div><div class="rp-row"><button type="button" id="vr-close">Close</button></div></div>';
+  document.body.appendChild(back);
+  back.addEventListener('click', e => { if (e.target === back) back.remove(); });
+  document.getElementById('vr-close').onclick = () => back.remove();
+  await vrPush();
+  let info; try { info = await authFetch('/quote-versions/' + job); } catch (e) { document.getElementById('vr-list').innerHTML = '<div class="cq-warn">' + escHtml(e.message) + '</div>'; return; }
+  const mine = vrBaseGet(job);
+  document.getElementById('vr-list').innerHTML = (info.versions.length ? info.versions.map(v => '<div class="vr-item" data-vr="' + v.version + '"' + (v.version === focus ? ' style="border-color:#d97706"' : '') + '><div><b>Version ' + v.version + '</b> · ' + escHtml(v.byName || '') + (v.version === mine ? ' <span class="qd-tag">On your screen</span>' : '') + (v.sentAt ? '<span class="qd-tag">Sent to SM8</span>' : '') + (v.linkAt ? '<span class="qd-tag">Client link</span>' : '')
+      + '<div class="vr-sub">' + v.lines + ' lines · $' + v.total.toFixed(2) + ' · saved ' + escHtml(qdWhen(Date.parse(v.savedAt))) + '</div></div>'
+      + '<div class="cq-row"><button type="button" class="cq-cbtn" data-vrdiff="' + v.version + '">What changed</button>' + (v.version === mine ? '' : '<button type="button" class="cq-cbtn" data-vruse="' + v.version + '">Open this version</button>') + '</div><div class="vr-diff" hidden></div></div>').join('')
+    : '<div class="rp-small">No saved versions yet — they save by themselves as you build the quote.</div>');
+}
+document.addEventListener('click', async e => {
+  const t = e.target; if (!t.closest) return;
+  if (t.closest('[data-vropen]')) return vrOpenSheet();
+  if (t.closest('[data-vrhide]')) { document.getElementById('vr-warn').hidden = true; return; }
+  const see = t.closest('[data-vrsee]'); if (see) return vrOpenSheet(+see.dataset.vrsee);
+  const df = t.closest('[data-vrdiff]');
+  if (df) { const box = df.closest('.vr-item').querySelector('.vr-diff'); try { const v = await authFetch('/quote-versions/' + qdJob + '/' + df.dataset.vrdiff); box.textContent = 'From version ' + v.version + ' to what is on your screen:\n' + vrDiff(v.draft, vrDraftBody()); } catch (err) { box.textContent = err.message; } box.hidden = false; return; }
+  const use = t.closest('[data-vruse]');
+  if (use) {
+    if (!confirm('Open version ' + use.dataset.vruse + '? What is on your screen now is kept in "Other saved quotes on this phone".')) return;
+    try {
+      const v = await authFetch('/quote-versions/' + qdJob + '/' + use.dataset.vruse), job = qdJob;
+      qdStash('replaced');
+      qdApply({ job, lines: v.draft.lines, jobType: v.draft.jobType, discountPct: v.draft.discountPct, texts: v.draft.texts });
+      qdSaveNow(); vrBaseSet(job, v.version);
+      qdBanner({ job, lines: v.draft.lines, savedAt: Date.parse(v.savedAt) }, 'opened'); qdRenderList();
+      document.getElementById('vr-back').remove(); document.getElementById('vr-warn').hidden = true;
+      showToast('Opened version ' + v.version + ' (' + (v.byName || '') + ')');
+    } catch (err) { showToast(err.message); }
+  }
+});
+
 // ── PAYMENT STAGES (QUOTE_STAGES=on) ────────────────────────────────────────
 // Staged jobs: the tech names each stage and its amount (inc GST). The stages cover what's left after the
 // deposit (20% on jobs over $1,000 — same rule as the server); the link can only be made when it all adds up.
@@ -5181,6 +5299,7 @@ function qdSaveNow() {
     st.drafts[d.job] = { ...d, savedAt: same ? old.savedAt : d.savedAt, sentAt: same ? old.sentAt || null : null, linkAt: same ? old.linkAt || null : null };
   } else delete st.drafts[d.job];
   st.current = d.job; qdWrite(qdPrune(st));
+  if (typeof vrSchedule === 'function') vrSchedule();
 }
 function qdSave() { if (!qdOn() || qdBusy) return; clearTimeout(qdTimer); qdTimer = setTimeout(qdSaveNow, 300); }
 // keep a copy before the screen is cleared (Clear / Start a new quote / switching drafts)
@@ -5219,6 +5338,7 @@ function qdRestore() {
   const d = st.drafts[st.current];
   if (qdHas(d)) { qdApply(d); qdBanner(d, 'restored'); qdPriceCheck(d); }
   qdRenderList();
+  if (typeof vrCheck === 'function') setTimeout(() => vrCheck(qdJob), 1500);
 }
 // job number changed (on leaving the box): the lines on screen follow the job number, unless that job
 // already has its own saved draft — then ask.
@@ -5235,6 +5355,7 @@ function qdJobChanged(raw) {
   // move the lines on screen to the new job number
   if (st.drafts[qdJob] && qdJob !== nj) { delete st.drafts[qdJob]; qdWrite(st); }
   qdJob = nj; qdSaveNow(); qdRenderList();
+  if (typeof vrCheck === 'function') vrCheck(nj);
 }
 function qdBanner(d, how) {
   const b = document.getElementById('qd-banner'); if (!b) return;
@@ -5265,6 +5386,7 @@ async function qdPriceCheck(d) {
     + '<div class="qd-row" style="margin-top:6px"><button type="button" data-qdprices>Use the new prices</button><button type="button" data-qdkeep>Keep the saved prices</button></div>' : '';
 }
 function qdRenderList() {
+  if (typeof vrRenderBar === 'function') vrRenderBar();
   const box = document.getElementById('qd-drafts'); if (!box) return;
   if (!qdOn()) { box.hidden = true; return; }
   const st = qdRead(), list = Object.entries(st.drafts).filter(([k, d]) => !(k === qdJob && k === st.current && qdBody(d) === qdBody(qdSnap()))).sort((a, b) => b[1].savedAt - a[1].savedAt);
@@ -5381,6 +5503,7 @@ async function cqRender() {
   if (box.hidden) return;
   cqClientTick();
   if (typeof stRender === 'function') stRender();
+  if (typeof vrRenderBar === 'function') vrRenderBar();
   const seq = ++cqRenderSeq, job = cqJob(), recs = job ? await cqForJob(job) : [];
   if (seq !== cqRenderSeq) return;
   const lines = cqLines(), keys = new Set(lines.map(l => l.key));
@@ -5444,6 +5567,7 @@ async function cqSend() {
     out.scrollIntoView({ behavior: 'smooth', block: 'center' });
     showToast('✅ Client quote link made');
     if (typeof qdMark === 'function') qdMark('linkAt');
+    if (typeof vrAfterSend === 'function') vrAfterSend('link', j.id);
   } catch (e) { out.innerHTML = '<div class="cq-result" style="background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.3)">❌ ' + escHtml(e.message) + '</div>'; }
   btn.disabled = false; btn.textContent = '🔗 Send to client';
 }
