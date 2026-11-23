@@ -203,6 +203,19 @@ body.pilot input:not([type=checkbox]):not([type=radio]):not([type=range]):not([t
 .cq-jobpick button{padding:0;border:2px solid transparent;border-radius:8px;background:none;cursor:pointer}
 .cq-jobpick img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;display:block}
 .cq-send{min-height:48px;font-size:15px}
+/* Quote drafts on this phone (logged-in only) */
+.qd-banner{margin:10px 12px 0;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surface);border:1px solid var(--border2);border-left:4px solid #3b82f6;font-size:13px;color:var(--text);display:flex;flex-direction:column;gap:8px}
+.qd-banner b{font-weight:800}
+.qd-row{display:flex;flex-wrap:wrap;gap:6px}
+.qd-row button{flex:1 1 130px;min-height:40px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font:600 13px var(--font);cursor:pointer}
+.qd-chg{font-size:12.5px;color:var(--text)}.qd-chg:not(:empty){padding:8px;border-radius:var(--radius-sm);background:rgba(245,158,11,.14);border:1px solid rgba(180,83,9,.35)}
+.qd-drafts{margin:8px 12px 0}
+.qd-toggle{width:100%;min-height:40px;border:1px dashed var(--border2);border-radius:var(--radius-sm);background:none;color:var(--text-mid);font:600 13px var(--font);cursor:pointer}
+.qd-list{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.qd-item{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;align-items:center;padding:8px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);font-size:13px;color:var(--text)}
+.qd-item .qd-sub{font-size:12px;color:var(--text-mid);overflow-wrap:anywhere}
+.qd-item button{min-height:38px;min-width:44px;padding:4px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:600 13px var(--font);cursor:pointer}
+.qd-tag{font-size:11px;font-weight:700;padding:1px 6px;border-radius:999px;background:rgba(74,222,128,.15);color:#15803d;margin-left:4px}
 .cq-client{display:flex;flex-direction:column;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--border)}
 .cq-lbl{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:var(--text-mid)}
 .cq-client input{width:100%;box-sizing:border-box;min-height:40px;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:400 16px var(--font)}
@@ -950,6 +963,8 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             <div class="qt-list" id="ql-lines"></div>
           </div>
           <div class="qt-panel qt-summary" id="qt-summary" hidden>
+            <div class="qd-banner" id="qd-banner" hidden></div>
+            <div class="qd-drafts" id="qd-drafts" hidden></div>
             <div class="gp-panel" id="gp-panel"></div>
             <div class="gp-discount" id="gp-discount" style="display:none">
               <span class="gp-disc-label">Discount</span>
@@ -2685,7 +2700,7 @@ function chQty(id, delta) {
   updateQuoteUI();
   if(activeScreen==='quote') renderQuote(); else renderQResults();
 }
-function clearQuote() { quote=[]; quoteJobType=null; quoteDiscountPct=0; document.querySelectorAll('[data-qtext]').forEach(t=>{t.value='';try{localStorage.removeItem(t.dataset.qtext)}catch(e){}}); const qd=document.getElementById('qd-custom'); if(qd) qd.value=''; updateQuoteUI(); renderQuote(); renderQResults(); }
+function clearQuote() { if (typeof qdStash === 'function') qdStash('cleared'); quote=[]; quoteJobType=null; quoteDiscountPct=0; document.querySelectorAll('[data-qtext]').forEach(t=>{t.value='';try{localStorage.removeItem(t.dataset.qtext)}catch(e){}}); const qd=document.getElementById('qd-custom'); if(qd) qd.value=''; updateQuoteUI(); renderQuote(); renderQResults(); }
 function updateQuoteUI() {
   syncDiscountLine();
   const count = quote.reduce((s,i)=>s+i.qty,0);
@@ -2698,6 +2713,7 @@ function updateQuoteUI() {
   updateHomeStats();
   if (typeof updateQuoteBar === 'function') updateQuoteBar();
   if (typeof cqRender === 'function' && qTab === 'summary') cqRender();
+  if (typeof qdSave === 'function') qdSave();
 }
 function updateHomeStats() {
   const hs_quote = document.getElementById('hs-quote');
@@ -2748,7 +2764,7 @@ function renderQuote() { return PILOT_UI ? renderQuotePilot() : renderQuoteClass
 // All maths ex GST. Bundle lines use the server's bundle cost (parts × qty, ex GST). A bundle with
 // no known cost — costs not loaded, or any part the server couldn't cost — is left out of GP
 // entirely (its price too — counting its price without its full cost would overstate GP).
-function setQuoteJobType(t) { quoteJobType = t; renderGP(); updateQuoteBar(); }
+function setQuoteJobType(t) { quoteJobType = t; renderGP(); updateQuoteBar(); if (typeof qdSave === 'function') qdSave(); }
 function isGstFreeLine(i) {
   // Reece lines carry the price file's GST % (10 or 0) as `markup`.
   return i.type === 'reece' && i.markup !== undefined && i.markup !== null && i.markup !== '' && Number(i.markup) === 0;
@@ -2882,6 +2898,7 @@ async function sendQuoteToSM8() {
     const data=await res.json();
     if(res.ok&&data.success){
       showToast('✅ Quote sent to ServiceM8!');
+      if (typeof qdMark === 'function') qdMark('sentAt');
       const banner=document.createElement('div');
       banner.style.cssText='padding:10px 14px;background:rgba(74,222,128,.1);font-size:12px;color:#16a34a;text-align:center;border-bottom:1px solid rgba(74,222,128,.2)';
       const names={jobDescription:'Job description',invoiceDescription:'Invoice description',diaryNote:'Diary note'}, tx=data.texts||{};
@@ -4092,6 +4109,7 @@ function showLogin() {
 function setUser(u) {
   CURRENT_USER = u;
   enablePilotUI();
+  if (typeof qdRestore === 'function') qdRestore();
   try { localStorage.setItem(AUTH_USER_KEY, JSON.stringify(u)); } catch (e) {}
   document.getElementById('login-overlay').hidden = true;
   document.getElementById('pin-overlay').classList.add('hidden');   // a personal login replaces the PIN
@@ -4874,6 +4892,165 @@ async function qnRender() {
   if (mine.some(r => r.status !== 'waiting')) { qnServer.job = ''; }                     // refresh from the server next time
 }
 
+// ── QUOTE DRAFTS ON THIS PHONE (Step A) ─────────────────────────────────────
+// Logged-in staff only (the shared PIN app is unchanged). Every change to the quote is saved on this phone,
+// filed under the job number in the box (or "no job number yet"), per person. Reopening the app brings the
+// last draft back. Nothing is sent anywhere. Kept 30 days; a draft already sent to ServiceM8 or made into a
+// client link (and not changed since) is kept 7 days. "Clear" and "Start a new quote" keep a copy for 30 days.
+const QD_DAYS = 30, QD_SENT_DAYS = 7, QD_MAX = 40;
+let qdJob = '', qdTimer = null, qdBusy = false, qdChanges = null;
+const qdKey = () => CURRENT_USER && CURRENT_USER.id ? 'ipd_qdraft_' + CURRENT_USER.id : null;
+const qdOn = () => !!(CURRENT_USER && PILOT_UI && qdKey());
+function qdRead() { try { const st = JSON.parse(localStorage.getItem(qdKey()) || 'null'); if (st && st.drafts) return st; } catch (e) {} return { current: '', drafts: {} }; }
+function qdWrite(st) { try { localStorage.setItem(qdKey(), JSON.stringify(st)); return true; } catch (e) { showToast('⚠ Phone storage full — the draft could not be saved'); return false; } }
+const qdTexts = () => { const o = {}; document.querySelectorAll('[data-qtext]').forEach(t => (o[t.dataset.qtext] = t.value)); return o; };
+const qdSnap = () => ({ job: qdJob, lines: JSON.parse(JSON.stringify(quote)), jobType: quoteJobType, discountPct: quoteDiscountPct, texts: qdTexts(), savedAt: Date.now() });
+const qdHas = d => !!d && ((d.lines || []).length > 0 || Object.values(d.texts || {}).some(v => v && String(v).trim()));
+const qdBody = d => JSON.stringify([d.lines, d.jobType, d.discountPct, d.texts]);
+const qdTotal = d => (d.lines || []).reduce((t, i) => t + (Number(i.price) || 0) * (Number(i.qty) || 0), 0);
+const qdWhen = t => new Date(t).toLocaleString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+function qdPrune(st) {
+  const now = Date.now();
+  for (const [k, d] of Object.entries(st.drafts)) {
+    const sent = d.sentAt || d.linkAt, age = now - d.savedAt;
+    if (age > QD_DAYS * 864e5 || (sent && sent >= d.savedAt && now - sent > QD_SENT_DAYS * 864e5)) delete st.drafts[k];
+  }
+  const keys = Object.keys(st.drafts).sort((a, b) => st.drafts[b].savedAt - st.drafts[a].savedAt);
+  keys.slice(QD_MAX).forEach(k => delete st.drafts[k]);
+  return st;
+}
+function qdSaveNow() {
+  clearTimeout(qdTimer); qdTimer = null;
+  if (!qdOn() || qdBusy) return;
+  const st = qdRead(), d = qdSnap(), old = st.drafts[d.job];
+  if (qdHas(d)) {
+    const same = old && qdBody(old) === qdBody(d);
+    st.drafts[d.job] = { ...d, savedAt: same ? old.savedAt : d.savedAt, sentAt: same ? old.sentAt || null : null, linkAt: same ? old.linkAt || null : null };
+  } else delete st.drafts[d.job];
+  st.current = d.job; qdWrite(qdPrune(st));
+}
+function qdSave() { if (!qdOn() || qdBusy) return; clearTimeout(qdTimer); qdTimer = setTimeout(qdSaveNow, 300); }
+// keep a copy before the screen is cleared (Clear / Start a new quote / switching drafts)
+function qdStash(why) {
+  if (!qdOn()) return;
+  const d = qdSnap(); if (!qdHas(d)) return;
+  const st = qdRead(); st.drafts['x' + d.savedAt] = { ...d, kept: why }; delete st.drafts[d.job]; qdWrite(qdPrune(st));
+}
+function qdMark(field) { if (!qdOn()) return; qdSaveNow(); const st = qdRead(), d = st.drafts[qdJob]; if (d) { d[field] = Date.now(); d.savedAt = Math.min(d.savedAt, d[field]); qdWrite(st); } qdRenderList(); }
+function qdApply(d) {
+  qdBusy = true;
+  try {
+    quote = JSON.parse(JSON.stringify(d.lines || [])); quoteJobType = d.jobType || null; quoteDiscountPct = Number(d.discountPct) || 0;
+    document.querySelectorAll('[data-qtext]').forEach(t => { t.value = (d.texts || {})[t.dataset.qtext] || ''; try { localStorage.setItem(t.dataset.qtext, t.value); } catch (e) {} });
+    const qd = document.getElementById('qd-custom'); if (qd) qd.value = quoteDiscountPct && ![5, 10, 15].includes(quoteDiscountPct) ? quoteDiscountPct : '';
+    const jn = document.getElementById('job-number-input'); if (jn) jn.value = d.job || '';
+    qdJob = d.job || '';
+  } finally { qdBusy = false; }
+  updateQuoteUI(); renderQuote(); if (typeof renderQResults === 'function') renderQResults();
+  if (typeof cqRender === 'function') cqRender();
+}
+function qdClearScreen() {
+  qdBusy = true;
+  try {
+    quote = []; quoteJobType = null; quoteDiscountPct = 0; qdJob = '';
+    document.querySelectorAll('[data-qtext]').forEach(t => { t.value = ''; try { localStorage.removeItem(t.dataset.qtext); } catch (e) {} });
+    const qd = document.getElementById('qd-custom'); if (qd) qd.value = '';
+    const jn = document.getElementById('job-number-input'); if (jn) jn.value = '';
+  } finally { qdBusy = false; }
+  updateQuoteUI(); renderQuote(); if (typeof cqRender === 'function') cqRender();
+}
+// app opened / logged in: bring back the last draft
+function qdRestore() {
+  if (!qdOn() || quote.length) { qdRenderList(); return; }
+  const st = qdPrune(qdRead()); qdWrite(st);
+  const d = st.drafts[st.current];
+  if (qdHas(d)) { qdApply(d); qdBanner(d, 'restored'); qdPriceCheck(d); }
+  qdRenderList();
+}
+// job number changed (on leaving the box): the lines on screen follow the job number, unless that job
+// already has its own saved draft — then ask.
+function qdJobChanged(raw) {
+  if (!qdOn()) return;
+  const nj = String(raw || '').trim(); if (nj && !/^\d{1,8}$/.test(nj)) return;
+  if (nj === qdJob) return;
+  const st = qdRead(), cur = qdSnap(), target = st.drafts[nj];
+  if (qdHas(target) && (!qdHas(cur) || qdBody(target) !== qdBody(cur))) {
+    const msg = 'Job ' + nj + ' already has a saved quote on this phone (' + (target.lines || []).length + ' lines, $' + qdTotal(target).toFixed(2) + ', saved ' + qdWhen(target.savedAt) + ').\n\nOK = open that saved quote' + (qdHas(cur) ? ' (the lines on screen stay saved under ' + (qdJob ? 'job ' + qdJob : '"no job number"') + ')' : '') + '.\nCancel = keep the lines on screen for job ' + nj + ' (the older one is kept in Drafts).';
+    if (!qdHas(cur) || confirm(msg)) { qdSaveNow(); qdApply(target); qdBanner(target, 'opened'); qdPriceCheck(target); qdRenderList(); return; }
+    st.drafts['x' + target.savedAt] = { ...target, kept: 'replaced' }; delete st.drafts[nj]; qdWrite(st);
+  }
+  // move the lines on screen to the new job number
+  if (st.drafts[qdJob] && qdJob !== nj) { delete st.drafts[qdJob]; qdWrite(st); }
+  qdJob = nj; qdSaveNow(); qdRenderList();
+}
+function qdBanner(d, how) {
+  const b = document.getElementById('qd-banner'); if (!b) return;
+  b.hidden = false;
+  b.innerHTML = '<div>↺ <b>' + (how === 'restored' ? 'Restored your quote' : 'Opened the saved quote') + (d.job ? ' for job ' + escHtml(d.job) : '') + '</b> — ' + (d.lines || []).length + ' line' + ((d.lines || []).length === 1 ? '' : 's') + ', saved ' + escHtml(qdWhen(d.savedAt)) + '.</div>'
+    + '<div class="qd-chg" id="qd-chg"></div>'
+    + '<div class="qd-row"><button type="button" data-qdnew>Start a new quote</button><button type="button" data-qdhide>OK</button></div>';
+}
+// prices may have changed since the draft was saved: flag them, the tech decides
+async function qdPriceCheck(d) {
+  qdChanges = null;
+  const out = [];
+  for (const it of quote) {
+    try {
+      if (it.type === 'reece' && it.code) {
+        let r = reeceCache[it.code];
+        if (!r) { const j = await (await fetch(PROXY + '/reece-search?q=' + encodeURIComponent(it.code))).json(); r = (j.products || []).find(x => String(x.code) === String(it.code)); if (r) reeceCache[r.code] = r; }
+        if (r && Math.abs((parseFloat(r.retail) || 0) - it.price) > 0.004) out.push({ id: it.id, name: it.name, was: it.price, now: parseFloat(r.retail) || 0, cost: parseFloat(r.cost) || 0 });
+      } else if (it.type === 'bundle' && bundles.length) {
+        const b = bundles.find(x => x.uuid === it.id); const p = b ? parseFloat(b.price) : NaN;
+        if (b && Number.isFinite(p) && Math.abs(p - it.price) > 0.004) out.push({ id: it.id, name: it.name, was: it.price, now: p });
+      }
+    } catch (e) { /* no signal: say nothing */ }
+  }
+  const box = document.getElementById('qd-chg'); if (!box) return;
+  qdChanges = out;
+  box.innerHTML = out.length ? '⚠ ' + out.length + ' price' + (out.length === 1 ? ' has' : 's have') + ' changed since this quote was saved:<br>' + out.map(c => escHtml(c.name.slice(0, 50)) + ': $' + c.was.toFixed(2) + ' → <b>$' + c.now.toFixed(2) + '</b>').join('<br>')
+    + '<div class="qd-row" style="margin-top:6px"><button type="button" data-qdprices>Use the new prices</button><button type="button" data-qdkeep>Keep the saved prices</button></div>' : '';
+}
+function qdRenderList() {
+  const box = document.getElementById('qd-drafts'); if (!box) return;
+  if (!qdOn()) { box.hidden = true; return; }
+  const st = qdRead(), list = Object.entries(st.drafts).filter(([k, d]) => !(k === qdJob && k === st.current && qdBody(d) === qdBody(qdSnap()))).sort((a, b) => b[1].savedAt - a[1].savedAt);
+  box.hidden = !list.length;
+  if (!list.length) return;
+  const open = box.dataset.open === '1';
+  box.innerHTML = '<button type="button" class="qd-toggle" data-qdtoggle>📝 Other saved quotes on this phone (' + list.length + ') ' + (open ? '▲' : '▼') + '</button>'
+    + (open ? '<div class="qd-list">' + list.map(([k, d]) => '<div class="qd-item"><div><b>' + (d.job ? 'Job ' + escHtml(d.job) : 'No job number') + '</b>'
+      + (d.sentAt ? '<span class="qd-tag">Sent to SM8</span>' : '') + (d.linkAt ? '<span class="qd-tag">Link made</span>' : '') + (d.kept ? '<span class="qd-tag" style="background:rgba(245,158,11,.15);color:#b45309">' + (d.kept === 'cleared' ? 'Cleared' : 'Earlier copy') + '</span>' : '')
+      + '<div class="qd-sub">' + (d.lines || []).length + ' lines · $' + qdTotal(d).toFixed(2) + ' · ' + escHtml(qdWhen(d.savedAt)) + '</div></div>'
+      + '<button type="button" data-qdopen="' + escHtml(k) + '">Open</button><button type="button" data-qddel="' + escHtml(k) + '" aria-label="Remove">✕</button></div>').join('') + '</div>' : '');
+}
+function qdOpen(k) {
+  const st = qdRead(), d = st.drafts[k]; if (!d) return;
+  qdSaveNow();                                                    // the quote on screen stays saved
+  const st2 = qdRead(), cur = st2.drafts[d.job];
+  if (k !== d.job) {                                              // an earlier copy becomes that job's quote; the current one is kept as a copy
+    if (cur && qdBody(cur) !== qdBody(d)) st2.drafts['x' + cur.savedAt] = { ...cur, kept: cur.kept || 'replaced' };
+    st2.drafts[d.job] = { ...d, kept: null }; delete st2.drafts[k];
+  }
+  st2.current = d.job; qdWrite(st2);
+  qdApply(d); qdBanner(d, 'opened'); qdPriceCheck(d); qdRenderList();
+}
+window.addEventListener('pagehide', () => { if (qdTimer) qdSaveNow(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && qdTimer) qdSaveNow(); });
+document.addEventListener('input', e => { if (e.target.matches && e.target.matches('[data-qtext]')) qdSave(); });
+document.addEventListener('change', e => { if (e.target.id === 'job-number-input') qdJobChanged(e.target.value); });
+document.addEventListener('click', e => {
+  const t = e.target; if (!t.closest) return;
+  if (t.closest('[data-qdhide]')) { document.getElementById('qd-banner').hidden = true; return; }
+  if (t.closest('[data-qdnew]')) { if (!confirm('Start a new quote? This one stays saved in "Other saved quotes on this phone".')) return; qdSaveNow(); qdBusy = true; qdJob = ''; qdBusy = false; const st = qdRead(); st.current = ''; if (st.drafts['']) { st.drafts['x' + st.drafts[''].savedAt] = { ...st.drafts[''], kept: 'replaced' }; delete st.drafts['']; } qdWrite(st); qdClearScreen(); document.getElementById('qd-banner').hidden = true; qdRenderList(); return; }
+  if (t.closest('[data-qdprices]')) { for (const c of qdChanges || []) { const it = quote.find(i => i.id === c.id); if (it) { it.price = c.now; if (c.cost) it.cost = c.cost; } } updateQuoteUI(); renderQuote(); document.getElementById('qd-chg').innerHTML = '✓ New prices used.'; return; }
+  if (t.closest('[data-qdkeep]')) { document.getElementById('qd-chg').innerHTML = ''; return; }
+  if (t.closest('[data-qdtoggle]')) { const b = document.getElementById('qd-drafts'); b.dataset.open = b.dataset.open === '1' ? '0' : '1'; qdRenderList(); return; }
+  const op = t.closest('[data-qdopen]'); if (op) return qdOpen(op.dataset.qdopen);
+  const dl = t.closest('[data-qddel]');
+  if (dl) { if (!confirm('Remove this saved quote from the phone?')) return; const st = qdRead(); delete st.drafts[dl.dataset.qddel]; qdWrite(st); qdRenderList(); }
+});
+
 // ── CLIENT QUOTE LINK: photos & mock-ups + Send to client ───────────────────
 // Logged-in staff only (the shared PIN never sees this). Photos are shrunk on the phone (photo 1600 px, mock-up
 // 2000 px, 480 px thumbnail), kept in the phone's own database until our server confirms them, then only the
@@ -5008,6 +5185,7 @@ async function cqSend() {
     const sh = document.getElementById('cq-share'); if (sh) sh.onclick = () => navigator.share({ title: 'Your quote from Innovation Plumbing and Design', url: j.link }).catch(() => {});
     out.scrollIntoView({ behavior: 'smooth', block: 'center' });
     showToast('✅ Client quote link made');
+    if (typeof qdMark === 'function') qdMark('linkAt');
   } catch (e) { out.innerHTML = '<div class="cq-result" style="background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.3)">❌ ' + escHtml(e.message) + '</div>'; }
   btn.disabled = false; btn.textContent = '🔗 Send to client';
 }
