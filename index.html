@@ -203,6 +203,17 @@ body.pilot input:not([type=checkbox]):not([type=radio]):not([type=range]):not([t
 .cq-jobpick button{padding:0;border:2px solid transparent;border-radius:8px;background:none;cursor:pointer}
 .cq-jobpick img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;display:block}
 .cq-send{min-height:48px;font-size:15px}
+/* Product information links (PRODUCT_LINKS=on, logged-in only) */
+.pl-btn{margin-top:6px;min-height:34px;padding:4px 10px;border:1px solid var(--border2);border-radius:999px;background:var(--surface2);color:var(--text);font:600 12.5px var(--font);cursor:pointer}
+.pl-btn.has{border-color:#3b82f6;color:#1d4ed8}
+.pl-sec{font-size:12px;font-weight:800;color:var(--text-mid);text-transform:uppercase;letter-spacing:.03em;margin-top:4px}
+.pl-opt{display:flex;gap:8px;align-items:flex-start;padding:8px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:14px}
+.pl-opt input{width:22px;height:22px;flex:none;margin:0}
+.pl-opt small{display:block;color:var(--text-mid);font-size:12px;overflow-wrap:anywhere}
+.pl-on{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:var(--radius-sm);background:rgba(59,130,246,.08);font-size:13px}
+.pl-on span{flex:1;min-width:0;overflow-wrap:anywhere}
+.pl-on button{min-width:40px;min-height:36px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer}
+.rp-card input[type=text],.rp-card input[type=url],.rp-card input[type=search],.rp-card select{width:100%;box-sizing:border-box;min-height:42px;padding:8px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:400 16px var(--font)}
 /* Report a problem */
 .rp-back{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:flex-end;justify-content:center}
 .rp-card{background:var(--surface);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px;color:var(--text);box-sizing:border-box}
@@ -2770,6 +2781,7 @@ function renderQuotePilot() {
   totals.style.display='block';
   updateQuoteBar();
   if (typeof qWatchImages === 'function') qWatchImages(list);
+  if (typeof plDecorate === 'function') plDecorate(list);
 }
 
 function renderQuote() { return PILOT_UI ? renderQuotePilot() : renderQuoteClassic(); }
@@ -4906,6 +4918,108 @@ async function qnRender() {
   if (mine.some(r => r.status !== 'waiting')) { qnServer.job = ''; }                     // refresh from the server next time
 }
 
+// ── PRODUCT INFORMATION LINKS (PRODUCT_LINKS=on) ─────────────────────────────
+// "📄 Product info" on each quote line (logged-in Summary only). Knowledge Centre links that match the line
+// (exact = same Reece code; possible = name/tags), a search of the whole Knowledge Centre, or a link typed by
+// hand from an approved site (checked again by the server). Nothing is ticked automatically (Matt, 23 Nov).
+// The ticked links live on the quote line (so drafts keep them); they go to the client quote only, never ServiceM8.
+const PL_LINE = 5, PL_QUOTE = 20;
+let plData = null, plSig = '';
+const plCount = () => quote.reduce((t, i) => t + (i.links || []).length, 0);
+function plDecorate(list) {
+  if (!(CURRENT_USER && PILOT_UI && cqFeat && cqFeat.productLinks)) return;
+  list.querySelectorAll('.qline[data-id]').forEach(row => {
+    const it = quote.find(i => String(i.id) === row.dataset.id); if (!it || it.id === 'discount') return;
+    const front = row.querySelector('.quote-item'); if (!front || front.querySelector('.pl-btn')) return;
+    const n = (it.links || []).length, b = document.createElement('button');
+    b.type = 'button'; b.className = 'pl-btn' + (n ? ' has' : ''); b.dataset.plopen = it.id; b.textContent = '📄 Product info' + (n ? ' (' + n + ')' : '');
+    front.appendChild(b);
+  });
+}
+async function plLoad() {
+  const lines = quote.filter(i => i.id !== 'discount').map(i => ({ key: String(i.id), code: i.type === 'reece' ? i.code : '', name: i.name, type: i.type }));
+  const sig = JSON.stringify(lines);
+  if (plData && plSig === sig && Date.now() - plData.at < 5 * 60e3) return plData;
+  const j = await authFetch('/client-quote/product-links', { method: 'POST', body: JSON.stringify({ lines }) });
+  plData = { ...j, at: Date.now() }; plSig = sig; return plData;
+}
+const plSiteOk = (host, sites) => { const h = String(host || '').toLowerCase().replace(/^www\./, ''); return sites.some(a => h === a || h.endsWith('.' + a)); };
+async function plOpen(itemId) {
+  const it = quote.find(i => String(i.id) === String(itemId)); if (!it) return;
+  const old = document.getElementById('pl-back'); if (old) old.remove();
+  const back = document.createElement('div'); back.className = 'rp-back'; back.id = 'pl-back';
+  back.innerHTML = '<div class="rp-card" role="dialog" aria-modal="true" aria-labelledby="pl-title"><h3 id="pl-title">📄 Product info</h3><div class="rp-small">' + escHtml(it.name) + '</div><div id="pl-body"><div class="rp-small">Reading the Knowledge Centre…</div></div>'
+    + '<div class="rp-row"><button type="button" class="rp-send" id="pl-done">Done</button></div></div>';
+  document.body.appendChild(back);
+  back.addEventListener('click', e => { if (e.target === back) plClose(); });
+  document.getElementById('pl-done').onclick = plClose;
+  let d; try { d = await plLoad(); } catch (e) { document.getElementById('pl-body').innerHTML = '<div class="cq-warn">' + escHtml(e.message) + '</div>'; return; }
+  back.dataset.item = it.id; plRenderSheet();
+}
+function plClose() { const b = document.getElementById('pl-back'); if (b) b.remove(); renderQuote(); if (typeof qdSave === 'function') qdSave(); }
+function plRenderSheet() {
+  const back = document.getElementById('pl-back'); if (!back || !plData) return;
+  const it = quote.find(i => String(i.id) === back.dataset.item); if (!it) return;
+  const mine = it.links || [], m = (plData.lines || {})[String(it.id)] || { exact: [], possible: [] }, byId = id => plData.links.find(l => l.id === id);
+  const q = (document.getElementById('pl-search') || {}).value || '';
+  const opt = l => '<label class="pl-opt"><input type="checkbox" data-pltick="' + escHtml(l.id) + '"' + (mine.some(k => k.id === l.id) ? ' checked' : '') + '><span>' + escHtml(l.title) + '<small>' + escHtml(l.type) + ' · ' + escHtml(l.site) + (l.category ? ' · ' + escHtml(l.category) : '') + '</small></span></label>';
+  const ex = m.exact.map(byId).filter(Boolean), po = m.possible.map(byId).filter(Boolean);
+
+  document.getElementById('pl-body').innerHTML =
+    '<div class="pl-sec">On this line (' + mine.length + ' of ' + PL_LINE + ')</div>' + (mine.length ? mine.map((k, x) => '<div class="pl-on"><span>' + escHtml(k.title) + ' <small>· ' + escHtml(k.type || '') + ' · ' + escHtml(k.site || '') + (k.source === 'manual' ? ' · added by hand' : '') + '</small></span><button type="button" data-plrm="' + x + '" aria-label="Remove">✕</button></div>').join('') : '<div class="rp-small">None yet — tick below.</div>')
+    + (ex.length ? '<div class="pl-sec">Exact match (same Reece code)</div>' + ex.map(opt).join('') : '')
+    + (po.length ? '<div class="pl-sec">Possible match</div>' + po.map(opt).join('') : '')
+    + (!ex.length && !po.length ? '<div class="rp-small">No Knowledge Centre match for this line — search below or add a link by hand.</div>' : '')
+    + '<div class="pl-sec">Search the Knowledge Centre</div><input type="search" id="pl-search" placeholder="e.g. Thermann, toilet, Bristol" value="' + escHtml(q) + '" autocomplete="off"><div id="pl-found"></div>'
+    + '<div class="pl-sec">Add a link by hand</div><div class="rp-small">Approved sites only: ' + escHtml(plData.approvedSites.slice(0, 8).join(', ')) + ' and other main brands. The server checks the page opens.</div>'
+    + '<input type="text" id="pl-mt" placeholder="What the client sees, e.g. Rheem 250L spec sheet" maxlength="120"><input type="url" id="pl-mu" placeholder="https://…" autocapitalize="off" inputmode="url">'
+    + '<select id="pl-my"><option>Spec sheet</option><option>Product page</option><option>Installation guide</option><option>Warranty</option><option>Product information</option></select>'
+    + '<div class="rp-row"><button type="button" id="pl-madd">Add this link</button></div><div class="cq-warn" id="pl-msg"></div>';
+  plRenderFound();
+}
+// search results only (typing must not rebuild the box, or the iPhone keyboard closes)
+function plRenderFound() {
+  const back = document.getElementById('pl-back'), box = document.getElementById('pl-found'); if (!back || !box || !plData) return;
+  const it = quote.find(i => String(i.id) === back.dataset.item); if (!it) return;
+  const mine = it.links || [], m = (plData.lines || {})[String(it.id)] || { exact: [], possible: [] };
+  const words = (document.getElementById('pl-search').value || '').toLowerCase().split(/\s+/).filter(Boolean);
+  const found = words.length ? plData.links.filter(l => !m.exact.includes(l.id) && !m.possible.includes(l.id) && words.every(w => (l.title + ' ' + l.category + ' ' + (l.tags || '') + ' ' + l.code).toLowerCase().includes(w))).slice(0, 30) : [];
+  box.innerHTML = found.map(l => '<label class="pl-opt"><input type="checkbox" data-pltick="' + escHtml(l.id) + '"' + (mine.some(k => k.id === l.id) ? ' checked' : '') + '><span>' + escHtml(l.title) + '<small>' + escHtml(l.type) + ' · ' + escHtml(l.site) + (l.category ? ' · ' + escHtml(l.category) : '') + '</small></span></label>').join('')
+    + (words.length && !found.length ? '<div class="rp-small">Nothing found.</div>' : '');
+}
+function plAdd(it, link) {
+  it.links = it.links || [];
+  if (it.links.some(k => k.url === link.url)) return 'Already on this line';
+  if (it.links.length >= PL_LINE) return 'Up to ' + PL_LINE + ' links per line';
+  if (plCount() >= PL_QUOTE) return 'Up to ' + PL_QUOTE + ' links per quote';
+  it.links.push(link); return '';
+}
+document.addEventListener('click', e => {
+  const t = e.target; if (!t.closest) return;
+  const op = t.closest('[data-plopen]'); if (op) { e.stopPropagation(); return plOpen(op.dataset.plopen); }
+  const back = document.getElementById('pl-back'); if (!back || !t.closest('#pl-back')) return;
+  const it = quote.find(i => String(i.id) === back.dataset.item); if (!it) return;
+  const rm = t.closest('[data-plrm]'); if (rm) { it.links.splice(+rm.dataset.plrm, 1); if (!it.links.length) delete it.links; plRenderSheet(); return; }
+  if (t.closest('#pl-madd')) {
+    const title = document.getElementById('pl-mt').value.trim(), raw = document.getElementById('pl-mu').value.trim(), type = document.getElementById('pl-my').value, msg = document.getElementById('pl-msg');
+    let u; try { u = new URL(raw); } catch (err) { msg.textContent = 'Paste the full web address, starting https://'; return; }
+    if (u.protocol !== 'https:') { msg.textContent = 'The address must start with https://'; return; }
+    if (!plSiteOk(u.hostname, plData.approvedSites)) { msg.textContent = u.hostname.replace(/^www\./, '') + ' is not on the approved list of sites'; return; }
+    const err = plAdd(it, { title: title || u.hostname.replace(/^www\./, ''), url: u.href, type, site: u.hostname.replace(/^www\./, ''), source: 'manual' });
+    if (err) { msg.textContent = err; return; }
+    plRenderSheet(); return;
+  }
+});
+document.addEventListener('change', e => {
+  const tk = e.target.closest && e.target.closest('[data-pltick]'); if (!tk) return;
+  const back = document.getElementById('pl-back'), it = back && quote.find(i => String(i.id) === back.dataset.item); if (!it) return;
+  const l = plData.links.find(x => x.id === tk.dataset.pltick); if (!l) return;
+  if (tk.checked) { const err = plAdd(it, { id: l.id, title: l.title, type: l.type, url: l.url, site: l.site, source: 'kc' }); if (err) { tk.checked = false; showToast(err); return; } }
+  else { it.links = (it.links || []).filter(k => k.id !== l.id); if (!it.links.length) delete it.links; }
+  plRenderSheet();
+});
+document.addEventListener('input', e => { if (e.target.id === 'pl-search') plRenderFound(); });
+
 // ── REPORT A PROBLEM ─────────────────────────────────────────────────────────
 // Logged-in staff only. Their words plus what the app knows (screen, version, phone, recent errors and — if
 // ticked — the job number and quote lines). Saved on our server and emailed to Matt. Never to ServiceM8.
@@ -5116,7 +5230,7 @@ document.addEventListener('click', e => {
 // 2000 px, 480 px thumbnail), kept in the phone's own database until our server confirms them, then only the
 // thumbnail stays. They go to OUR server only — never to ServiceM8. "Send to client" makes the private link.
 const CQ_DB = 'ipd-client-quote', CQ_STORE = 'images', CQ_MAX = 12, CQ_PER_LINE = 4;
-let cqOn = false, cqBusy = false, cqAgain = false;
+let cqOn = false, cqBusy = false, cqAgain = false, cqFeat = {};
 function cqDb() { return new Promise((ok, no) => { const r = indexedDB.open(CQ_DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(CQ_STORE, { keyPath: 'clientId' }); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); }); }
 async function cqTx(mode, fn) { const db = await cqDb(); return new Promise((ok, no) => { const t = db.transaction(CQ_STORE, mode), st = t.objectStore(CQ_STORE); const out = fn(st); t.oncomplete = () => ok(out && out.result !== undefined ? out.result : out); t.onerror = () => no(t.error); }); }
 const cqAll = () => cqTx('readonly', st => st.getAll());
@@ -5129,8 +5243,9 @@ const cqLines = () => quote.map((i, n) => ({ key: cqLineKey(i, n), name: i.name 
 
 async function cqRefresh() {
   cqOn = false;
-  if (CURRENT_USER) { try { cqOn = !!(await (await fetch(PROXY + '/client-quote/status', { signal: AbortSignal.timeout(6000) })).json()).on; } catch (e) {} }
-  cqRender();
+  cqFeat = {};
+  if (CURRENT_USER) { try { cqFeat = await (await fetch(PROXY + '/client-quote/status', { signal: AbortSignal.timeout(6000) })).json(); cqOn = !!cqFeat.on; } catch (e) {} }
+  cqRender(); if (PILOT_UI && typeof renderQuote === 'function') renderQuote();
 }
 // shrink onto a white background (a see-through PNG mock-up would otherwise turn black), JPEG
 async function cqShrink(file, max, quality) {
@@ -5234,7 +5349,7 @@ async function cqSend() {
   try {
     const invoiceDescription = (document.getElementById('q-invoice-desc')?.value || '').trim();
     const j = await authFetch('/client-quote', { method: 'POST', body: JSON.stringify({ jobNumber: job, invoiceDescription, images, ...(client ? { client } : {}),
-      lines: quote.map(i => ({ name: i.name, qty: Number(i.qty), priceInc: Number(i.price) })) }) });
+      lines: quote.map(i => ({ name: i.name, qty: Number(i.qty), priceInc: Number(i.price), ...(cqFeat.productLinks && (i.links || []).length ? { links: i.links.map(k => k.source === 'kc' ? { id: k.id } : { url: k.url, title: k.title, type: k.type }) } : {}) })) }) });
     const preview = j.link.replace('/quote.html#', '/quote.html?staff=1#');
     try { localStorage.setItem('ipd_cq_last_' + job, JSON.stringify({ link: j.link, expiresAt: j.expiresAt, at: Date.now() })); } catch (e) {}
     out.innerHTML = '<div class="cq-result"><b>✅ Link ready for job ' + escHtml(job) + (client && client.name ? ' (' + escHtml(client.name) + ')' : '') + ' — valid until ' + new Date(j.expiresAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) + '</b>'

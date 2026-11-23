@@ -65,6 +65,12 @@
   figcaption { font-size: 14px; margin-top: 6px; overflow-wrap: anywhere; }
   .mocknote { font-size: 12.5px; color: var(--warn); margin-top: 2px; }
   .lthumbs { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .plinks { margin-top: 0; font-size: 14px; }
+  tr.haslinks td { border-bottom: 0; padding-bottom: 2px; }
+  tr.plrow td { padding-top: 0; }
+  .plinks .plh { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+  .plinks a { display: block; color: #1a56b0; padding: 4px 0; overflow-wrap: anywhere; text-decoration: underline; }
+  .plinks a span { color: var(--muted); font-size: 12.5px; text-decoration: none; }
   .lthumbs button.img { width: 64px; height: 64px; }
   .lthumbs .badge { font-size: 10px; padding: 1px 5px; left: 3px; top: 3px; }
   #viewer { position: fixed; inset: 0; background: #000; z-index: 20; display: none; flex-direction: column; color: #fff; }
@@ -124,7 +130,7 @@ const signedLine = s => `Accepted by ${s.name} on ${when(s.at)}, under terms ver
 const stages = q => Array.isArray(q.stages) ? q.stages : [];
 // Photos and mock-ups: whole-quote ones first, then each line's, in the tech's order. Served only through this quote's link.
 const MOCK_NOTE = 'For illustration only, final layout may vary.';
-let ALL = [];
+let ALL = [], LINKS = [];
 const imgUrl = (x, size) => API + '/client-quote/' + id + '/image/' + x.id + '?size=' + size;
 const orderImages = q => { const im = Array.isArray(q.images) ? q.images : []; return [...im.filter(x => x.line === null || x.line === undefined), ...q.lines.flatMap((l, i) => im.filter(x => x.line === i))]; };
 const thumbBtn = (x, cls = '') => `<button type="button" class="img ${x.kind === 'mockup' ? 'mock' : ''} ${cls}" data-img="${ALL.indexOf(x)}" aria-label="Enlarge${x.caption ? ': ' + esc(x.caption) : ''}"><img src="${imgUrl(x, 'thumb')}" alt="${esc(x.caption || (x.kind === 'mockup' ? 'Mock-up' : 'Photo'))}" loading="lazy">${x.kind === 'mockup' ? '<span class="badge">Mock-up</span>' : ''}</button>`;
@@ -153,9 +159,11 @@ function render() {
   const q = Q, co = TERMS.business, c = q.company || {};
   const name = c.name || co.name, abn = c.abn ? c.abn.replace(/^(\d{2})(\d{3})(\d{3})(\d{3})$/, '$1 $2 $3 $4') : co.abn;
   ALL = orderImages(q);
+  let ln = 0; LINKS = []; q.lines.forEach((l, i) => (l.links || []).forEach((k, j) => LINKS.push({ ...k, n: ++ln, line: i, idx: j })));
+  const linkList = i => { const ks = LINKS.filter(k => k.line === i); return ks.length ? `<div class="plinks"><div class="plh">Product information</div>${ks.map(k => `<a href="${esc(k.url)}" target="_blank" rel="noopener noreferrer" data-link="${i}:${k.idx}">[${k.n}] ${esc(k.title)} <span>· ${esc(k.type || 'Information')} · ${esc(k.site || '')}</span></a>`).join('')}</div>` : ''; };
   const whole = ALL.filter(x => x.line === null || x.line === undefined);
   const lineImgs = i => ALL.filter(x => x.line === i);
-  const lines = q.lines.map((l, i) => `<tr><td>${esc(l.name)}${lineImgs(i).length ? `<div class="lthumbs">${lineImgs(i).map(x => thumbBtn(x)).join('')}</div>` : ''}</td><td class="q">${l.qty === 1 ? '' : esc(l.qty)}</td><td class="a">${aud(l.qty * l.priceInc)}</td></tr>`).join('');
+  const lines = q.lines.map((l, i) => { const lk = linkList(i); return `<tr data-line="${i}"${lk ? ' class="haslinks"' : ''}><td>${esc(l.name)}${lineImgs(i).length ? `<div class="lthumbs">${lineImgs(i).map(x => thumbBtn(x)).join('')}</div>` : ''}</td><td class="q">${l.qty === 1 ? '' : esc(l.qty)}</td><td class="a">${aud(l.qty * l.priceInc)}</td></tr>` + (lk ? `<tr class="plrow" data-linkrow="${i}"><td colspan="3">${lk}</td></tr>` : ''); }).join('');
   const s = q.signed;
   $('#app').innerHTML = `
     <header class="card">
@@ -214,6 +222,11 @@ function render() {
   const sg = $('#sign'); if (sg) sg.onclick = sign;
   $('#pdf').onclick = pdf;
   document.querySelectorAll('[data-img]').forEach(b => (b.onclick = () => openViewer(+b.dataset.img)));
+  // a product link opens in a new tab; this page records it (the client's page stays open)
+  document.querySelectorAll('[data-link]').forEach(a => a.addEventListener('click', () => {
+    if (staffPreview) return; const [line, link] = a.dataset.link.split(':').map(Number);
+    fetch(API + '/client-quote/' + id + '/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'link-opened', line, link }) }).catch(() => {});
+  }));
 }
 
 // ---- full-screen viewer: swipe left/right, pinch or double-tap to zoom, drag when zoomed
@@ -339,11 +352,15 @@ async function buildPdf(doc, logo) {
   doc.setFont('helvetica', 'bold'); doc.setFontSize(10); need(8);
   doc.text('Item', L, y); doc.text('Qty', 160, y, { align: 'right' }); doc.text('Amount', R, y, { align: 'right' }); y += 2; doc.line(L, y, R, y); y += 5;
   doc.setFont('helvetica', 'normal');
-  for (const l of q.lines) {
+  q.lines.forEach((l, i) => {
     const parts = doc.splitTextToSize(l.name, 128); need(parts.length * 4.5 + 2);
     doc.text(parts, L, y); doc.text(String(l.qty), 160, y, { align: 'right' }); doc.text(aud(l.qty * l.priceInc).replace('−', '-'), R, y, { align: 'right' });
     y += parts.length * 4.5 + 2;
-  }
+    for (const k of LINKS.filter(k => k.line === i)) {
+      const t = doc.splitTextToSize(`[${k.n}] ${k.title} – ${k.type || 'Information'}`, 120)[0];
+      need(5); doc.setFontSize(9); doc.setTextColor(26, 86, 176); doc.textWithLink(t, L + 4, y - 0.5, { url: k.url }); doc.setTextColor(0); doc.setFontSize(10); y += 4.2;
+    }
+  });
   doc.line(L, y - 2, R, y - 2); y += 4; need(20);
   doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text('Total (inc GST)', 120, y); doc.text(aud(q.totalInc), R, y, { align: 'right' }); y += 5.5;
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.text('Includes GST of', 120, y); doc.text(aud(q.gstInc), R, y, { align: 'right' }); y += 5;
@@ -392,6 +409,17 @@ async function buildPdf(doc, logo) {
         if (col) { y = rowTop + rowH; col = 0; rowH = 0; } else col = 1;
       }
       endRow();
+    }
+  }
+  // product information links: full addresses, readable on paper and tappable on screen
+  if (LINKS.length) {
+    doc.addPage(); y = 18;
+    para('Product information links', 13, 'bold'); y += 2;
+    for (const k of LINKS) {
+      need(12); doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.text(`[${k.n}] ${doc.splitTextToSize(k.title + ' – ' + (k.type || 'Information'), W - 10)[0]}`, L, y); y += 4.6;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(26, 86, 176);
+      for (const seg of doc.splitTextToSize(k.url, W - 6)) { need(4.4); doc.textWithLink(seg, L + 4, y, { url: k.url }); y += 4.2; }
+      doc.setTextColor(0); y += 2.5;
     }
   }
   // full terms
