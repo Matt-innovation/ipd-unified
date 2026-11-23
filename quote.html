@@ -180,7 +180,7 @@ function render() {
   const whole = ALL.filter(x => x.line === null || x.line === undefined);
   const lineImgs = i => ALL.filter(x => x.line === i);
   const lines = q.lines.map((l, i) => { const lk = linkList(i); const cls = [lk ? 'haslinks' : '', l.optional ? 'opt' : '', l.optional && !CHOICE.has(i) ? 'off' : ''].filter(Boolean).join(' ');
-    return `<tr data-line="${i}"${cls ? ` class="${cls}"` : ''}><td>${l.optional ? `<label class="optl"><input type="checkbox" data-opt="${i}"${CHOICE.has(i) ? ' checked' : ''}${lockOpt ? ' disabled' : ''}><span>Optional — tick to include</span></label>` : ''}${esc(l.name)}${lineImgs(i).length ? `<div class="lthumbs">${lineImgs(i).map(x => thumbBtn(x)).join('')}</div>` : ''}</td><td class="q">${l.qty === 1 ? '' : esc(l.qty)}</td><td class="a">${aud(l.qty * l.priceInc)}</td></tr>` + (lk ? `<tr class="plrow" data-linkrow="${i}"><td colspan="3">${lk}</td></tr>` : ''); }).join('');
+    return `<tr data-line="${i}"${cls ? ` class="${cls}"` : ''}><td>${l.optional ? `<label class="optl"><input type="checkbox" data-opt="${i}"${CHOICE.has(i) ? ' checked' : ''}${lockOpt ? ' disabled' : ''}><span>Optional</span></label>` : ''}${esc(l.name)}${lineImgs(i).length ? `<div class="lthumbs">${lineImgs(i).map(x => thumbBtn(x)).join('')}</div>` : ''}</td><td class="q">${l.qty === 1 ? '' : esc(l.qty)}</td><td class="a">${aud(l.qty * l.priceInc)}</td></tr>` + (lk ? `<tr class="plrow" data-linkrow="${i}"><td colspan="3">${lk}</td></tr>` : ''); }).join('');
   const s = q.signed;
   $('#app').innerHTML = `
     <header class="card">
