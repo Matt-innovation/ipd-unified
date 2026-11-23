@@ -27,4 +27,5 @@ Last updated: 20 Nov 2026
 
 ## 20 Nov 2026
 - New branch `client-terms` (also in `preview-all`): client quote page `quote.html` + approved terms `terms/ipd-terms.txt` (v1, QBCC 1141791), version history in `terms/ipd-terms.json` and `terms/history/`. Edit terms only with `ipd-audit-scripts/terms-version.js record "what changed"`.
+- 23 Nov 2026: terms **v2** (Matt): payment key term reworded; clause 11 now "Concrete and hard surfaces" (hard surfaces extra unless listed); v1 kept in history. Address shows "Servicing Brisbane" (page, PDF header and footer). Payment schedule shows only when a quote has stages (server `stages` field; deposit + stages = total). Signed record shows terms version + date; a quote signed under an old version keeps showing that version. Tech entry of stages: planned, not built. 46 phone/iPad checks pass. Preview only.
 - Not on the live Netlify site (main unchanged).
