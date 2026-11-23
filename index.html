@@ -234,6 +234,13 @@ body.pilot input:not([type=checkbox]):not([type=radio]):not([type=range]):not([t
 .vr-item .vr-sub{font-size:12px;color:var(--text-mid)}
 .vr-item .cq-row button{flex:1 1 110px}
 .vr-diff{font-size:12.5px;background:var(--surface2);border-radius:var(--radius-sm);padding:8px;white-space:pre-wrap;overflow-wrap:anywhere}
+/* Safety (SWMS) check — SWMS_PROMPTS=on */
+.sw-card{margin:8px 12px 0;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surface);border:1px solid var(--border2);border-left:4px solid #eab308;display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--text)}
+.sw-card .sw-hd{font-weight:800;font-size:14px}
+.sw-risk{display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid var(--border2);border-radius:var(--radius-sm)}
+.sw-risk small{color:var(--text-mid);overflow-wrap:anywhere}
+.sw-risk .qd-row button.sel{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
+.sw-risk input,.sw-card select{width:100%;box-sizing:border-box;min-height:40px;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:400 16px var(--font)}
 /* Report a problem */
 .rp-back{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:flex-end;justify-content:center}
 .rp-card{background:var(--surface);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px;color:var(--text);box-sizing:border-box}
@@ -1009,6 +1016,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             <div class="qd-banner" id="qd-banner" hidden></div>
             <div class="qd-drafts" id="qd-drafts" hidden></div>
             <div class="vr-warn" id="vr-warn" hidden></div>
+            <div class="sw-card" id="sw-card" hidden></div>
             <div class="vr-bar" id="vr-bar" hidden><button type="button" data-vropen>🕘 Saved versions of this quote</button></div>
             <div class="gp-panel" id="gp-panel"></div>
             <div class="gp-discount" id="gp-discount" style="display:none">
@@ -2806,6 +2814,7 @@ function renderQuotePilot() {
   if (typeof qWatchImages === 'function') qWatchImages(list);
   if (typeof plDecorate === 'function') plDecorate(list);
   if (typeof opDecorate === 'function') opDecorate(list);
+  if (typeof swRender === 'function') swRender();
 }
 
 function renderQuote() { return PILOT_UI ? renderQuotePilot() : renderQuoteClassic(); }
@@ -2937,6 +2946,7 @@ async function sendQuoteToSM8() {
   // Never send a null/NaN price or quantity — stop and say which line instead.
   const badLines = quote.filter(i => !Number.isFinite(Number(i.price)) || !Number.isFinite(Number(i.qty)));
   if (badLines.length) { showToast('❌ Not sent — no valid price on: ' + badLines.map(i => i.name).join(', ')); return; }
+  if (typeof swBeforeSend === 'function' && !swBeforeSend()) return;
   if (typeof vrBeforeSend === 'function' && !(await vrBeforeSend())) return;
   const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0);
   const jobNumber=(document.getElementById('job-number-input')?.value||'').trim();
@@ -4951,7 +4961,7 @@ async function qnRender() {
 let vrTimer = null, vrBusy = false, vrInfo = null;
 const vrOn = () => qdOn() && cqFeat && cqFeat.versions && /^\d{1,8}$/.test(qdJob || '');
 function vrSchedule() { if (!vrOn()) return; clearTimeout(vrTimer); vrTimer = setTimeout(vrPush, 20000); }
-const vrDraftBody = () => ({ lines: JSON.parse(JSON.stringify(quote)), jobType: quoteJobType, discountPct: quoteDiscountPct, texts: qdTexts() });
+const vrDraftBody = () => ({ lines: JSON.parse(JSON.stringify(quote)), jobType: quoteJobType, discountPct: quoteDiscountPct, texts: qdTexts(), swms: swState });
 function vrBaseGet(job) { const st = qdRead(), d = st.drafts[job]; return d && d.serverVersion || 0; }
 function vrBaseSet(job, v) { const st = qdRead(), d = st.drafts[job]; if (d) { d.serverVersion = v; qdWrite(st); } }
 async function vrPush() {
@@ -5041,7 +5051,7 @@ document.addEventListener('click', async e => {
     try {
       const v = await authFetch('/quote-versions/' + qdJob + '/' + use.dataset.vruse), job = qdJob;
       qdStash('replaced');
-      qdApply({ job, lines: v.draft.lines, jobType: v.draft.jobType, discountPct: v.draft.discountPct, texts: v.draft.texts });
+      qdApply({ job, lines: v.draft.lines, jobType: v.draft.jobType, discountPct: v.draft.discountPct, texts: v.draft.texts, swms: v.draft.swms });
       qdSaveNow(); vrBaseSet(job, v.version);
       qdBanner({ job, lines: v.draft.lines, savedAt: Date.parse(v.savedAt) }, 'opened'); qdRenderList();
       document.getElementById('vr-back').remove(); document.getElementById('vr-warn').hidden = true;
@@ -5242,6 +5252,65 @@ document.addEventListener('click', e => {
   updateQuoteUI(); renderQuote();
 });
 
+// ── SAFETY (SWMS) CHECK — SWMS_PROMPTS=on ────────────────────────────────────
+// Spots likely high-risk construction work in the quote lines (the WHS list: falls over 2 m, trenches over 1.5 m,
+// asbestos, confined spaces, gas, mobile plant, traffic, demolition/structural) and asks the tech: SWMS done, or not
+// needed (why). Advice only — it never blocks; sending asks once if something flagged is unanswered. Kept with the
+// draft and the client quote record (staff only). Words matched are a starting list; Matt can change them.
+const SW_RULES = [
+  { id: 'height', label: 'Work at height (risk of a fall over 2 m)', re: /\b(roof\w*|gutter\w*|down ?pipes?|ladders?|heights?|scaffold\w*|solar|skylights?|eaves?|valley|ridge)\b/i, codes: /^(BROOF|BDOWNPIPE)/i },
+  { id: 'trench', label: 'Trench or excavation deeper than 1.5 m', re: /\b(trench\w*|excavat\w*|sewer\w*|stormwater|dig|digging|soakwells?|inspection openings?|jump[- ]?ups?)\b/i },
+  { id: 'asbestos', label: 'Asbestos (disturbing or removing)', re: /\b(asbestos|fibro|ac sheet\w*)\b/i },
+  { id: 'confined', label: 'Confined space (pit, tank, manhole)', re: /\b(confined|manholes?|septic|sumps?|pits?)\b/i },
+  { id: 'gas', label: 'Gas piping or gas appliances', re: /\b(gas|lpg|bayonets?)\b/i, codes: /^BGAS/i },
+  { id: 'plant', label: 'Powered mobile plant (excavator, mini digger)', re: /\b(excavators?|diggers?|bobcat|backhoe|mini ?ex)\b/i, codes: /^BHIRE/i },
+  { id: 'traffic', label: 'Near traffic, a road or a footpath', re: /\b(roads?|footpaths?|kerbs?|crossovers?)\b/i },
+  { id: 'structure', label: 'Demolition or structural alteration', re: /\b(demolish\w*|demolition|load[- ]?bearing|lintels?|remove walls?)\b/i },
+];
+const swEmpty = () => ({ answers: {}, notes: {}, extra: [] });
+let swState = swEmpty();
+const swOn = () => !!(CURRENT_USER && PILOT_UI && cqFeat && cqFeat.swms);
+function swDetect() {
+  const hits = {};
+  for (const i of quote) { if (i.id === 'discount') continue; for (const r of SW_RULES) if (r.re.test(i.name || '') || (r.codes && r.codes.test(i.code || ''))) (hits[r.id] = hits[r.id] || []).push(i.name); }
+  for (const id of swState.extra) hits[id] = hits[id] || ['added by hand'];
+  return hits;
+}
+function swSummary() { const h = swDetect(); return SW_RULES.filter(r => h[r.id]).map(r => ({ id: r.id, label: r.label, answer: swState.answers[r.id] || 'unanswered', note: swState.notes[r.id] || '', lines: h[r.id] })); }
+function swRender(force) {
+  const box = document.getElementById('sw-card'); if (!box) return;
+  if (!swOn() || !quote.length) { box.hidden = true; return; }
+  if (!force && box.contains(document.activeElement) && document.activeElement.tagName === 'INPUT') return;
+  const h = swDetect(), list = SW_RULES.filter(r => h[r.id]), rest = SW_RULES.filter(r => !h[r.id]);
+  box.hidden = false;
+  box.innerHTML = '<div class="sw-hd">🦺 Safety check (SWMS)</div>'
+    + (list.length ? '<div class="rp-small">This quote may include high-risk construction work. Check each one:</div>' : '<div class="rp-small">No high-risk work spotted in this quote\'s lines.</div>')
+    + list.map(r => { const a = swState.answers[r.id]; return '<div class="sw-risk" data-sw="' + r.id + '"><b>⚠ ' + escHtml(r.label) + '</b><small>From: ' + escHtml(h[r.id].slice(0, 3).join('; ').slice(0, 160)) + '</small>'
+      + '<div class="qd-row"><button type="button" data-swa="done"' + (a === 'done' ? ' class="sel"' : '') + '>✓ SWMS done</button><button type="button" data-swa="notneeded"' + (a === 'notneeded' ? ' class="sel"' : '') + '>Not needed</button></div>'
+      + (a === 'notneeded' ? '<input type="text" data-swnote maxlength="300" placeholder="Why not needed? e.g. single-storey, ladder under 2 m" value="' + escHtml(swState.notes[r.id] || '') + '">' : '') + '</div>'; }).join('')
+    + (rest.length ? '<select data-swadd><option value="">+ Add a risk by hand…</option>' + rest.map(r => '<option value="' + r.id + '">' + escHtml(r.label) + '</option>').join('') + '</select>' : '');
+}
+function swBeforeSend() {
+  if (!swOn()) return true;
+  const open = swSummary().filter(x => x.answer === 'unanswered');
+  if (!open.length) return true;
+  return confirm('This job may need a SWMS for:\n• ' + open.map(x => x.label).join('\n• ') + '\n\nMark each one "SWMS done" or "Not needed" in the Safety check on the Summary. Send anyway?');
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('#sw-card [data-swa]'); if (!b) return;
+  const id = b.closest('[data-sw]').dataset.sw; swState.answers[id] = swState.answers[id] === b.dataset.swa ? undefined : b.dataset.swa;
+  if (!swState.answers[id]) delete swState.answers[id];
+  swRender(true); qdSave();
+});
+document.addEventListener('change', e => {
+  const sel = e.target.closest && e.target.closest('#sw-card [data-swadd]'); if (!sel || !sel.value) return;
+  if (!swState.extra.includes(sel.value)) swState.extra.push(sel.value); swRender(true); qdSave();
+});
+document.addEventListener('input', e => {
+  const f = e.target.closest && e.target.closest('#sw-card [data-swnote]'); if (!f) return;
+  swState.notes[f.closest('[data-sw]').dataset.sw] = f.value.slice(0, 300); qdSave();
+});
+
 // ── REPORT A PROBLEM ─────────────────────────────────────────────────────────
 // Logged-in staff only. Their words plus what the app knows (screen, version, phone, recent errors and — if
 // ticked — the job number and quote lines). Saved on our server and emailed to Matt. Never to ServiceM8.
@@ -5300,9 +5369,9 @@ const qdOn = () => !!(CURRENT_USER && PILOT_UI && qdKey());
 function qdRead() { try { const st = JSON.parse(localStorage.getItem(qdKey()) || 'null'); if (st && st.drafts) return st; } catch (e) {} return { current: '', drafts: {} }; }
 function qdWrite(st) { try { localStorage.setItem(qdKey(), JSON.stringify(st)); return true; } catch (e) { showToast('⚠ Phone storage full — the draft could not be saved'); return false; } }
 const qdTexts = () => { const o = {}; document.querySelectorAll('[data-qtext]').forEach(t => (o[t.dataset.qtext] = t.value)); return o; };
-const qdSnap = () => ({ job: qdJob, lines: JSON.parse(JSON.stringify(quote)), jobType: quoteJobType, discountPct: quoteDiscountPct, texts: qdTexts(), savedAt: Date.now() });
+const qdSnap = () => ({ job: qdJob, lines: JSON.parse(JSON.stringify(quote)), jobType: quoteJobType, discountPct: quoteDiscountPct, texts: qdTexts(), swms: JSON.parse(JSON.stringify(swState)), savedAt: Date.now() });
 const qdHas = d => !!d && ((d.lines || []).length > 0 || Object.values(d.texts || {}).some(v => v && String(v).trim()));
-const qdBody = d => JSON.stringify([d.lines, d.jobType, d.discountPct, d.texts]);
+const qdBody = d => JSON.stringify([d.lines, d.jobType, d.discountPct, d.texts, d.swms || null]);
 const qdTotal = d => (d.lines || []).reduce((t, i) => t + (Number(i.price) || 0) * (Number(i.qty) || 0), 0);
 const qdWhen = t => new Date(t).toLocaleString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
 function qdPrune(st) {
@@ -5338,6 +5407,7 @@ function qdApply(d) {
   qdBusy = true;
   try {
     quote = JSON.parse(JSON.stringify(d.lines || [])); quoteJobType = d.jobType || null; quoteDiscountPct = Number(d.discountPct) || 0;
+    swState = d.swms && d.swms.answers ? JSON.parse(JSON.stringify(d.swms)) : swEmpty();
     document.querySelectorAll('[data-qtext]').forEach(t => { t.value = (d.texts || {})[t.dataset.qtext] || ''; try { localStorage.setItem(t.dataset.qtext, t.value); } catch (e) {} });
     const qd = document.getElementById('qd-custom'); if (qd) qd.value = quoteDiscountPct && ![5, 10, 15].includes(quoteDiscountPct) ? quoteDiscountPct : '';
     const jn = document.getElementById('job-number-input'); if (jn) jn.value = d.job || '';
@@ -5349,7 +5419,7 @@ function qdApply(d) {
 function qdClearScreen() {
   qdBusy = true;
   try {
-    quote = []; quoteJobType = null; quoteDiscountPct = 0; qdJob = '';
+    quote = []; quoteJobType = null; quoteDiscountPct = 0; qdJob = ''; swState = swEmpty();
     document.querySelectorAll('[data-qtext]').forEach(t => { t.value = ''; try { localStorage.removeItem(t.dataset.qtext); } catch (e) {} });
     const qd = document.getElementById('qd-custom'); if (qd) qd.value = '';
     const jn = document.getElementById('job-number-input'); if (jn) jn.value = '';
@@ -5573,13 +5643,14 @@ async function cqSend() {
   const cd = cqClientGet(job);
   if (cd) { const prob = cqClientProblem(cd); if (prob) { cqClientRender(); return showToast(prob); } }
   const client = cd ? { name: (cd.name || '').trim(), contacts: cd.contacts.map(c => ({ name: (c.name || '').trim(), phone: (c.phone || '').trim(), email: (c.email || '').trim(), role: (c.role || '').trim() })).filter(c => c.name || c.phone || c.email) } : undefined;
+  if (typeof swBeforeSend === 'function' && !swBeforeSend()) return;
   const st = stGet(job);
   let stages;
   if (cqFeat.stages && st.on) { const chk = stCheck(st); if (chk.problem) { stRender(); return showToast(chk.problem); } stages = st.stages.map(x => ({ name: x.name.trim(), amountInc: Math.round(Number(x.amount) * 100) / 100 })); }
   const btn = document.getElementById('cq-send'); btn.disabled = true; btn.textContent = 'Making the link…';
   try {
     const invoiceDescription = (document.getElementById('q-invoice-desc')?.value || '').trim();
-    const j = await authFetch('/client-quote', { method: 'POST', body: JSON.stringify({ jobNumber: job, invoiceDescription, images, ...(client ? { client } : {}), ...(stages ? { stages } : {}),
+    const j = await authFetch('/client-quote', { method: 'POST', body: JSON.stringify({ jobNumber: job, invoiceDescription, images, ...(client ? { client } : {}), ...(stages ? { stages } : {}), ...(swOn() ? { swms: swSummary() } : {}),
       lines: quote.map(i => ({ name: i.name, qty: Number(i.qty), priceInc: Number(i.price), ...(cqFeat.options && i.optional ? { optional: true, defaultOn: !!i.defaultOn } : {}), ...(cqFeat.productLinks && (i.links || []).length ? { links: i.links.map(k => k.source === 'kc' ? { id: k.id } : { url: k.url, title: k.title, type: k.type }) } : {}) })) }) });
     const preview = j.link.replace('/quote.html#', '/quote.html?staff=1#');
     try { localStorage.setItem('ipd_cq_last_' + job, JSON.stringify({ link: j.link, expiresAt: j.expiresAt, at: Date.now() })); } catch (e) {}
