@@ -13,18 +13,19 @@
   },
   "keyTerms": [
     "This quote is valid for 30 days. Prices include GST unless the quote says otherwise.",
-    "Jobs over $1,000: a deposit (usually 20%) is due when you accept, before we order materials or start. The balance is due on completion (COD).",
+    "A deposit applies on jobs over $1,000. On staged jobs, each stage is invoiced when that stage is complete, as shown on this quote. The final balance is due on completion (COD).",
     "Extra work or changes must be agreed in writing before they start, and are charged at our standard rates.",
     "Allowances are our best estimate. If the real cost will be different, we tell you and agree it in writing first.",
-    "Hidden or unexpected problems (such as damaged drains, hidden pipes or asbestos), rock, and concrete over 100mm thick are extra. For hidden problems we stop and agree the next step with you first.",
+    "Hidden or unexpected problems (such as damaged drains, hidden pipes or asbestos) and rock are extra. For hidden problems we stop and agree the next step with you first.",
+    "Cutting, breaking or removing concrete, paving, tiles or other hard surfaces is extra unless the quote lists it.",
     "Making good (walls, tiles, paint, concrete, landscaping) and other trades are not included unless the quote lists them.",
     "Our workmanship is warranted for the life of the installation. Product warranties are with the manufacturer.",
     "If you cancel after accepting, you pay for work done and costs already incurred."
   ],
   "current": {
-    "version": 1,
-    "date": "2026-11-20",
-    "sha256": "ad0aff786ce40302476477e46ebc47b82d40d84a3a214b238d1e4550fba860d6"
+    "version": 2,
+    "date": "2026-11-23",
+    "sha256": "06813d6d2362af583d89e92e43386cbd3c2260d89a6f559281fe71ba5e356c97"
   },
   "history": [
     {
@@ -39,6 +40,24 @@
         "Extra work or changes must be agreed in writing before they start, and are charged at our standard rates.",
         "Allowances are our best estimate. If the real cost will be different, we tell you and agree it in writing first.",
         "Hidden or unexpected problems (such as damaged drains, hidden pipes or asbestos), rock, and concrete over 100mm thick are extra. For hidden problems we stop and agree the next step with you first.",
+        "Making good (walls, tiles, paint, concrete, landscaping) and other trades are not included unless the quote lists them.",
+        "Our workmanship is warranted for the life of the installation. Product warranties are with the manufacturer.",
+        "If you cancel after accepting, you pay for work done and costs already incurred."
+      ]
+    },
+    {
+      "version": 2,
+      "date": "2026-11-23",
+      "sha256": "06813d6d2362af583d89e92e43386cbd3c2260d89a6f559281fe71ba5e356c97",
+      "file": "terms/history/ipd-terms-v2-2026-11-23.txt",
+      "note": "v2 (Matt, 23 Nov 2026): key term on payment reworded (deposit on jobs over $1,000, staged jobs invoiced per stage, balance COD); clause 11 replaced: cutting, breaking or removing concrete, paving, tiles or other hard surfaces is extra unless the quote lists it; matching key term changed. Business address shown as Servicing Brisbane.",
+      "keyTerms": [
+        "This quote is valid for 30 days. Prices include GST unless the quote says otherwise.",
+        "A deposit applies on jobs over $1,000. On staged jobs, each stage is invoiced when that stage is complete, as shown on this quote. The final balance is due on completion (COD).",
+        "Extra work or changes must be agreed in writing before they start, and are charged at our standard rates.",
+        "Allowances are our best estimate. If the real cost will be different, we tell you and agree it in writing first.",
+        "Hidden or unexpected problems (such as damaged drains, hidden pipes or asbestos) and rock are extra. For hidden problems we stop and agree the next step with you first.",
+        "Cutting, breaking or removing concrete, paving, tiles or other hard surfaces is extra unless the quote lists it.",
         "Making good (walls, tiles, paint, concrete, landscaping) and other trades are not included unless the quote lists them.",
         "Our workmanship is warranted for the life of the installation. Product warranties are with the manufacturer.",
         "If you cancel after accepting, you pay for work done and costs already incurred."
