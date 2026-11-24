@@ -54,3 +54,11 @@ Waiting for Matt: Day 1 launch OKs (merges to main, live switches); Knowledge Sh
 - Setting: owners only, app Settings → Your login → "📬 Accepted quotes email". Saved in our database straight away (no redeploy); every change kept (collection cq-setting). Blank = no scheduling email. No saved value → SCHEDULE_EMAIL env → info@. Server: GET/POST /client-quote/settings.
 - Still behind QUOTE_ALERTS (off on live). Tests: client-quote-check.js 171, new sched-check.js 9; full regress passed (PIN comparison: only the known Stock toast after re-runs).
 - Test sign on job 7600 (preview) 24 Nov ~10:22 am: quote 2a9a88e8-5435-448c-9760-b079ebb8e2d7, both options ticked, total $3,160.50, deposit $632.10; "opened" emailed to the 2 owners, "accepted" to the 2 owners + info@.
+
+## 24 Nov 2026 — LAUNCH OK #2 DONE: app merged to main (Netlify), Matt's OK
+- Netlify (no API access from here, checked by behaviour): live site = main byte-for-byte; main--site exists; claude-notes--site and preview-all--site = Netlify "site not found" although both were pushed many times (no branch deploys); /STATUS.md and /CLAUDE.md 404. Merged tree has no CLAUDE.md / STATUS.md; sw.js unchanged.
+- Checks first: full regress EVERYTHING PASSED (PIN comparison: Stock toast only).
+- main 4e57fca -> merge commit f1de95d (= preview-all eb327dc). Live at ~01:03 UTC (11:03 am Brisbane). Publishes index.html, quote.html, terms/ (new).
+- After deploy, real live app + live server, WebKit iPhone SE and iPhone 13, PIN user, read only: PIN screen shown, search "tempering valve" 20 results, no errors, PILOT_UI false; PIN / Home / Search / Quote / Settings screenshots 0.000% different from before the merge.
+- No live switches changed (waiting for OK #3).
+- UNDO: Netlify -> Deploys -> the deploy of main@4e57fca -> "Publish deploy" (then Netlify locks auto publishing; unlock it after the fix). And `git revert -m 1 f1de95d` + push main so the next build doesn't republish it.
