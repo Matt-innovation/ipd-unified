@@ -15,6 +15,9 @@ The IPD app (Innovation Plumbing + Design, Brisbane): a single `index.html` web 
 5. Staff on the shared PIN must never see a change until Matt says so. Always give Matt the undo.
 6. Test on previews first, and give Matt exact things to check on his iPhone or iPad.
 7. Keep `STATUS.md` short and current: what's live, what's on previews, what you're waiting on, what Matt needs to test. Update it after each job. Never include keys or customer data.
+8. Easiest, simplest, quickest way for every step, with the least involvement from Matt. He has put months into this and wants to see the end of the project soon.
+   - Prefer solutions that need no accounts, keys, sign-ins or clicks from Matt. Do the work yourself.
+   - Only ask him for the approvals the rules require: anything to `main`, anything written to ServiceM8, anything deleted, anything outside the project folders.
 
 ## How things fit together
 

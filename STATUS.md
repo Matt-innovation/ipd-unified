@@ -83,3 +83,7 @@ Choices made without Matt (safe defaults — change any):
 - Live shows 13 sections to owners/techs, 12 to office (no Safety while SWMS_PROMPTS is off). No video links yet on live -> "Video coming soon", watched tick not needed.
 - Undo: (3) delete TRAINING_MODE on live + redeploy; (2) git revert -m 1 dbe9e36 in ipd-app, push main; (1) git revert -m 1 1daca0e in ipd-server, push main.
 - Next (plan only, waiting for Matt): AI-made training videos, trial video 1.
+
+## 2026-11-24: Azure unused
+- Matt stopped the Azure setup. A free Azure account exists in his name, but nothing was created in it (no budget, no Speech service, no keys) and the command-line sign-in was cancelled before it finished.
+- The Azure command-line tool and ffmpeg 9.1 are installed on this PC. Training-video voices now use a free voice engine on this PC (no accounts or keys); videos are hosted inside ipd-app, not YouTube.
