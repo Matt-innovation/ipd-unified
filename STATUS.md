@@ -87,3 +87,9 @@ Choices made without Matt (safe defaults — change any):
 ## 2026-11-24: Azure unused
 - Matt stopped the Azure setup. A free Azure account exists in his name, but nothing was created in it (no budget, no Speech service, no keys) and the command-line sign-in was cancelled before it finished.
 - The Azure command-line tool and ffmpeg 9.1 are installed on this PC. Training-video voices now use a free voice engine on this PC (no accounts or keys); videos are hosted inside ipd-app, not YouTube.
+
+## 2026-11-24 ~4 pm: training videos made on this PC (preview only)
+- No accounts, keys or YouTube. Voice: Kokoro (free, on this PC). Recording: app on a simulated iPhone against a local test server; Trainee login + dummy code; nothing sent anywhere. Maker: `ipd-audit-scripts/video` (README there).
+- Videos live in the app: `training/videos/*.mp4` + `training/videos.json` (built-in video wins over a pasted link). App preview-all f656981; training checks 58/58, full regress passed, PIN app unchanged.
+- Video 1 trial (3:01, 4.9 MB) in two voices: A = George (British, in the course), B = Michael (American, `training/videos/01-login-voice-b.mp4`). Waiting for Matt to pick and approve; then videos 2-14 get made the same way on the preview. Removing the unpicked file needs his OK (a deletion).
+- Not on live until Matt OKs a merge to main.
