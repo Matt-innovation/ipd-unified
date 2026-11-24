@@ -1516,6 +1516,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
       </style>
       <div class="screen-scroll">
         <div class="tr-wrap">
+          <div id="trc-box" hidden></div>
 
           <div class="tr-intro">
             <div class="tr-intro-title">IPD App — How To Use</div>
@@ -1565,7 +1566,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             <div class="tr-step-body">
               <div class="tr-instruction">
                 <p>When you open the app you'll see the <strong>Home Screen</strong>. This is your starting point for everything.</p>
-                <div class="tr-items">
+                <div class="tr-items" id="tr-home-items">
                   <div class="tr-item"><span class="tr-icon">🔧</span><div><strong>New Quote</strong> — Start a quote for a job. Use this for pricing up work for a customer.</div></div>
                   <div class="tr-item"><span class="tr-icon">📦</span><div><strong>Stock Order</strong> — Build a list of materials you need to order from Reece. Prices come through automatically.</div></div>
                   <div class="tr-item"><span class="tr-icon">🎓</span><div><strong>Training</strong> — This guide you're reading right now.</div></div>
@@ -1573,7 +1574,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
                   <div class="tr-item"><span class="tr-icon">✨</span><div><strong>AI Assistant</strong> — Ask it plumbing questions, get help with compliance, or troubleshoot issues.</div></div>
                   <div class="tr-item"><span class="tr-icon">💬</span><div><strong>WhatsApp</strong> — Quick link to join the IPD BOYS group.</div></div>
                 </div>
-                <div class="tr-tip">💡 The <strong>bottom bar</strong> has navigation buttons — Quote, Labour, Review, and more. These appear once you're in a job.</div>
+                <div class="tr-tip" id="tr-home-tip">💡 The <strong>bottom bar</strong> has navigation buttons — Quote, Labour, Review, and more. These appear once you're in a job.</div>
               </div>
             </div>
           </div>
@@ -1669,7 +1670,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
                     <li>Select the correct <strong>rate type</strong>:</li>
                   </ol>
                 </div>
-                <div class="tr-rates">
+                <div class="tr-rates" id="tr-rates">
                   <div class="tr-rate"><span class="tr-rate-name">Standard</span><span class="tr-rate-price">$229/hr</span><span class="tr-rate-desc">Normal tradie rate</span></div>
                   <div class="tr-rate"><span class="tr-rate-name">2nd Tradesman</span><span class="tr-rate-price">$160/hr</span><span class="tr-rate-desc">Second tradie on same job</span></div>
                   <div class="tr-rate"><span class="tr-rate-name">Builder Rate</span><span class="tr-rate-price">$195/hr</span><span class="tr-rate-desc">For builder clients</span></div>
@@ -1789,11 +1790,11 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
           <div class="tr-step">
             <button class="tr-step-header" onclick="toggleStep(this)">
               <div class="tr-step-num">11</div>
-              <div class="tr-step-title">Using the AI Assistant</div>
+              <div class="tr-step-title" id="tr-ai-title">Using the AI Assistant</div>
               <div class="tr-step-chevron">▼</div>
             </button>
             <div class="tr-step-body">
-              <div class="tr-instruction">
+              <div class="tr-instruction" id="tr-ai-body">
                 <p>The AI Assistant is a built-in tool you can ask plumbing questions, compliance questions, or get help with anything job-related.</p>
                 <div class="tr-how">
                   <div class="tr-how-title">How to use it:</div>
@@ -2501,6 +2502,7 @@ function goScreen(name) {
   if (name === 'kb') renderKB();
   if (name === 'quote') { renderQuote(); if (PILOT_UI) setQTab('summary'); }   // the quote page always opens on Summary
   if (name === 'labour') updateLabourTotals();
+  if (name === 'training' && typeof trOnScreen === 'function') trOnScreen();
   if (name === 'home') { updateHomeStats(); if (PILOT_UI) { renderHome(); kioskRefreshSummary(); } }
 }
 
@@ -4186,6 +4188,7 @@ function setUser(u) {
   if (typeof socialRefresh === 'function') socialRefresh().then(() => sUploadLoop());
   if (typeof qnRefresh === 'function') qnRefresh().then(() => qnUploadLoop());
   if (typeof cqRefresh === 'function') cqRefresh().then(() => cqUploadLoop());
+  if (typeof trInit === 'function') trInit();
 }
 function signedOut() {
   const wasPilot = PILOT_UI;
@@ -4748,6 +4751,7 @@ async function sShrink(file, max, quality) {
 }
 function sEnsureDraft() { if (!sDraft) sDraft = { postId: sUuid() }; try { localStorage.setItem('ipd_social_draft', JSON.stringify(sDraft)); } catch (e) {} return sDraft; }
 async function sAddPhoto(kind, file) {
+  if (typeof trPracticeOn === 'function' && trPracticeOn()) { showToast('🎓 Practice: photos are not saved. Stop practice first.'); return; }
   const d = sEnsureDraft();
   try {
     const [image, thumb] = await Promise.all([sShrink(file, 1600, 0.8), sShrink(file, 240, 0.7)]);
@@ -4902,6 +4906,7 @@ async function qnRefresh() {
   if (qTab === 'notes') qnRender();
 }
 async function qnAdd(kind, payload) {
+  if (typeof trPracticeOn === 'function' && trPracticeOn()) { showToast('🎓 Practice: notes and photos are not saved. Stop practice to add them to a real job.'); return false; }
   const job = qnJob();
   if (!/^\d{1,8}$/.test(job)) { showToast('Enter the job number on the Summary tab first'); return false; }
   await qnPut({ clientId: sUuid(), jobNumber: job, kind, status: 'waiting', at: Date.now(), ...payload });
@@ -4961,7 +4966,7 @@ async function qnRender() {
 // changes within 10 minutes stay one version; sending or making a link starts a new one. Nothing is merged:
 // if someone else is working on the same job the app says so and lets you look at their version.
 let vrTimer = null, vrBusy = false, vrInfo = null;
-const vrOn = () => qdOn() && cqFeat && cqFeat.versions && /^\d{1,8}$/.test(qdJob || '');
+const vrOn = () => qdOn() && cqFeat && cqFeat.versions && /^\d{1,8}$/.test(qdJob || '') && !(typeof trPracticeOn === 'function' && trPracticeOn());
 function vrSchedule() { if (!vrOn()) return; clearTimeout(vrTimer); vrTimer = setTimeout(vrPush, 20000); }
 const vrDraftBody = () => ({ lines: JSON.parse(JSON.stringify(quote)), jobType: quoteJobType, discountPct: quoteDiscountPct, texts: qdTexts(), swms: swState });
 function vrBaseGet(job) { const st = qdRead(), d = st.drafts[job]; return d && d.serverVersion || 0; }
@@ -5316,7 +5321,7 @@ document.addEventListener('input', e => {
 // ── REPORT A PROBLEM ─────────────────────────────────────────────────────────
 // Logged-in staff only. Their words plus what the app knows (screen, version, phone, recent errors and — if
 // ticked — the job number and quote lines). Saved on our server and emailed to Matt. Never to ServiceM8.
-const APP_VERSION = '2026-11-23 pilot';
+const APP_VERSION = '2026-11-24 pilot';
 const RP_ERRORS = [];
 window.addEventListener('error', e => { RP_ERRORS.push(new Date().toISOString().slice(11, 19) + ' ' + String(e.message || 'error').slice(0, 200) + (e.filename ? ' @' + String(e.filename).split('/').pop() + ':' + e.lineno : '')); if (RP_ERRORS.length > 20) RP_ERRORS.shift(); });
 window.addEventListener('unhandledrejection', e => { RP_ERRORS.push(new Date().toISOString().slice(11, 19) + ' ' + String((e.reason && e.reason.message) || e.reason || 'rejected').slice(0, 200)); if (RP_ERRORS.length > 20) RP_ERRORS.shift(); });
@@ -5380,7 +5385,7 @@ function openProblem() {
 // client link (and not changed since) is kept 7 days. "Clear" and "Start a new quote" keep a copy for 30 days.
 const QD_DAYS = 30, QD_SENT_DAYS = 7, QD_MAX = 40;
 let qdJob = '', qdTimer = null, qdBusy = false, qdChanges = null;
-const qdKey = () => CURRENT_USER && CURRENT_USER.id ? 'ipd_qdraft_' + CURRENT_USER.id : null;
+const qdKey = () => CURRENT_USER && CURRENT_USER.id ? 'ipd_qdraft_' + (typeof trPracticeOn === 'function' && trPracticeOn() ? 'practice_' : '') + CURRENT_USER.id : null;   // practice (training) keeps its own draft
 const qdOn = () => !!(CURRENT_USER && PILOT_UI && qdKey());
 function qdRead() { try { const st = JSON.parse(localStorage.getItem(qdKey()) || 'null'); if (st && st.drafts) return st; } catch (e) {} return { current: '', drafts: {} }; }
 function qdWrite(st) { try { localStorage.setItem(qdKey(), JSON.stringify(st)); return true; } catch (e) { showToast('⚠ Phone storage full — the draft could not be saved'); return false; } }
@@ -6071,6 +6076,312 @@ function savePin() {
   document.getElementById('pin-confirm').value = '';
   showToast('PIN updated successfully');
 }
+
+
+// ── TRAINING COURSE (logged-in only, TRAINING_MODE=on on the server) ─────────────────────────────────────────
+// Learn the app: 14 short sections (video + practice steps + "I watched the video" + Mark complete); the next
+// section stays locked until this one is done. Practice mode: job 7600, its own draft (the real draft is
+// untouched), and nothing is really sent — Send to SM8 / stock orders are pretended on the phone, notes and
+// photos can't be added, client links are marked PRACTICE (no alerts). PIN users see none of this.
+let trCourse = null, trOpenId = null;
+const trBusy = new Set();
+const TR_SCREENS = { home: 'Home', search: 'Find a product', labour: 'Labour', quote: 'Quote', stock: 'Van stock', ai: 'Ask Old Mate' };
+const trPracticeKey = () => (CURRENT_USER && CURRENT_USER.id ? 'ipd_practice_' + CURRENT_USER.id : null);
+function trPracticeOn() { const k = trPracticeKey(); if (!k || !PILOT_UI) return false; try { return localStorage.getItem(k) === '1'; } catch (e) { return false; } }
+
+// Practice: nothing leaves the phone except reads, Old Mate, the course itself and PRACTICE client links.
+(function () {
+  const realFetch = window.fetch.bind(window);
+  const reply = (o, status = 200) => Promise.resolve(new Response(JSON.stringify(o), { status, headers: { 'Content-Type': 'application/json' } }));
+  const ALLOW = [/^\/auth\//, /^\/training\//, /^\/ai-(ask|search|review)$/, /^\/client-quote$/, /^\/client-quote\/(images|product-links)$/, /^\/kiosk\/notices\/[^/]+\/read$/, /^\/social\/captions\/check$/];
+  window.fetch = function (input, init) {
+    const url = typeof input === 'string' ? input : (input && input.url) || '', method = String((init && init.method) || (input && input.method) || 'GET').toUpperCase();
+    let path = null; if (url.startsWith(PROXY)) path = url.slice(PROXY.length).split('?')[0];
+    if (path === '/ai-ask') setTimeout(() => trAuto('ask'), 0);
+    if (method !== 'GET' && trPracticeOn()) {
+      if (path === '/send-quote') { let n = 0; try { n = JSON.parse(init.body).quoteItems.length; } catch (e) {} setTimeout(() => trAuto('sent'), 0);
+        return reply({ success: true, practice: true, message: `PRACTICE: nothing was sent to ServiceM8. On a real job this adds ${n} line${n === 1 ? '' : 's'} to the job.` }); }
+      if (path === '/send-order') { setTimeout(() => trAuto('order'), 0); return reply({ success: true, practice: true, message: 'PRACTICE: nothing was sent. On a real day the order goes to ServiceM8 for the office.' }); }
+      if (path && (/^\/quote-versions\//.test(path) || path === '/ai-feedback')) return reply({ ok: true, practice: true });
+      if (path === '/client-quote') { try { const b = JSON.parse(init.body); b.practice = true; b.jobNumber = '7600'; init = { ...init, body: JSON.stringify(b) }; } catch (e) {}
+        return realFetch(input, init).then(r => { if (r.ok) setTimeout(() => trAuto('link'), 0); return r; }); }
+      if ((path !== null && !ALLOW.some(rx => rx.test(path))) || (path === null && /script\.google\.com/.test(url)))
+        return reply({ error: 'Practice mode: nothing is saved or sent. Tap "Stop practice" at the top to do this for real.' }, 409);
+    }
+    const p = realFetch(input, init);
+    if (path === '/client-quote' && method === 'POST') p.then(r => { if (r.ok) setTimeout(() => trAuto('link'), 0); }).catch(() => {});
+    return p;
+  };
+})();
+
+function trStyle() {
+  if (document.getElementById('trc-style')) return;
+  const st = document.createElement('style'); st.id = 'trc-style';
+  st.textContent = `
+#trc-box{margin-bottom:12px}
+.trc-card{background:var(--surface);border-radius:var(--radius);padding:14px;border:1px solid var(--border2)}
+.trc-hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:16px;font-weight:800;color:var(--text)}
+.trc-hd span{font-size:12px;font-weight:600;color:var(--text-mid);white-space:nowrap}
+.trc-bar{height:8px;border-radius:4px;background:var(--surface2);margin:10px 0;overflow:hidden}.trc-bar i{display:block;height:100%;background:var(--orange)}
+.trc-go,.trc-prac,.trc-complete,.trc-own button,.trc-sheet .trc-btn{width:100%;min-height:44px;border-radius:var(--radius-sm);border:none;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer}
+.trc-go,.trc-complete{background:var(--orange);color:#000}.trc-complete:disabled{opacity:.45}
+.trc-prac,.trc-own button,.trc-sheet .trc-btn{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+.trc-list{margin-top:10px;display:flex;flex-direction:column;gap:4px}
+.trc-row{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text);font:inherit;font-size:14px;text-align:left;cursor:pointer}
+.trc-row.locked{opacity:.55}.trc-row.done .trc-t{color:var(--text-mid)}
+.trc-n{width:24px;height:24px;border-radius:50%;background:var(--orange);color:#000;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.trc-t{flex:1;min-width:0}.trc-s{flex-shrink:0;font-size:15px}
+.trc-own{display:flex;gap:8px;margin-top:10px}.trc-own button{flex:1;font-size:13px}
+.trc-old{margin:14px 2px 6px;font-size:12px;font-weight:700;color:var(--on-bg);text-transform:uppercase;letter-spacing:.5px}
+.trc-back{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10500;display:flex;align-items:flex-end;justify-content:center}
+.trc-sheet{background:var(--surface);color:var(--text);width:100%;max-width:640px;max-height:92vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom));box-sizing:border-box}
+.trc-sh-hd{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}.trc-sh-hd b{flex:1;font-size:17px}
+.trc-x{width:40px;height:40px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:16px;cursor:pointer;flex-shrink:0}
+.trc-video{position:relative;width:100%;padding-top:56.25%;border-radius:10px;overflow:hidden;background:#111}
+.trc-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.trc-novideo{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#eee;font-size:15px;font-weight:700;text-align:center;padding:10px}
+.trc-novideo small{font-weight:400;font-size:12px;color:#bbb;margin-top:4px}
+.trc-outline{font-size:14px;color:var(--text-mid);margin:10px 0}
+.trc-steps-h{font-size:11px;font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:.5px;margin:12px 0 6px}
+.trc-step{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px;line-height:1.4}
+.trc-step input{width:22px;height:22px;flex-shrink:0;margin:0;accent-color:var(--orange)}.trc-step em{color:var(--text-dim);font-size:12px}
+.trc-watch{border-bottom:none;margin-top:6px;font-weight:700}
+.trc-msg{font-size:13px;color:#dc2626;min-height:18px;margin:6px 0}
+.trc-why{font-size:12px;color:var(--text-mid);text-align:center;margin-top:6px}
+.trc-done{background:rgba(22,163,74,.1);color:#16a34a;border-radius:var(--radius-sm);padding:10px;text-align:center;font-weight:700;margin-bottom:8px}
+.trc-person{display:flex;align-items:center;gap:10px;width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:inherit;text-align:left;margin-bottom:6px;cursor:pointer}
+.trc-person b{display:block}.trc-person small{color:var(--text-mid)}.trc-person .trc-pc{margin-left:auto;font-weight:800;white-space:nowrap}
+.trc-ps{padding:9px 0;border-bottom:1px solid var(--border);font-size:14px}.trc-ps .trc-pa{display:flex;gap:8px;margin-top:6px}
+.trc-ps .trc-pa button{flex:1;min-height:40px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:inherit;font-size:13px;font-weight:700}
+.trc-vid{padding:10px 0;border-bottom:1px solid var(--border)}.trc-vid input{width:100%;box-sizing:border-box;font-family:inherit;font-size:16px;padding:9px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface2);color:var(--text);margin:6px 0}
+.trc-vid .trc-vr{display:flex;gap:8px;align-items:center}.trc-vid .trc-vr button{min-height:40px;padding:0 14px;border-radius:var(--radius-sm);border:none;background:var(--orange);color:#000;font-weight:700;font:inherit;font-weight:700}
+.trc-vid small{color:var(--text-mid);font-size:12px}
+#trp-banner{position:fixed;left:0;right:0;top:0;z-index:10400;display:flex;align-items:center;gap:8px;padding:calc(6px + env(safe-area-inset-top)) 10px 6px;background:repeating-linear-gradient(-45deg,#fde047 0 14px,#facc15 14px 28px);color:#422006;font-size:13px;font-weight:800;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+#trp-banner span{flex:1;min-width:0;line-height:1.15}#trp-banner small{display:block;font-size:11px;font-weight:700}#trp-banner button{min-height:34px;border-radius:8px;border:1px solid #422006;background:#fff8;color:#422006;font:inherit;font-size:12px;font-weight:800;padding:0 10px}
+body.practicing{padding-top:var(--trp-h,46px)}
+#job-number-input[readonly]{background:#fef9c3!important;color:#422006!important}
+`;
+  document.head.appendChild(st);
+}
+
+async function trInit() {
+  const box = document.getElementById('trc-box');
+  trCourse = null;
+  if (!CURRENT_USER || !PILOT_UI) { if (box) { box.hidden = true; box.innerHTML = ''; } trPracticeBanner(); return; }
+  trStyle();
+  trPracticeBanner();
+  try { const j = await authFetch('/training/me'); trCourse = j && j.on === true && Array.isArray(j.sections) ? j : null; } catch (e) { trCourse = null; }
+  trRenderBox();
+  if (trCourse) trAuto('login');
+}
+function trRenderBox() {
+  const box = document.getElementById('trc-box'); if (!box) return;
+  if (!trCourse) { box.hidden = true; box.innerHTML = ''; return; }
+  const S = trCourse.sections, done = S.filter(s => s.completedAt).length, next = S.find(s => !s.completedAt && !s.locked);
+  const icon = s => (s.status === 'done' ? '✅' : s.status === 'locked' ? '🔒' : s.status === 'started' ? '◐' : '▶');
+  box.hidden = false;
+  box.innerHTML = '<div class="trc-card"><div class="trc-hd">🎓 Training course <span>' + done + ' of ' + S.length + ' done</span></div>'
+    + '<div class="trc-bar"><i style="width:' + Math.round(done / Math.max(1, S.length) * 100) + '%"></i></div>'
+    + (next ? '<button class="trc-go" data-trsec="' + next.id + '">▶ ' + (done ? 'Continue' : 'Start') + ': ' + next.n + '. ' + escHtml(next.title) + '</button>' : '<div class="trc-done">✅ All done. Well done!</div>')
+    + '<div class="trc-list">' + S.map(s => '<button class="trc-row ' + s.status + '" data-trsec="' + s.id + '"><span class="trc-n">' + s.n + '</span><span class="trc-t">' + escHtml(s.title) + '</span><span class="trc-s" aria-label="' + s.status + '">' + icon(s) + '</span></button>').join('') + '</div>'
+    + (trCourse.isOwner ? '<div class="trc-own"><button data-trteam>👥 Team progress</button><button data-trvideos>🎬 Video links</button></div>' : '')
+    + '</div><div class="trc-old">Quick reference: the step-by-step guide</div>';
+}
+function trSec(id) { return trCourse && Array.isArray(trCourse.sections) ? trCourse.sections.find(s => s.id === id) : null; }
+async function trPost(id, body) {
+  const j = await authFetch('/training/me/' + id, { method: 'POST', body: JSON.stringify(body) });
+  if (j && Array.isArray(j.sections)) trCourse.sections = j.sections; trRenderBox(); if (trOpenId === id) trRenderSheetRest(); return j;
+}
+// a step the app can see done ticks itself (any open, unfinished section that has it)
+function trAuto(key) {
+  if (!trCourse) return;
+  for (const s of trCourse.sections) {
+    if (s.locked || s.completedAt) continue;
+    s.steps.forEach((p, i) => {
+      const k = s.id + ':' + i;
+      if (p.auto === key && !p.done && !trBusy.has(k)) { trBusy.add(k); trPost(s.id, { step: i, done: true }).catch(() => {}).finally(() => trBusy.delete(k)); }
+    });
+  }
+}
+function trQuoteSeen() {
+  if (!trCourse || !Array.isArray(quote)) return;
+  if (quote.some(i => i.type === 'reece')) trAuto('reece');
+  if (quote.some(i => i.type === 'bundle')) trAuto('bundle');
+  if (quote.some(i => i.type === 'labour' || /^(qlab_|labour_)/.test(String(i.id || '')))) trAuto('labour');
+}
+function trCloseSheet() { const b = document.getElementById('trc-back'); if (b) b.remove(); trOpenId = null; }
+function trOpenSection(id) {
+  const s = trSec(id); if (!s) return;
+  if (s.locked) { const i = trCourse.sections.indexOf(s), prev = trCourse.sections[i - 1]; showToast('🔒 Finish ' + (prev ? prev.n + '. ' + prev.title : 'the section before') + ' first'); return; }
+  trCloseSheet(); trOpenId = id;
+  const back = document.createElement('div'); back.className = 'trc-back'; back.id = 'trc-back';
+  back.innerHTML = '<div class="trc-sheet" role="dialog" aria-modal="true" aria-labelledby="trc-title"><div class="trc-sh-hd"><b id="trc-title">' + s.n + '. ' + escHtml(s.title) + '</b><button class="trc-x" data-trclose aria-label="Close">✕</button></div>'
+    + '<div class="trc-video">' + (s.video ? '<iframe src="' + escHtml(s.video.embed) + '" title="' + escHtml(s.title) + ' (video)" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>'
+      : '<div class="trc-novideo">🎬 Video coming soon<small>Matt is recording it. You can still do the practice steps.</small></div>') + '</div>'
+    + '<div id="trc-rest"></div></div>';
+  document.body.appendChild(back);
+  back.addEventListener('click', e => { if (e.target === back) trCloseSheet(); });
+  trRenderSheetRest();
+}
+function trRenderSheetRest() {
+  const el = document.getElementById('trc-rest'), s = trSec(trOpenId); if (!el || !s) return;
+  const done = !!s.completedAt, left = s.steps.filter(p => !p.done).length, needWatch = s.video && !s.watched;
+  const i = trCourse.sections.indexOf(s), nx = trCourse.sections[i + 1];
+  const why = left ? 'Tick ' + (left === 1 ? 'the last practice step' : 'the ' + left + ' practice steps') + (needWatch ? ' and "I watched the video"' : '') : needWatch ? 'Tick "I watched the video"' : '';
+  el.innerHTML = '<p class="trc-outline">' + escHtml(s.outline) + '</p>'
+    + (s.unlockedBy && !done ? '<div class="trc-why">Unlocked by ' + escHtml(s.unlockedBy) + '</div>' : '')
+    + '<div class="trc-steps-h">Practice steps</div>'
+    + s.steps.map((p, k) => '<label class="trc-step"><input type="checkbox" data-trstep="' + k + '"' + (p.done ? ' checked' : '') + (done ? ' disabled' : '') + '><span>' + escHtml(p.text) + (p.auto ? ' <em>(ticks itself)</em>' : '') + '</span></label>').join('')
+    + '<div style="margin-top:10px">' + (s.practice ? '<button class="trc-prac" data-trprac>' + (trPracticeOn() ? '🎓 Go to practice (' + escHtml(TR_SCREENS[s.screen] || 'Quote') + ')' : '🎓 Start practice (job 7600, nothing is sent)') + '</button>'
+      : '<button class="trc-prac" data-trgo>Open ' + escHtml(TR_SCREENS[s.screen] || 'Home') + '</button>') + '</div>'
+    + (s.video ? '<label class="trc-step trc-watch"><input type="checkbox" data-trwatched' + (s.watched ? ' checked' : '') + (done ? ' disabled' : '') + '><span>I watched the video</span></label>' : '')
+    + '<div class="trc-msg" id="trc-msg" role="alert"></div>'
+    + (done ? '<div class="trc-done">✅ Completed ' + new Date(s.completedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }) + '</div>' + (nx ? '<button class="trc-go" data-trsec="' + nx.id + '">Next: ' + nx.n + '. ' + escHtml(nx.title) + '</button>' : '')
+      : '<button class="trc-complete" data-trcomplete' + (why ? ' disabled' : '') + '>Mark complete</button>' + (why ? '<div class="trc-why">' + escHtml(why) + '</div>' : ''));
+}
+function trGoTo(s) {
+  trCloseSheet();
+  const scr = s.screen || 'home';
+  if (scr === 'stock' || scr === 'labour' || scr === 'search' || scr === 'quote' || scr === 'home' || scr === 'ai') goScreen(scr);
+}
+
+// ---- practice mode
+function trPracticeBanner() {
+  let b = document.getElementById('trp-banner');
+  const on = trPracticeOn();
+  if (on && !b) {
+    trStyle();
+    b = document.createElement('div'); b.id = 'trp-banner'; b.setAttribute('role', 'status');
+    b.innerHTML = '<span>🎓 PRACTICE · job 7600<small>Nothing is sent</small></span><button type="button" data-trcourse>Course</button><button type="button" data-trstop>Stop</button>';
+    document.body.appendChild(b);
+  }
+  if (b) b.hidden = !on;
+  document.body.classList.toggle('practicing', on);
+  if (on && b) document.body.style.setProperty('--trp-h', b.offsetHeight + 'px');
+  const jn = document.getElementById('job-number-input');
+  if (jn) { jn.readOnly = on; if (on && jn.value !== '7600') { jn.value = '7600'; qdJob = '7600'; } }
+}
+function trPracticeStart() {
+  if (trPracticeOn()) { trPracticeBanner(); return; }
+  if (typeof qdSaveNow === 'function') qdSaveNow();               // the real draft is saved under its own key first
+  try { localStorage.setItem(trPracticeKey(), '1'); } catch (e) { showToast('Could not start practice on this phone'); return; }
+  const st = qdRead(), d = st.drafts['7600'];                     // practice has its own draft (job 7600)
+  if (qdHas(d)) qdApply(d); else { qdClearScreen(); }
+  trPracticeBanner();
+  if (typeof cqRender === 'function') cqRender();
+  showToast('🎓 Practice started: job 7600, nothing is sent');
+  trAuto('practice');
+}
+function trPracticeStop() {
+  if (!trPracticeOn()) return;
+  if (typeof qdSaveNow === 'function') qdSaveNow();               // keep the practice quote for next time
+  try { localStorage.removeItem(trPracticeKey()); } catch (e) {}
+  qdClearScreen();
+  trPracticeBanner();
+  const jn = document.getElementById('job-number-input'); if (jn) jn.readOnly = false;
+  qdRestore();                                                    // the real draft comes back
+  if (typeof cqRender === 'function') cqRender();
+  showToast('Practice stopped: your real quote is back');
+}
+
+// ---- owners: team progress (unlock / reset) and video links
+async function trOpenTeam(personId) {
+  trCloseSheet();
+  const back = document.createElement('div'); back.className = 'trc-back'; back.id = 'trc-back';
+  back.innerHTML = '<div class="trc-sheet" role="dialog" aria-modal="true"><div class="trc-sh-hd"><b>👥 Team progress</b><button class="trc-x" data-trclose aria-label="Close">✕</button></div><div id="trc-team">Loading…</div></div>';
+  document.body.appendChild(back); back.addEventListener('click', e => { if (e.target === back) trCloseSheet(); });
+  let j; try { j = await authFetch('/training/team'); } catch (e) { document.getElementById('trc-team').textContent = e.message; return; }
+  const el = document.getElementById('trc-team'); if (!el) return;
+  const p = personId && j.people.find(x => x.id === personId);
+  const icon = st => (st === 'done' ? '✅' : st === 'locked' ? '🔒' : st === 'started' ? '◐' : '▶');
+  if (!p) {
+    el.innerHTML = j.people.length ? j.people.map(x => '<button class="trc-person" data-trperson="' + x.id + '"><span><b>' + escHtml(x.name) + '</b><small>' + escHtml(ROLE_NAMES[x.role] || x.role) + ' · ' + (x.next ? 'next: ' + escHtml(x.next) : 'all done') + '</small></span><span class="trc-pc">' + x.done + '/' + x.total + '</span></button>').join('') : 'No one yet.';
+    return;
+  }
+  el.innerHTML = '<button class="trc-btn" data-trteamback>← Everyone</button><h3 style="margin:12px 0 4px">' + escHtml(p.name) + ' · ' + p.done + '/' + p.total + '</h3>'
+    + p.sections.map(s => '<div class="trc-ps">' + icon(s.status) + ' <b>' + s.n + '. ' + escHtml(s.title) + '</b><br><small>'
+      + (s.status === 'done' ? 'Completed ' + new Date(s.completedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }) : s.status === 'locked' ? 'Locked' : s.stepsDone + ' of ' + s.steps + ' steps' + (s.watched ? ', video watched' : '')) + (s.unlockedBy ? ' · unlocked by ' + escHtml(s.unlockedBy) : '') + '</small>'
+      + '<div class="trc-pa">' + (s.status === 'locked' ? '<button data-trunlock="' + s.id + '" data-who="' + p.id + '">Unlock</button>' : '') + (s.status !== 'locked' && (s.status !== 'open' || s.unlockedBy) ? '<button data-trreset="' + s.id + '" data-who="' + p.id + '">Reset</button>' : '') + '</div></div>').join('');
+}
+async function trOpenVideos() {
+  trCloseSheet();
+  const back = document.createElement('div'); back.className = 'trc-back'; back.id = 'trc-back';
+  back.innerHTML = '<div class="trc-sheet" role="dialog" aria-modal="true"><div class="trc-sh-hd"><b>🎬 Video links</b><button class="trc-x" data-trclose aria-label="Close">✕</button></div>'
+    + '<div class="trc-why" style="text-align:left">Paste an unlisted YouTube or Vimeo link for each section. Leave it blank for "Video coming soon". Every change is kept.</div><div id="trc-vids">Loading…</div></div>';
+  document.body.appendChild(back); back.addEventListener('click', e => { if (e.target === back) trCloseSheet(); });
+  let j; try { j = await authFetch('/training/videos'); } catch (e) { document.getElementById('trc-vids').textContent = e.message; return; }
+  document.getElementById('trc-vids').innerHTML = j.sections.map(s => '<div class="trc-vid" data-trvid="' + s.id + '"><b>' + s.n + '. ' + escHtml(s.title) + '</b>' + (s.shown ? '' : ' <small>(switched off here, so hidden for now)</small>')
+    + '<input type="url" inputmode="url" autocomplete="off" placeholder="https://youtu.be/… or https://vimeo.com/…" value="' + escHtml(s.url) + '" aria-label="Video link for ' + escHtml(s.title) + '">'
+    + '<div class="trc-vr"><button type="button" data-trvidsave="' + s.id + '">Save</button><small data-trvidmsg>' + (s.url ? 'Set by ' + escHtml(s.by) : 'No video yet') + '</small></div></div>').join('');
+}
+
+document.addEventListener('click', async e => {
+  const t = e.target; if (!t.closest) return;
+  if (t.closest('[data-trclose]')) { trCloseSheet(); return; }
+  const sec = t.closest('[data-trsec]'); if (sec) { trOpenSection(sec.dataset.trsec); return; }
+  if (t.closest('[data-trstop]')) { trPracticeStop(); return; }
+  if (t.closest('[data-trcourse]')) { goScreen('training'); return; }
+  if (t.closest('[data-trprac]')) { const s = trSec(trOpenId); trPracticeStart(); if (s) trGoTo(s); return; }
+  if (t.closest('[data-trgo]')) { const s = trSec(trOpenId); if (s) trGoTo(s); return; }
+  if (t.closest('[data-trcomplete]')) {
+    const msg = document.getElementById('trc-msg');
+    try { await trPost(trOpenId, { complete: true }); showToast('✅ Section complete'); } catch (err) { if (msg) msg.textContent = err.message; }
+    return;
+  }
+  if (t.closest('[data-trteam]')) { trOpenTeam(); return; }
+  if (t.closest('[data-trvideos]')) { trOpenVideos(); return; }
+  const pe = t.closest('[data-trperson]'); if (pe) { trOpenTeam(pe.dataset.trperson); return; }
+  if (t.closest('[data-trteamback]')) { trOpenTeam(); return; }
+  const un = t.closest('[data-trunlock]'), rs = t.closest('[data-trreset]');
+  if (un || rs) {
+    const b = un || rs, action = un ? 'unlock' : 'reset', sid = un ? un.dataset.trunlock : rs.dataset.trreset;
+    if (!confirm(action === 'unlock' ? 'Unlock this section for them? They can do it without finishing the one before.' : 'Reset this section for them? Their ticks for it are cleared and they do it again.')) return;
+    try { await authFetch('/training/team/' + b.dataset.who + '/' + sid, { method: 'POST', body: JSON.stringify({ action }) }); showToast(action === 'unlock' ? 'Unlocked' : 'Reset'); trOpenTeam(b.dataset.who);
+      if (CURRENT_USER && b.dataset.who === CURRENT_USER.id) trInit(); } catch (err) { showToast(err.message); }
+    return;
+  }
+  const vs = t.closest('[data-trvidsave]');
+  if (vs) {
+    const row = vs.closest('[data-trvid]'), inp = row.querySelector('input'), m = row.querySelector('[data-trvidmsg]');
+    vs.disabled = true;
+    try { const j = await authFetch('/training/videos', { method: 'POST', body: JSON.stringify({ section: vs.dataset.trvidsave, url: inp.value }) }); m.style.color = ''; m.textContent = j.url ? '✅ Saved' : '✅ Cleared (video coming soon)'; if (trCourse) trInit(); }
+    catch (err) { m.style.color = '#dc2626'; m.textContent = err.message; }
+    vs.disabled = false;
+  }
+});
+document.addEventListener('change', async e => {
+  const t = e.target, s = trSec(trOpenId); if (!s || !t.closest || !t.closest('#trc-rest')) return;
+  const msg = document.getElementById('trc-msg');
+  try {
+    if (t.matches('[data-trstep]')) await trPost(s.id, { step: Number(t.dataset.trstep), done: t.checked });
+    else if (t.matches('[data-trwatched]')) await trPost(s.id, { watched: t.checked });
+  } catch (err) { t.checked = !t.checked; if (msg) msg.textContent = err.message; }
+});
+// steps the app can see: quote lines added (Reece, bundle, labour)
+if (typeof updateQuoteUI === 'function') { const trUQ = updateQuoteUI; updateQuoteUI = function () { const r = trUQ.apply(this, arguments); try { trQuoteSeen(); } catch (e) {} return r; }; }
+// in practice "Clear" / "New quote" keep job 7600
+if (typeof qdClearScreen === 'function') { const trCS = qdClearScreen; qdClearScreen = function () { const r = trCS.apply(this, arguments); if (trPracticeOn()) { const jn = document.getElementById('job-number-input'); if (jn) { jn.value = '7600'; jn.readOnly = true; } qdJob = '7600'; } return r; }; }
+
+// ---- the old step-by-step guide: labour rates from the app's own rates (everyone); for logged-in staff the
+// Home list is today's tiles and "AI Assistant" is Old Mate.
+function trGuideFix() {
+  const rates = document.getElementById('tr-rates');
+  if (rates && typeof qLabourRate === 'function') {
+    const R = [['standard', 'Standard', '/hr', 'Normal tradie rate'], ['second', '2nd Tradesman', '/hr', 'Second tradie on same job'], ['builder', 'Builder Rate', '/hr', 'For builder clients'], ['apprentice', 'Apprentice', '/hr', 'Apprentice labour'], ['service', 'Service Fee', ' flat', 'Call-out / service charge']];
+    const html = R.map(([k, n, u, d]) => '<div class="tr-rate"><span class="tr-rate-name">' + n + '</span><span class="tr-rate-price">$' + (Math.round(qLabourRate(k) * 100) / 100) + u + '</span><span class="tr-rate-desc">' + d + '</span></div>').join('');
+    if (rates.dataset.html !== html) { rates.innerHTML = html; rates.dataset.html = html; }
+  }
+  if (!PILOT_UI || !CURRENT_USER) return;
+  const items = document.getElementById('tr-home-items');
+  if (items && typeof HOME_ACTIONS !== 'undefined') items.innerHTML = HOME_ACTIONS.filter(homeAllowed).map(a => '<div class="tr-item"><span class="tr-icon">' + (a.id === 'ask' ? '🧔' : a.icon) + '</span><div><strong>' + escHtml(a.label) + '</strong> — ' + escHtml(a.desc) + '</div></div>').join('');
+  const tip = document.getElementById('tr-home-tip'); if (tip) tip.innerHTML = '💡 Tap <strong>☆</strong> on a tile to pin it to the top of Home. Ask Old Mate is the box at the top. The <strong>bottom bar</strong> takes you to Home, Stock, Labour, Search, Review, Quote and Settings.';
+  const at = document.getElementById('tr-ai-title'); if (at) at.textContent = 'Ask Old Mate';
+  const ab = document.getElementById('tr-ai-body');
+  if (ab) ab.innerHTML = '<p><strong>Old Mate</strong> answers questions about plumbing standards, our products and bundles, and our suppliers, and shows where each answer came from.</p>'
+    + '<div class="tr-how"><div class="tr-how-title">How to use it:</div><ol><li>On Home, type in the <strong>Ask Old Mate</strong> box at the top (or tap a suggested question)</li><li>Ask plainly, e.g. <strong>"Minimum fall for a 100mm sewer drain?"</strong></li><li>Read the answer and open the <strong>sources</strong> under it</li></ol></div>'
+    + '<div class="tr-tip">💡 Good for quick checks on site. For anything that matters, read the source, and ask Matt or your supervisor if you are not sure.</div>';
+}
+function trOnScreen() { trGuideFix(); if (CURRENT_USER && PILOT_UI && !trCourse) trInit(); else trRenderBox(); }
 
 window.addEventListener('load',init);
 </script>

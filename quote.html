@@ -88,6 +88,7 @@
   #viewer .cap .mocknote { color: #ffb27a; }
   #viewer .nav { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0,0,0,.55); color: #fff; border: 1px solid rgba(255,255,255,.5); font-size: 22px; line-height: 44px; }
   #viewer .prev { left: 8px; } #viewer .next { right: 8px; }
+.practice{background:#fde68a;color:#78350f;border:2px dashed #b45309;border-radius:10px;padding:10px 12px;margin:0 0 10px;font-weight:700;font-size:14px;text-align:center}
 </style>
 </head>
 <body>
@@ -182,7 +183,7 @@ function render() {
   const lines = q.lines.map((l, i) => { const lk = linkList(i); const cls = [lk ? 'haslinks' : '', l.optional ? 'opt' : '', l.optional && !CHOICE.has(i) ? 'off' : ''].filter(Boolean).join(' ');
     return `<tr data-line="${i}"${cls ? ` class="${cls}"` : ''}><td>${l.optional ? `<label class="optl"><input type="checkbox" data-opt="${i}"${CHOICE.has(i) ? ' checked' : ''}${lockOpt ? ' disabled' : ''}><span>Optional</span></label>` : ''}${esc(l.name)}${lineImgs(i).length ? `<div class="lthumbs">${lineImgs(i).map(x => thumbBtn(x)).join('')}</div>` : ''}</td><td class="q">${l.qty === 1 ? '' : esc(l.qty)}</td><td class="a">${aud(l.qty * l.priceInc)}</td></tr>` + (lk ? `<tr class="plrow" data-linkrow="${i}"><td colspan="3">${lk}</td></tr>` : ''); }).join('');
   const s = q.signed;
-  $('#app').innerHTML = `
+  $('#app').innerHTML = `${q.practice ? '<div class="practice">🎓 PRACTICE QUOTE: for staff training only. This is not a real quote.</div>' : ''}
     <header class="card">
       <img src="${esc(co.logo)}" alt="IPD logo">
       <div class="co"><b>${esc(name)}</b>ABN ${esc(abn)} · QBCC Licence ${esc(co.qbcc)}<br>${esc(co.address)}<br>${esc(co.phone)} · ${esc(co.email)}</div>
