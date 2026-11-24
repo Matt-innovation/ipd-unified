@@ -6083,7 +6083,7 @@ function savePin() {
 // section stays locked until this one is done. Practice mode: job 7600, its own draft (the real draft is
 // untouched), and nothing is really sent — Send to SM8 / stock orders are pretended on the phone, notes and
 // photos can't be added, client links are marked PRACTICE (no alerts). PIN users see none of this.
-let trCourse = null, trOpenId = null;
+let trCourse = null, trOpenId = null, trBuiltin = null;   // trBuiltin: videos shipped with the app (training/videos.json); they win over a pasted link
 const trBusy = new Set();
 const TR_SCREENS = { home: 'Home', search: 'Find a product', labour: 'Labour', quote: 'Quote', stock: 'Van stock', ai: 'Ask Old Mate' };
 const trPracticeKey = () => (CURRENT_USER && CURRENT_USER.id ? 'ipd_practice_' + CURRENT_USER.id : null);
@@ -6139,6 +6139,7 @@ function trStyle() {
 .trc-x{width:40px;height:40px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:16px;cursor:pointer;flex-shrink:0}
 .trc-video{position:relative;width:100%;padding-top:56.25%;border-radius:10px;overflow:hidden;background:#111}
 .trc-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.trc-video.trc-vfile{padding-top:0;display:flex;justify-content:center;background:#000}.trc-vfile video{display:block;height:min(62vh,560px);max-width:100%;aspect-ratio:9/16;background:#000}
 .trc-novideo{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#eee;font-size:15px;font-weight:700;text-align:center;padding:10px}
 .trc-novideo small{font-weight:400;font-size:12px;color:#bbb;margin-top:4px}
 .trc-outline{font-size:14px;color:var(--text-mid);margin:10px 0}
@@ -6171,6 +6172,8 @@ async function trInit() {
   trStyle();
   trPracticeBanner();
   try { const j = await authFetch('/training/me'); trCourse = j && j.on === true && Array.isArray(j.sections) ? j : null; } catch (e) { trCourse = null; }
+  if (trCourse && trBuiltin === null) { try { const r = await fetch('training/videos.json', { cache: 'no-cache' }); trBuiltin = r.ok ? await r.json() : {}; } catch (e) { trBuiltin = {}; } }
+  trMergeBuiltin();
   trRenderBox();
   if (trCourse) trAuto('login');
 }
@@ -6187,10 +6190,14 @@ function trRenderBox() {
     + (trCourse.isOwner ? '<div class="trc-own"><button data-trteam>👥 Team progress</button><button data-trvideos>🎬 Video links</button></div>' : '')
     + '</div><div class="trc-old">Quick reference: the step-by-step guide</div>';
 }
+function trMergeBuiltin() {
+  if (!trCourse || !trBuiltin) return;
+  for (const s of trCourse.sections) { const b = trBuiltin[s.id]; if (b && b.file) s.video = { file: b.file + (b.v ? '?v=' + encodeURIComponent(b.v) : ''), poster: b.poster ? b.poster + (b.v ? '?v=' + encodeURIComponent(b.v) : '') : '', builtin: true }; }
+}
 function trSec(id) { return trCourse && Array.isArray(trCourse.sections) ? trCourse.sections.find(s => s.id === id) : null; }
 async function trPost(id, body) {
   const j = await authFetch('/training/me/' + id, { method: 'POST', body: JSON.stringify(body) });
-  if (j && Array.isArray(j.sections)) trCourse.sections = j.sections; trRenderBox(); if (trOpenId === id) trRenderSheetRest(); return j;
+  if (j && Array.isArray(j.sections)) { trCourse.sections = j.sections; trMergeBuiltin(); } trRenderBox(); if (trOpenId === id) trRenderSheetRest(); return j;
 }
 // a step the app can see done ticks itself (any open, unfinished section that has it)
 function trAuto(key) {
@@ -6216,8 +6223,8 @@ function trOpenSection(id) {
   trCloseSheet(); trOpenId = id;
   const back = document.createElement('div'); back.className = 'trc-back'; back.id = 'trc-back';
   back.innerHTML = '<div class="trc-sheet" role="dialog" aria-modal="true" aria-labelledby="trc-title"><div class="trc-sh-hd"><b id="trc-title">' + s.n + '. ' + escHtml(s.title) + '</b><button class="trc-x" data-trclose aria-label="Close">✕</button></div>'
-    + '<div class="trc-video">' + (s.video ? '<iframe src="' + escHtml(s.video.embed) + '" title="' + escHtml(s.title) + ' (video)" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>'
-      : '<div class="trc-novideo">🎬 Video coming soon<small>Matt is recording it. You can still do the practice steps.</small></div>') + '</div>'
+    + '<div class="trc-video' + (s.video && s.video.file ? ' trc-vfile' : '') + '">' + (s.video && s.video.file ? '<video src="' + escHtml(s.video.file) + '"' + (s.video.poster ? ' poster="' + escHtml(s.video.poster) + '"' : '') + ' controls playsinline preload="metadata" title="' + escHtml(s.title) + ' (video)"></video>' : s.video ? '<iframe src="' + escHtml(s.video.embed) + '" title="' + escHtml(s.title) + ' (video)" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>'
+      : '<div class="trc-novideo">🎬 Video coming soon<small>On its way. You can still do the practice steps.</small></div>') + '</div>'
     + '<div id="trc-rest"></div></div>';
   document.body.appendChild(back);
   back.addEventListener('click', e => { if (e.target === back) trCloseSheet(); });
@@ -6310,7 +6317,7 @@ async function trOpenVideos() {
     + '<div class="trc-why" style="text-align:left">Paste an unlisted YouTube or Vimeo link for each section. Leave it blank for "Video coming soon". Every change is kept.</div><div id="trc-vids">Loading…</div></div>';
   document.body.appendChild(back); back.addEventListener('click', e => { if (e.target === back) trCloseSheet(); });
   let j; try { j = await authFetch('/training/videos'); } catch (e) { document.getElementById('trc-vids').textContent = e.message; return; }
-  document.getElementById('trc-vids').innerHTML = j.sections.map(s => '<div class="trc-vid" data-trvid="' + s.id + '"><b>' + s.n + '. ' + escHtml(s.title) + '</b>' + (s.shown ? '' : ' <small>(switched off here, so hidden for now)</small>')
+  document.getElementById('trc-vids').innerHTML = j.sections.map(s => trBuiltin && trBuiltin[s.id] && trBuiltin[s.id].file ? '<div class="trc-vid"><b>' + s.n + '. ' + escHtml(s.title) + '</b><small> ✅ Built into the app (no link needed)</small></div>' : '<div class="trc-vid" data-trvid="' + s.id + '"><b>' + s.n + '. ' + escHtml(s.title) + '</b>' + (s.shown ? '' : ' <small>(switched off here, so hidden for now)</small>')
     + '<input type="url" inputmode="url" autocomplete="off" placeholder="https://youtu.be/… or https://vimeo.com/…" value="' + escHtml(s.url) + '" aria-label="Video link for ' + escHtml(s.title) + '">'
     + '<div class="trc-vr"><button type="button" data-trvidsave="' + s.id + '">Save</button><small data-trvidmsg>' + (s.url ? 'Set by ' + escHtml(s.by) : 'No video yet') + '</small></div></div>').join('');
 }
