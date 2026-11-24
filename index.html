@@ -6139,7 +6139,7 @@ function trStyle() {
 .trc-x{width:40px;height:40px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:16px;cursor:pointer;flex-shrink:0}
 .trc-video{position:relative;width:100%;padding-top:56.25%;border-radius:10px;overflow:hidden;background:#111}
 .trc-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.trc-video.trc-vfile{padding-top:0;display:flex;justify-content:center;background:#000}.trc-vfile video{display:block;height:min(62vh,560px);max-width:100%;aspect-ratio:9/16;background:#000}
+.trc-video.trc-vfile{padding-top:0;display:flex;justify-content:center;background:#000}.trc-vfile video{display:block;height:min(62vh,560px);width:auto;max-width:100%;aspect-ratio:9/16;object-fit:contain;background:#000}@media (min-width:700px) and (hover:hover) and (pointer:fine){.trc-vfile video{height:min(84vh,1024px)}}
 .trc-novideo{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#eee;font-size:15px;font-weight:700;text-align:center;padding:10px}
 .trc-novideo small{font-weight:400;font-size:12px;color:#bbb;margin-top:4px}
 .trc-outline{font-size:14px;color:var(--text-mid);margin:10px 0}
@@ -6192,7 +6192,7 @@ function trRenderBox() {
 }
 function trMergeBuiltin() {
   if (!trCourse || !trBuiltin) return;
-  for (const s of trCourse.sections) { const b = trBuiltin[s.id]; if (b && b.file) s.video = { file: b.file + (b.v ? '?v=' + encodeURIComponent(b.v) : ''), poster: b.poster ? b.poster + (b.v ? '?v=' + encodeURIComponent(b.v) : '') : '', builtin: true }; }
+  for (const s of trCourse.sections) { const b = trBuiltin[s.id]; if (b && b.file) s.video = { file: b.file + (b.v ? '?v=' + encodeURIComponent(b.v) : ''), poster: b.poster ? b.poster + (b.v ? '?v=' + encodeURIComponent(b.v) : '') : '', ratio: b.w > 0 && b.h > 0 ? b.w + '/' + b.h : '', builtin: true }; }
 }
 function trSec(id) { return trCourse && Array.isArray(trCourse.sections) ? trCourse.sections.find(s => s.id === id) : null; }
 async function trPost(id, body) {
@@ -6223,7 +6223,7 @@ function trOpenSection(id) {
   trCloseSheet(); trOpenId = id;
   const back = document.createElement('div'); back.className = 'trc-back'; back.id = 'trc-back';
   back.innerHTML = '<div class="trc-sheet" role="dialog" aria-modal="true" aria-labelledby="trc-title"><div class="trc-sh-hd"><b id="trc-title">' + s.n + '. ' + escHtml(s.title) + '</b><button class="trc-x" data-trclose aria-label="Close">✕</button></div>'
-    + '<div class="trc-video' + (s.video && s.video.file ? ' trc-vfile' : '') + '">' + (s.video && s.video.file ? '<video src="' + escHtml(s.video.file) + '"' + (s.video.poster ? ' poster="' + escHtml(s.video.poster) + '"' : '') + ' controls playsinline preload="metadata" title="' + escHtml(s.title) + ' (video)"></video>' : s.video ? '<iframe src="' + escHtml(s.video.embed) + '" title="' + escHtml(s.title) + ' (video)" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>'
+    + '<div class="trc-video' + (s.video && s.video.file ? ' trc-vfile' : '') + '">' + (s.video && s.video.file ? '<video src="' + escHtml(s.video.file) + '"' + (s.video.poster ? ' poster="' + escHtml(s.video.poster) + '"' : '') + (s.video.ratio ? ' style="aspect-ratio:' + escHtml(s.video.ratio) + '"' : '') + ' controls playsinline preload="metadata" title="' + escHtml(s.title) + ' (video)"></video>' : s.video ? '<iframe src="' + escHtml(s.video.embed) + '" title="' + escHtml(s.title) + ' (video)" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>'
       : '<div class="trc-novideo">🎬 Video coming soon<small>On its way. You can still do the practice steps.</small></div>') + '</div>'
     + '<div id="trc-rest"></div></div>';
   document.body.appendChild(back);
