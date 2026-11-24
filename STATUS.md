@@ -75,3 +75,11 @@ Choices made without Matt (safe defaults — change any):
 - Some steps tick themselves (logged in, started practice, Reece/bundle/labour line added, practice send, practice client link, asked Old Mate); every step can also be ticked by hand.
 - Limit: 3000 progress changes per person (stops runaway taps).
 - Going live later needs Matt's OK: merge server + app to main, then TRAINING_MODE=on on live.
+
+## 2026-11-24 ~1:50 pm: training course LIVE (Matt's OK)
+- Server main = merge 1daca0e (previous 624ab86), deploy dep-dc2gc3dbedkc73avgnc0. App main = merge dbe9e36 (previous f1de95d) on Netlify.
+- Live server env: TRAINING_MODE=on (was not set), deploy dep-dc2ghlu7bikc738k93eg. Nothing else changed (24 keys; LINE_PRODUCTS, SWMS_PROMPTS still not set).
+- Checks before each merge: full regress passed (client link box timed out once, passed 137/137 on re-run and in the second full run). PIN app on real Netlify + live server, iPhone SE/13: 0.000% after each of the three steps. /training/* = 401 without login.
+- Live shows 13 sections to owners/techs, 12 to office (no Safety while SWMS_PROMPTS is off). No video links yet on live -> "Video coming soon", watched tick not needed.
+- Undo: (3) delete TRAINING_MODE on live + redeploy; (2) git revert -m 1 dbe9e36 in ipd-app, push main; (1) git revert -m 1 1daca0e in ipd-server, push main.
+- Next (plan only, waiting for Matt): AI-made training videos, trial video 1.
