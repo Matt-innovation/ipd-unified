@@ -47,3 +47,10 @@ Choices made without Matt (safest sensible default — change any of them):
 - SWMS: keyword rules for 8 high-risk work types (height >2 m, trench >1.5 m, asbestos, confined space, gas, mobile plant, traffic, demolition/structural) in index.html SW_RULES; advice only, asks once before sending if unanswered; answers kept with drafts/versions and on the client quote record (staff only). No ServiceM8 badge (needs OK).
 Waiting for Matt: Day 1 launch OKs (merges to main, live switches); Knowledge Sheet columns (Google step); spec sheet approval; text/email sending service; Work Order move + diary copy; SWMS badge in ServiceM8; LINE_PRODUCTS on live; test database expires 11 Dec 2026; calendars/leave/push.
 
+
+## 24 Nov 2026 — "accepted" alert also goes to the scheduling inbox (PREVIEW ONLY)
+- Accepted (signed) client quotes: alert to the link maker + owners (as before) AND an email to the scheduling inbox, default info@innovationplumbing.com.au. Email has job number, client, address, contact, who signed and when, total, deposit, stages, options chosen / not chosen, photo permission, who made the quote, and a link to the signed quote (staff view `quote.html?staff=1#id`, not counted as a client open). Says nothing was changed in ServiceM8.
+- "Opened" alerts unchanged (link maker + owners only, never the inbox).
+- Setting: owners only, app Settings → Your login → "📬 Accepted quotes email". Saved in our database straight away (no redeploy); every change kept (collection cq-setting). Blank = no scheduling email. No saved value → SCHEDULE_EMAIL env → info@. Server: GET/POST /client-quote/settings.
+- Still behind QUOTE_ALERTS (off on live). Tests: client-quote-check.js 171, new sched-check.js 9; full regress passed (PIN comparison: only the known Stock toast after re-runs).
+- Test sign on job 7600 (preview) 24 Nov ~10:22 am: quote 2a9a88e8-5435-448c-9760-b079ebb8e2d7, both options ticked, total $3,160.50, deposit $632.10; "opened" emailed to the 2 owners, "accepted" to the 2 owners + info@.
