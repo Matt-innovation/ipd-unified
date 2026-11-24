@@ -1247,6 +1247,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             <div class="settings-hint" id="me-line"></div>
             <button class="settings-btn" id="me-users-btn" hidden onclick="openUsers()">Manage users</button>
             <button class="settings-btn" id="me-problem-btn" onclick="openProblem()">⚠️ Report a problem</button>
+            <button class="settings-btn" id="me-sched-btn" hidden onclick="openScheduleEmail()">📬 Accepted quotes email</button>
             <button class="settings-btn" onclick="logOut()">Log out</button>
           </div>
         </div>
@@ -4177,6 +4178,7 @@ function setUser(u) {
   document.getElementById('me-card').hidden = false;
   document.getElementById('me-line').textContent = 'Logged in as ' + u.name + ' — ' + (ROLE_NAMES[u.role] || u.role) + (u.title ? ' (' + u.title + ')' : '');
   document.getElementById('me-users-btn').hidden = !u.canManageUsers;
+  document.getElementById('me-sched-btn').hidden = !u.canManageUsers;
   if (typeof renderHome === 'function') renderHome();
   if (typeof kioskRefreshSummary === 'function') kioskRefreshSummary();
   if (typeof dirRefresh === 'function') dirRefresh();
@@ -5318,6 +5320,20 @@ const APP_VERSION = '2026-11-23 pilot';
 const RP_ERRORS = [];
 window.addEventListener('error', e => { RP_ERRORS.push(new Date().toISOString().slice(11, 19) + ' ' + String(e.message || 'error').slice(0, 200) + (e.filename ? ' @' + String(e.filename).split('/').pop() + ':' + e.lineno : '')); if (RP_ERRORS.length > 20) RP_ERRORS.shift(); });
 window.addEventListener('unhandledrejection', e => { RP_ERRORS.push(new Date().toISOString().slice(11, 19) + ' ' + String((e.reason && e.reason.message) || e.reason || 'rejected').slice(0, 200)); if (RP_ERRORS.length > 20) RP_ERRORS.shift(); });
+// Owners: where "accepted" client-quote alerts are emailed so the job can be scheduled (default info@). Saved on the
+// server straight away — no redeploy. Blank = no scheduling email (staff alerts still go out).
+async function openScheduleEmail() {
+  if (!CURRENT_USER || !CURRENT_USER.canManageUsers) return;
+  let cur;
+  try { cur = (await authFetch('/client-quote/settings')).scheduleEmail; }
+  catch (e) { showToast(/not found/i.test(e.message) ? 'Client quote links are switched off on this server' : 'Could not load: ' + e.message); return; }
+  const NL = String.fromCharCode(10);
+  const v = prompt('When a client accepts a quote, also email (for scheduling):' + NL + NL + 'Now: ' + (cur.email || 'nobody') + (cur.from === 'saved' ? ' (set by ' + (cur.by || '?') + ')' : ' (' + cur.from + ')') + NL + NL + 'Leave blank for no scheduling email.', cur.email || '');
+  if (v === null) return;
+  try { const j = await authFetch('/client-quote/settings', { method: 'POST', body: JSON.stringify({ scheduleEmail: v.trim() }) });
+    showToast(j.scheduleEmail.email ? '✅ Accepted quotes will also go to ' + j.scheduleEmail.email : '✅ No scheduling email (staff alerts still go)'); }
+  catch (e) { showToast(e.message); }
+}
 function openProblem() {
   if (!CURRENT_USER) { showToast('Log in first, or call Matt'); return; }
   const old = document.getElementById('rp-back'); if (old) old.remove();
