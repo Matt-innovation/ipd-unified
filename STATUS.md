@@ -108,3 +108,13 @@ Choices made without Matt (safe defaults — change any):
 - Seen while recording, not changed (for Matt to decide): in practice the toast still says "Quote sent to ServiceM8!" even though nothing was sent; the green "sent" banner is hard to read on the orange practice background.
 - Checks: training course 59/59 (updated: with all 14 built in there are no link boxes, so paste-a-link is only checked when a section has none), full regress passed (client link box timed out once, passed 137/137 on re-run); app preview-all 9dba59a, server preview-all f597894. PIN app unchanged.
 - Not on live until Matt OKs a merge to main.
+
+## 2026-11-26: practice pop-up fixed, video 10 with a real Old Mate review (preview only)
+- Practice mode: the pop-up after Send to SM8 now says "Practice only, nothing was sent" (was "Quote sent to ServiceM8!"). The message on the quote is now dark green on solid white with a green border, 14px (contrast 9:1; was pale green on see-through, hard to read on orange). Real (non-practice) sends unchanged.
+- Stock order AI review: Old Mate's markdown marks (##, **, ---) were shown as-is (also on live). Now shown as headings and bold. Preview only.
+- Matt's OK: one test question per video (10 and 11) to the live Old Mate, read-only, nothing to ServiceM8, no client data. Tool: `ipd-audit-scripts/video/ask-live.js` (refuses to ask twice; saved answers in `video/ai-answers`; the recording plays the saved answer and never sends anything).
+  - Video 10: /ai-review of one line (15mm Compression Tee, have 1, target 3, order 2). Good answer; video remade (8.3 MB). Video 5 remade too (shows the new practice message).
+  - Video 11: /ai-ask "Minimum fall for a 100mm sewer drain?" Answer NOT used (kept in work/ai-requests/11-oldmate-ai-ask-NOT-SUITABLE.json): it says our own quick reference is wrong, and has "number not verified" gaps twice. Video 11 left as before. Waiting for Matt to pick a different question.
+  - Found: the app's Standards quick reference (live, index.html "DN100 drain grade 1 : 100", and server ai-quick-reference.txt) says DN100 1:100; Old Mate's sources say 1.65% (about 1 in 60) minimum, with 1:100 possibly only as a reduced grade. Not changed; Matt to check against AS/NZS 3500.2.
+- Checks: training course 61/61 (new: practice pop-up text, message contrast). Full regress all passed except the client link box check, which fails some runs with a timeout and passes others (137/137 on a solo run); that area wasn't changed. Test now waits for the new contact instead of 200 ms. PIN app vs live: only the known Stock screen fade timing.
+- App preview-all 64cf713. Not on live until Matt OKs a merge to main.
