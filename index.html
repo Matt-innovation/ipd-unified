@@ -4455,7 +4455,7 @@ function setKTab(t) {
   if (t === 'owner' && !(kSummary && kSummary.isOwner)) t = 'timeoff';
   kTab = t;
   document.querySelectorAll('#k-tabs [data-ktab]').forEach(b => { b.classList.toggle('on', b.dataset.ktab === t); if (b.dataset.ktab === 'owner') b.hidden = !(kSummary && kSummary.isOwner); });
-  document.querySelectorAll('.k-panel').forEach(p => (p.hidden = p.id !== 'k-' + t));
+  document.querySelectorAll('#screen-kiosk .k-panel').forEach(p => (p.hidden = p.id !== 'k-' + t));
   if (t === 'timeoff' || t === 'notices') kLoadMe();
   if (t === 'calendar') kLoadCalendar();
   if (t === 'owner') kLoadOwner();
