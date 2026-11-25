@@ -94,3 +94,17 @@ Choices made without Matt (safe defaults — change any):
 - Video 1 trial (3:01, 4.9 MB) in two voices: A = George (British, in the course), B = Michael (American, `training/videos/01-login-voice-b.mp4`). Waiting for Matt to pick and approve; then videos 2-14 get made the same way on the preview. Removing the unpicked file needs his OK (a deletion).
 - Not on live until Matt OKs a merge to main.
 - ~5 pm update: video 1 remade sharp (Matt found the first one unclear on his PC). iPhone 390x844 recorded at 3x inside a 1296x3072 video, H.264 CRF 19, 12 MB for 3 min. George voice only; voice B removed (Matt: "George only"). On a PC the course shows it up to 84% of the screen height (never past real size); on a phone 62% of the height with a full-screen button. App preview-all b88a467; training checks 60/60, full regress passed, PIN app unchanged. Waiting for Matt's look before making videos 2-14.
+
+## 2026-11-25: all 14 training videos made (preview only)
+- Matt approved video 1 (George). "G'day" changed to "Hi" in every script and caption. All 14 made the same way: George only, sharp settings (1296x3072, H.264 CRF 19), 5.6 to 13.4 MB each, 1 to 3 minutes each, every tap checked (no missed taps).
+- Voice and quality are set in one place: `ipd-audit-scripts/video/settings.js` (`voice`, `speed`, `crf`). Change it there and run `node make-all.js` to remake.
+- The first try to make all 14 in one go was stopped by Claude Code because the PC ran low on memory (Chrome was using about 4 GB). They were then made one to three at a time, which worked.
+- Defaults I picked (Matt said not to ask):
+  - Videos 10 (stock review) and 11 (Ask Old Mate) show where Old Mate's answer appears, but no real answer: the preview server has no AI key, and nothing was sent to live. No made-up answers. With Matt's OK, one question could go to the live Old Mate and these two could be remade with real answers.
+  - Video 12 uses an example notice and three made-up suppliers ("Example Plumbing Supplies" etc., 07 0000 000x), not real businesses.
+  - Video 7 shows the client page with a made-up client ("Practice Client", 1 Practice St).
+- App bug found and fixed on the preview only: opening the Staff Kiosk hid the Suppliers and Markup guide screens, so they came up blank (`setKTab` hid every `.k-panel` in the app). Fixed so it only touches the kiosk's own tabs. Needs Matt's OK to go live.
+- Course text fixed on the preview (server training.js): the Materials allowance is on the Quote screen's Labour tab, not the Summary tab.
+- Seen while recording, not changed (for Matt to decide): in practice the toast still says "Quote sent to ServiceM8!" even though nothing was sent; the green "sent" banner is hard to read on the orange practice background.
+- Checks: training course 59/59 (updated: with all 14 built in there are no link boxes, so paste-a-link is only checked when a section has none), full regress passed (client link box timed out once, passed 137/137 on re-run); app preview-all 9dba59a, server preview-all f597894. PIN app unchanged.
+- Not on live until Matt OKs a merge to main.
