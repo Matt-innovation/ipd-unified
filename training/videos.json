@@ -38,7 +38,7 @@
  "send": {
   "file": "training/videos/05-send.mp4",
   "poster": "training/videos/05-send.jpg",
-  "v": "202611250714",
+  "v": "202611252103",
   "voice": "bm_george",
   "seconds": 81,
   "w": 1296,
@@ -83,9 +83,9 @@
  "stock": {
   "file": "training/videos/10-stock.mp4",
   "poster": "training/videos/10-stock.jpg",
-  "v": "202611250729",
+  "v": "202611252101",
   "voice": "bm_george",
-  "seconds": 94,
+  "seconds": 98,
   "w": 1296,
   "h": 3072
  },

@@ -376,6 +376,7 @@ body.pilot.on-quote .toast{bottom:150px}
 .review-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:12px}
 .review-card h3{font-size:12px;font-weight:600;color:var(--text-mid);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
 .review-text{font-size:13px;color:var(--text);line-height:1.6;white-space:pre-wrap}
+.review-text .rv-h{display:inline-block;font-size:14px;margin-top:4px}
 .order-summary-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-mid)}
 .badge-order{background:var(--red-lt);color:var(--red);font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px}
 .send-btn{width:100%;padding:12px;border-radius:var(--radius-sm);background:var(--btn-bg);color:var(--btn-text);border:none;font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
@@ -2559,6 +2560,13 @@ function renderStock() {
 function setOnHand(code, val) { onHand[code] = val==='' ? '' : Math.max(0, parseInt(val)||0); renderStock(); }
 
 // ── REVIEW ────────────────────────────────────────────────────────────────────
+// Old Mate's order review comes back with markdown marks (##, **, ---): show headings and bold as such, drop the rest.
+function reviewHtml(t) {
+  return String(t).split('\n').filter(l => !/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(l)).map(l => {
+    const h = l.match(/^\s*#{1,6}\s+(.*)$/), body = esc(h ? h[1] : l).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+    return h ? '<b class="rv-h">' + body.replace(/<\/?b>/g, '') + '</b>' : body;
+  }).join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
 async function runStockReview() {
   const items = orderItems();
   if (!items.length) { showToast('Count your stock first'); return; }
@@ -2568,7 +2576,7 @@ async function runStockReview() {
   try {
     const res = await fetch(PROXY+'/ai-review', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderItems:items})});
     const data = await res.json();
-    wrap.innerHTML = `<div class="review-card"><h3>Order — ${items.length} lines</h3>${items.map(i=>`<div class="order-summary-row"><span>${esc(i.name)}</span><span class="badge-order">ORDER ${i.toOrder}</span></div>`).join('')}</div><div class="review-card"><h3>AI Review</h3><div class="review-text">${esc(data.review||data.error||'No response.')}</div></div><button class="send-btn" id="send-btn" onclick="sendOrder()">📤 Send to ServiceM8</button><div id="send-status"></div>`;
+    wrap.innerHTML = `<div class="review-card"><h3>Order — ${items.length} lines</h3>${items.map(i=>`<div class="order-summary-row"><span>${esc(i.name)}</span><span class="badge-order">ORDER ${i.toOrder}</span></div>`).join('')}</div><div class="review-card"><h3>AI Review</h3><div class="review-text">${reviewHtml(data.review||data.error||'No response.')}</div></div><button class="send-btn" id="send-btn" onclick="sendOrder()">📤 Send to ServiceM8</button><div id="send-status"></div>`;
   } catch(e) { wrap.innerHTML += '<div class="status-msg error">Could not reach server.</div>'; }
 }
 async function sendOrder() {
@@ -2960,13 +2968,14 @@ async function sendQuoteToSM8() {
     const res=await fetch(PROXY+'/send-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quoteItems:quote.map(i=>({name:i.name,qty:i.qty,price:i.price,cost:quoteLineCost(i),code:i.code||'',type:i.type||'reece',uuid:i.type==='bundle'?i.id:'',...(i.type==='labour'?{lineKind:lineKindOf(i)}:{})})),totalInc,jobNumber,...(jobDescription?{jobDescription}:{}),...(invoiceDescription?{invoiceDescription}:{}),...(diaryNote?{diaryNote}:{})})});
     const data=await res.json();
     if(res.ok&&data.success){
-      showToast('✅ Quote sent to ServiceM8!');
+      showToast(data.practice ? '🎓 Practice only, nothing was sent' : '✅ Quote sent to ServiceM8!');
       if (typeof qdMark === 'function') qdMark('sentAt');
       if (typeof vrAfterSend === 'function') vrAfterSend('sm8');
       const banner=document.createElement('div');
       banner.style.cssText='padding:10px 14px;background:rgba(74,222,128,.1);font-size:12px;color:#16a34a;text-align:center;border-bottom:1px solid rgba(74,222,128,.2)';
+      if (data.practice) banner.style.cssText='margin:8px 0;padding:12px 14px;background:#fff;border:2px solid #15803d;border-radius:10px;font-size:14px;font-weight:600;line-height:1.4;color:#14532d;text-align:center';
       const names={jobDescription:'Job description',invoiceDescription:'Invoice description',diaryNote:'Diary note'}, tx=data.texts||{};
-      banner.textContent='✅ '+data.message+Object.keys(names).filter(k=>tx[k]).map(k=>' '+(tx[k].result==='saved'?'✓ '+names[k]+' saved'+(tx[k].replaced?' (old text archived)':''):'⚠ '+names[k]+' NOT saved — add it in ServiceM8')+'.').join('');
+      banner.textContent=(data.practice?'🎓 ':'✅ ')+data.message+Object.keys(names).filter(k=>tx[k]).map(k=>' '+(tx[k].result==='saved'?'✓ '+names[k]+' saved'+(tx[k].replaced?' (old text archived)':''):'⚠ '+names[k]+' NOT saved — add it in ServiceM8')+'.').join('');
       document.getElementById('quote-list').prepend(banner);
     } else showToast('❌ '+(data.error||'Could not send'));
   } catch(e){showToast('❌ Could not reach server');}
@@ -6100,7 +6109,7 @@ function trPracticeOn() { const k = trPracticeKey(); if (!k || !PILOT_UI) return
     if (path === '/ai-ask') setTimeout(() => trAuto('ask'), 0);
     if (method !== 'GET' && trPracticeOn()) {
       if (path === '/send-quote') { let n = 0; try { n = JSON.parse(init.body).quoteItems.length; } catch (e) {} setTimeout(() => trAuto('sent'), 0);
-        return reply({ success: true, practice: true, message: `PRACTICE: nothing was sent to ServiceM8. On a real job this adds ${n} line${n === 1 ? '' : 's'} to the job.` }); }
+        return reply({ success: true, practice: true, message: `Practice only, nothing was sent. On a real job this adds ${n} line${n === 1 ? '' : 's'} to the job.` }); }
       if (path === '/send-order') { setTimeout(() => trAuto('order'), 0); return reply({ success: true, practice: true, message: 'PRACTICE: nothing was sent. On a real day the order goes to ServiceM8 for the office.' }); }
       if (path && (/^\/quote-versions\//.test(path) || path === '/ai-feedback')) return reply({ ok: true, practice: true });
       if (path === '/client-quote') { try { const b = JSON.parse(init.body); b.practice = true; b.jobNumber = '7600'; init = { ...init, body: JSON.stringify(b) }; } catch (e) {}
