@@ -202,6 +202,27 @@ body.pilot input:not([type=checkbox]):not([type=radio]):not([type=range]):not([t
 .cq-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .cq-row button{min-width:44px;min-height:40px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:600 14px var(--font);cursor:pointer}
 .cq-row .cq-st{font-size:12px;font-weight:700;margin-left:auto}
+/* PHOTO_MARKUP=on: full-screen markup editor */
+#mk{position:fixed;inset:0;z-index:3000;background:#111;display:flex;flex-direction:column;color:#fff;touch-action:none;-webkit-user-select:none;user-select:none}
+#mk[hidden]{display:none}
+body.mk-open{overflow:hidden}
+.mk-top{display:flex;align-items:center;gap:8px;padding:calc(6px + env(safe-area-inset-top)) 10px 6px}
+.mk-title{flex:1;text-align:center;font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mk-b{min-height:44px;min-width:44px;padding:0 12px;border-radius:10px;border:1px solid #444;background:#222;color:#fff;font:600 14px var(--font);cursor:pointer}
+.mk-b:disabled{opacity:.4}
+.mk-save{background:#16a34a;border-color:#16a34a}
+.mk-wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:4px}
+#mk-c{touch-action:none;display:block;background:#000;max-width:100%;max-height:100%}
+.mk-hint{font-size:12px;color:#ccc;text-align:center;padding:4px 12px;min-height:22px}
+.mk-bar{padding:6px 8px calc(8px + env(safe-area-inset-bottom));background:#1a1a1a;display:flex;flex-direction:column;gap:6px}
+.mk-tools{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}.mk-tools::before,.mk-tools::after{content:"";margin:auto}
+.mk-tool{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:56px;min-height:52px;border-radius:10px;border:1px solid #444;background:#222;color:#fff;font:600 18px var(--font);cursor:pointer;padding:2px 6px}
+.mk-tool small{font-size:10px;font-weight:600;color:#bbb}
+.mk-tool.on{background:#2563eb;border-color:#2563eb}.mk-tool.on small{color:#fff}
+.mk-colors{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+.mk-col{width:36px;height:36px;border-radius:50%;border:2px solid #555;cursor:pointer;padding:0}
+.mk-col.on{outline:3px solid #fff;outline-offset:2px}
+.mk-del{margin-left:8px}
 .cq-st.ok{color:#16a34a}.cq-st.bad{color:#dc2626}.cq-st.wait{color:var(--text-mid)}
 .cq-mock{font-size:12px;color:#b45309}
 .cq-jobpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px}
@@ -5767,6 +5788,7 @@ async function cqRender() {
     + (r.attach && !keys.has(r.attach) ? '<div class="cq-mock">That line was removed — this shows with the whole quote.</div>' : '')
     + (r.kind === 'mockup' ? '<div class="cq-mock">Client sees: "Mock-up. For illustration only, final layout may vary."</div>' : '')
     + '<div class="cq-row"><button type="button" data-cqmove="-1" aria-label="Move up"' + (i ? '' : ' disabled') + '>↑</button><button type="button" data-cqmove="1" aria-label="Move down"' + (i < recs.length - 1 ? '' : ' disabled') + '>↓</button>'
+    + (mkOn() ? '<button type="button" data-cqmark aria-label="Mark up this picture">✏️ Mark up</button>' : '')
     + '<button type="button" data-cqdel aria-label="Remove">✕</button>' + st(r) + '</div></div></div>').join('');
 }
 
@@ -5937,6 +5959,227 @@ document.addEventListener('click', async e => {
   if (del) { if (!confirm('Remove this picture from the quote?')) return; await cqDel(recs[i].clientId); return cqRender(); }
   const j = i + Number(mv.dataset.cqmove); if (j < 0 || j >= recs.length) return;
   const a = recs[i], b = recs[j], t = a.order; a.order = b.order; b.order = t; cqCapFromScreen(a); cqCapFromScreen(b); await cqPut(a); await cqPut(b); cqRender();
+});
+
+// ── PHOTO MARKUP (PHOTO_MARKUP=on, logged in) ────────────────────────────────
+// Draw on a client-quote photo: text, circles, squares, arrows, lines (6 colours), measure (set the scale from a
+// known length, then other lines show their length), and drop in a product picture (PNG with a clear background).
+// Everything is movable/resizable by finger or stylus (pointer events), with undo. Save adds a marked-up COPY to
+// the quote's pictures (the original is kept); it uploads and attaches like any other picture. Nothing goes to ServiceM8.
+const MK_COLORS = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#ffffff', '#111111'];
+const MK_TOOLS = [['text', 'T', 'Text'], ['circle', '◯', 'Circle'], ['rect', '▢', 'Square'], ['arrow', '➚', 'Arrow'], ['line', '╱', 'Line'], ['measure', '📏', 'Measure'], ['product', '🛋️', 'Product']];
+let mk = null;
+function mkOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.markup); }
+function mkEl() {
+  let el = document.getElementById('mk'); if (el) return el;
+  el = document.createElement('div'); el.id = 'mk'; el.hidden = true;
+  el.innerHTML = '<div class="mk-top"><button type="button" class="mk-b" data-mk="cancel">Cancel</button><span class="mk-title">Mark up photo</span><button type="button" class="mk-b" data-mk="undo" aria-label="Undo">↶ Undo</button><button type="button" class="mk-b mk-save" data-mk="save">Save</button></div>'
+    + '<div class="mk-wrap"><canvas id="mk-c"></canvas></div>'
+    + '<div class="mk-hint" id="mk-hint"></div>'
+    + '<div class="mk-bar"><div class="mk-tools">' + MK_TOOLS.map(t => '<button type="button" class="mk-tool" data-mktool="' + t[0] + '"><span>' + t[1] + '</span><small>' + t[2] + '</small></button>').join('') + '</div>'
+    + '<div class="mk-colors">' + MK_COLORS.map(c => '<button type="button" class="mk-col" data-mkcol="' + c + '" style="background:' + c + '" aria-label="Colour"></button>').join('') + '<button type="button" class="mk-b mk-del" data-mk="del" disabled>🗑 Delete</button></div></div>'
+    + '<input type="file" id="mk-prod" accept="image/*" hidden>';
+  document.body.appendChild(el);
+  const c = el.querySelector('#mk-c');
+  c.addEventListener('pointerdown', mkDown); c.addEventListener('pointermove', mkMove); c.addEventListener('pointerup', mkUp); c.addEventListener('pointercancel', mkUp);
+  el.addEventListener('click', mkClick);
+  el.querySelector('#mk-prod').addEventListener('change', mkProduct);
+  window.addEventListener('resize', () => { if (mk) mkFit(); });
+  return el;
+}
+async function mkOpen(rec) {
+  const el = mkEl();
+  let src = rec.image;
+  if (!src && rec.serverId) {   // uploaded already: the phone keeps only the small copy, so fetch the full one from our server
+    try { const l = await authFetch('/client-quote/images/' + encodeURIComponent(rec.serverId) + '/link'); const b = await (await fetch(PROXY + l.full)).blob(); src = await new Promise(ok => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(b); }); }
+    catch (e) { showToast('Could not open the full picture: ' + e.message); return; }
+  }
+  if (!src) { showToast('This picture is not on the phone any more. Add it again to mark it up.'); return; }
+  const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error('Could not open that picture')); i.src = src; }).catch(e => { showToast(e.message); return null; });
+  if (!img) return;
+  const W = img.naturalWidth, H = img.naturalHeight;
+  mk = { rec, img, W, H, objs: [], sel: -1, tool: 'arrow', color: MK_COLORS[0], hist: [], imgs: {}, lw: Math.max(4, Math.round(Math.max(W, H) / 180)), drag: null };
+  const c = el.querySelector('#mk-c'); c.width = W; c.height = H;
+  el.hidden = false; document.body.classList.add('mk-open');
+  mkTool('arrow'); mkFit(); mkDraw();
+}
+function mkClose() { const el = document.getElementById('mk'); if (el) el.hidden = true; document.body.classList.remove('mk-open'); mk = null; }
+function mkFit() {
+  const el = document.getElementById('mk'), wrap = el.querySelector('.mk-wrap'), c = el.querySelector('#mk-c');
+  const k = Math.min(wrap.clientWidth / mk.W, wrap.clientHeight / mk.H);
+  c.style.width = Math.floor(mk.W * k) + 'px'; c.style.height = Math.floor(mk.H * k) + 'px';
+}
+function mkHint() {
+  const h = document.getElementById('mk-hint'); if (!h || !mk) return;
+  const ref = mk.objs.find(o => o.ref);
+  h.textContent = mk.tool === 'measure' ? (ref ? 'Drag along anything to measure it. Scale set from the ' + mkFmt(ref.mm) + ' line.' : 'Drag along something you know the length of (e.g. a door or tile). You\'ll type its length.')
+    : mk.tool === 'text' ? 'Tap where the text goes.' : mk.tool === 'product' ? 'Pick a product picture (a PNG with a clear background works best).'
+    : 'Drag to draw. Tap a mark to move it; drag its dots to resize.';
+}
+function mkTool(t) {
+  if (!mk) return; mk.tool = t;
+  document.querySelectorAll('#mk [data-mktool]').forEach(b => b.classList.toggle('on', b.dataset.mktool === t));
+  document.querySelectorAll('#mk [data-mkcol]').forEach(b => b.classList.toggle('on', b.dataset.mkcol === mk.color));
+  mkHint();
+  if (t === 'product') document.getElementById('mk-prod').click();
+}
+const mkSnap = () => JSON.stringify(mk.objs);
+function mkPush(before) { mk.hist.push(before); if (mk.hist.length > 60) mk.hist.shift(); }
+function mkPos(e) { const r = e.target.getBoundingClientRect(); return { x: (e.clientX - r.left) * mk.W / r.width, y: (e.clientY - r.top) * mk.H / r.height, k: mk.W / r.width }; }
+const mkLen = o => Math.hypot(o.x2 - o.x1, o.y2 - o.y1);
+function mkScale() { const r = mk.objs.find(o => o.ref); return r && mkLen(r) > 0 ? r.mm / mkLen(r) : null; }
+function mkFmt(mm) { return mm >= 1000 ? (mm / 1000).toFixed(mm >= 10000 ? 1 : 2) + ' m' : Math.round(mm) + ' mm'; }
+function mkBox(o) {
+  if (o.t === 'text') { const g = document.getElementById('mk-c').getContext('2d'); g.font = 'bold ' + o.s + 'px ' + 'DM Sans, -apple-system, sans-serif'; const w = Math.max(...o.text.split('\n').map(l => g.measureText(l).width)); return { x: o.x, y: o.y, w, h: o.s * 1.2 * o.text.split('\n').length }; }
+  if (o.t === 'img') return { x: o.x, y: o.y, w: o.w, h: o.h };
+  return { x: Math.min(o.x1, o.x2), y: Math.min(o.y1, o.y2), w: Math.abs(o.x2 - o.x1), h: Math.abs(o.y2 - o.y1) };
+}
+const MK_LINES = ['line', 'arrow', 'measure'];
+function mkHandles(o) {
+  if (MK_LINES.includes(o.t)) return [[o.x1, o.y1], [o.x2, o.y2]];
+  const b = mkBox(o);
+  if (o.t === 'text' || o.t === 'img') return [[b.x + b.w, b.y + b.h]];
+  return [[b.x, b.y], [b.x + b.w, b.y], [b.x, b.y + b.h], [b.x + b.w, b.y + b.h]];
+}
+function mkSegDist(p, o) { const dx = o.x2 - o.x1, dy = o.y2 - o.y1, L = dx * dx + dy * dy; let t = L ? ((p.x - o.x1) * dx + (p.y - o.y1) * dy) / L : 0; t = Math.max(0, Math.min(1, t)); return Math.hypot(p.x - (o.x1 + t * dx), p.y - (o.y1 + t * dy)); }
+function mkHit(o, p, tol) {
+  if (MK_LINES.includes(o.t)) return mkSegDist(p, o) <= tol;
+  const b = mkBox(o);
+  if (o.t === 'text' || o.t === 'img') return p.x >= b.x - tol / 2 && p.x <= b.x + b.w + tol / 2 && p.y >= b.y - tol / 2 && p.y <= b.y + b.h + tol / 2;
+  if (o.t === 'rect') { const inX = p.x >= b.x - tol && p.x <= b.x + b.w + tol, inY = p.y >= b.y - tol && p.y <= b.y + b.h + tol;
+    return inX && inY && (Math.abs(p.x - b.x) <= tol || Math.abs(p.x - b.x - b.w) <= tol || Math.abs(p.y - b.y) <= tol || Math.abs(p.y - b.y - b.h) <= tol); }
+  const rx = b.w / 2, ry = b.h / 2; if (rx < 1 || ry < 1) return Math.hypot(p.x - b.x, p.y - b.y) <= tol;
+  const r = Math.hypot((p.x - b.x - rx) / rx, (p.y - b.y - ry) / ry); return Math.abs(r - 1) * Math.min(rx, ry) <= tol;
+}
+function mkDown(e) {
+  if (!mk) return; e.preventDefault(); e.target.setPointerCapture(e.pointerId);
+  const p = mkPos(e), tol = 22 * p.k, before = mkSnap();
+  if (mk.sel >= 0) {
+    const hs = mkHandles(mk.objs[mk.sel]), hi = hs.findIndex(h => Math.hypot(h[0] - p.x, h[1] - p.y) <= tol);
+    if (hi >= 0) { mk.drag = { mode: 'resize', hi, p, before, o0: JSON.parse(JSON.stringify(mk.objs[mk.sel])) }; return; }
+  }
+  for (let i = mk.objs.length - 1; i >= 0; i--) if (mkHit(mk.objs[i], p, tol)) {
+    const was = mk.sel === i; mk.sel = i; mk.drag = { mode: 'move', p, last: p, before, was, moved: false }; mkSel(); mkDraw(); return;
+  }
+  mk.sel = -1; mkSel();
+  if (mk.tool === 'text') {
+    const t = (prompt('Text to show on the photo:') || '').trim().slice(0, 200);
+    if (t) { mkPush(before); mk.objs.push({ t: 'text', x: p.x, y: p.y, s: Math.round(Math.max(mk.W, mk.H) / 28), text: t, c: mk.color }); mk.sel = mk.objs.length - 1; mkSel(); }
+    mkDraw(); return;
+  }
+  if (mk.tool === 'product') { mkDraw(); return; }
+  mk.objs.push({ t: mk.tool, x1: p.x, y1: p.y, x2: p.x, y2: p.y, c: mk.color, w: mk.lw });
+  mk.sel = mk.objs.length - 1; mk.drag = { mode: 'create', p, before, tol }; mkDraw();
+}
+function mkMove(e) {
+  if (!mk || !mk.drag) return; e.preventDefault();
+  const p = mkPos(e), d = mk.drag, o = mk.objs[mk.sel]; if (!o) return;
+  if (d.mode === 'create') { o.x2 = p.x; o.y2 = p.y; }
+  else if (d.mode === 'move') {
+    const dx = p.x - d.last.x, dy = p.y - d.last.y; d.last = p; if (Math.hypot(p.x - d.p.x, p.y - d.p.y) > 4 * (mk.W / e.target.getBoundingClientRect().width)) d.moved = true;
+    if ('x1' in o) { o.x1 += dx; o.x2 += dx; o.y1 += dy; o.y2 += dy; } else { o.x += dx; o.y += dy; }
+  } else if (d.mode === 'resize') {
+    const o0 = d.o0;
+    if (MK_LINES.includes(o.t)) { if (d.hi === 0) { o.x1 = p.x; o.y1 = p.y; } else { o.x2 = p.x; o.y2 = p.y; } }
+    else if (o.t === 'text') { const b = mkBox(o0); o.s = Math.max(10, Math.round(o0.s * Math.max(0.15, (p.y - o0.y) / Math.max(1, b.h)))); }
+    else if (o.t === 'img') { const w = Math.max(20, p.x - o0.x); o.w = w; o.h = w * o0.h / o0.w; }
+    else { const b = mkBox(o0), fx = d.hi % 2 ? b.x : b.x + b.w, fy = d.hi > 1 ? b.y : b.y + b.h; o.x1 = fx; o.y1 = fy; o.x2 = p.x; o.y2 = p.y; }
+  }
+  mkDraw();
+}
+function mkUp(e) {
+  if (!mk || !mk.drag) return;
+  const d = mk.drag, o = mk.objs[mk.sel]; mk.drag = null;
+  if (d.mode === 'create') {
+    if (mkLen(o) < d.tol * 0.6) { mk.objs.pop(); mk.sel = -1; mkSel(); mkDraw(); return; }
+    if (o.t === 'measure' && !mk.objs.some(x => x.ref)) {
+      const v = parseFloat(String(prompt('How long is this in real life, in mm?\n(e.g. 820 for a standard door, 600 for a 600 mm vanity)') || '').replace(/[^\d.]/g, ''));
+      if (!(v > 0 && v < 1e6)) { mk.objs.pop(); mk.sel = -1; mkSel(); mkDraw(); showToast('Measuring needs one known length first'); return; }
+      o.ref = true; o.mm = v; mkHint();
+    }
+    mkPush(d.before);
+  } else if (d.mode === 'move' && !d.moved) {
+    if (d.was && o && o.t === 'text') { const t = (prompt('Change the text:', o.text) || '').trim().slice(0, 200); if (t && t !== o.text) { mkPush(d.before); o.text = t; } }
+    else if (d.was && o && o.ref) { const v = parseFloat(String(prompt('Known length of this line, in mm:', String(o.mm)) || '').replace(/[^\d.]/g, '')); if (v > 0 && v < 1e6 && v !== o.mm) { mkPush(d.before); o.mm = v; mkHint(); } }
+  } else if (d.before !== mkSnap()) mkPush(d.before);
+  mkSel(); mkDraw();
+}
+function mkSel() { const b = document.querySelector('#mk [data-mk="del"]'); if (b) b.disabled = !(mk && mk.sel >= 0); }
+function mkArrowHead(g, o) { const a = Math.atan2(o.y2 - o.y1, o.x2 - o.x1), L = o.w * 5; g.beginPath(); g.moveTo(o.x2, o.y2); g.lineTo(o.x2 - L * Math.cos(a - 0.45), o.y2 - L * Math.sin(a - 0.45)); g.lineTo(o.x2 - L * Math.cos(a + 0.45), o.y2 - L * Math.sin(a + 0.45)); g.closePath(); g.fill(); }
+function mkDraw(final) {
+  if (!mk) return;
+  const c = document.getElementById('mk-c'), g = c.getContext('2d'), sc = mkScale();
+  g.clearRect(0, 0, mk.W, mk.H); g.drawImage(mk.img, 0, 0, mk.W, mk.H);
+  for (const o of mk.objs) {
+    g.save(); g.strokeStyle = g.fillStyle = o.c; g.lineCap = g.lineJoin = 'round';
+    if (o.t === 'img') { const im = mk.imgs[o.src]; if (im) g.drawImage(im, o.x, o.y, o.w, o.h); }
+    else if (o.t === 'text') {
+      g.font = 'bold ' + o.s + 'px DM Sans, -apple-system, sans-serif'; g.textBaseline = 'top'; g.lineWidth = Math.max(2, o.s / 7);
+      g.strokeStyle = o.c === '#111111' ? '#ffffff' : 'rgba(0,0,0,.75)';
+      o.text.split('\n').forEach((l, i) => { g.strokeText(l, o.x, o.y + i * o.s * 1.2); g.fillText(l, o.x, o.y + i * o.s * 1.2); });
+    } else {
+      g.lineWidth = o.w; g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = o.w;
+      if (o.t === 'rect') { const b = mkBox(o); g.strokeRect(b.x, b.y, b.w, b.h); }
+      else if (o.t === 'circle') { const b = mkBox(o); g.beginPath(); g.ellipse(b.x + b.w / 2, b.y + b.h / 2, Math.max(1, b.w / 2), Math.max(1, b.h / 2), 0, 0, Math.PI * 2); g.stroke(); }
+      else { g.beginPath(); g.moveTo(o.x1, o.y1); g.lineTo(o.x2, o.y2); g.stroke(); if (o.t === 'arrow') mkArrowHead(g, o); }
+      if (o.t === 'measure') {
+        const a = Math.atan2(o.y2 - o.y1, o.x2 - o.x1), T = o.w * 3;
+        for (const [x, y] of [[o.x1, o.y1], [o.x2, o.y2]]) { g.beginPath(); g.moveTo(x - T * Math.sin(a), y + T * Math.cos(a)); g.lineTo(x + T * Math.sin(a), y - T * Math.cos(a)); g.stroke(); }
+        const label = o.ref ? mkFmt(o.mm) : sc ? mkFmt(mkLen(o) * sc) : '?';
+        const fs = Math.round(Math.max(mk.W, mk.H) / 40); g.shadowBlur = 0; g.font = 'bold ' + fs + 'px DM Sans, -apple-system, sans-serif';
+        const tw = g.measureText(label).width, mx = (o.x1 + o.x2) / 2, my = (o.y1 + o.y2) / 2;
+        g.fillStyle = 'rgba(0,0,0,.7)'; g.fillRect(mx - tw / 2 - fs * 0.3, my - fs * 0.75, tw + fs * 0.6, fs * 1.5);
+        g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(label, mx, my);
+      }
+    }
+    g.restore();
+  }
+  if (!final && mk.sel >= 0 && mk.objs[mk.sel]) {
+    const o = mk.objs[mk.sel], k = mk.W / (c.getBoundingClientRect().width || mk.W);
+    g.save(); g.lineWidth = 2 * k; g.setLineDash([6 * k, 5 * k]); g.strokeStyle = '#fff';
+    if (!MK_LINES.includes(o.t)) { const b = mkBox(o); g.strokeRect(b.x - 4 * k, b.y - 4 * k, b.w + 8 * k, b.h + 8 * k); }
+    g.setLineDash([]);
+    for (const [x, y] of mkHandles(o)) { g.beginPath(); g.arc(x, y, 11 * k, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 3 * k; g.strokeStyle = '#2563eb'; g.stroke(); }
+    g.restore();
+  }
+}
+async function mkProduct(e) {
+  const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f || !mk) return;
+  const url = await new Promise(ok => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.onerror = () => ok(''); fr.readAsDataURL(f); });
+  const im = url && await new Promise(ok => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = url; });
+  if (!im) return showToast('Could not open that picture');
+  const id = 'p' + Date.now(); mk.imgs[id] = im;
+  const w = mk.W * 0.35, h = w * im.naturalHeight / im.naturalWidth;
+  mkPush(mkSnap()); mk.objs.push({ t: 'img', src: id, x: (mk.W - w) / 2, y: (mk.H - h) / 2, w, h }); mk.sel = mk.objs.length - 1;
+  mk.tool = 'arrow'; mkTool('arrow'); mkSel(); mkDraw(); showToast('Drag the picture into place; drag its dot to resize');
+}
+async function mkClick(e) {
+  if (!mk) return;
+  const t = e.target.closest('[data-mktool]'); if (t) { mk.sel = -1; mkSel(); mkDraw(); return mkTool(t.dataset.mktool); }
+  const col = e.target.closest('[data-mkcol]');
+  if (col) { mk.color = col.dataset.mkcol; const o = mk.objs[mk.sel]; if (o && o.t !== 'img') { mkPush(mkSnap()); o.c = mk.color; } mkTool(mk.tool === 'product' ? 'arrow' : mk.tool); mkDraw(); return; }
+  const b = e.target.closest('[data-mk]'); if (!b) return;
+  const a = b.dataset.mk;
+  if (a === 'undo') { if (!mk.hist.length) return showToast('Nothing to undo'); mk.objs = JSON.parse(mk.hist.pop()); mk.sel = -1; mkSel(); mkHint(); mkDraw(); return; }
+  if (a === 'del') { if (mk.sel < 0) return; mkPush(mkSnap()); mk.objs.splice(mk.sel, 1); mk.sel = -1; mkSel(); mkHint(); mkDraw(); return; }
+  if (a === 'cancel') { if (mk.objs.length && !confirm('Close without saving the markup?')) return; return mkClose(); }
+  if (a === 'save') {
+    if (!mk.objs.length) return showToast('Draw something first, or tap Cancel');
+    const rec = mk.rec, job = rec.jobNumber, mine = await cqForJob(job);
+    if (mine.length >= CQ_MAX) return showToast('Up to ' + CQ_MAX + ' photos and mock-ups per quote. Remove one first.');
+    mk.sel = -1; mkDraw(true);
+    const c = document.getElementById('mk-c'), image = c.toDataURL('image/jpeg', 0.85);
+    const t = document.createElement('canvas'), k = Math.min(1, 480 / Math.max(mk.W, mk.H)); t.width = Math.round(mk.W * k); t.height = Math.round(mk.H * k);
+    t.getContext('2d').drawImage(c, 0, 0, t.width, t.height);
+    const later = mine.filter(r => r.order > rec.order).map(r => r.order), next = later.length ? Math.min(...later) : rec.order + 1;
+    await cqPut({ clientId: sUuid(), jobNumber: job, kind: rec.kind, caption: ((rec.caption || '').trim() ? rec.caption.trim().slice(0, 280) + ' (marked up)' : 'Marked up'), attach: rec.attach || '', order: (rec.order + next) / 2, image, thumb: t.toDataURL('image/jpeg', 0.7), status: 'waiting', at: Date.now(), markedUp: true });
+    mkClose(); cqRender(); cqUploadLoop(); showToast('Marked-up copy added to the quote. The original is kept.');
+  }
+}
+document.addEventListener('click', async e => {
+  const b = e.target.closest && e.target.closest('[data-cqmark]'); if (!b || !mkOn()) return;
+  const item = b.closest('[data-cq]'), r = item && (await cqAll()).find(x => x.clientId === item.dataset.cq);
+  if (r) mkOpen(r);
 });
 
 function setupQuoteNotes() {
