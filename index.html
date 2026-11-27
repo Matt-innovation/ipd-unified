@@ -202,6 +202,17 @@ body.pilot input:not([type=checkbox]):not([type=radio]):not([type=range]):not([t
 .cq-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .cq-row button{min-width:44px;min-height:40px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:600 14px var(--font);cursor:pointer}
 .cq-row .cq-st{font-size:12px;font-weight:700;margin-left:auto}
+/* SHOWPIECE=on: offer the product photo/spec sheet link */
+#sp-offer{position:fixed;left:0;right:0;bottom:0;z-index:2500;padding:12px 12px calc(12px + env(safe-area-inset-bottom));display:flex;justify-content:center;pointer-events:none}
+#sp-offer[hidden]{display:none}
+.sp-card{pointer-events:auto;width:100%;max-width:520px;background:var(--surface);color:var(--text);border:2px solid var(--orange);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.35);padding:14px 16px}
+.sp-h{font-size:16px;font-weight:800}
+.sp-name{font-size:14px;font-weight:600;margin-top:6px;overflow-wrap:anywhere}
+.sp-sub{font-size:13px;color:var(--text-mid);margin-top:4px;line-height:1.4}
+.sp-btns{display:flex;gap:8px;margin-top:12px}
+.sp-btns button{flex:1;min-height:46px;border-radius:12px;font:700 15px var(--font);cursor:pointer;border:1px solid var(--border2)}
+.sp-yes{background:#111;color:#fff;border-color:#111!important}
+.sp-no{background:var(--surface2);color:var(--text)}
 /* PHOTO_MARKUP=on: full-screen markup editor */
 #mk{position:fixed;inset:0;z-index:3000;background:#111;display:flex;flex-direction:column;color:#fff;touch-action:none;-webkit-user-select:none;user-select:none}
 #mk[hidden]{display:none}
@@ -2871,6 +2882,7 @@ function chQty(id, delta) {
 function clearQuote() { if (typeof qdStash === 'function') qdStash('cleared'); quote=[]; quoteJobType=null; quoteDiscountPct=0; document.querySelectorAll('[data-qtext]').forEach(t=>{t.value='';try{localStorage.removeItem(t.dataset.qtext)}catch(e){}}); const qd=document.getElementById('qd-custom'); if(qd) qd.value=''; updateQuoteUI(); renderQuote(); renderQResults(); }
 function updateQuoteUI() {
   syncDiscountLine();
+  if (typeof spCheck === 'function') setTimeout(spCheck, 0);
   const count = quote.reduce((s,i)=>s+i.qty,0);
   const badge = document.getElementById('quote-badge');
   const pill = document.getElementById('quote-pill');
@@ -6180,6 +6192,41 @@ document.addEventListener('click', async e => {
   const b = e.target.closest && e.target.closest('[data-cqmark]'); if (!b || !mkOn()) return;
   const item = b.closest('[data-cq]'), r = item && (await cqAll()).find(x => x.clientId === item.dataset.cq);
   if (r) mkOpen(r);
+});
+
+// ── SHOWPIECE PRODUCTS (SHOWPIECE=on, logged in, client quotes and product links on) ──────────
+// When a showpiece Reece product (toilet, tapware, basin, hot water, shower, vanity …; the server marks them by
+// showpiece-rule.json) goes on the quote, offer once to attach a link to its Reece product page, which shows the photo
+// and the spec sheet, to that line on the client quote page. We link only: no copies of Reece's photos or files.
+function spOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.showpiece && cqFeat.productLinks); }
+function spUrl(code) { return 'https://www.reece.com.au/product/x-' + encodeURIComponent(String(code).replace(/^REC/i, '').replace(/-\d+$/, '')); }
+let spBusy = false;
+function spCheck() {
+  if (!spOn() || spBusy) return;
+  const it = quote.find(i => i.type === 'reece' && !i.spAsked && reeceCache[i.code] && reeceCache[i.code].showpiece);
+  if (!it) return;
+  it.spAsked = true; spBusy = true;
+  let el = document.getElementById('sp-offer');
+  if (!el) { el = document.createElement('div'); el.id = 'sp-offer'; document.body.appendChild(el); }
+  el.innerHTML = '<div class="sp-card" role="dialog" aria-label="Add product photo and spec sheet"><div class="sp-h">📸 Show the client this product?</div>'
+    + '<div class="sp-name">' + escHtml(it.name) + '</div>'
+    + '<div class="sp-sub">Adds a link on the client quote page to its Reece product page, with the photo and specification sheet.</div>'
+    + '<div class="sp-btns"><button type="button" class="sp-yes" data-sp="yes">Add photo &amp; spec sheet</button><button type="button" class="sp-no" data-sp="no">No thanks</button></div></div>';
+  el.dataset.id = it.id; el.hidden = false;
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-sp]'); if (!b) return;
+  const el = document.getElementById('sp-offer'), it = quote.find(i => i.id === el.dataset.id);
+  el.hidden = true; spBusy = false;
+  if (b.dataset.sp === 'yes' && it) {
+    const url = spUrl(it.code);
+    it.links = it.links || [];
+    if (it.links.length >= PL_LINE) showToast('This line already has ' + PL_LINE + ' links');
+    else if (quote.reduce((t, i) => t + (i.links || []).length, 0) >= PL_QUOTE) showToast('Up to ' + PL_QUOTE + ' product links per quote');
+    else if (!it.links.some(k => k.url === url)) { it.links.push({ source: 'manual', url, title: 'Product photo and specification sheet', type: 'Product information', site: 'reece.com.au' }); showToast('Added: the client sees the product photo and spec sheet link on this line'); }
+    if (typeof renderQuote === 'function') renderQuote();
+  }
+  setTimeout(spCheck, 300);
 });
 
 function setupQuoteNotes() {
