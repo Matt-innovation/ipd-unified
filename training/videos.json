@@ -1,0 +1,128 @@
+{
+ "login": {
+  "file": "training/videos/01-login.mp4",
+  "poster": "training/videos/01-login.jpg",
+  "v": "202611250653",
+  "voice": "bm_george",
+  "seconds": 180,
+  "w": 1296,
+  "h": 3072
+ },
+ "search": {
+  "file": "training/videos/02-search.mp4",
+  "poster": "training/videos/02-search.jpg",
+  "v": "202611250702",
+  "voice": "bm_george",
+  "seconds": 124,
+  "w": 1296,
+  "h": 3072
+ },
+ "labour": {
+  "file": "training/videos/03-labour.mp4",
+  "poster": "training/videos/03-labour.jpg",
+  "v": "202611250707",
+  "voice": "bm_george",
+  "seconds": 134,
+  "w": 1296,
+  "h": 3072
+ },
+ "quote": {
+  "file": "training/videos/04-quote.mp4",
+  "poster": "training/videos/04-quote.jpg",
+  "v": "202611250711",
+  "voice": "bm_george",
+  "seconds": 122,
+  "w": 1296,
+  "h": 3072
+ },
+ "send": {
+  "file": "training/videos/05-send.mp4",
+  "poster": "training/videos/05-send.jpg",
+  "v": "202611252103",
+  "voice": "bm_george",
+  "seconds": 81,
+  "w": 1296,
+  "h": 3072
+ },
+ "client": {
+  "file": "training/videos/06-client.mp4",
+  "poster": "training/videos/06-client.jpg",
+  "v": "202611250717",
+  "voice": "bm_george",
+  "seconds": 89,
+  "w": 1296,
+  "h": 3072
+ },
+ "sendclient": {
+  "file": "training/videos/07-sendclient.mp4",
+  "poster": "training/videos/07-sendclient.jpg",
+  "v": "202611250720",
+  "voice": "bm_george",
+  "seconds": 98,
+  "w": 1296,
+  "h": 3072
+ },
+ "swms": {
+  "file": "training/videos/08-swms.mp4",
+  "poster": "training/videos/08-swms.jpg",
+  "v": "202611250723",
+  "voice": "bm_george",
+  "seconds": 81,
+  "w": 1296,
+  "h": 3072
+ },
+ "notes": {
+  "file": "training/videos/09-notes.mp4",
+  "poster": "training/videos/09-notes.jpg",
+  "v": "202611250726",
+  "voice": "bm_george",
+  "seconds": 83,
+  "w": 1296,
+  "h": 3072
+ },
+ "stock": {
+  "file": "training/videos/10-stock.mp4",
+  "poster": "training/videos/10-stock.jpg",
+  "v": "202611252101",
+  "voice": "bm_george",
+  "seconds": 98,
+  "w": 1296,
+  "h": 3072
+ },
+ "oldmate": {
+  "file": "training/videos/11-oldmate.mp4",
+  "poster": "training/videos/11-oldmate.jpg",
+  "v": "202611250732",
+  "voice": "bm_george",
+  "seconds": 82,
+  "w": 1296,
+  "h": 3072
+ },
+ "team": {
+  "file": "training/videos/12-team.mp4",
+  "poster": "training/videos/12-team.jpg",
+  "v": "202611250735",
+  "voice": "bm_george",
+  "seconds": 98,
+  "w": 1296,
+  "h": 3072
+ },
+ "guide": {
+  "file": "training/videos/13-guide.mp4",
+  "poster": "training/videos/13-guide.jpg",
+  "v": "202611250737",
+  "voice": "bm_george",
+  "seconds": 63,
+  "w": 1296,
+  "h": 3072
+ },
+ "help": {
+  "file": "training/videos/14-help.mp4",
+  "poster": "training/videos/14-help.jpg",
+  "v": "202611250739",
+  "voice": "bm_george",
+  "seconds": 64,
+  "w": 1296,
+  "h": 3072
+ }
+}

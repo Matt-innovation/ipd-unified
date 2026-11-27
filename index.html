@@ -376,6 +376,7 @@ body.pilot.on-quote .toast{bottom:150px}
 .review-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:12px}
 .review-card h3{font-size:12px;font-weight:600;color:var(--text-mid);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
 .review-text{font-size:13px;color:var(--text);line-height:1.6;white-space:pre-wrap}
+.review-text .rv-h{display:inline-block;font-size:14px;margin-top:4px}
 .order-summary-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-mid)}
 .badge-order{background:var(--red-lt);color:var(--red);font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px}
 .send-btn{width:100%;padding:12px;border-radius:var(--radius-sm);background:var(--btn-bg);color:var(--btn-text);border:none;font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
@@ -2559,6 +2560,13 @@ function renderStock() {
 function setOnHand(code, val) { onHand[code] = val==='' ? '' : Math.max(0, parseInt(val)||0); renderStock(); }
 
 // ── REVIEW ────────────────────────────────────────────────────────────────────
+// Old Mate's order review comes back with markdown marks (##, **, ---): show headings and bold as such, drop the rest.
+function reviewHtml(t) {
+  return String(t).split('\n').filter(l => !/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(l)).map(l => {
+    const h = l.match(/^\s*#{1,6}\s+(.*)$/), body = esc(h ? h[1] : l).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+    return h ? '<b class="rv-h">' + body.replace(/<\/?b>/g, '') + '</b>' : body;
+  }).join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
 async function runStockReview() {
   const items = orderItems();
   if (!items.length) { showToast('Count your stock first'); return; }
@@ -2568,7 +2576,7 @@ async function runStockReview() {
   try {
     const res = await fetch(PROXY+'/ai-review', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderItems:items})});
     const data = await res.json();
-    wrap.innerHTML = `<div class="review-card"><h3>Order — ${items.length} lines</h3>${items.map(i=>`<div class="order-summary-row"><span>${esc(i.name)}</span><span class="badge-order">ORDER ${i.toOrder}</span></div>`).join('')}</div><div class="review-card"><h3>AI Review</h3><div class="review-text">${esc(data.review||data.error||'No response.')}</div></div><button class="send-btn" id="send-btn" onclick="sendOrder()">📤 Send to ServiceM8</button><div id="send-status"></div>`;
+    wrap.innerHTML = `<div class="review-card"><h3>Order — ${items.length} lines</h3>${items.map(i=>`<div class="order-summary-row"><span>${esc(i.name)}</span><span class="badge-order">ORDER ${i.toOrder}</span></div>`).join('')}</div><div class="review-card"><h3>AI Review</h3><div class="review-text">${reviewHtml(data.review||data.error||'No response.')}</div></div><button class="send-btn" id="send-btn" onclick="sendOrder()">📤 Send to ServiceM8</button><div id="send-status"></div>`;
   } catch(e) { wrap.innerHTML += '<div class="status-msg error">Could not reach server.</div>'; }
 }
 async function sendOrder() {
@@ -2960,13 +2968,15 @@ async function sendQuoteToSM8() {
     const res=await fetch(PROXY+'/send-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quoteItems:quote.map(i=>({name:i.name,qty:i.qty,price:i.price,cost:quoteLineCost(i),code:i.code||'',type:i.type||'reece',uuid:i.type==='bundle'?i.id:'',...(i.type==='labour'?{lineKind:lineKindOf(i)}:{})})),totalInc,jobNumber,...(jobDescription?{jobDescription}:{}),...(invoiceDescription?{invoiceDescription}:{}),...(diaryNote?{diaryNote}:{})})});
     const data=await res.json();
     if(res.ok&&data.success){
-      showToast('✅ Quote sent to ServiceM8!');
+      showToast(data.practice ? '🎓 Practice only, nothing was sent' : '✅ Quote sent to ServiceM8!');
       if (typeof qdMark === 'function') qdMark('sentAt');
       if (typeof vrAfterSend === 'function') vrAfterSend('sm8');
       const banner=document.createElement('div');
       banner.style.cssText='padding:10px 14px;background:rgba(74,222,128,.1);font-size:12px;color:#16a34a;text-align:center;border-bottom:1px solid rgba(74,222,128,.2)';
+      if (data.practice) { const b2 = document.createElement('button'); b2.type = 'button'; b2.setAttribute('data-trreal', ''); b2.textContent = 'Real job? Make it a real quote'; b2.style.cssText = 'display:block;margin:8px auto 0;padding:8px 12px;border-radius:8px;border:0;background:#111;color:#fff;font-weight:700;font-size:13px'; setTimeout(() => banner.appendChild(b2), 0); }
+      if (data.practice) banner.style.cssText='margin:8px 0;padding:12px 14px;background:#fff;border:2px solid #15803d;border-radius:10px;font-size:14px;font-weight:600;line-height:1.4;color:#14532d;text-align:center';
       const names={jobDescription:'Job description',invoiceDescription:'Invoice description',diaryNote:'Diary note'}, tx=data.texts||{};
-      banner.textContent='✅ '+data.message+Object.keys(names).filter(k=>tx[k]).map(k=>' '+(tx[k].result==='saved'?'✓ '+names[k]+' saved'+(tx[k].replaced?' (old text archived)':''):'⚠ '+names[k]+' NOT saved — add it in ServiceM8')+'.').join('');
+      banner.textContent=(data.practice?'🎓 ':'✅ ')+data.message+Object.keys(names).filter(k=>tx[k]).map(k=>' '+(tx[k].result==='saved'?'✓ '+names[k]+' saved'+(tx[k].replaced?' (old text archived)':''):'⚠ '+names[k]+' NOT saved — add it in ServiceM8')+'.').join('');
       document.getElementById('quote-list').prepend(banner);
     } else showToast('❌ '+(data.error||'Could not send'));
   } catch(e){showToast('❌ Could not reach server');}
@@ -4455,7 +4465,7 @@ function setKTab(t) {
   if (t === 'owner' && !(kSummary && kSummary.isOwner)) t = 'timeoff';
   kTab = t;
   document.querySelectorAll('#k-tabs [data-ktab]').forEach(b => { b.classList.toggle('on', b.dataset.ktab === t); if (b.dataset.ktab === 'owner') b.hidden = !(kSummary && kSummary.isOwner); });
-  document.querySelectorAll('.k-panel').forEach(p => (p.hidden = p.id !== 'k-' + t));
+  document.querySelectorAll('#screen-kiosk .k-panel').forEach(p => (p.hidden = p.id !== 'k-' + t));
   if (t === 'timeoff' || t === 'notices') kLoadMe();
   if (t === 'calendar') kLoadCalendar();
   if (t === 'owner') kLoadOwner();
@@ -6083,11 +6093,11 @@ function savePin() {
 // section stays locked until this one is done. Practice mode: job 7600, its own draft (the real draft is
 // untouched), and nothing is really sent — Send to SM8 / stock orders are pretended on the phone, notes and
 // photos can't be added, client links are marked PRACTICE (no alerts). PIN users see none of this.
-let trCourse = null, trOpenId = null;
+let trCourse = null, trOpenId = null, trBuiltin = null;   // trBuiltin: videos shipped with the app (training/videos.json); they win over a pasted link
 const trBusy = new Set();
 const TR_SCREENS = { home: 'Home', search: 'Find a product', labour: 'Labour', quote: 'Quote', stock: 'Van stock', ai: 'Ask Old Mate' };
 const trPracticeKey = () => (CURRENT_USER && CURRENT_USER.id ? 'ipd_practice_' + CURRENT_USER.id : null);
-function trPracticeOn() { const k = trPracticeKey(); if (!k || !PILOT_UI) return false; try { return localStorage.getItem(k) === '1'; } catch (e) { return false; } }
+function trPracticeOn() { const k = trPracticeKey(); if (!k || !PILOT_UI) return false; try { const v = localStorage.getItem(k); return v === '1' || /^\d{13}$/.test(v || ''); } catch (e) { return false; } }
 
 // Practice: nothing leaves the phone except reads, Old Mate, the course itself and PRACTICE client links.
 (function () {
@@ -6100,7 +6110,7 @@ function trPracticeOn() { const k = trPracticeKey(); if (!k || !PILOT_UI) return
     if (path === '/ai-ask') setTimeout(() => trAuto('ask'), 0);
     if (method !== 'GET' && trPracticeOn()) {
       if (path === '/send-quote') { let n = 0; try { n = JSON.parse(init.body).quoteItems.length; } catch (e) {} setTimeout(() => trAuto('sent'), 0);
-        return reply({ success: true, practice: true, message: `PRACTICE: nothing was sent to ServiceM8. On a real job this adds ${n} line${n === 1 ? '' : 's'} to the job.` }); }
+        return reply({ success: true, practice: true, message: `Practice only, nothing was sent. On a real job this adds ${n} line${n === 1 ? '' : 's'} to the job.` }); }
       if (path === '/send-order') { setTimeout(() => trAuto('order'), 0); return reply({ success: true, practice: true, message: 'PRACTICE: nothing was sent. On a real day the order goes to ServiceM8 for the office.' }); }
       if (path && (/^\/quote-versions\//.test(path) || path === '/ai-feedback')) return reply({ ok: true, practice: true });
       if (path === '/client-quote') { try { const b = JSON.parse(init.body); b.practice = true; b.jobNumber = '7600'; init = { ...init, body: JSON.stringify(b) }; } catch (e) {}
@@ -6139,6 +6149,7 @@ function trStyle() {
 .trc-x{width:40px;height:40px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:16px;cursor:pointer;flex-shrink:0}
 .trc-video{position:relative;width:100%;padding-top:56.25%;border-radius:10px;overflow:hidden;background:#111}
 .trc-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.trc-video.trc-vfile{padding-top:0;display:flex;justify-content:center;background:#000}.trc-vfile video{display:block;height:min(62vh,560px);width:auto;max-width:100%;aspect-ratio:9/16;object-fit:contain;background:#000}@media (min-width:700px) and (hover:hover) and (pointer:fine){.trc-vfile video{height:min(84vh,1024px)}}
 .trc-novideo{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#eee;font-size:15px;font-weight:700;text-align:center;padding:10px}
 .trc-novideo small{font-weight:400;font-size:12px;color:#bbb;margin-top:4px}
 .trc-outline{font-size:14px;color:var(--text-mid);margin:10px 0}
@@ -6170,7 +6181,10 @@ async function trInit() {
   if (!CURRENT_USER || !PILOT_UI) { if (box) { box.hidden = true; box.innerHTML = ''; } trPracticeBanner(); return; }
   trStyle();
   trPracticeBanner();
+  setTimeout(trPracticeStale, 1500);
   try { const j = await authFetch('/training/me'); trCourse = j && j.on === true && Array.isArray(j.sections) ? j : null; } catch (e) { trCourse = null; }
+  if (trCourse && trBuiltin === null) { try { const r = await fetch('training/videos.json', { cache: 'no-cache' }); trBuiltin = r.ok ? await r.json() : {}; } catch (e) { trBuiltin = {}; } }
+  trMergeBuiltin();
   trRenderBox();
   if (trCourse) trAuto('login');
 }
@@ -6187,10 +6201,14 @@ function trRenderBox() {
     + (trCourse.isOwner ? '<div class="trc-own"><button data-trteam>👥 Team progress</button><button data-trvideos>🎬 Video links</button></div>' : '')
     + '</div><div class="trc-old">Quick reference: the step-by-step guide</div>';
 }
+function trMergeBuiltin() {
+  if (!trCourse || !trBuiltin) return;
+  for (const s of trCourse.sections) { const b = trBuiltin[s.id]; if (b && b.file) s.video = { file: b.file + (b.v ? '?v=' + encodeURIComponent(b.v) : ''), poster: b.poster ? b.poster + (b.v ? '?v=' + encodeURIComponent(b.v) : '') : '', ratio: b.w > 0 && b.h > 0 ? b.w + '/' + b.h : '', builtin: true }; }
+}
 function trSec(id) { return trCourse && Array.isArray(trCourse.sections) ? trCourse.sections.find(s => s.id === id) : null; }
 async function trPost(id, body) {
   const j = await authFetch('/training/me/' + id, { method: 'POST', body: JSON.stringify(body) });
-  if (j && Array.isArray(j.sections)) trCourse.sections = j.sections; trRenderBox(); if (trOpenId === id) trRenderSheetRest(); return j;
+  if (j && Array.isArray(j.sections)) { trCourse.sections = j.sections; trMergeBuiltin(); } trRenderBox(); if (trOpenId === id) trRenderSheetRest(); return j;
 }
 // a step the app can see done ticks itself (any open, unfinished section that has it)
 function trAuto(key) {
@@ -6216,8 +6234,8 @@ function trOpenSection(id) {
   trCloseSheet(); trOpenId = id;
   const back = document.createElement('div'); back.className = 'trc-back'; back.id = 'trc-back';
   back.innerHTML = '<div class="trc-sheet" role="dialog" aria-modal="true" aria-labelledby="trc-title"><div class="trc-sh-hd"><b id="trc-title">' + s.n + '. ' + escHtml(s.title) + '</b><button class="trc-x" data-trclose aria-label="Close">✕</button></div>'
-    + '<div class="trc-video">' + (s.video ? '<iframe src="' + escHtml(s.video.embed) + '" title="' + escHtml(s.title) + ' (video)" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>'
-      : '<div class="trc-novideo">🎬 Video coming soon<small>Matt is recording it. You can still do the practice steps.</small></div>') + '</div>'
+    + '<div class="trc-video' + (s.video && s.video.file ? ' trc-vfile' : '') + '">' + (s.video && s.video.file ? '<video src="' + escHtml(s.video.file) + '"' + (s.video.poster ? ' poster="' + escHtml(s.video.poster) + '"' : '') + (s.video.ratio ? ' style="aspect-ratio:' + escHtml(s.video.ratio) + '"' : '') + ' controls playsinline preload="metadata" title="' + escHtml(s.title) + ' (video)"></video>' : s.video ? '<iframe src="' + escHtml(s.video.embed) + '" title="' + escHtml(s.title) + ' (video)" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>'
+      : '<div class="trc-novideo">🎬 Video coming soon<small>On its way. You can still do the practice steps.</small></div>') + '</div>'
     + '<div id="trc-rest"></div></div>';
   document.body.appendChild(back);
   back.addEventListener('click', e => { if (e.target === back) trCloseSheet(); });
@@ -6260,11 +6278,51 @@ function trPracticeBanner() {
   if (on && b) document.body.style.setProperty('--trp-h', b.offsetHeight + 'px');
   const jn = document.getElementById('job-number-input');
   if (jn) { jn.readOnly = on; if (on && jn.value !== '7600') { jn.value = '7600'; qdJob = '7600'; } }
+  let r = document.getElementById('trp-real'); const job = document.querySelector('.qt-job');
+  if (on && !r && job) {
+    r = document.createElement('div'); r.id = 'trp-real';
+    r.style.cssText = 'margin:0 0 8px;padding:10px 12px;background:#fff;border:2px solid #b45309;border-radius:10px;color:#3f2a06;font-size:13px;line-height:1.4';
+    r.innerHTML = '<b>🎓 Practice quote: nothing is sent.</b> Is this a real job? <button type="button" data-trreal style="margin-top:6px;display:block;width:100%;padding:9px;border-radius:8px;border:0;background:#111;color:#fff;font-weight:700;font-size:14px">Make it a real quote</button>';
+    job.insertBefore(r, job.firstChild);
+  }
+  if (r) r.hidden = !on;
 }
+// Practice left on by mistake: the lines on screen become a real quote (no job number yet), practice stops.
+// The practice copy stays in practice; nothing is sent.
+function trPracticeMakeReal() {
+  if (!trPracticeOn()) return;
+  if (typeof qdSaveNow === 'function') qdSaveNow();                 // practice copy kept in practice
+  const d = qdSnap();
+  if (!qdHas(d)) { showToast('This practice quote is empty'); return; }
+  if (!confirm('Make this a real quote?\n\nPractice stops. These ' + d.lines.length + ' line' + (d.lines.length === 1 ? '' : 's') + ' ($' + qdTotal(d).toFixed(2) + ') become a real quote. Then type the real job number and tap Send to SM8.')) return;
+  try { localStorage.removeItem(trPracticeKey()); } catch (e) {}
+  const st = qdRead(), old = st.drafts[''];                         // the real quotes on this phone
+  if (qdHas(old)) { st.drafts['x' + old.savedAt] = { ...old, kept: 'replaced' }; delete st.drafts['']; qdWrite(st); }
+  qdApply({ ...d, job: '', sentAt: null, linkAt: null });
+  trPracticeBanner();
+  qdSaveNow(); qdRenderList();
+  if (typeof cqRender === 'function') cqRender();
+  if (typeof goScreen === 'function') goScreen('quote');
+  if (typeof setQTab === 'function') setQTab('summary');
+  const jn = document.getElementById('job-number-input'); if (jn) { jn.readOnly = false; jn.value = ''; setTimeout(() => { try { jn.scrollIntoView({ block: 'center' }); jn.focus(); } catch (e) {} }, 300); }
+  showToast('Real quote now: type the real job number, then Send to SM8');
+}
+// Opened the app with practice still on from earlier (over 2 hours, or from before this was kept): say so.
+function trPracticeStale() {
+  if (!trPracticeOn() || window.__trStaleAsked) return;
+  let v = ''; try { v = localStorage.getItem(trPracticeKey()) || ''; } catch (e) {}
+  const t = /^\d{13}$/.test(v) ? +v : 0;
+  if (t && Date.now() - t < 2 * 3600e3) return;
+  window.__trStaleAsked = true;
+  const d = qdSnap(), has = qdHas(d);
+  if (has && confirm('🎓 Practice mode is still on' + (t ? ' (since ' + qdWhen(t) + ')' : '') + '. Quotes in practice are NOT sent to ServiceM8.\n\nOK = make the quote on screen a real quote\nCancel = keep practising')) { trPracticeMakeReal(); return; }
+  if (!has && confirm('🎓 Practice mode is still on' + (t ? ' (since ' + qdWhen(t) + ')' : '') + '. Quotes in practice are NOT sent to ServiceM8.\n\nOK = stop practice\nCancel = keep practising')) trPracticeStop();
+}
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('[data-trreal]')) { e.preventDefault(); trPracticeMakeReal(); } });
 function trPracticeStart() {
   if (trPracticeOn()) { trPracticeBanner(); return; }
   if (typeof qdSaveNow === 'function') qdSaveNow();               // the real draft is saved under its own key first
-  try { localStorage.setItem(trPracticeKey(), '1'); } catch (e) { showToast('Could not start practice on this phone'); return; }
+  try { localStorage.setItem(trPracticeKey(), String(Date.now())); } catch (e) { showToast('Could not start practice on this phone'); return; }
   const st = qdRead(), d = st.drafts['7600'];                     // practice has its own draft (job 7600)
   if (qdHas(d)) qdApply(d); else { qdClearScreen(); }
   trPracticeBanner();
@@ -6310,7 +6368,7 @@ async function trOpenVideos() {
     + '<div class="trc-why" style="text-align:left">Paste an unlisted YouTube or Vimeo link for each section. Leave it blank for "Video coming soon". Every change is kept.</div><div id="trc-vids">Loading…</div></div>';
   document.body.appendChild(back); back.addEventListener('click', e => { if (e.target === back) trCloseSheet(); });
   let j; try { j = await authFetch('/training/videos'); } catch (e) { document.getElementById('trc-vids').textContent = e.message; return; }
-  document.getElementById('trc-vids').innerHTML = j.sections.map(s => '<div class="trc-vid" data-trvid="' + s.id + '"><b>' + s.n + '. ' + escHtml(s.title) + '</b>' + (s.shown ? '' : ' <small>(switched off here, so hidden for now)</small>')
+  document.getElementById('trc-vids').innerHTML = j.sections.map(s => trBuiltin && trBuiltin[s.id] && trBuiltin[s.id].file ? '<div class="trc-vid"><b>' + s.n + '. ' + escHtml(s.title) + '</b><small> ✅ Built into the app (no link needed)</small></div>' : '<div class="trc-vid" data-trvid="' + s.id + '"><b>' + s.n + '. ' + escHtml(s.title) + '</b>' + (s.shown ? '' : ' <small>(switched off here, so hidden for now)</small>')
     + '<input type="url" inputmode="url" autocomplete="off" placeholder="https://youtu.be/… or https://vimeo.com/…" value="' + escHtml(s.url) + '" aria-label="Video link for ' + escHtml(s.title) + '">'
     + '<div class="trc-vr"><button type="button" data-trvidsave="' + s.id + '">Save</button><small data-trvidmsg>' + (s.url ? 'Set by ' + escHtml(s.by) : 'No video yet') + '</small></div></div>').join('');
 }
