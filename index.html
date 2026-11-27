@@ -202,6 +202,52 @@ body.pilot input:not([type=checkbox]):not([type=radio]):not([type=range]):not([t
 .cq-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .cq-row button{min-width:44px;min-height:40px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font:600 14px var(--font);cursor:pointer}
 .cq-row .cq-st{font-size:12px;font-weight:700;margin-left:auto}
+/* QUOTE_STEPS=on: the Quote screen as 9 numbered steps */
+.qs-on #q-tabs,.qs-on .qt-panels{display:none!important}
+#qs-nav{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border2);flex-shrink:0}
+#qs-nav::-webkit-scrollbar{display:none}
+.qs-chip{flex:0 0 auto;display:flex;align-items:center;gap:5px;min-height:44px;padding:4px 10px;border-radius:12px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:600 13px var(--font);cursor:pointer}
+.qs-chip b{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--border2);color:var(--text);font-size:12px}
+.qs-chip.done b{background:#16a34a;color:#fff}.qs-chip.done b::after{content:'';}
+.qs-chip.done{border-color:#16a34a}
+.qs-chip.warn b{background:#dc2626;color:#fff}.qs-chip.warn{border-color:#dc2626}
+.qs-chip.cur{outline:2px solid var(--orange);outline-offset:1px}
+#qs-steps{position:relative;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 10px 28px;display:flex;flex-direction:column;gap:12px}
+.qs-step{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:12px;scroll-margin-top:6px}
+.qs-step.done{border-color:rgba(22,163,74,.55)}.qs-step.warn{border-color:#dc2626}
+.qs-hd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.qs-n{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--btn2-bg,#111);color:var(--btn2-text,#fff);font-weight:800;font-size:15px;flex-shrink:0}
+.qs-step.done .qs-n{background:#16a34a;color:#fff}
+.qs-t{font-size:16px;font-weight:800;flex:1;min-width:0;line-height:1.25}
+.qs-st{font-size:12px;font-weight:700;color:#16a34a;white-space:nowrap}.qs-step.warn .qs-st{color:#dc2626}
+.qs-body{display:flex;flex-direction:column;gap:10px}
+.qs-sub{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-mid);margin-top:4px}
+.qs-note{font-size:13px;color:var(--text-mid);line-height:1.45}
+.qs-on .qs-step .qt-panel{position:static!important;display:flex!important;overflow:visible;inset:auto}
+.qs-on .qs-step #qp-results,.qs-on .qs-step #qb-results{max-height:55vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border2);border-radius:12px}
+.qs-off{display:none;font-size:13px;color:var(--text-mid)}
+.qs-nocq .qs-off{display:block}.qs-nocq [data-qscq]{display:none!important}
+.qs-same{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;min-height:44px}
+.qs-same input{width:22px;height:22px}
+textarea.qs-ro{opacity:.7}
+.qs-dep{font-size:14px}
+.qs-dh{font-size:14px;margin-bottom:6px}.qs-dh .neg{color:#dc2626}
+.qs-drow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border:1px solid var(--border2);border-radius:12px;margin-top:6px}
+.qs-drow.low{border-color:rgba(220,38,38,.6);background:rgba(220,38,38,.06)}
+.qs-drow.cur{outline:2px solid var(--orange)}
+.qs-dl{font-weight:700;font-size:14px;min-width:110px;display:flex;align-items:center;gap:6px}
+.qs-dl small{font-weight:500;color:var(--text-mid)}
+.qs-dl input{width:96px;min-height:40px;font-size:16px;padding:4px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text)}
+.qs-dg{flex:1;font-size:14px;min-width:120px}.qs-dg b{color:#dc2626}
+.qs-dbtn{min-height:40px;min-width:72px;border-radius:10px;border:0;background:var(--btn-bg);color:var(--btn-text);font:700 14px var(--font);cursor:pointer}
+/* SUGGEST=on: suggested products */
+.sg-box{margin:8px 10px;padding:10px 12px;border:1px dashed var(--border2);border-radius:12px;background:var(--surface);display:flex;flex-direction:column;gap:6px}
+.sg-hd{font-weight:800;font-size:14px}.sg-hd small{font-weight:500;color:var(--text-mid);font-size:12px}
+.sg-sub{font-size:12px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:.04em;margin-top:4px}
+.sg-row{display:flex;align-items:center;gap:10px}
+.sg-body{flex:1;min-width:0}.sg-name{font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.sg-why{font-size:12px;color:var(--text-mid);overflow-wrap:anywhere}
+.sg-more{align-self:flex-start;min-height:40px;border:0;background:transparent;color:var(--text);text-decoration:underline;font:600 13px var(--font);cursor:pointer}
 /* SHOWPIECE=on: offer the product photo/spec sheet link */
 #sp-offer{position:fixed;left:0;right:0;bottom:0;z-index:2500;padding:12px 12px calc(12px + env(safe-area-inset-bottom));display:flex;justify-content:center;pointer-events:none}
 #sp-offer[hidden]{display:none}
@@ -2569,7 +2615,7 @@ function goScreen(name) {
   document.body.classList.toggle('on-quote', name === 'quote');   // lifts pop-up messages above the quote bar
   if (name !== 'search') stopListening();
   if (name === 'kb') renderKB();
-  if (name === 'quote') { renderQuote(); if (PILOT_UI) setQTab('summary'); }   // the quote page always opens on Summary
+  if (name === 'quote') { renderQuote(); if (PILOT_UI) setQTab('summary'); if (typeof qsBuild === 'function') { qsBuild(); qsRender(); } }   // the quote page always opens on Summary
   if (name === 'labour') updateLabourTotals();
   if (name === 'training' && typeof trOnScreen === 'function') trOnScreen();
   if (name === 'home') { updateHomeStats(); if (PILOT_UI) { renderHome(); kioskRefreshSummary(); } }
@@ -2883,6 +2929,8 @@ function clearQuote() { if (typeof qdStash === 'function') qdStash('cleared'); q
 function updateQuoteUI() {
   syncDiscountLine();
   if (typeof spCheck === 'function') setTimeout(spCheck, 0);
+  if (typeof qsRender === 'function') setTimeout(qsRender, 0);
+  if (typeof sgSchedule === 'function') sgSchedule();
   const count = quote.reduce((s,i)=>s+i.qty,0);
   const badge = document.getElementById('quote-badge');
   const pill = document.getElementById('quote-pill');
@@ -3024,6 +3072,7 @@ function renderDiscountControls() {
 }
 function renderGP() {
   const panel = document.getElementById('gp-panel'); if (!panel) return;
+  if (typeof qsDiscRender === 'function') setTimeout(qsDiscRender, 0);
   renderDiscountControls();
   const T = GP_SETTINGS.targets, pctTxt = v => Math.round(v * 100) + '%';
   if (!quoteJobType) {
@@ -3083,6 +3132,7 @@ async function sendQuoteToSM8() {
     const data=await res.json();
     if(res.ok&&data.success){
       showToast(data.practice ? '🎓 Practice only, nothing was sent' : '✅ Quote sent to ServiceM8!');
+      if (!data.practice && typeof sgLearn === 'function') sgLearn('sent');
       if (typeof qdMark === 'function') qdMark('sentAt');
       if (typeof vrAfterSend === 'function') vrAfterSend('sm8');
       const banner=document.createElement('div');
@@ -3766,7 +3816,7 @@ async function qAdd(it) {
   }
   qRefreshLists();
 }
-function qRefreshLists() { if (qTab === 'products') renderQProducts(true); if (qTab === 'bundles') renderQBundles(); updateQuoteBar(); }
+function qRefreshLists() { if (typeof qsOn === 'function' && qsOn() && document.getElementById('qs-steps')) { renderQProducts(true); renderQBundles(); renderQLabour(); updateQuoteBar(); return; } if (qTab === 'products') renderQProducts(true); if (qTab === 'bundles') renderQBundles(); updateQuoteBar(); }
 
 function renderQProducts(keep) {
   const box = document.getElementById('qp-results'), q = (document.getElementById('qp-search').value || '').trim();
@@ -5728,6 +5778,8 @@ async function cqRefresh() {
   cqRender(); if (PILOT_UI && typeof renderQuote === 'function') renderQuote();
   if (PILOT_UI && typeof renderHome === 'function') renderHome();
   if (typeof bcRender === 'function') bcRender();
+  if (typeof qsBuild === 'function') qsBuild();
+  if (typeof sgSchedule === 'function') sgSchedule();
 }
 // shrink onto a white background (a see-through PNG mock-up would otherwise turn black), JPEG
 async function cqShrink(file, max, quality) {
@@ -5841,6 +5893,7 @@ async function cqSend() {
       lines: quote.map(i => ({ name: i.name, qty: Number(i.qty), priceInc: Number(i.price), ...(cqFeat.options && i.optional ? { optional: true, defaultOn: !!i.defaultOn } : {}), ...(cqFeat.productLinks && (i.links || []).length ? { links: i.links.map(k => k.source === 'kc' ? { id: k.id } : { url: k.url, title: k.title, type: k.type }) } : {}) })) }) });
     const preview = j.link.replace('/quote.html#', '/quote.html?staff=1#');
     try { localStorage.setItem('ipd_cq_last_' + job, JSON.stringify({ link: j.link, expiresAt: j.expiresAt, at: Date.now() })); } catch (e) {}
+    if (typeof sgLearn === 'function') sgLearn('link');
     out.innerHTML = '<div class="cq-result"><b>✅ Link ready for job ' + escHtml(job) + (client && client.name ? ' (' + escHtml(client.name) + ')' : '') + ' — valid until ' + new Date(j.expiresAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) + '</b>'
       + '<div class="cq-link" id="cq-link">' + escHtml(j.link) + '</div>'
       + '<div class="cq-row"><button type="button" id="cq-copy">📋 Copy</button>' + (navigator.share ? '<button type="button" id="cq-share">📤 Share</button>' : '') + '<a class="q-btn" style="flex:1 1 90px;display:flex;align-items:center;justify-content:center;min-height:40px;text-decoration:none" href="' + escHtml(preview) + '" target="_blank" rel="noopener">👁 Preview</a></div>'
@@ -6228,6 +6281,191 @@ document.addEventListener('click', e => {
   }
   setTimeout(spCheck, 300);
 });
+
+// ── QUOTE STEPS (QUOTE_STEPS=on, logged in) ──────────────────────────────────
+// The Quote screen as one page of 9 numbered steps, top to bottom, with a bar to jump to a step and a tick on the
+// steps that are done. Nothing is rebuilt: the existing parts of the screen are moved into the steps, so every
+// feature works exactly as before. Off: the tabs (Summary, Products, Bundles, Labour, Notes & photos) as today.
+const QS_STEPS = [
+  [1, 'Job number', 'Job'], [2, 'Client details', 'Client'], [3, 'Job description', 'Description'], [4, 'Photos and markup', 'Photos'],
+  [5, 'Products', 'Products'], [6, 'Labour, materials and more', 'Labour'], [7, 'Total, GST, deposit and stages', 'Total'],
+  [8, 'Discount and GP (staff only, the client never sees this)', 'GP'], [9, 'Client quote page', 'Send'],
+];
+function qsOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.quoteSteps); }
+function qsBuild() {
+  if (!qsOn()) return;
+  const $ = id => document.getElementById(id), scr = $('screen-quote'), wrap = scr && scr.querySelector('.quote-wrap');
+  if (!wrap || $('qs-steps') || !$('q-tabs') || !$('cq-box')) return;
+  const nav = document.createElement('nav'); nav.id = 'qs-nav'; nav.setAttribute('aria-label', 'Quote steps');
+  nav.innerHTML = QS_STEPS.map(([n, , s]) => '<button type="button" class="qs-chip" data-qsgo="' + n + '"><b>' + n + '</b><span>' + s + '</span></button>').join('');
+  const steps = document.createElement('div'); steps.id = 'qs-steps';
+  steps.innerHTML = QS_STEPS.map(([n, t]) => '<section class="qs-step" id="qs-' + n + '"><div class="qs-hd"><span class="qs-n">' + n + '</span><span class="qs-t">' + t + '</span><span class="qs-st"></span></div><div class="qs-body"></div></section>').join('');
+  wrap.insertBefore(steps, wrap.firstChild); wrap.insertBefore(nav, steps);
+  const body = n => steps.querySelector('#qs-' + n + ' .qs-body');
+  const mv = (n, node, cq) => { if (node) { if (cq) node.setAttribute('data-qscq', ''); body(n).appendChild(node); } };
+  const add = (n, html) => body(n).insertAdjacentHTML('beforeend', html);
+  const lab = id => $(id) && $(id).closest('label'), cq = $('cq-box'), sum = $('qt-summary');
+  // 1 job number (+ saved drafts, versions); the practice-mode strip finds this .qt-job first
+  const jw = document.createElement('div'); jw.className = 'qt-job qs-jobwrap'; body(1).appendChild(jw); jw.appendChild($('job-number-input'));
+  ['qd-banner', 'qd-drafts', 'vr-warn', 'vr-bar'].forEach(id => mv(1, $(id)));
+  // 2 client details
+  mv(2, $('cq-client'), true); add(2, '<div class="qs-off">Client details come with the client quote link, which is switched off here.</div>');
+  // 3 job description (+ use it as the invoice description)
+  mv(3, lab('q-job-desc'));
+  add(3, '<label class="qs-same"><input type="checkbox" id="qs-same"> Also use this as the invoice description (the client sees it)</label>');
+  mv(3, lab('q-invoice-desc')); mv(3, sum.querySelector('.qt-job > .qt-inv-hint'));
+  // 4 photos and markup
+  mv(4, cq.querySelector(':scope > .cq-sub'), true); mv(4, cq.querySelector(':scope > .qn-btns'), true); mv(4, $('cq-jobpick'), true); mv(4, $('cq-list'), true); mv(4, cq.querySelector(':scope > .qt-inv-hint'), true);
+  add(4, '<div class="qs-off">Photos for the client come with the client quote link, which is switched off here. Job diary photos are in step 6.</div>');
+  // 5 products
+  add(5, '<div class="qs-sub">Our bundles</div>'); mv(5, $('qt-bundles'));
+  add(5, '<div class="qs-sub">Reece products</div>'); mv(5, $('qt-products'));
+  // 6 labour, materials and everything else
+  mv(6, $('qt-labour')); mv(6, lab('q-diary-note')); mv(6, $('sw-card'));
+  add(6, '<div class="qs-sub">Notes &amp; photos for the job diary</div>'); mv(6, $('qt-notes')); mv(6, sum.querySelector('.quote-actions'));
+  // 7 lines, totals, deposit, stages
+  mv(7, sum.querySelector('.qhint')); mv(7, $('quote-list')); mv(7, $('quote-totals')); add(7, '<div class="qs-dep" id="qs-dep"></div>'); mv(7, $('cq-stages'), true);
+  // 8 discount and GP
+  mv(8, $('gp-panel')); mv(8, $('gp-discount')); add(8, '<div id="qs-disc"></div>');
+  // 9 client quote page
+  add(9, '<div class="qs-note">Optional lines are set on each line in step 7. Product links (and the showpiece photo and spec sheet links) are on each line. The client sees the terms, the photos from step 4, the lines and the total, never the cost, GP or markup.</div>');
+  mv(9, cq, true); add(9, '<div class="qs-off">The client quote link is switched off here. Use Send to SM8 at the bottom.</div>');
+  scr.classList.add('qs-on');
+  // invoice description follows the job description when ticked (remembered on this phone)
+  const same = $('qs-same'), jd = $('q-job-desc'), inv = $('q-invoice-desc');
+  try { same.checked = localStorage.getItem('ipd_qs_same') === '1'; } catch (e) {}
+  const sync = () => { inv.readOnly = same.checked; inv.classList.toggle('qs-ro', same.checked); if (same.checked && inv.value !== jd.value) { inv.value = jd.value; inv.dispatchEvent(new Event('input', { bubbles: true })); } };
+  same.addEventListener('change', () => { try { localStorage.setItem('ipd_qs_same', same.checked ? '1' : '0'); } catch (e) {} sync(); });
+  jd.addEventListener('input', sync); sync();
+  nav.addEventListener('click', e => { const b = e.target.closest('[data-qsgo]'); if (!b) return; const s = $('qs-' + b.dataset.qsgo); steps.scrollTop = s.offsetTop - 4; qsCur(+b.dataset.qsgo); });
+  steps.addEventListener('scroll', () => { const y = steps.scrollTop + 60; let cur = 1; for (const [n] of QS_STEPS) if ($('qs-' + n).offsetTop <= y) cur = n; qsCur(cur); }, { passive: true });
+  new MutationObserver(() => { cancelAnimationFrame(qsRaf); qsRaf = requestAnimationFrame(qsMarks); }).observe(steps, { childList: true, subtree: true });
+  scr.addEventListener('input', () => { cancelAnimationFrame(qsRaf); qsRaf = requestAnimationFrame(qsMarks); });
+  renderQProducts(); renderQBundles(); renderQLabour(); qsRender();
+}
+let qsRaf = 0;
+function qsCur(n) { document.querySelectorAll('#qs-nav .qs-chip').forEach(c => c.classList.toggle('cur', +c.dataset.qsgo === n)); const c = document.querySelector('#qs-nav .qs-chip.cur'); if (c && c.scrollIntoView) { const nav = c.parentNode; if (c.offsetLeft < nav.scrollLeft || c.offsetLeft + c.offsetWidth > nav.scrollLeft + nav.clientWidth) nav.scrollTo({ left: c.offsetLeft - 12, behavior: 'smooth' }); } }
+function qsGp(d) {   // GP if the whole-quote discount were d (0–0.5), same maths as the GP panel
+  const g = calcGP(); if (!(g.sellExFull > 0)) return null;
+  const s = g.sellExFull * (1 - d); return s > 0 ? (s - g.cost) / s : null;
+}
+function qsMarks() {
+  const scr = document.getElementById('screen-quote'); if (!scr || !scr.classList.contains('qs-on')) return;
+  scr.classList.toggle('qs-nocq', !(CURRENT_USER && cqOn));
+  const val = id => ((document.getElementById(id) || {}).value || '').trim();
+  const lines = quote.filter(i => i.id !== 'discount'), target = quoteJobType ? GP_SETTINGS.targets[quoteJobType] : null, gp = qsGp(discountFraction());
+  const gpLow = target != null && gp != null && gp < target - 1e-9;
+  const done = {
+    1: /^\d{1,8}$/.test(val('job-number-input')),
+    2: !!((document.querySelector('#cq-client [data-cqc="name"]') || {}).value || '').trim(),
+    3: !!val('q-job-desc'),
+    4: !!document.querySelector('#cq-list .cq-item'),
+    5: lines.some(i => i.type === 'reece' || i.type === 'bundle'),
+    6: lines.some(i => i.type === 'labour' || i.type === 'material' || /^mat/i.test(String(i.id))),
+    7: lines.length > 0,
+    8: target != null && gp != null && !gpLow,
+    9: /Link ready/.test((document.getElementById('cq-result') || {}).textContent || ''),
+  };
+  for (const [n] of QS_STEPS) {
+    const st = done[n] ? '✓ Done' : (n === 8 && gpLow ? '⚠ GP below minimum' : '');
+    const h = document.querySelector('#qs-' + n + ' .qs-st'); if (h && h.textContent !== st) h.textContent = st;
+    const sec = document.getElementById('qs-' + n); if (sec) { sec.classList.toggle('done', !!done[n]); sec.classList.toggle('warn', n === 8 && gpLow); }
+    const c = document.querySelector('#qs-nav [data-qsgo="' + n + '"]'); if (c) { c.classList.toggle('done', !!done[n]); c.classList.toggle('warn', n === 8 && gpLow); }
+  }
+}
+function qsRender() {
+  const scr = document.getElementById('screen-quote'); if (!scr || !scr.classList.contains('qs-on')) return;
+  const T = stTotals(), dep = document.getElementById('qs-dep');
+  if (dep) dep.innerHTML = T.total > 0 ? (T.deposit ? 'Deposit on acceptance: <b>$' + T.deposit.toFixed(2) + '</b> (20% on jobs over $1,000) · the rest: <b>$' + T.rest.toFixed(2) + '</b>' : 'No deposit (jobs of $1,000 or less).') : '';
+  qsDiscRender(); qsMarks();
+}
+// Step 8 helper: GP now, and GP after a 5%, 10%, 15% or set-dollar discount; warns when it would go below the minimum.
+let qsDollar = '';
+function qsDiscRender() {
+  const box = document.getElementById('qs-disc'); if (!box) return;
+  const lines = quote.filter(i => i.id !== 'discount');
+  if (!lines.length) { box.innerHTML = '<div class="qs-note">Add lines to the quote to see the GP and what discount you can give.</div>'; return; }
+  if (!quoteJobType) { box.innerHTML = '<div class="qs-note">Choose the job type above to see the GP minimum and the discount you can give.</div>'; return; }
+  const target = GP_SETTINGS.targets[quoteJobType], g = calcGP(), pct = v => (v * 100).toFixed(1) + '%';
+  const base = lines.reduce((s, i) => s + (parseFloat(i.price) || 0) * i.qty, 0);
+  if (!(g.sellExFull > 0)) { box.innerHTML = '<div class="qs-note">No costs known for these lines yet, so GP can\'t be worked out.</div>'; return; }
+  const now = qsGp(discountFraction()), full = qsGp(0);
+  const row = (label, d, key) => {
+    const v = qsGp(d), ok = v != null && v >= target - 1e-9, amt = base * d;
+    return '<div class="qs-drow' + (ok ? '' : ' low') + (Math.abs(discountFraction() - d) < 1e-9 ? ' cur' : '') + '"><span class="qs-dl">' + label + (d > 0 ? ' <small>−$' + amt.toFixed(2) + '</small>' : '') + '</span>'
+      + '<span class="qs-dg">GP ' + (v == null ? '—' : pct(v)) + (ok ? '' : ' <b>⚠ below ' + Math.round(target * 100) + '% minimum</b>') + '</span>'
+      + '<button type="button" class="qs-dbtn" data-qsdisc="' + key + '">' + (Math.abs(discountFraction() - d) < 1e-9 ? 'Applied' : 'Apply') + '</button></div>';
+  };
+  const dol = parseFloat(qsDollar), dFromDol = dol > 0 && base > 0 ? Math.min(0.5, dol / base) : 0;
+  box.innerHTML = '<div class="qs-dh">GP on the whole job now: <b class="' + (now != null && now < target - 1e-9 ? 'neg' : '') + '">' + (now == null ? '—' : pct(now)) + '</b> · minimum ' + Math.round(target * 100) + '% (' + (quoteJobType === 'maintenance' ? 'maintenance' : 'construction / reno / hot water') + ')' + (discountFraction() > 0 ? ' · before discount ' + pct(full) : '') + '</div>'
+    + row('No discount', 0, 'p0') + row('5% off', 0.05, 'p5') + row('10% off', 0.10, 'p10') + row('15% off', 0.15, 'p15')
+    + '<div class="qs-drow qs-dset"><label class="qs-dl">Set amount $<input type="number" id="qs-dollar" inputmode="decimal" min="0" step="1" placeholder="e.g. 100" value="' + escHtml(qsDollar) + '"></label>'
+    + (dFromDol > 0 ? '<span class="qs-dg">= ' + (dFromDol * 100).toFixed(1) + '% · GP ' + pct(qsGp(dFromDol)) + (qsGp(dFromDol) < target - 1e-9 ? ' <b>⚠ below ' + Math.round(target * 100) + '% minimum</b>' : '') + '</span><button type="button" class="qs-dbtn" data-qsdisc="dol">Apply</button>' : '<span class="qs-dg">Type an amount (inc GST)</span>') + '</div>'
+    + '<div class="qs-note">Uses the same discount as the Discount buttons above (one "Discount" line on the quote). Set amounts are turned into a % of the quote (up to 50%).</div>';
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-qsdisc]'); if (!b) return;
+  const k = b.dataset.qsdisc, lines = quote.filter(i => i.id !== 'discount'), base = lines.reduce((s, i) => s + (parseFloat(i.price) || 0) * i.qty, 0);
+  let p = k === 'dol' ? Math.min(50, Math.floor((parseFloat(qsDollar) || 0) / base * 1000) / 10) : +k.slice(1);
+  const v = qsGp(p / 100), target = quoteJobType ? GP_SETTINGS.targets[quoteJobType] : 0;
+  if (p > 0 && v != null && v < target - 1e-9 && !confirm('This discount takes GP to ' + (v * 100).toFixed(1) + '%, below the ' + Math.round(target * 100) + '% minimum. Apply it anyway?')) return;
+  setQuoteDiscount(p); showToast(p ? 'Discount ' + p + '% applied' : 'Discount removed');
+});
+document.addEventListener('input', e => { if (e.target && e.target.id === 'qs-dollar') { qsDollar = e.target.value; const pos = e.target.selectionStart; qsDiscRender(); const n = document.getElementById('qs-dollar'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (err) {} } } });
+
+// ── SUGGESTED PRODUCTS (SUGGEST=on, logged in) ───────────────────────────────
+// "Often used with" what's on the quote, and products past jobs with similar words in the job description used.
+// From the server (/suggest), which learns from past ServiceM8 jobs (read only), our sent quotes and taps. Tap to add.
+function sgOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.suggest); }
+let sgTimer = null, sgKey = '', sgData = null, sgMore = false;
+const sgCodes = () => quote.filter(i => i.code && (i.type === 'reece' || i.type === 'bundle')).map(i => String(i.code));
+const sgText = () => ((document.getElementById('q-job-desc') || {}).value || '').trim();
+function sgBox() {
+  let b = document.getElementById('sg-box'); if (b) return b;
+  const panel = document.getElementById('qt-products'); if (!panel) return null;
+  b = document.createElement('div'); b.id = 'sg-box'; b.className = 'sg-box'; b.hidden = true; panel.insertBefore(b, panel.firstChild); return b;
+}
+function sgSchedule() { if (!sgOn()) { const b = document.getElementById('sg-box'); if (b) b.hidden = true; return; } clearTimeout(sgTimer); sgTimer = setTimeout(sgLoad, 700); }
+async function sgLoad() {
+  const codes = sgCodes(), q = sgText(), key = codes.join(',') + '|' + q;
+  if (key === sgKey && sgData && !sgData.building) return sgRender();
+  sgKey = key;
+  if (!codes.length && q.length < 3) { sgData = null; return sgRender(); }
+  try { sgData = await authFetch('/suggest?codes=' + encodeURIComponent(codes.join(',')) + '&q=' + encodeURIComponent(q.slice(0, 500))); }
+  catch (e) { sgData = { error: e.message }; }
+  sgRender();
+  if (sgData && sgData.building && !sgData.ready) { sgKey = ''; setTimeout(sgSchedule, 20000); }
+}
+function sgRender() {
+  const b = sgBox(); if (!b) return;
+  if (!sgOn()) { b.hidden = true; return; }
+  b.hidden = false;
+  const row = p => '<div class="sg-row"><div class="sg-body"><div class="sg-name">' + escHtml(p.name) + '</div><div class="sg-why">' + escHtml(p.code) + ' · $' + (Number(p.retail) || 0).toFixed(2) + ' · ' + escHtml(p.why) + '</div></div><button type="button" class="qrow-add" data-sgadd="' + escHtml(p.code) + '">Add</button></div>';
+  if (!sgData) { b.innerHTML = '<div class="sg-hd">💡 Suggested products</div><div class="sg-why">Add a product or type the job description, and products often used with it show here.</div>'; return; }
+  if (sgData.error) { b.innerHTML = '<div class="sg-hd">💡 Suggested products</div><div class="sg-why">Suggestions not available just now.</div>'; return; }
+  const a = sgData.withLines || [], w = sgData.fromWords || [], n = sgMore ? 8 : 3;
+  if (!a.length && !w.length) { b.innerHTML = '<div class="sg-hd">💡 Suggested products</div><div class="sg-why">' + (sgData.ready ? 'Nothing to suggest yet for this quote.' : 'Learning from past jobs. Suggestions show here in a minute or two.') + '</div>'; return; }
+  b.innerHTML = '<div class="sg-hd">💡 Suggested products <small>tap Add, nothing is added by itself</small></div>'
+    + (a.length ? '<div class="sg-sub">Often used with what\'s on this quote</div>' + a.slice(0, n).map(row).join('') : '')
+    + (w.length ? '<div class="sg-sub">From the job description</div>' + w.slice(0, n).map(row).join('') : '')
+    + (a.length > 3 || w.length > 3 ? '<button type="button" class="sg-more" data-sgmore>' + (sgMore ? 'Show fewer' : 'Show more') + '</button>' : '');
+}
+async function sgLearn(kind) {
+  if (!sgOn() || (typeof trPracticeOn === 'function' && trPracticeOn())) return;
+  const codes = sgCodes(); if (codes.length < 2) return;
+  try { await authFetch('/suggest/learn', { method: 'POST', body: JSON.stringify({ codes, text: sgText(), job: (document.getElementById('job-number-input') || {}).value || '', kind }) }); } catch (e) {}
+}
+document.addEventListener('click', async e => {
+  if (e.target.closest && e.target.closest('[data-sgmore]')) { sgMore = !sgMore; return sgRender(); }
+  const b = e.target.closest && e.target.closest('[data-sgadd]'); if (!b || !sgData) return;
+  const p = (sgData.withLines || []).concat(sgData.fromWords || []).find(x => x.code === b.dataset.sgadd); if (!p) return;
+  const from = sgCodes();
+  reeceCache[p.code] = reeceCache[p.code] || { ...p, source: 'reece' };
+  b.disabled = true; await qAdd(qFromReece(reeceCache[p.code]));
+  showToast('Added ' + p.name.slice(0, 40));
+  try { await authFetch('/suggest/taken', { method: 'POST', body: JSON.stringify({ code: p.code, from }) }); } catch (err) {}
+});
+document.addEventListener('input', e => { if (e.target && e.target.id === 'q-job-desc') sgSchedule(); });
 
 function setupQuoteNotes() {
   const scr = document.getElementById('screen-quote'); if (!scr || scr.dataset.qnReady) return;
