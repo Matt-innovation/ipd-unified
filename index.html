@@ -78,6 +78,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .cat-row::-webkit-scrollbar{display:none}
 .cat-chip{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text-mid);white-space:nowrap;flex-shrink:0}
 .cat-chip.active{background:var(--btn2-bg);color:var(--btn2-text);border-color:var(--btn2-bg)}
+/* BUNDLE_TABS=on (logged in): bundle category tabs */
+.bc-tabs{gap:8px;padding:8px 12px}
+.bc-tab{display:flex;align-items:center;gap:6px;min-height:40px;padding:6px 14px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text);white-space:nowrap;flex-shrink:0;font-family:inherit}
+.bc-tab.active{background:var(--btn2-bg);color:var(--btn2-text);border-color:var(--btn2-bg)}
+.bc-tab .bc-n{font-size:12px;font-weight:500;opacity:.7}
 .section-hd{padding:6px 14px;font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;background:var(--surface2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
 .stock-row{display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border);gap:10px;background:var(--surface)}
 .stock-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
@@ -564,6 +569,35 @@ body.pilot .home-wrap>*{flex-shrink:0;min-width:0}
 .home-section{display:flex;flex-direction:column;gap:8px}
 .home-section-hd{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--on-bg);text-transform:uppercase;letter-spacing:.6px}
 .home-want{display:grid;grid-template-columns:1fr;gap:8px}
+/* HOME_TABS=on (logged in): five big tabs; everything else in the side menu */
+.home5 .home-ask,.home5 #home-stars-wrap,.home5 .home-want-hd,.home5 .home-hint,.home5 .home-stat-row{display:none!important}
+.home5 #home-health.h5-hide{display:none!important}
+.home5 .home-want{grid-template-columns:1fr 1fr;gap:12px}
+.home-big{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;min-height:150px;padding:18px 12px;background:var(--surface);border:1px solid var(--border2);border-radius:18px;cursor:pointer;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.08);-webkit-tap-highlight-color:transparent}
+.home-big:active{transform:scale(.98)}
+.home-big:last-child:nth-child(odd){grid-column:1/-1;min-height:120px;flex-direction:row;gap:16px}
+.home-big-icon{font-size:52px;line-height:1}
+.home-big-icon img{width:54px;height:auto;display:block}
+.home-big-label{font-size:19px;font-weight:800;line-height:1.2}
+.home-big-desc{font-size:13px;color:var(--text-mid);line-height:1.35}
+@media (min-width:700px){.home5 .home-want{grid-template-columns:repeat(3,1fr);gap:16px}.home-big{min-height:190px}.home-big:last-child:nth-child(odd){grid-column:auto;flex-direction:column;min-height:190px}.home-big-icon{font-size:64px}.home-big-label{font-size:22px}}
+.sm-btn{display:none;width:44px;height:44px;margin-left:-8px;border:0;background:transparent;color:#fff;font-size:26px;line-height:1;cursor:pointer;border-radius:10px;flex-shrink:0}
+.sm-on .sm-btn{display:block}
+#side-menu{position:fixed;inset:0;z-index:2000;display:none}
+#side-menu.open{display:block}
+.sm-back{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.sm-panel{position:absolute;top:0;left:0;bottom:0;width:min(86vw,360px);background:var(--surface);color:var(--text);box-shadow:4px 0 20px rgba(0,0,0,.3);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);animation:smIn .18s ease-out}
+@keyframes smIn{from{transform:translateX(-100%)}to{transform:none}}
+.sm-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border2);font-size:17px;font-weight:800}
+.sm-close{width:44px;height:44px;border:0;background:transparent;font-size:24px;color:var(--text);cursor:pointer}
+.sm-list{flex:1;overflow-y:auto;padding:6px 0 calc(16px + env(safe-area-inset-bottom))}
+.sm-item{font-family:inherit;display:flex;align-items:center;gap:14px;width:100%;min-height:54px;padding:8px 18px;border:0;background:transparent;color:var(--text);text-align:left;font-size:16px;cursor:pointer}
+.sm-item:active,.sm-item:hover{background:var(--surface2)}
+.sm-item-icon{font-size:24px;width:30px;text-align:center;flex-shrink:0}
+.sm-item-icon img{width:28px;height:auto}
+.sm-item-text{display:flex;flex-direction:column;gap:1px;min-width:0}
+.sm-item-desc{font-size:12px;color:var(--text-mid)}
+.sm-sec{padding:12px 18px 4px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-mid)}
 .home-stars{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media (min-width:600px){.home-want{grid-template-columns:1fr 1fr}.home-stars{grid-template-columns:repeat(3,1fr)}}
 @media (min-width:1000px){.home-want{grid-template-columns:repeat(3,1fr)}.home-stars{grid-template-columns:repeat(4,1fr)}}
@@ -759,6 +793,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
 </div>
 <div id="app">
   <div class="top-bar">
+    <button class="sm-btn" id="sm-btn" aria-label="Menu" onclick="smOpen()">☰</button>
     <div class="top-logo">
       <div class="top-logo-mark">🔧</div>
       <div><div class="top-logo-text">IPD</div><div class="top-logo-sub">Innovation Plumbing + Design</div></div>
@@ -868,7 +903,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
         </div>
 
         <div class="home-section">
-          <div class="home-section-hd">I want to…</div>
+          <div class="home-section-hd home-want-hd">I want to…</div>
           <div class="home-want" id="home-want"></div>
           <div class="home-hint">Tap ☆ on a button to pin it to your shortcuts.</div>
         </div>
@@ -990,6 +1025,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
           </div>
           <div class="qt-panel" id="qt-bundles" hidden>
             <div class="qt-search"><input type="search" id="qb-search" placeholder="Search our bundles (name or code)…" autocomplete="off" enterkeyhint="search"></div>
+            <div class="cat-row bc-tabs" id="qb-tabs" hidden></div>
             <div class="qt-list" id="qb-results"></div>
           </div>
           <div class="qt-panel" id="qt-labour" hidden>
@@ -2642,7 +2678,52 @@ async function loadKnowledge() {
 }
 
 // ── SEARCH ────────────────────────────────────────────────────────────────────
+// Bundle category tabs (BUNDLE_TABS=on). Each tab = some of the Sheet's bundle categories; bundles in "Other"
+// (and other odd ones) go to a tab by words in their name, else stay in "Other". First match wins.
+const BC_GROUPS = [
+  { id: 'hw', icon: '🔥', label: 'Hot water systems', cats: ['Hot Water', 'Tempering Valve'], kw: /hot water|\bhwu|\bhws|gas hot|instantaneous/i },
+  { id: 'wc', icon: '🚽', label: 'Toilet installs', cats: ['Toilets'], kw: /toilet|cistern|\bpan\b|seat/i },
+  { id: 'kit', icon: '🍽️', label: 'Kitchen and laundry', cats: ['Dishwashers', 'Garbage Disposals', 'Fridge Water', 'Water Filters', 'New Water Point', 'Flexi Hose'], kw: /kitchen|laundry|dishwasher|filter|sink|washing machine/i },
+  { id: 'taps', icon: '🚰', label: 'Taps and mixers', cats: ['Tapware', 'Mixers', 'Hose Taps', 'Sink Spouts'], kw: /\btaps?\b|mixer|aerator|bath outlet|spout/i },
+  { id: 'bath', icon: '🚿', label: 'Showers and bathrooms', cats: ['Showers', 'Vanity', 'Bathrooms', 'Plug & Waste'], kw: /shower|basin|bathroom|vanity/i },
+  { id: 'drain', icon: '🕳️', label: 'Drains and pipes', cats: ['Drain Cleaning', 'Pipework', 'Downpipes', 'Roofing'], kw: /drain|sewer|stormwater|gully|\btrap\b|pipe ?work|water line/i },
+  { id: 'pump', icon: '💧', label: 'Valves, pumps and tanks', cats: [], kw: /pump|rainbank|tank|isolation valve|pressure limiting|lagging/i },
+  { id: 'gas', icon: '🔵', label: 'Gas', cats: ['Gas Works'], kw: /\bgas\b/i },
+  { id: 'hire', icon: '🚜', label: 'Equipment hire', cats: ['Equipment Hire'], kw: null },
+  { id: 'fees', icon: '🧾', label: 'Fees and call-outs', cats: ['After Hours', 'Minimum Fee', 'Bundle Quote'], kw: /\bfee\b|form 4|health check|investigation|call ?out/i },
+];
+function bcOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.bundleTabs); }
+function bcGroupOf(b) {
+  const byCat = BC_GROUPS.find(g => g.cats.includes(b.category));
+  if (byCat) return byCat.id;
+  const t = (b.name || '') + ' ' + (b.code || '');
+  const byWord = BC_GROUPS.find(g => g.kw && g.kw.test(t));
+  return byWord ? byWord.id : 'other';
+}
+function bcTabs() {
+  const n = {}; bundles.forEach(b => { const g = bcGroupOf(b); n[g] = (n[g] || 0) + 1; });
+  return BC_GROUPS.filter(g => n[g.id]).map(g => ({ ...g, n: n[g.id] })).concat(n.other ? [{ id: 'other', icon: '📁', label: 'Other', n: n.other }] : []);
+}
+function bcTabHtml(cur, attr) {
+  return '<button class="bc-tab' + (cur === 'All' ? ' active' : '') + '" ' + attr + '="All">All <span class="bc-n">' + bundles.length + '</span></button>' +
+    bcTabs().map(g => '<button class="bc-tab' + (cur === 'g:' + g.id ? ' active' : '') + '" ' + attr + '="g:' + g.id + '">' + g.icon + ' ' + esc(g.label) + ' <span class="bc-n">' + g.n + '</span></button>').join('');
+}
+// a bundle is in the chosen tab (or Sheet category, when tabs are off)
+function bcIn(b, cat) { return cat === 'All' || (cat.startsWith('g:') ? bcGroupOf(b) === cat.slice(2) : b.category === cat); }
+let qbCat = 'All';
+function bcRender() {
+  if (typeof dataLoaded === 'undefined' || !dataLoaded) return;
+  if (!bcOn() && String(quoteCat).startsWith('g:')) quoteCat = 'All';
+  buildQCats(); if (typeof renderQBundles === 'function' && document.getElementById('qb-results')) renderQBundles();
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest && e.target.closest('[data-bcq],[data-bcb]'); if (!t) return;
+  if (t.dataset.bcq) { quoteCat = t.dataset.bcq; buildQCats(); renderQResults(); }
+  else { qbCat = t.dataset.bcb; renderQBundles(); }
+});
 function buildQCats() {
+  if (bcOn()) { const el = document.getElementById('q-cats'); el.classList.add('bc-tabs'); el.innerHTML = bcTabHtml(quoteCat, 'data-bcq'); return; }
+  document.getElementById('q-cats').classList.remove('bc-tabs');
   const cats = new Set(['All']);
   bundles.forEach(b => { if(b.category) cats.add(b.category); });
   document.getElementById('q-cats').innerHTML = [...cats].map(c =>
@@ -2679,8 +2760,8 @@ function renderQResults() {
     ? (isBundlePrefix
         // Prefix match: BHWU matches BHWU001, BHWU-STANDARD etc
         ? bundles.filter(b => b.code && b.code.toUpperCase().startsWith(raw.trim().toUpperCase())).slice(0, 50)
-        : (q ? bundles.filter(b=>quoteCat==='All'||b.category===quoteCat).map(b=>({...b,_s:scoreItem(b.name,b.code,b.category,q)})).filter(b=>b._s>0).sort((a,b)=>b._s-a._s).slice(0,50)
-             : bundles.filter(b=>quoteCat!=='All'&&b.category===quoteCat).slice(0,50)))
+        : (q ? bundles.filter(b=>bcIn(b,quoteCat)).map(b=>({...b,_s:scoreItem(b.name,b.code,b.category,q)})).filter(b=>b._s>0).sort((a,b)=>b._s-a._s).slice(0,50)
+             : bundles.filter(b=>quoteCat!=='All'&&bcIn(b,quoteCat)).sort((a,b)=>a.name.localeCompare(b.name)).slice(0,bcOn()?200:50)))
     : [];
   // For Reece tab, fetch from server CSV endpoint
   if (showReece && q) {
@@ -3681,6 +3762,16 @@ function renderQProducts(keep) {
 
 function renderQBundles() {
   const box = document.getElementById('qb-results'), raw = (document.getElementById('qb-search').value || '').trim();
+  const tabs = document.getElementById('qb-tabs'), bc = bcOn() && dataLoaded;
+  if (tabs) { tabs.hidden = !bc; if (bc) tabs.innerHTML = bcTabHtml(qbCat, 'data-bcb'); }
+  if (!bc) qbCat = 'All';
+  if (bc && qbCat !== 'All') {
+    const q2 = raw ? normaliseTerm(raw) : '';
+    const inTab = bundles.filter(b => bcIn(b, qbCat));
+    const list = q2 ? inTab.map(b => ({ ...b, _s: scoreItem(b.name, b.code, b.category, q2) })).filter(b => b._s > 0).sort((a, b) => b._s - a._s) : inTab.slice().sort((a, b) => a.name.localeCompare(b.name));
+    box.innerHTML = list.length ? list.slice(0, 200).map(b => qRow(qFromBundle(b))).join('') : '<div class="qempty">No bundles in this tab' + (raw ? ' match that search' : '') + '.</div>';
+    return;
+  }
   if (!raw) {
     const favs = qRead(Q_FAV_KEY).filter(x => x.type === 'bundle'), rec = qRead(Q_RECENT_KEY).filter(x => x.type === 'bundle');
     box.innerHTML = (favs.length ? '<div class="qsec">★ Favourites</div>' + favs.map(qRow).join('') : '') +
@@ -4355,9 +4446,35 @@ function homeGreeting() {
   return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
 }
 
+const HOME5 = ['quote', 'search', 'ask', 'social', 'stock'];
+const HOME5_TEXT = { quote: ['Build a quote', 'Price a job, send to ServiceM8'], search: ['Find a product', 'Reece products and bundles'], ask: ['Ask Old Mate', 'Standards, products, suppliers'], social: ['Social media', 'Job photos for Facebook'], stock: ['Stock', 'Count and order van stock'] };
+function home5On() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.homeTabs); }
+function smRender() {
+  const on = home5On();
+  document.body.classList.toggle('sm-on', on);
+  const list = document.getElementById('sm-list'); if (!list || !on) return;
+  const items = HOME_ACTIONS.filter(homeAllowed).filter(a => !HOME5.includes(a.id));
+  const row = a => '<button class="sm-item" data-sm="' + a.id + '"><span class="sm-item-icon">' + (a.img ? '<img src="' + a.img + '" alt="">' : a.icon) + '</span><span class="sm-item-text"><span>' + escHtml(a.label) + (a.badge && a.badge() ? ' <span class="home-tile-badge">' + escHtml(a.badge()) + '</span>' : '') + '</span><span class="sm-item-desc">' + escHtml(a.desc) + '</span></span></button>';
+  list.innerHTML = '<button class="sm-item" data-sm="home"><span class="sm-item-icon">🏠</span><span class="sm-item-text"><span>Home</span></span></button>' +
+    items.map(row).join('') + (realRole() === 'owner' ? '<div class="sm-sec">Owners</div><button class="sm-item" data-sm="health"><span class="sm-item-icon">🩺</span><span class="sm-item-text"><span>Systems health</span><span class="sm-item-desc">Is everything working?</span></span></button>' : '');
+}
+function smOpen() { if (!home5On()) return; smRender(); const m = document.getElementById('side-menu'); m.classList.add('open'); m.setAttribute('aria-hidden', 'false'); }
+function smClose() { const m = document.getElementById('side-menu'); if (!m) return; m.classList.remove('open'); m.setAttribute('aria-hidden', 'true'); }
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-sm]'); if (!b) return;
+  const id = b.dataset.sm; smClose();
+  if (id === 'home') { goScreen('home'); return; }
+  if (id === 'health') { goScreen('home'); const h = document.getElementById('home-health'); if (h) { h.classList.remove('h5-hide'); homeHealthAt = 0; loadHealth(); setTimeout(() => h.scrollIntoView({ block: 'start', behavior: 'smooth' }), 50); } return; }
+  const a = HOME_ACTIONS.find(x => x.id === id); if (!a || !homeAllowed(a)) return;
+  if (a.href) window.open(a.href, '_blank'); else a.go();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') smClose(); });
 function renderHome() {
   const el = id => document.getElementById(id);
   if (!el('home-want')) return;
+  const h5 = home5On(), wrap = el('home-want').closest('.home-wrap');
+  if (wrap) wrap.classList.toggle('home5', h5);
+  smRender();
   // greeting
   el('home-hello').textContent = homeGreeting() + (CURRENT_USER ? ', ' + CURRENT_USER.name.split(' ')[0] : '');
   el('home-hello-sub').textContent = CURRENT_USER
@@ -4381,13 +4498,16 @@ function renderHome() {
     '<span class="home-tile-icon">' + (a.img ? '<img class="om-tile" src="' + a.img + '" width="120" height="176" alt="" loading="lazy" decoding="async">' : a.icon) + '</span><span class="home-tile-text"><span class="home-tile-label">' + escHtml(a.label) + (a.badge && a.badge() ? '<span class="home-tile-badge">' + escHtml(a.badge()) + '</span>' : '') + '</span>' +
     (small ? '' : '<span class="home-tile-desc">' + escHtml(a.desc) + '</span>') + '</span>' +
     '<button class="home-star' + (stars.includes(a.id) ? ' on' : '') + '" data-star="' + a.id + '" aria-label="' + (stars.includes(a.id) ? 'Unpin' : 'Pin') + ' ' + escHtml(a.label) + '">' + (stars.includes(a.id) ? '★' : '☆') + '</button></div>';
-  el('home-want').innerHTML = allowed.map(a => tile(a, false)).join('');
+  const big = a => '<div class="home-big" data-act="' + a.id + '" role="button" tabindex="0"><span class="home-big-icon">' + (a.img ? '<img src="' + a.img + '" alt="">' : a.icon) + '</span><span><span class="home-big-label">' + escHtml(HOME5_TEXT[a.id][0]) + (a.badge && a.badge() ? ' <span class="home-tile-badge">' + escHtml(a.badge()) + '</span>' : '') + '</span><br><span class="home-big-desc">' + escHtml(HOME5_TEXT[a.id][1]) + '</span></span></div>';
+  el('home-want').innerHTML = h5 ? HOME5.map(id => allowed.find(a => a.id === id)).filter(Boolean).map(big).join('') : allowed.map(a => tile(a, false)).join('');
   const starred = allowed.filter(a => stars.includes(a.id));
   el('home-stars-wrap').hidden = !starred.length;
   el('home-stars').innerHTML = starred.map(a => tile(a, true)).join('');
   // Systems health: owners only, and only when not viewing as someone else
   const showHealth = isOwner && homeRole() === 'owner';
   el('home-health').hidden = !showHealth;
+  if (h5 && !el('home-health').dataset.h5) { el('home-health').classList.add('h5-hide'); el('home-health').dataset.h5 = '1'; }
+  if (!h5) el('home-health').classList.remove('h5-hide');
   if (showHealth && Date.now() - homeHealthAt > 5 * 60 * 1000) loadHealth();
 }
 
@@ -4439,7 +4559,7 @@ function setupHome() {
     if (va && realRole() === 'owner') { homeViewAs = va.dataset.viewas === 'owner' ? null : va.dataset.viewas; renderHome(); return; }
     const chip = e.target.closest('[data-ask]');
     if (chip) { homeAsk(chip.dataset.ask); return; }
-    const t = e.target.closest('.home-tile');
+    const t = e.target.closest('.home-tile, .home-big');
     if (t) {
       const a = HOME_ACTIONS.find(x => x.id === t.dataset.act);
       if (!a || !homeAllowed(a)) return;
@@ -5573,6 +5693,8 @@ async function cqRefresh() {
   cqFeat = {};
   if (CURRENT_USER) { try { cqFeat = await (await fetch(PROXY + '/client-quote/status', { signal: AbortSignal.timeout(6000) })).json(); cqOn = !!cqFeat.on; } catch (e) {} }
   cqRender(); if (PILOT_UI && typeof renderQuote === 'function') renderQuote();
+  if (PILOT_UI && typeof renderHome === 'function') renderHome();
+  if (typeof bcRender === 'function') bcRender();
 }
 // shrink onto a white background (a see-through PNG mock-up would otherwise turn black), JPEG
 async function cqShrink(file, max, quality) {
@@ -6443,5 +6565,6 @@ function trOnScreen() { trGuideFix(); if (CURRENT_USER && PILOT_UI && !trCourse)
 
 window.addEventListener('load',init);
 </script>
+<div id="side-menu" aria-hidden="true"><div class="sm-back" onclick="smClose()"></div><nav class="sm-panel" aria-label="Menu"><div class="sm-hd"><span>Menu</span><button class="sm-close" onclick="smClose()" aria-label="Close menu">✕</button></div><div class="sm-list" id="sm-list"></div></nav></div>
 </body>
 </html>
