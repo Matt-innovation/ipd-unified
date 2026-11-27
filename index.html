@@ -2973,6 +2973,7 @@ async function sendQuoteToSM8() {
       if (typeof vrAfterSend === 'function') vrAfterSend('sm8');
       const banner=document.createElement('div');
       banner.style.cssText='padding:10px 14px;background:rgba(74,222,128,.1);font-size:12px;color:#16a34a;text-align:center;border-bottom:1px solid rgba(74,222,128,.2)';
+      if (data.practice) { const b2 = document.createElement('button'); b2.type = 'button'; b2.setAttribute('data-trreal', ''); b2.textContent = 'Real job? Make it a real quote'; b2.style.cssText = 'display:block;margin:8px auto 0;padding:8px 12px;border-radius:8px;border:0;background:#111;color:#fff;font-weight:700;font-size:13px'; setTimeout(() => banner.appendChild(b2), 0); }
       if (data.practice) banner.style.cssText='margin:8px 0;padding:12px 14px;background:#fff;border:2px solid #15803d;border-radius:10px;font-size:14px;font-weight:600;line-height:1.4;color:#14532d;text-align:center';
       const names={jobDescription:'Job description',invoiceDescription:'Invoice description',diaryNote:'Diary note'}, tx=data.texts||{};
       banner.textContent=(data.practice?'🎓 ':'✅ ')+data.message+Object.keys(names).filter(k=>tx[k]).map(k=>' '+(tx[k].result==='saved'?'✓ '+names[k]+' saved'+(tx[k].replaced?' (old text archived)':''):'⚠ '+names[k]+' NOT saved — add it in ServiceM8')+'.').join('');
@@ -6096,7 +6097,7 @@ let trCourse = null, trOpenId = null, trBuiltin = null;   // trBuiltin: videos s
 const trBusy = new Set();
 const TR_SCREENS = { home: 'Home', search: 'Find a product', labour: 'Labour', quote: 'Quote', stock: 'Van stock', ai: 'Ask Old Mate' };
 const trPracticeKey = () => (CURRENT_USER && CURRENT_USER.id ? 'ipd_practice_' + CURRENT_USER.id : null);
-function trPracticeOn() { const k = trPracticeKey(); if (!k || !PILOT_UI) return false; try { return localStorage.getItem(k) === '1'; } catch (e) { return false; } }
+function trPracticeOn() { const k = trPracticeKey(); if (!k || !PILOT_UI) return false; try { const v = localStorage.getItem(k); return v === '1' || /^\d{13}$/.test(v || ''); } catch (e) { return false; } }
 
 // Practice: nothing leaves the phone except reads, Old Mate, the course itself and PRACTICE client links.
 (function () {
@@ -6180,6 +6181,7 @@ async function trInit() {
   if (!CURRENT_USER || !PILOT_UI) { if (box) { box.hidden = true; box.innerHTML = ''; } trPracticeBanner(); return; }
   trStyle();
   trPracticeBanner();
+  setTimeout(trPracticeStale, 1500);
   try { const j = await authFetch('/training/me'); trCourse = j && j.on === true && Array.isArray(j.sections) ? j : null; } catch (e) { trCourse = null; }
   if (trCourse && trBuiltin === null) { try { const r = await fetch('training/videos.json', { cache: 'no-cache' }); trBuiltin = r.ok ? await r.json() : {}; } catch (e) { trBuiltin = {}; } }
   trMergeBuiltin();
@@ -6276,11 +6278,51 @@ function trPracticeBanner() {
   if (on && b) document.body.style.setProperty('--trp-h', b.offsetHeight + 'px');
   const jn = document.getElementById('job-number-input');
   if (jn) { jn.readOnly = on; if (on && jn.value !== '7600') { jn.value = '7600'; qdJob = '7600'; } }
+  let r = document.getElementById('trp-real'); const job = document.querySelector('.qt-job');
+  if (on && !r && job) {
+    r = document.createElement('div'); r.id = 'trp-real';
+    r.style.cssText = 'margin:0 0 8px;padding:10px 12px;background:#fff;border:2px solid #b45309;border-radius:10px;color:#3f2a06;font-size:13px;line-height:1.4';
+    r.innerHTML = '<b>🎓 Practice quote: nothing is sent.</b> Is this a real job? <button type="button" data-trreal style="margin-top:6px;display:block;width:100%;padding:9px;border-radius:8px;border:0;background:#111;color:#fff;font-weight:700;font-size:14px">Make it a real quote</button>';
+    job.insertBefore(r, job.firstChild);
+  }
+  if (r) r.hidden = !on;
 }
+// Practice left on by mistake: the lines on screen become a real quote (no job number yet), practice stops.
+// The practice copy stays in practice; nothing is sent.
+function trPracticeMakeReal() {
+  if (!trPracticeOn()) return;
+  if (typeof qdSaveNow === 'function') qdSaveNow();                 // practice copy kept in practice
+  const d = qdSnap();
+  if (!qdHas(d)) { showToast('This practice quote is empty'); return; }
+  if (!confirm('Make this a real quote?\n\nPractice stops. These ' + d.lines.length + ' line' + (d.lines.length === 1 ? '' : 's') + ' ($' + qdTotal(d).toFixed(2) + ') become a real quote. Then type the real job number and tap Send to SM8.')) return;
+  try { localStorage.removeItem(trPracticeKey()); } catch (e) {}
+  const st = qdRead(), old = st.drafts[''];                         // the real quotes on this phone
+  if (qdHas(old)) { st.drafts['x' + old.savedAt] = { ...old, kept: 'replaced' }; delete st.drafts['']; qdWrite(st); }
+  qdApply({ ...d, job: '', sentAt: null, linkAt: null });
+  trPracticeBanner();
+  qdSaveNow(); qdRenderList();
+  if (typeof cqRender === 'function') cqRender();
+  if (typeof goScreen === 'function') goScreen('quote');
+  if (typeof setQTab === 'function') setQTab('summary');
+  const jn = document.getElementById('job-number-input'); if (jn) { jn.readOnly = false; jn.value = ''; setTimeout(() => { try { jn.scrollIntoView({ block: 'center' }); jn.focus(); } catch (e) {} }, 300); }
+  showToast('Real quote now: type the real job number, then Send to SM8');
+}
+// Opened the app with practice still on from earlier (over 2 hours, or from before this was kept): say so.
+function trPracticeStale() {
+  if (!trPracticeOn() || window.__trStaleAsked) return;
+  let v = ''; try { v = localStorage.getItem(trPracticeKey()) || ''; } catch (e) {}
+  const t = /^\d{13}$/.test(v) ? +v : 0;
+  if (t && Date.now() - t < 2 * 3600e3) return;
+  window.__trStaleAsked = true;
+  const d = qdSnap(), has = qdHas(d);
+  if (has && confirm('🎓 Practice mode is still on' + (t ? ' (since ' + qdWhen(t) + ')' : '') + '. Quotes in practice are NOT sent to ServiceM8.\n\nOK = make the quote on screen a real quote\nCancel = keep practising')) { trPracticeMakeReal(); return; }
+  if (!has && confirm('🎓 Practice mode is still on' + (t ? ' (since ' + qdWhen(t) + ')' : '') + '. Quotes in practice are NOT sent to ServiceM8.\n\nOK = stop practice\nCancel = keep practising')) trPracticeStop();
+}
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('[data-trreal]')) { e.preventDefault(); trPracticeMakeReal(); } });
 function trPracticeStart() {
   if (trPracticeOn()) { trPracticeBanner(); return; }
   if (typeof qdSaveNow === 'function') qdSaveNow();               // the real draft is saved under its own key first
-  try { localStorage.setItem(trPracticeKey(), '1'); } catch (e) { showToast('Could not start practice on this phone'); return; }
+  try { localStorage.setItem(trPracticeKey(), String(Date.now())); } catch (e) { showToast('Could not start practice on this phone'); return; }
   const st = qdRead(), d = st.drafts['7600'];                     // practice has its own draft (job 7600)
   if (qdHas(d)) qdApply(d); else { qdClearScreen(); }
   trPracticeBanner();
