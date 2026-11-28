@@ -240,6 +240,54 @@ textarea.qs-ro{opacity:.7}
 .qs-dl input{width:96px;min-height:40px;font-size:16px;padding:4px 8px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text)}
 .qs-dg{flex:1;font-size:14px;min-width:120px}.qs-dg b{color:#dc2626}
 .qs-dbtn{min-height:40px;min-width:72px;border-radius:10px;border:0;background:var(--btn-bg);color:var(--btn-text);font:700 14px var(--font);cursor:pointer}
+/* BUNDLE_BUILDER=on: owners' bundle builder (full screen) */
+body.bb-open{overflow:hidden}
+.bb-back{position:fixed;inset:0;z-index:950;background:var(--surface2);color:var(--text);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
+.bb-back[hidden]{display:none}
+.bb-top{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border2);background:var(--surface)}
+.bb-top b{font-size:17px;flex:1}.bb-tc{font-size:11px;color:var(--text-mid);text-align:right;max-width:40%}
+.bb-x{min-width:44px;min-height:44px;border:0;background:transparent;font-size:20px;color:var(--text);cursor:pointer}
+.bb-tabs{display:flex;gap:6px;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border2)}
+.bb-tabs button{flex:1;min-height:44px;border-radius:12px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:700 14px var(--font);cursor:pointer}
+.bb-tabs button.on{background:var(--btn-bg);color:var(--btn-text);border-color:transparent}
+.bb-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px calc(28px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;max-width:900px;width:100%;margin:0 auto;box-sizing:border-box}
+.bb-body input[type=search],.bb-f input,.bb-f select,.bb-f textarea,.bb-lab input{width:100%;box-sizing:border-box;min-height:44px;font-size:16px;padding:8px 10px;border:1px solid var(--border2);border-radius:10px;background:var(--surface2);color:var(--text);font-family:var(--font)}
+.bb-f{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--text-mid)}
+.bb-cats{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.bb-cats::-webkit-scrollbar{display:none}
+.bb-cats button{flex:0 0 auto;min-height:40px;padding:0 12px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:600 13px var(--font);cursor:pointer}
+.bb-cats button.on{background:var(--btn-bg);color:var(--btn-text);border-color:transparent}
+.bb-row,.bb-part{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border2);border-radius:12px;background:var(--surface);flex-wrap:wrap}
+.bb-row.off{opacity:.6}
+.bb-rt{flex:1 1 180px;min-width:0;display:flex;flex-direction:column;gap:2px}.bb-rt b{font-size:14px;overflow-wrap:anywhere}.bb-rt small{font-size:12px;color:var(--text-mid);overflow-wrap:anywhere}
+.bb-b,.bb-b2{min-height:44px;min-width:64px;padding:0 12px;border-radius:10px;border:0;background:var(--btn-bg);color:var(--btn-text);font:700 13px var(--font);cursor:pointer}
+.bb-b2{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+.bb-go{background:#16a34a;color:#fff}
+.bb-link{min-height:40px;border:0;background:transparent;color:var(--text);text-decoration:underline;font:600 13px var(--font);cursor:pointer;padding:0 4px}
+.bb-qty{min-width:28px;text-align:center;font-weight:700}
+.bb-lab{display:flex;gap:10px;flex-wrap:wrap}.bb-lab label{flex:1 1 140px;display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--text-mid)}
+.bb-acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.bb-note{font-size:13px;padding:8px 10px;border-radius:10px;background:var(--surface2)}
+.bb-would{padding:10px;border:2px solid var(--orange);border-radius:12px;display:flex;flex-direction:column;gap:6px;font-size:14px}.bb-would.ok{border-color:#16a34a}
+.bb-would ul{margin:0;padding-left:18px;font-size:13px}
+.bb-tbl{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}.bb-tbl td,.bb-tbl th{border:1px solid var(--border2);padding:4px 6px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
+.bb-chk{font-size:14px;padding:6px 2px;border-bottom:1px solid var(--border2)}.bb-chk small{display:block;font-size:12px;color:var(--text-mid);margin-left:24px}
+/* PRODUCT_LINKS_ANY=on: Reece link for any code */
+.rl-link{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border:1px solid var(--border2);border-radius:10px;font-size:14px;overflow-wrap:anywhere}.rl-link small{color:var(--text-mid);font-size:12px}
+.rl-open{display:flex;align-items:center;justify-content:center;min-height:44px;text-decoration:none;flex:1 1 140px}
+a.pl-btn.rl-tech{text-decoration:none;display:inline-flex;align-items:center;min-height:44px;margin-left:6px}
+/* GP_EQUIP=on: major equipment set aside */
+.eq-set{font-size:13px;margin-top:6px;color:var(--text)}
+.eq-small{font-size:12px;color:var(--text-mid);margin-top:3px}
+.eq-list{margin-top:6px;font-size:13px}.eq-list summary{min-height:40px;display:flex;align-items:center;cursor:pointer;color:var(--text-mid);font-weight:600}
+.eq-row{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px}.eq-row input{width:22px;height:22px;flex-shrink:0}.eq-row small{color:var(--text-mid)}
+.eq-chg{min-height:40px;margin-top:4px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:600 13px var(--font);padding:0 12px;cursor:pointer}
+/* SCOPE_OF_WORK=on: the scope box */
+.sc-box{display:flex;flex-direction:column;gap:4px;padding:10px;border:1px solid var(--border2);border-radius:12px;background:var(--surface2)}
+.sc-box[hidden],.sc-bundle[hidden]{display:none!important}
+.sc-box textarea{min-height:120px}
+.sc-ticks{display:flex;flex-direction:column}
+.sc-ticks .qs-same{font-size:14px}
+.sc-bundle{padding:8px 10px;border:1px dashed var(--border2);border-radius:10px}
 /* SUGGEST=on: suggested products */
 .sg-box{margin:8px 10px;padding:10px 12px;border:1px dashed var(--border2);border-radius:12px;background:var(--surface);display:flex;flex-direction:column;gap:6px}
 .sg-hd{font-weight:800;font-size:14px}.sg-hd small{font-weight:500;color:var(--text-mid);font-size:12px}
@@ -1152,6 +1200,19 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
             </div>
             <div class="qt-job">
               <input type="text" id="job-number-input" placeholder="Job number (optional)">
+              <div class="sc-box" id="sc-box" hidden>
+                <label class="qt-inv">Scope of work (optional): everything the whole job includes
+                  <textarea id="q-scope" data-qtext="ipd_scope" rows="6" maxlength="2000" placeholder="e.g. Remove and dispose of the old 250L electric hot water system. Supply and install a new 270L heat pump, new tempering valve, isolation valve and pressure limiting valve. Connect to the existing water and power. Test and commission."></textarea>
+                </label>
+                <input type="hidden" id="q-scope-use" data-qtext="ipd_scope_use">
+                <div class="sc-ticks">
+                  <label class="qs-same"><input type="checkbox" data-scuse="quote"> Use as the quote description (client quote page and PDF)</label>
+                  <label class="qs-same"><input type="checkbox" data-scuse="invoice"> Use as the invoice description (ServiceM8 Billing)</label>
+                  <label class="qs-same"><input type="checkbox" data-scuse="job"> Use as the job description (ServiceM8 Details)</label>
+                </div>
+                <div class="qt-inv-hint" id="sc-hint"></div>
+              </div>
+              <div class="qt-inv-hint sc-bundle" id="sc-bundle" hidden>This quote has bundles. Each bundle carries its own description into ServiceM8 and onto the client quote page, so the job and invoice description can stay empty.</div>
               <label class="qt-inv">Job description
                 <textarea id="q-job-desc" data-qtext="ipd_job_desc" rows="3" maxlength="2000" placeholder="What the job is, e.g. Replace leaking 250L electric HWS with heat pump."></textarea>
                 <span class="qt-inv-hint">ServiceM8 → Details page → Job Description.</span>
@@ -2930,6 +2991,7 @@ function updateQuoteUI() {
   syncDiscountLine();
   if (typeof spCheck === 'function') setTimeout(spCheck, 0);
   if (typeof qsRender === 'function') setTimeout(qsRender, 0);
+  if (typeof scSync === 'function') setTimeout(scSync, 0);
   if (typeof sgSchedule === 'function') sgSchedule();
   const count = quote.reduce((s,i)=>s+i.qty,0);
   const badge = document.getElementById('quote-badge');
@@ -3000,9 +3062,12 @@ function isGstFreeLine(i) {
   // Reece lines carry the price file's GST % (10 or 0) as `markup`.
   return i.type === 'reece' && i.markup !== undefined && i.markup !== null && i.markup !== '' && Number(i.markup) === 0;
 }
-function calcGP() {
-  let sellInc = 0, sellEx = 0, cost = 0, hasBundle = false, noCost = 0, bundlesNoCost = 0;
+function calcGP(opt) {
+  const all = !!(opt && opt.all), eq = !all && eqOn();
+  let sellInc = 0, sellEx = 0, cost = 0, hasBundle = false, noCost = 0, bundlesNoCost = 0, eSellInc = 0, eSellEx = 0, eCost = 0, hours = 0;
+  const equip = [];
   for (const i of quote) {
+    if (i.type === 'labour' && i.id !== 'discount') hours += (Number(i.hours) || (/\((\d+(?:\.\d+)?)h\)/.exec(i.name || '') || [])[1] * 1 || 0) * (Number(i.qty) || 1);
     if (i.id === 'discount') continue;                // applied below as a % of the counted sell
     const lineInc = (parseFloat(i.price) || 0) * i.qty;
     let lineCost;
@@ -3018,15 +3083,54 @@ function calcGP() {
       if (c <= 0) { noCost++; continue; }          // no cost known — leave out rather than show 100%
       lineCost = c * i.qty;
     }
+    if (eq && eqIsSet(i)) { eSellInc += lineInc; eSellEx += isGstFreeLine(i) ? lineInc : lineInc / 1.1; eCost += lineCost; equip.push({ name: i.name, id: i.id, inc: lineInc }); continue; }
     sellInc += lineInc;
     sellEx  += isGstFreeLine(i) ? lineInc : lineInc / 1.1;
     cost    += lineCost;
   }
   // Whole-quote discount reduces the sell of every counted line by the same %; cost is unchanged.
+  // Major equipment set aside (GP_EQUIP=on): the whole discount comes out of the job, not the equipment.
   const sellExFull = sellEx, d = discountFraction();
-  sellInc *= (1 - d); sellEx *= (1 - d);
-  return { sellInc, sellEx, cost, hasBundle, noCost, sellExFull, bundlesNoCost };
+  if (eq && equip.length) { sellInc -= d * (sellInc + eSellInc); sellEx -= d * (sellEx + eSellEx); }
+  else { sellInc *= (1 - d); sellEx *= (1 - d); }
+  return { sellInc, sellEx, cost, hasBundle, noCost, sellExFull, bundlesNoCost, equip, eSellInc, eSellEx, eCost, hours };
 }
+// ── MAJOR EQUIPMENT (GP_EQUIP=on, logged in) ─────────────────────────────────
+// An item costing eqMin() or more per unit (ex GST, default $550; owners change it) is major equipment: the headline
+// Job GP leaves it out and is checked against the job-type target as usual. Staff can flag or unflag any line
+// (line.equip true/false; not set = by the cost). Bundles are flagged by hand only (their price includes labour).
+let eqSet = null;
+function eqOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.gpEquip); }
+function eqMin() { return eqSet && eqSet.equipMin > 0 ? eqSet.equipMin : 550; }
+function eqAuto(i) { return i.type !== 'labour' && i.type !== 'bundle' && i.id !== 'discount' && (parseFloat(i.cost) || 0) >= eqMin() - 1e-9; }
+function eqIsSet(i) { return i.id !== 'discount' && (i.equip === true || (i.equip !== false && eqAuto(i))); }
+async function eqLoad() { if (!eqOn()) return; try { const j = await authFetch('/gp-settings'); if (j && j.equipMin) { eqSet = j; renderGP(); } } catch (e) {} }
+async function eqChange() {
+  if (!eqSet || !eqSet.canChange) return;
+  const v = prompt('Major equipment: items costing this much or more (per item, ex GST) are set aside from the Job GP.', String(eqMin()));
+  if (v == null) return; const n = parseFloat(String(v).replace(/[$,\s]/g, ''));
+  if (!(n >= 50 && n <= 100000)) return showToast('Use an amount from $50 to $100,000');
+  try { eqSet = await authFetch('/gp-settings', { method: 'POST', body: JSON.stringify({ equipMin: n }) }); showToast('Major equipment is now $' + eqMin().toFixed(0) + ' or more'); updateQuoteUI(); renderGP(); } catch (e) { showToast('Not saved: ' + e.message); }
+}
+function eqToggle(id) {
+  const i = quote.find(x => String(x.id) === String(id)); if (!i) return;
+  const now = eqIsSet(i); i.equip = !now; if (i.equip === eqAuto(i)) delete i.equip;   // back to "by the cost" when it matches
+  if (typeof qdSave === 'function') qdSave(); updateQuoteUI(); renderGP();
+}
+function eqPanelHtml(g) {
+  if (!eqOn()) return '';
+  const money = v => '$' + Math.round(v).toLocaleString('en-AU'), lines = quote.filter(i => i.id !== 'discount' && i.type !== 'labour');
+  const ga = calcGP({ all: true }), allGp = ga.sellEx > 0 ? (ga.sellEx - ga.cost) / ga.sellEx : null;
+  const out = [];
+  if (g.equip.length) out.push('<div class="eq-set">Set aside: ' + g.equip.map(e => escHtml(e.name.slice(0, 40)) + ' ' + money(e.inc)).join(', ') + '</div>');
+  if (allGp != null) out.push('<div class="eq-small">Overall GP with everything included: ' + (allGp * 100).toFixed(1) + '%</div>');
+  if (ga.hours > 0 && ga.sellEx > 0) out.push('<div class="eq-small">GP per labour hour: ' + money((ga.sellEx - ga.cost) / ga.hours) + ' an hour (' + (Math.round(ga.hours * 10) / 10) + ' h, everything included)</div>');
+  if (lines.length) out.push('<details class="eq-list"><summary>Major equipment: ' + money(eqMin()) + ' or more each (cost ex GST)' + (eqSet && eqSet.canChange ? '' : ' · set by the owners') + '</summary>'
+    + lines.map(i => '<label class="eq-row"><input type="checkbox" data-eqid="' + escHtml(String(i.id)) + '"' + (eqIsSet(i) ? ' checked' : '') + '> <span>' + escHtml(i.name.slice(0, 60)) + (i.cost > 0 ? ' <small>cost $' + Number(i.cost).toFixed(0) + '</small>' : '') + '</span></label>').join('')
+    + (eqSet && eqSet.canChange ? '<button type="button" class="eq-chg" onclick="eqChange()">Change the $' + eqMin().toFixed(0) + ' (owners)</button>' : '') + '</details>');
+  return out.join('');
+}
+document.addEventListener('change', e => { const c = e.target.closest && e.target.closest('[data-eqid]'); if (c) eqToggle(c.dataset.eqid); });
 
 // ── QUOTE DISCOUNT (whole quote, %) ──────────────────────────────────────────
 function discountFraction() { return Math.min(50, Math.max(0, quoteDiscountPct || 0)) / 100; }
@@ -3058,7 +3162,7 @@ function setMaxDiscount() {
   const target = GP_SETTINGS.targets[quoteJobType];
   const g = calcGP();
   if (g.sellExFull <= 0) { showToast('Add items to the quote first'); return; }
-  const dMax = 1 - g.cost / (g.sellExFull * (1 - target));
+  const dMax = (g.sellExFull - g.cost / (1 - target)) / (g.sellExFull + (g.eSellEx || 0));   // = 1 − C/(S(1−T)) with nothing set aside
   if (dMax <= 0) { setQuoteDiscount(0); showToast('No discount possible — GP is below target even at full price'); return; }
   const pct = Math.min(50, Math.floor(dMax * 1000) / 10);   // round DOWN to 0.1% so target still holds
   const box = document.getElementById('qd-custom'); if (box) box.value = [0, 5, 10, 15].includes(pct) ? '' : pct;
@@ -3096,7 +3200,7 @@ function renderGP() {
     const lowestInc = g.cost / (1 - target) * 1.1;   // lowest sell (inc GST) that still hits target
     const room = g.sellInc - lowestInc;
     const money = v => (v < 0 ? '−$' : '$') + Math.abs(v).toFixed(2);
-    body = `<div class="gp-bar ${cls}"><span class="gp-pct">GP ${(gp * 100).toFixed(1)}%</span><span class="gp-target">Target ${pctTxt(target)}</span></div>`
+    body = `<div class="gp-bar ${cls}"><span class="gp-pct">${eqOn() ? 'Job GP' : 'GP'} ${(gp * 100).toFixed(1)}%</span><span class="gp-target">Target ${pctTxt(target)}</span></div>`
       + `<div class="gp-row"><span>Lowest price to hold target (inc GST)</span><b>${money(lowestInc)}</b></div>`
       + `<div class="gp-row"><span>Room to discount</span><b class="${room < 0 ? 'neg' : ''}">${money(room)}</b></div>`
       // Below target only: same action as the Labour screen's button (same uplift line, units rounded up).
@@ -3105,7 +3209,7 @@ function renderGP() {
   const notes = [];
   if (g.bundlesNoCost) notes.push(`GP excludes ${g.bundlesNoCost} bundle${g.bundlesNoCost === 1 ? '' : 's'} with no cost`);
   if (g.noCost) notes.push(`GP excludes ${g.noCost} item${g.noCost === 1 ? '' : 's'} with no cost price`);
-  panel.innerHTML = typeRow + body + (notes.length ? `<div class="gp-note">${notes.join(' · ')}</div>` : '');
+  panel.innerHTML = typeRow + body + eqPanelHtml(g) + (notes.length ? `<div class="gp-note">${notes.join(' · ')}</div>` : '');
 }
 
 function exportQuote() {
@@ -4500,6 +4604,7 @@ const HOME_ACTIONS = [
   { id: 'kb', icon: '📚', label: 'IPD Knowledge Centre', desc: 'Bundles, codes and how-tos', roles: ALL_ROLES, go: () => goScreen('kb') },
   { id: 'training', icon: '🎓', label: 'Learn the app', desc: 'Step-by-step guide', roles: ALL_ROLES, go: () => goScreen('training') },
   { id: 'whatsapp', icon: '💬', label: 'Message the team', desc: 'IPD BOYS WhatsApp group', roles: ALL_ROLES, href: 'https://chat.whatsapp.com/D9bDzCG7f9UK7ZhmddIuKw' },
+  { id: 'bundlebuilder', icon: '🧰', label: 'Bundle builder', desc: 'See, build and edit our bundles (owners)', roles: ['owner'], needsBB: true, go: () => bbOpen() },
   { id: 'users', icon: '👥', label: 'Manage users', desc: 'Add, change or remove people', roles: ['owner'], needsManage: true, go: () => openUsers() },
   { id: 'problem', icon: '⚠️', label: 'Report a problem', desc: 'Tell Matt what went wrong — it goes straight to him', roles: ALL_ROLES, go: () => openProblem() },
   { id: 'settings', icon: '⚙️', label: 'Settings', desc: 'Your login and app settings', roles: ALL_ROLES, go: () => goScreen('settings') },
@@ -4518,6 +4623,7 @@ function homeStars() { try { return JSON.parse(localStorage.getItem(homeStarKey(
 function homeAllowed(a) {
   if (!a.roles.includes(homeRole())) return false;
   if (a.needsManage) return !!(CURRENT_USER && CURRENT_USER.canManageUsers && !homeViewAs);
+  if (a.needsBB) return !homeViewAs && typeof bbOn === 'function' && bbOn();
   if (a.needsKiosk) return !!(CURRENT_USER && kSummary && kSummary.enabled);
   if (a.needsDirectory) return !!(CURRENT_USER && dirConfig && dirConfig.enabled);
   if (a.needsGuide) return !!(CURRENT_USER && guideCfg && guideCfg.enabled);
@@ -5240,6 +5346,7 @@ function vrDiff(a, b) {
   for (const [k, i] of B) { const o = A.get(k); if (!o) continue; if (o.qty !== i.qty) out.push('qty: ' + i.name + ' ' + o.qty + ' → ' + i.qty); if (Number(o.price) !== Number(i.price)) out.push('price: ' + i.name + ' ' + m2(o.price) + ' → ' + m2(i.price)); }
   const ta = tot(a), tb = tot(b); if (Math.abs(ta - tb) > 0.004) out.push('total: ' + m2(ta) + ' → ' + m2(tb));
   if ((a.texts || {}).ipd_invoice_desc !== (b.texts || {}).ipd_invoice_desc) out.push('invoice description changed');
+  if (((a.texts || {}).ipd_scope || '') !== ((b.texts || {}).ipd_scope || '') || ((a.texts || {}).ipd_scope_use || '') !== ((b.texts || {}).ipd_scope_use || '')) out.push('scope of work changed');
   return out.length ? out.join('\n') : 'No differences.';
 }
 async function vrOpenSheet(focus) {
@@ -5364,6 +5471,7 @@ function plDecorate(list) {
     const n = (it.links || []).length, b = document.createElement('button');
     b.type = 'button'; b.className = 'pl-btn' + (n ? ' has' : ''); b.dataset.plopen = it.id; b.textContent = '📄 Product info' + (n ? ' (' + n + ')' : '');
     front.appendChild(b);
+    if (rlOn()) for (const t of (it.techLinks || [])) { const a = document.createElement('a'); a.className = 'pl-btn rl-tech'; a.href = t.url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = '🔧 ' + (t.exact ? 'Product page' : 'Reece search') + ' (technician)'; a.addEventListener('click', e => e.stopPropagation()); front.appendChild(a); }
   });
 }
 async function plLoad() {
@@ -5395,7 +5503,7 @@ function plRenderSheet() {
   const opt = l => '<label class="pl-opt"><input type="checkbox" data-pltick="' + escHtml(l.id) + '"' + (mine.some(k => k.id === l.id) ? ' checked' : '') + '><span>' + escHtml(l.title) + '<small>' + escHtml(l.type) + ' · ' + escHtml(l.site) + (l.category ? ' · ' + escHtml(l.category) : '') + '</small></span></label>';
   const ex = m.exact.map(byId).filter(Boolean), po = m.possible.map(byId).filter(Boolean);
 
-  document.getElementById('pl-body').innerHTML =
+  document.getElementById('pl-body').innerHTML = (rlOn() && rlCodeOf(it) ? '<div id="rl-box"></div>' : '') +
     '<div class="pl-sec">On this line (' + mine.length + ' of ' + PL_LINE + ')</div>' + (mine.length ? mine.map((k, x) => '<div class="pl-on"><span>' + escHtml(k.title) + ' <small>· ' + escHtml(k.type || '') + ' · ' + escHtml(k.site || '') + (k.source === 'manual' ? ' · added by hand' : '') + '</small></span><button type="button" data-plrm="' + x + '" aria-label="Remove">✕</button></div>').join('') : '<div class="rp-small">None yet — tick below.</div>')
     + (ex.length ? '<div class="pl-sec">Exact match (same Reece code)</div>' + ex.map(opt).join('') : '')
     + (po.length ? '<div class="pl-sec">Possible match</div>' + po.map(opt).join('') : '')
@@ -5405,7 +5513,7 @@ function plRenderSheet() {
     + '<input type="text" id="pl-mt" placeholder="What the client sees, e.g. Rheem 250L spec sheet" maxlength="120"><input type="url" id="pl-mu" placeholder="https://…" autocapitalize="off" inputmode="url">'
     + '<select id="pl-my"><option>Spec sheet</option><option>Product page</option><option>Installation guide</option><option>Warranty</option><option>Product information</option></select>'
     + '<div class="rp-row"><button type="button" id="pl-madd">Add this link</button></div><div class="cq-warn" id="pl-msg"></div>';
-  plRenderFound();
+  plRenderFound(); if (rlOn() && rlCodeOf(it)) rlRender(it);
 }
 // search results only (typing must not rebuild the box, or the iPhone keyboard closes)
 function plRenderFound() {
@@ -5449,6 +5557,55 @@ document.addEventListener('change', e => {
   plRenderSheet();
 });
 document.addEventListener('input', e => { if (e.target.id === 'pl-search') plRenderFound(); });
+// ── REECE LINK FOR ANY PRODUCT CODE (PRODUCT_LINKS_ANY=on, with PRODUCT_LINKS) ───────────────────
+// In 📄 Product info: the Reece page for the line's code, built by the server (the exact product page if Reece has
+// it, else a Reece search for the code, so the link always works). Links only, nothing copied from Reece.
+// "Add link for client" puts it on the client quote page (the line's links, as today). "Add link for technician"
+// shows a 🔧 button on the quote line (kept with the quote, its drafts and versions) for whoever is on site.
+// "Save to the Knowledge Centre" adds it to the owners' list of links for the Sheet (nothing is written to the Sheet).
+const rlData = {};
+function rlOn() { return !!(CURRENT_USER && PILOT_UI && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.productLinks && cqFeat.anyLink); }
+function rlCodeOf(it) { const c = String(it.code || '').trim(); return it.id !== 'discount' && (it.type === 'reece' || /^(REC)?\d{3,9}(-\d+)?$/i.test(c)) && c ? c : ''; }
+async function rlRender(it) {
+  const box = document.getElementById('rl-box'); if (!box) return;
+  const code = rlCodeOf(it);
+  let d = rlData[code];
+  if (!d) {
+    box.innerHTML = '<div class="pl-sec">Reece product page</div><div class="rp-small">Finding the Reece page for ' + escHtml(code) + '…</div>';
+    try { d = rlData[code] = await authFetch('/client-quote/reece-link?code=' + encodeURIComponent(code)); } catch (e) { box.innerHTML = '<div class="pl-sec">Reece product page</div><div class="cq-warn">' + escHtml(e.message) + '</div>'; return; }
+    if (!document.getElementById('rl-box')) return;
+  }
+  const forClient = (it.links || []).some(k => k.url === d.url), forTech = (it.techLinks || []).some(k => k.url === d.url);
+  document.getElementById('rl-box').innerHTML = '<div class="pl-sec">Reece product page</div>'
+    + '<div class="rl-link"><b>' + escHtml(d.title) + '</b><small>' + escHtml(d.exact ? 'reece.com.au · product ' + d.code : 'reece.com.au · ' + (d.checked || 'search')) + '</small></div>'
+    + '<label class="pl-opt"><input type="checkbox" data-rl="client"' + (forClient ? ' checked' : '') + '><span>Add link for client<small>On the client quote page, on this line</small></span></label>'
+    + '<label class="pl-opt"><input type="checkbox" data-rl="tech"' + (forTech ? ' checked' : '') + '><span>Add link for technician<small>A 🔧 button on this line in the app, for whoever is on site</small></span></label>'
+    + '<div class="rp-row"><a class="q-btn rl-open" href="' + escHtml(d.url) + '" target="_blank" rel="noopener">Open the Reece page</a>'
+    + (d.exact ? '<button type="button" class="q-btn" data-rl="kc">Save to the Knowledge Centre</button>' : '') + '</div><div class="rp-small" id="rl-msg"></div>';
+}
+document.addEventListener('change', e => {
+  const c = e.target.closest && e.target.closest('input[data-rl]'); if (!c) return;
+  const back = document.getElementById('pl-back'), it = back && quote.find(i => String(i.id) === back.dataset.item), d = it && rlData[rlCodeOf(it)]; if (!d) return;
+  if (c.dataset.rl === 'client') {
+    if (c.checked) { const err = plAdd(it, { title: d.exact ? 'Product photo and specification sheet' : 'Reece product search', url: d.url, type: 'Product information', site: 'reece.com.au', source: 'manual' }); if (err) { c.checked = false; showToast(err); return; } }
+    else { it.links = (it.links || []).filter(k => k.url !== d.url); if (!it.links.length) delete it.links; }
+  } else {
+    if (c.checked) { it.techLinks = (it.techLinks || []).filter(k => k.url !== d.url).concat([{ url: d.url, title: d.title, exact: !!d.exact }]); }
+    else { it.techLinks = (it.techLinks || []).filter(k => k.url !== d.url); if (!it.techLinks.length) delete it.techLinks; }
+  }
+  if (typeof qdSave === 'function') qdSave(); plRenderSheet();
+});
+document.addEventListener('click', async e => {
+  const b = e.target.closest && e.target.closest('button[data-rl="kc"]'); if (!b) return;
+  const back = document.getElementById('pl-back'), it = back && quote.find(i => String(i.id) === back.dataset.item), d = it && rlData[rlCodeOf(it)]; if (!d) return;
+  b.disabled = true;
+  try {
+    const j = await authFetch('/client-quote/kc-save', { method: 'POST', body: JSON.stringify({ code: d.code, url: d.url, title: 'Product photo and specification sheet', line: it.name }) });
+    const w = j.wouldWrite || {};
+    document.getElementById('rl-msg').textContent = (j.already ? 'Already on the owners\u2019 list. ' : '\u2713 ') + j.note + ' The row: ' + w.title + ' · code ' + w.reeceCode + ' · ' + w.url + ' · ' + w.linkType + ' · show to clients: ' + w.showToClients + '.';
+  } catch (err) { b.disabled = false; document.getElementById('rl-msg').textContent = 'Not saved: ' + err.message; }
+});
+
 
 // ── OPTIONS THE CLIENT TICKS (QUOTE_OPTIONS=on) ──────────────────────────────
 // A chip on each quote line: Required → Optional (starts unticked) → Optional (starts ticked). The client quote
@@ -5604,7 +5761,7 @@ function qdRead() { try { const st = JSON.parse(localStorage.getItem(qdKey()) ||
 function qdWrite(st) { try { localStorage.setItem(qdKey(), JSON.stringify(st)); return true; } catch (e) { showToast('⚠ Phone storage full — the draft could not be saved'); return false; } }
 const qdTexts = () => { const o = {}; document.querySelectorAll('[data-qtext]').forEach(t => (o[t.dataset.qtext] = t.value)); return o; };
 const qdSnap = () => ({ job: qdJob, lines: JSON.parse(JSON.stringify(quote)), jobType: quoteJobType, discountPct: quoteDiscountPct, texts: qdTexts(), swms: JSON.parse(JSON.stringify(swState)), savedAt: Date.now() });
-const qdHas = d => !!d && ((d.lines || []).length > 0 || Object.values(d.texts || {}).some(v => v && String(v).trim()));
+const qdHas = d => !!d && ((d.lines || []).length > 0 || Object.entries(d.texts || {}).some(([k, v]) => k !== 'ipd_scope_use' && v && String(v).trim()));
 const qdBody = d => JSON.stringify([d.lines, d.jobType, d.discountPct, d.texts, d.swms || null]);
 const qdTotal = d => (d.lines || []).reduce((t, i) => t + (Number(i.price) || 0) * (Number(i.qty) || 0), 0);
 const qdWhen = t => new Date(t).toLocaleString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
@@ -5779,6 +5936,8 @@ async function cqRefresh() {
   if (PILOT_UI && typeof renderHome === 'function') renderHome();
   if (typeof bcRender === 'function') bcRender();
   if (typeof qsBuild === 'function') qsBuild();
+  if (typeof scSync === 'function') scSync();
+  if (typeof eqLoad === 'function') eqLoad();
   if (typeof sgSchedule === 'function') sgSchedule();
 }
 // shrink onto a white background (a see-through PNG mock-up would otherwise turn black), JPEG
@@ -5888,7 +6047,7 @@ async function cqSend() {
   if (cqFeat.stages && st.on) { const chk = stCheck(st); if (chk.problem) { stRender(); return showToast(chk.problem); } stages = st.stages.map(x => ({ name: x.name.trim(), amountInc: Math.round(Number(x.amount) * 100) / 100 })); }
   const btn = document.getElementById('cq-send'); btn.disabled = true; btn.textContent = 'Making the link…';
   try {
-    const invoiceDescription = (document.getElementById('q-invoice-desc')?.value || '').trim();
+    const invoiceDescription = (typeof scFor === 'function' && scFor('quote')) || (document.getElementById('q-invoice-desc')?.value || '').trim();
     const j = await authFetch('/client-quote', { method: 'POST', body: JSON.stringify({ jobNumber: job, invoiceDescription, images, ...(client ? { client } : {}), ...(stages ? { stages } : {}), ...(swOn() ? { swms: swSummary() } : {}),
       lines: quote.map(i => ({ name: i.name, qty: Number(i.qty), priceInc: Number(i.price), ...(cqFeat.options && i.optional ? { optional: true, defaultOn: !!i.defaultOn } : {}), ...(cqFeat.productLinks && (i.links || []).length ? { links: i.links.map(k => k.source === 'kc' ? { id: k.id } : { url: k.url, title: k.title, type: k.type }) } : {}) })) }) });
     const preview = j.link.replace('/quote.html#', '/quote.html?staff=1#');
@@ -6282,6 +6441,242 @@ document.addEventListener('click', e => {
   setTimeout(spCheck, 300);
 });
 
+// ── BUNDLE BUILDER (BUNDLE_BUILDER=on, owners) ───────────────────────────────
+// See every bundle in 10 categories, build a new one or edit one (products, labour, description, price) with the
+// price and GP as you go (major equipment set aside, like the Quote screen). Publish / Update / Switch off show the
+// change first (old against new), need a confirm tap, and for now change a TEST COPY only: nothing is written to
+// ServiceM8 or the bundle Sheet until Matt approves live updates. Every change keeps a backup and an Undo.
+let bbData = null, bbIdeas = null, bbTab = 'list', bbCat = '', bbQ = '', bbForm = null, bbSearchT = null, bbLast = null;
+function bbOn() { return !!(CURRENT_USER && PILOT_UI && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.bundleBuilder && (CURRENT_USER.role === 'owner' || CURRENT_USER.canManageUsers)); }
+const BB_RATE = { standard: { name: 'Tradesman', sell: () => parseFloat((document.getElementById('rate-standard') || {}).value) || 229, cost: () => GP_SETTINGS.labourCostPerHour.standard },
+  apprentice: { name: 'Apprentice', sell: () => parseFloat((document.getElementById('rate-apprentice') || {}).value) || 100, cost: () => GP_SETTINGS.labourCostPerHour.apprentice } };
+const BB_45 = ['Hot water', 'Bathroom', 'Kitchen', 'Removals and cap-off'];   // construction / reno / hot water target; the rest maintenance
+const bbMoney = v => (v == null || !Number.isFinite(v) ? '—' : '$' + v.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+function bbOpen() {
+  if (!bbOn()) return;
+  let back = document.getElementById('bb-back');
+  if (!back) { back = document.createElement('div'); back.id = 'bb-back'; back.className = 'bb-back'; document.body.appendChild(back); }
+  back.hidden = false; document.body.classList.add('bb-open'); bbRender(); bbLoad();
+}
+function bbClose() { const b = document.getElementById('bb-back'); if (b) b.hidden = true; document.body.classList.remove('bb-open'); }
+async function bbLoad(fresh) {
+  try { bbData = await authFetch('/bundle-builder/list' + (fresh ? '?fresh=1' : '')); } catch (e) { bbData = { error: e.message }; }
+  if (bbTab !== 'build' || !document.getElementById('bb-name')) bbRender();   // never redraw the form under the owner's fingers
+}
+function bbGp(f) {   // price and GP of the form, with major equipment set aside
+  const parts = f.parts || [], lab = f.labour || [], minE = typeof eqMin === 'function' ? eqMin() : 550;
+  let cost = 0, sellSum = 0, eCost = 0, eSellEx = 0, hours = 0; const set = [];
+  for (const p of parts) { const c = (Number(p.costEx) || 0) * p.qty, sx = (Number(p.sellInc) || 0) * p.qty; cost += c; sellSum += sx; if (p.equip === true || (p.equip !== false && (Number(p.costEx) || 0) >= minE)) { eCost += c; eSellEx += sx / 1.1; set.push(p); } }
+  for (const l of lab) { cost += l.hours * BB_RATE[l.kind].cost(); sellSum += l.hours * BB_RATE[l.kind].sell(); hours += l.hours; }
+  const price = f.priceTouched ? Number(f.priceInc) || 0 : Math.round(sellSum * 100) / 100, ex = price / 1.1;
+  const all = ex > 0 ? (ex - cost) / ex : null, jobEx = ex - eSellEx, job = jobEx > 0 ? (jobEx - (cost - eCost)) / jobEx : null;
+  const target = BB_45.includes(f.category) ? GP_SETTINGS.targets.construction : GP_SETTINGS.targets.maintenance;
+  return { price, sellSum, cost, all, job, set, hours, perHour: hours > 0 ? (ex - cost) / hours : null, target };
+}
+function bbRender() {
+  const back = document.getElementById('bb-back'); if (!back || back.hidden) return;
+  const tabs = [['list', 'Bundles'], ['build', bbForm && bbForm.editOf ? 'Edit' : 'Build'], ['ideas', 'Suggested']];
+  let h = '<div class="bb-top"><button type="button" class="bb-x" data-bb="close" aria-label="Close">✕</button><b>🧰 Bundle builder</b><span class="bb-tc">Test copy: nothing goes to ServiceM8</span></div>'
+    + '<div class="bb-tabs">' + tabs.map(([k, t]) => '<button type="button" data-bbtab="' + k + '" class="' + (bbTab === k ? 'on' : '') + '">' + t + '</button>').join('') + '</div><div class="bb-body" id="bb-body">';
+  if (bbTab === 'list') h += bbListHtml(); else if (bbTab === 'build') h += bbBuildHtml(); else h += bbIdeasHtml();
+  back.innerHTML = h + '</div>';
+  if (bbTab === 'build') bbCalc();
+}
+function bbListHtml() {
+  if (!bbData) return '<div class="rp-small">Reading the bundles…</div>';
+  if (bbData.error) return '<div class="cq-warn">' + escHtml(bbData.error) + '</div>';
+  const words = bbQ.toLowerCase().split(/\s+/).filter(Boolean), cats = bbData.categories;
+  const rows = bbData.bundles.filter(b => (!bbCat || b.category === bbCat) && words.every(w => (b.name + ' ' + b.code + ' ' + b.sheetCategory).toLowerCase().includes(w)));
+  const count = c => bbData.bundles.filter(b => b.category === c && (b.testCopy ? b.testCopy.active : b.active)).length;
+  let h = '<input type="search" id="bb-q" placeholder="Search bundles by name or code" value="' + escHtml(bbQ) + '" autocomplete="off">'
+    + '<div class="bb-cats"><button type="button" data-bbcat="" class="' + (!bbCat ? 'on' : '') + '">All ' + bbData.bundles.length + '</button>' + cats.map(c => '<button type="button" data-bbcat="' + escHtml(c) + '" class="' + (bbCat === c ? 'on' : '') + '">' + escHtml(c) + ' ' + count(c) + '</button>').join('') + '</div>'
+    + '<div class="rp-small">' + rows.length + ' shown · read ' + new Date(bbData.readAt).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' }) + ' · <button type="button" class="bb-link" data-bb="fresh">read again</button></div>';
+  h += '<div id="bb-rows">' + bbRowsHtml(rows) + '</div>';
+  const dr = (bbData.drafts || []).filter(d => !d.editOf);
+  if (dr.length) h += '<div class="pl-sec">New bundles you are building</div>' + dr.map(d => '<div class="bb-row"><div class="bb-rt"><b>' + escHtml(d.name) + '</b><small>' + escHtml(d.code) + ' · ' + bbMoney(d.priceInc) + ' · ' + (d.testCopy ? (d.testCopy.active ? 'published (test copy)' : 'switched off (test copy)') : 'draft') + '</small></div><button type="button" class="bb-b" data-bbdraft="' + d.draftId + '">Open</button></div>').join('');
+  return h;
+}
+function bbRowsHtml(rows) {
+  return rows.map(b => {
+    const on = b.testCopy ? b.testCopy.active : b.active, st = b.testCopy ? (b.testCopy.type === 'update' ? 'updated (test copy)' : on ? 'switched on (test copy)' : 'switched off (test copy)') : (on ? 'in use' : 'switched off');
+    return '<div class="bb-row' + (on ? '' : ' off') + '"><div class="bb-rt"><b>' + escHtml(b.name) + '</b><small>' + escHtml(b.code) + ' · ' + bbMoney(b.priceInc) + ' · ' + b.parts.length + ' part' + (b.parts.length === 1 ? '' : 's') + ' · ' + escHtml(b.category) + ' · ' + st + '</small></div>'
+      + '<button type="button" class="bb-b" data-bbedit="' + escHtml(b.key) + '">Edit</button><button type="button" class="bb-b2" data-bbstate="' + escHtml(b.key) + '" data-on="' + (on ? 1 : 0) + '">' + (on ? 'Switch off' : 'Switch on') + '</button>'
+      + (b.testCopy ? '<button type="button" class="bb-link" data-bbundo="' + b.testCopy.eventId + '">Undo</button>' : '') + '</div>';
+  }).join('') || '<div class="rp-small">No bundles match.</div>';
+}
+function bbBlank() { return { id: null, editOf: null, name: '', code: '', description: '', category: 'Other', parts: [], labour: [], priceInc: 0, priceTouched: false }; }
+function bbBuildHtml() {
+  const f = bbForm || (bbForm = bbBlank());
+  const opt = c => '<option' + (f.category === c ? ' selected' : '') + '>' + escHtml(c) + '</option>';
+  return (f.editOf ? '<div class="bb-note">Editing <b>' + escHtml(f.origName || f.name) + '</b>. Quotes and jobs already made keep their own lines; only future quotes use the change.</div>' : '')
+    + '<label class="bb-f">Bundle name<input id="bb-name" maxlength="120" value="' + escHtml(f.name) + '" placeholder="e.g. Supply and install 270L heat pump"></label>'
+    + '<label class="bb-f">Code<input id="bb-code" maxlength="30" value="' + escHtml(f.code) + '" placeholder="e.g. BHWHP270" autocapitalize="characters"' + (f.editOf ? ' readonly' : '') + '></label>'
+    + '<label class="bb-f">Category<select id="bb-cat">' + (bbData && bbData.categories ? bbData.categories : ['Other']).map(opt).join('') + '</select></label>'
+    + '<label class="bb-f">Description (what the client sees)<textarea id="bb-desc" rows="4" maxlength="2000">' + escHtml(f.description) + '</textarea></label>'
+    + '<div class="pl-sec">Products</div><div id="bb-parts"></div>'
+    + '<input type="search" id="bb-ps" placeholder="Add a Reece product: name or code" autocomplete="off"><div id="bb-pres"></div>'
+    + '<div class="pl-sec">Labour</div><div class="bb-lab">' + Object.entries(BB_RATE).map(([k, r]) => '<label>' + r.name + ' hours<input type="number" inputmode="decimal" min="0" step="0.5" data-bblab="' + k + '" value="' + ((f.labour.find(l => l.kind === k) || {}).hours || '') + '"></label>').join('') + '</div>'
+    + '<div class="pl-sec">Price and GP</div><div id="bb-gp"></div>'
+    + '<label class="bb-f">Bundle price (inc GST)<input id="bb-price" type="number" inputmode="decimal" min="0" step="0.01" value="' + (f.priceTouched ? f.priceInc : '') + '" placeholder="the products and labour at today’s prices"></label>'
+    + '<div class="bb-acts"><button type="button" class="bb-b" data-bb="save">Save draft</button><button type="button" class="bb-b bb-go" data-bb="publish">' + (f.editOf ? 'Update in ServiceM8…' : 'Publish to ServiceM8…') + '</button><button type="button" class="bb-link" data-bb="new">Start a new bundle</button></div>'
+    + '<div id="bb-msg" class="rp-small"></div><div id="bb-would"></div>';
+}
+function bbCalc() {
+  const f = bbForm; if (!f) return;
+  const pb = document.getElementById('bb-parts');
+  if (pb) pb.innerHTML = f.parts.map((p, i) => '<div class="bb-part"><div class="bb-rt"><b>' + escHtml(p.name) + '</b><small>' + escHtml(p.code) + ' · cost ' + bbMoney(p.costEx) + ' ex · sell ' + bbMoney(p.sellInc) + '</small></div>'
+    + '<button type="button" class="qty-btn" data-bbq="' + i + '" data-d="-1" aria-label="Less">−</button><span class="bb-qty">' + p.qty + '</span><button type="button" class="qty-btn" data-bbq="' + i + '" data-d="1" aria-label="More">+</button></div>').join('') || '<div class="rp-small">No products yet.</div>';
+  const g = bbGp(f), pct = v => (v == null ? '—' : (v * 100).toFixed(1) + '%'), low = g.job != null && g.job < g.target - 1e-9;
+  const gp = document.getElementById('bb-gp');
+  if (gp) gp.innerHTML = '<div class="gp-bar ' + (g.job == null ? 'none' : low ? 'bad' : 'ok') + '"><span class="gp-pct">Job GP ' + pct(g.job) + '</span><span class="gp-target">Target ' + Math.round(g.target * 100) + '%</span></div>'
+    + (g.set.length ? '<div class="eq-set">Set aside: ' + g.set.map(p => escHtml(p.name.slice(0, 40)) + ' ' + bbMoney(p.sellInc * p.qty)).join(', ') + '</div>' : '')
+    + '<div class="eq-small">Overall GP with everything included: ' + pct(g.all) + '</div>'
+    + (g.perHour != null ? '<div class="eq-small">GP per labour hour: ' + bbMoney(g.perHour) + ' an hour</div>' : '')
+    + '<div class="eq-small">Products and labour at today’s prices: ' + bbMoney(g.sellSum) + ' · cost ' + bbMoney(g.cost) + ' ex GST · price used: <b>' + bbMoney(g.price) + '</b></div>';
+}
+function bbReadForm() {
+  const f = bbForm, v = id => (document.getElementById(id) || {}).value;
+  if (!f || !document.getElementById('bb-name')) return f;
+  f.name = v('bb-name').trim(); f.code = v('bb-code').trim().toUpperCase(); f.category = v('bb-cat'); f.description = v('bb-desc');
+  const pr = v('bb-price'); f.priceTouched = pr !== '' && pr != null; if (f.priceTouched) f.priceInc = parseFloat(pr) || 0;
+  f.labour = [...document.querySelectorAll('[data-bblab]')].map(i => ({ kind: i.dataset.bblab, hours: parseFloat(i.value) || 0 })).filter(l => l.hours > 0);
+  return f;
+}
+async function bbPriceParts(parts) {   // today's Reece sell and cost for each part (cost from the bundle cost list when not a Reece code)
+  await Promise.all(parts.map(async p => {
+    if (p.sellInc && p.costEx) return;
+    try { const d = await (await fetch(PROXY + '/reece-search?q=' + encodeURIComponent(String(p.code).replace(/^REC/i, '').replace(/-\d+$/, '')))).json(); const r = (d.products || []).find(x => String(x.code).replace(/-\d+$/, '') === String(p.code).replace(/^REC/i, '').replace(/-\d+$/, '')); if (r) { p.sellInc = p.sellInc || parseFloat(r.retail) || 0; p.costEx = p.costEx || parseFloat(r.cost) || 0; p.name = p.name || r.name; } } catch (e) {}
+  }));
+}
+async function bbEditBundle(key) {
+  const b = bbData.bundles.find(x => x.key === key); if (!b) return;
+  const dr = (bbData.drafts || []).filter(d => d.editOf === key).pop();
+  bbForm = dr ? { ...dr, id: dr.draftId, priceTouched: true, origName: b.name } : { id: null, editOf: key, origName: b.name, name: b.name, code: b.code, description: b.description || '', category: b.category, labour: [], priceInc: b.priceInc || 0, priceTouched: b.priceInc != null,
+    parts: b.parts.filter(p => p.code).map(p => ({ code: p.code, name: p.name, qty: p.qty, costEx: 0, sellInc: 0 })) };
+  bbTab = 'build'; bbRender();
+  if (!dr && b.uuid) { try { const c = await (await fetch(PROXY + '/bundle-costs?bundle=' + encodeURIComponent(b.uuid))).json(); for (const p of bbForm.parts) { const x = (c.parts || []).find(y => y.code === p.code); if (x && x.unit != null) p.costEx = x.unit; } } catch (e) {} }
+  await bbPriceParts(bbForm.parts); if (bbTab === 'build') bbCalc();
+}
+function bbDraftBody(f) { return { id: f.id || undefined, editOf: f.editOf || undefined, name: f.name, code: f.code, description: f.description, category: f.category, priceInc: bbGp(f).price,
+  parts: f.parts.map(p => ({ code: p.code, name: p.name, qty: p.qty, costEx: p.costEx, sellInc: p.sellInc, ...(p.equip === true || p.equip === false ? { equip: p.equip } : {}) })),
+  labour: f.labour.map(l => ({ kind: l.kind, name: BB_RATE[l.kind].name, hours: l.hours, costEx: BB_RATE[l.kind].cost(), sellInc: BB_RATE[l.kind].sell() })) }; }
+async function bbSave() {
+  const f = bbReadForm(), msg = document.getElementById('bb-msg');
+  try { const j = await authFetch('/bundle-builder/drafts', { method: 'POST', body: JSON.stringify(bbDraftBody(f)) }); f.id = j.draft.draftId; msg.textContent = '✓ Draft saved (every version is kept).'; bbLoad(); return true; }
+  catch (e) { msg.textContent = 'Not saved: ' + e.message; return false; }
+}
+async function bbPublish() {
+  if (!(await bbSave())) return;
+  const f = bbForm, out = document.getElementById('bb-would');
+  let j; try { j = await authFetch('/bundle-builder/drafts/' + f.id + '/publish', { method: 'POST', body: '{}' }); } catch (e) { out.innerHTML = '<div class="cq-warn">' + escHtml(e.message) + '</div>'; return; }
+  const w = j.would, sm = w.servicem8;
+  out.innerHTML = '<div class="bb-would"><b>' + (w.kind === 'update' ? 'What “Update in ServiceM8” would change' : 'What “Publish to ServiceM8” would add') + '</b>'
+    + (w.kind === 'update' ? '<table class="bb-tbl"><tr><th></th><th>Now</th><th>New</th></tr>' + (w.changes.length ? w.changes.map(c => '<tr><td>' + escHtml(c.what) + '</td><td>' + escHtml(c.old == null ? '—' : String(c.old)) + '</td><td>' + escHtml(c.new == null ? '— (removed)' : String(c.new)) + '</td></tr>').join('') : '<tr><td colspan="3">No changes.</td></tr>') + '</table>'
+      : '<div class="rp-small">New ServiceM8 bundle ' + escHtml(f.code) + ' “' + escHtml(f.name) + '” with:</div><ul>' + sm.partsReadable.map(x => '<li>' + escHtml(x) + '</li>').join('') + '</ul>')
+    + (sm.missing.length ? '<div class="cq-warn">Not added as a ServiceM8 part: ' + sm.missing.map(m => escHtml((m.code ? m.code + ' ' : '') + m.name + ' (' + m.why + ')')).join('; ') + '</div>' : '')
+    + '<div class="rp-small">Bundle Sheet row: ' + escHtml(w.sheetRow.code + ' · ' + w.sheetRow.name + ' · ' + bbMoney(w.sheetRow.price) + ' · ' + w.sheetRow.category) + '</div>'
+    + '<div class="rp-small">A backup of ' + (w.kind === 'update' ? 'this bundle' : 'the bundles') + ' is taken first, and Undo puts it back. Only future quotes are affected.</div>'
+    + '<button type="button" class="bb-b bb-go" data-bb="confirm">Confirm (test copy only)</button></div>';
+}
+async function bbConfirm() {
+  const f = bbForm, out = document.getElementById('bb-would');
+  try { const j = await authFetch('/bundle-builder/drafts/' + f.id + '/publish', { method: 'POST', body: JSON.stringify({ confirm: true }) }); bbLast = j;
+    out.innerHTML = '<div class="bb-would ok"><b>✓ ' + (j.would.kind === 'update' ? 'Updated' : 'Published') + ' on the test copy.</b><div class="rp-small">' + escHtml(j.note) + ' Backup kept (' + j.backup.count + ' bundles).</div><button type="button" class="bb-b2" data-bbundo="' + j.eventId + '">Undo</button></div>';
+    bbLoad(); } catch (e) { out.innerHTML = '<div class="cq-warn">' + escHtml(e.message) + '</div>'; }
+}
+async function bbState(key, on) {
+  const b = bbData.bundles.find(x => x.key === key) || {};
+  if (!confirm((on ? 'Switch off ' : 'Switch on ') + (b.name || 'this bundle') + '?\n\nTest copy only: nothing is written to ServiceM8. A switched-off bundle is never deleted, and Undo puts it back.')) return;
+  try { const j = await authFetch('/bundle-builder/state', { method: 'POST', body: JSON.stringify({ key, active: !on, confirm: true }) }); showToast((on ? 'Switched off' : 'Switched on') + ' on the test copy (backup kept)'); bbLast = j; bbLoad(); } catch (e) { showToast(e.message); }
+}
+async function bbUndo(id) {
+  try { await authFetch('/bundle-builder/undo', { method: 'POST', body: JSON.stringify({ eventId: id }) }); showToast('Undone: the test copy is back as it was'); bbLoad(); const o = document.getElementById('bb-would'); if (o) o.innerHTML = '<div class="rp-small">Undone.</div>'; } catch (e) { showToast(e.message); }
+}
+function bbIdeasHtml() {
+  if (!bbIdeas) { authFetch('/bundle-builder/ideas').then(j => { bbIdeas = j; bbRender(); }).catch(e => { bbIdeas = { error: e.message }; bbRender(); }); return '<div class="rp-small">Looking through past jobs…</div>'; }
+  if (bbIdeas.error) return '<div class="cq-warn">' + escHtml(bbIdeas.error) + '</div>';
+  const have = bbIdeas.checklist.filter(x => x.have).length;
+  return '<div class="pl-sec">Common jobs: ' + have + ' of ' + bbIdeas.checklist.length + ' have a bundle</div>'
+    + bbIdeas.checklist.map(x => '<div class="bb-chk ' + (x.have ? 'y' : 'n') + '">' + (x.have ? '✅' : '❌') + ' <b>' + escHtml(x.area) + ':</b> ' + escHtml(x.idea) + (x.matches.length ? '<small>' + escHtml(x.matches.slice(0, 2).join('; ')) + '</small>' : '') + '</div>').join('')
+    + '<div class="pl-sec">Suggested new bundles (from ' + bbIdeas.pastJobs + ' past jobs)</div>'
+    + (bbIdeas.pastErr ? '<div class="cq-warn">' + escHtml(bbIdeas.pastErr) + '</div>' : '')
+    + (bbIdeas.suggestions.map((s, i) => '<div class="bb-row"><div class="bb-rt"><b>' + escHtml(s.name) + '</b><small>' + escHtml(s.items.map(x => x.name.slice(0, 36)).join(' + ')) + ' · on ' + s.jobs + ' jobs · typical ' + bbMoney(s.typicalInc) + '</small></div><button type="button" class="bb-b" data-bbidea="' + i + '">Start a bundle</button></div>').join('') || '<div class="rp-small">No suggestions yet.</div>');
+}
+async function bbFromIdea(i) {
+  const s = bbIdeas.suggestions[i]; if (!s) return;
+  bbForm = { ...bbBlank(), name: s.name, category: s.category, parts: s.items.map(x => ({ code: x.code, name: x.name, qty: Math.max(1, Math.round(x.typicalQty || 1)), costEx: 0, sellInc: 0 })) };
+  bbTab = 'build'; bbRender(); await bbPriceParts(bbForm.parts); if (bbTab === 'build') bbCalc();
+}
+function bbSearch(q) {
+  clearTimeout(bbSearchT); const box = document.getElementById('bb-pres'); if (!box) return;
+  if (!q.trim()) { box.innerHTML = ''; return; }
+  bbSearchT = setTimeout(async () => {
+    try { const d = await (await fetch(PROXY + '/reece-search?q=' + encodeURIComponent(normaliseTerm(q)))).json(); bbSearch.res = (d.products || []).slice(0, 12);
+      box.innerHTML = bbSearch.res.map((r, i) => '<div class="bb-part"><div class="bb-rt"><b>' + escHtml(r.name) + '</b><small>' + escHtml(r.code) + ' · ' + bbMoney(parseFloat(r.retail)) + '</small></div><button type="button" class="bb-b" data-bbadd="' + i + '">Add</button></div>').join('') || '<div class="rp-small">Nothing found.</div>'; } catch (e) { box.innerHTML = '<div class="cq-warn">Search failed</div>'; }
+  }, 350);
+}
+document.addEventListener('click', e => {
+  const t = e.target; if (!t.closest || !t.closest('#bb-back')) return;
+  const q = s => t.closest(s);
+  if (q('[data-bb="close"]')) return bbClose();
+  if (q('[data-bbtab]')) { if (bbTab === 'build') bbReadForm(); bbTab = q('[data-bbtab]').dataset.bbtab; return bbRender(); }
+  if (q('[data-bbcat]')) { bbCat = q('[data-bbcat]').dataset.bbcat; return bbRender(); }
+  if (q('[data-bb="fresh"]')) return bbLoad(true);
+  if (q('[data-bbedit]')) return bbEditBundle(q('[data-bbedit]').dataset.bbedit);
+  if (q('[data-bbstate]')) return bbState(q('[data-bbstate]').dataset.bbstate, q('[data-bbstate]').dataset.on === '1');
+  if (q('[data-bbundo]')) return bbUndo(q('[data-bbundo]').dataset.bbundo);
+  if (q('[data-bbdraft]')) { const d = bbData.drafts.find(x => x.draftId === q('[data-bbdraft]').dataset.bbdraft); bbForm = { ...d, id: d.draftId, priceTouched: true }; bbTab = 'build'; return bbRender(); }
+  if (q('[data-bbidea]')) return bbFromIdea(+q('[data-bbidea]').dataset.bbidea);
+  if (q('[data-bb="new"]')) { bbForm = bbBlank(); return bbRender(); }
+  if (q('[data-bb="save"]')) return bbSave();
+  if (q('[data-bb="publish"]')) return bbPublish();
+  if (q('[data-bb="confirm"]')) return bbConfirm();
+  if (q('[data-bbadd]')) { bbReadForm(); const r = bbSearch.res[+q('[data-bbadd]').dataset.bbadd]; const ex = bbForm.parts.find(p => p.code === r.code); if (ex) ex.qty++; else bbForm.parts.push({ code: r.code, name: r.name, qty: 1, costEx: parseFloat(r.cost) || 0, sellInc: parseFloat(r.retail) || 0 }); return bbCalc(); }
+  if (q('[data-bbq]')) { const b = q('[data-bbq]'), p = bbForm.parts[+b.dataset.bbq]; p.qty = Math.max(0, p.qty + (+b.dataset.d)); if (!p.qty) bbForm.parts.splice(+b.dataset.bbq, 1); return bbCalc(); }
+});
+document.addEventListener('input', e => {
+  const t = e.target; if (!t.closest || !t.closest('#bb-back')) return;
+  if (t.id === 'bb-q') { bbQ = t.value; const rows = document.getElementById('bb-rows'); if (rows && bbData && bbData.bundles) { const words = bbQ.toLowerCase().split(/\s+/).filter(Boolean); rows.innerHTML = bbRowsHtml(bbData.bundles.filter(b => (!bbCat || b.category === bbCat) && words.every(w => (b.name + ' ' + b.code + ' ' + b.sheetCategory).toLowerCase().includes(w)))); } return; }
+  if (t.id === 'bb-ps') return bbSearch(t.value);
+  if (t.matches('[data-bblab], #bb-price, #bb-cat')) { bbReadForm(); bbCalc(); }
+});
+document.addEventListener('change', e => { if (e.target && e.target.id === 'bb-cat') { bbReadForm(); bbCalc(); } });
+
+// ── SCOPE OF WORK (SCOPE_OF_WORK=on, logged in) ──────────────────────────────
+// One optional box for the whole job's scope, with three ticks: the quote description (client quote page and PDF),
+// the invoice description (ServiceM8 Billing, work_done_description) and the job description (ServiceM8 Details,
+// job_description). A ticked box follows the scope (read only) and is sent exactly as it is today, so the server and
+// ServiceM8 writes don't change. Nothing ticked: nothing changes. The scope and ticks are saved with the quote, its
+// drafts and versions. Bundles carry their own descriptions, so a quote with bundles needs no job/invoice description.
+function scOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.scope); }
+function scUse() { return new Set(((document.getElementById('q-scope-use') || {}).value || '').split(',').filter(Boolean)); }
+function scText() { return scOn() ? ((document.getElementById('q-scope') || {}).value || '').trim() : ''; }
+function scFor(where) { const t = scText(); return t && scUse().has(where) ? t : null; }
+function scSync() {
+  const $ = id => document.getElementById(id), on = scOn(), box = $('sc-box'), sc = $('q-scope'), u = scUse();
+  const jd = $('q-job-desc'), inv = $('q-invoice-desc'), same = $('qs-same');
+  if (box) { box.hidden = !on; box.querySelectorAll('[data-scuse]').forEach(c => { c.checked = u.has(c.dataset.scuse); }); }
+  const hasB = on && quote.some(i => i.type === 'bundle'), bh = $('sc-bundle'); if (bh) bh.hidden = !hasB;
+  const scv = on && sc && sc.value.trim() ? sc.value : null;
+  const follow = (el, src) => { if (!el) return; const ro = src != null; el.readOnly = ro; el.classList.toggle('qs-ro', ro); if (ro && el.value !== src) { el.value = src; el.dispatchEvent(new Event('input', { bubbles: true })); } };
+  follow(jd, scv != null && u.has('job') ? scv : null);
+  follow(inv, scv != null && u.has('invoice') ? scv : (same && same.checked && jd ? jd.value : null));
+  const h = $('sc-hint');
+  if (h && on) {
+    const names = { quote: 'the client quote page and PDF', invoice: 'the invoice description', job: 'the job description' }, w = ['quote', 'invoice', 'job'].filter(k => u.has(k));
+    const t = !scv ? 'Type the scope to use it. Empty: nothing changes.' : !w.length ? 'Not used anywhere yet: tick where it goes.' : 'Used for ' + w.map(k => names[k]).join(', ').replace(/, ([^,]*)$/, ' and $1') + '. The ticked boxes below follow it.' + (u.has('invoice') || u.has('job') ? ' Sending to ServiceM8 writes it there (the old text is kept in our archive).' : '');
+    if (h.textContent !== t) h.textContent = t;
+  }
+  const same3 = $('qs-same'); if (same3) { same3.disabled = !!(scv != null && u.has('invoice')); }
+}
+document.addEventListener('change', e => {
+  const c = e.target.closest && e.target.closest('[data-scuse]'); if (!c) return;
+  const u = scUse(); if (c.checked) u.add(c.dataset.scuse); else u.delete(c.dataset.scuse);
+  const h = document.getElementById('q-scope-use'); h.value = ['quote', 'invoice', 'job'].filter(k => u.has(k)).join(',');
+  h.dispatchEvent(new Event('input', { bubbles: true })); scSync();
+});
+document.addEventListener('input', e => { if (e.target && (e.target.id === 'q-scope' || e.target.id === 'q-job-desc')) scSync(); });
+
 // ── QUOTE STEPS (QUOTE_STEPS=on, logged in) ──────────────────────────────────
 // The Quote screen as one page of 9 numbered steps, top to bottom, with a bar to jump to a step and a tick on the
 // steps that are done. Nothing is rebuilt: the existing parts of the screen are moved into the steps, so every
@@ -6311,7 +6706,7 @@ function qsBuild() {
   // 2 client details
   mv(2, $('cq-client'), true); add(2, '<div class="qs-off">Client details come with the client quote link, which is switched off here.</div>');
   // 3 job description (+ use it as the invoice description)
-  mv(3, lab('q-job-desc'));
+  mv(3, $('sc-box')); mv(3, $('sc-bundle')); mv(3, lab('q-job-desc'));
   add(3, '<label class="qs-same"><input type="checkbox" id="qs-same"> Also use this as the invoice description (the client sees it)</label>');
   mv(3, lab('q-invoice-desc')); mv(3, sum.querySelector('.qt-job > .qt-inv-hint'));
   // 4 photos and markup
@@ -6334,7 +6729,7 @@ function qsBuild() {
   // invoice description follows the job description when ticked (remembered on this phone)
   const same = $('qs-same'), jd = $('q-job-desc'), inv = $('q-invoice-desc');
   try { same.checked = localStorage.getItem('ipd_qs_same') === '1'; } catch (e) {}
-  const sync = () => { inv.readOnly = same.checked; inv.classList.toggle('qs-ro', same.checked); if (same.checked && inv.value !== jd.value) { inv.value = jd.value; inv.dispatchEvent(new Event('input', { bubbles: true })); } };
+  const sync = () => scSync();   // the invoice box follows the scope (if ticked there), else the job description (if ticked here)
   same.addEventListener('change', () => { try { localStorage.setItem('ipd_qs_same', same.checked ? '1' : '0'); } catch (e) {} sync(); });
   jd.addEventListener('input', sync); sync();
   nav.addEventListener('click', e => { const b = e.target.closest('[data-qsgo]'); if (!b) return; const s = $('qs-' + b.dataset.qsgo); steps.scrollTop = s.offsetTop - 4; qsCur(+b.dataset.qsgo); });
@@ -6347,7 +6742,7 @@ let qsRaf = 0;
 function qsCur(n) { document.querySelectorAll('#qs-nav .qs-chip').forEach(c => c.classList.toggle('cur', +c.dataset.qsgo === n)); const c = document.querySelector('#qs-nav .qs-chip.cur'); if (c && c.scrollIntoView) { const nav = c.parentNode; if (c.offsetLeft < nav.scrollLeft || c.offsetLeft + c.offsetWidth > nav.scrollLeft + nav.clientWidth) nav.scrollTo({ left: c.offsetLeft - 12, behavior: 'smooth' }); } }
 function qsGp(d) {   // GP if the whole-quote discount were d (0–0.5), same maths as the GP panel
   const g = calcGP(); if (!(g.sellExFull > 0)) return null;
-  const s = g.sellExFull * (1 - d); return s > 0 ? (s - g.cost) / s : null;
+  const s = g.sellExFull - d * (g.sellExFull + (g.eSellEx || 0)); return s > 0 ? (s - g.cost) / s : null;
 }
 function qsMarks() {
   const scr = document.getElementById('screen-quote'); if (!scr || !scr.classList.contains('qs-on')) return;
@@ -6358,7 +6753,7 @@ function qsMarks() {
   const done = {
     1: /^\d{1,8}$/.test(val('job-number-input')),
     2: !!((document.querySelector('#cq-client [data-cqc="name"]') || {}).value || '').trim(),
-    3: !!val('q-job-desc'),
+    3: !!val('q-job-desc') || (scOn() && (!!val('q-scope') || lines.some(i => i.type === 'bundle'))),
     4: !!document.querySelector('#cq-list .cq-item'),
     5: lines.some(i => i.type === 'reece' || i.type === 'bundle'),
     6: lines.some(i => i.type === 'labour' || i.type === 'material' || /^mat/i.test(String(i.id))),
