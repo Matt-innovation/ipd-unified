@@ -124,5 +124,14 @@
   "seconds": 68,
   "w": 1296,
   "h": 3072
+ },
+ "tasks": {
+  "file": "training/videos/15-tasks.mp4",
+  "poster": "training/videos/15-tasks.jpg",
+  "v": "202611280504",
+  "voice": "bm_george",
+  "seconds": 123,
+  "w": 1296,
+  "h": 3072
  }
 }
