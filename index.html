@@ -288,6 +288,11 @@ a.pl-btn.rl-tech{text-decoration:none;display:inline-flex;align-items:center;min
 .eq-list{margin-top:6px;font-size:13px}.eq-list summary{min-height:40px;display:flex;align-items:center;cursor:pointer;color:var(--text-mid);font-weight:600}
 .eq-row{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px}.eq-row input{width:22px;height:22px;flex-shrink:0}.eq-row small{color:var(--text-mid)}
 .eq-chg{min-height:40px;margin-top:4px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:600 13px var(--font);padding:0 12px;cursor:pointer}
+/* DISCOUNT_LADDER */
+.ld{margin-top:8px;padding:8px 10px;border:1px solid var(--border2);border-radius:10px;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.ld-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ld-row input{width:70px;min-height:40px;font-size:16px;padding:4px 6px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text)}
+.ld-row.capped .ld-res b{color:#b45309}.ld-res{flex:1 1 160px;color:var(--text-mid)}.ld-x{min-width:40px;min-height:40px;border:0;background:transparent;color:var(--text);cursor:pointer}
+.ld-mode select{min-height:40px;font-size:15px}.ld-send{font-weight:600}
 /* GP with options */
 .gpo{margin-top:8px;padding:8px 10px;border:1px dashed var(--border2);border-radius:10px;font-size:13px;display:flex;flex-direction:column;gap:2px}.gpo-one{color:var(--text-mid)}
 /* PHOTOS_ONE=on */
@@ -1246,6 +1251,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
                 <span class="qt-inv-hint">ServiceM8 → Details page → Job Description.</span>
               </label>
               <div class="so-sm8" id="so-sm8" hidden></div>
+              <input type="hidden" id="q-ladder" data-qtext="ipd_ladder">
               <div class="so-tools" id="so-tools" hidden>
                 <div class="so-btns"><button type="button" class="q-btn" id="so-ai">✨ Write with AI</button><button type="button" class="q-btn" id="so-inv">Use as invoice description</button></div>
                 <label class="qs-same"><input type="checkbox" id="so-diff"> Different invoice description</label>
@@ -3153,7 +3159,15 @@ function eqOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undef
 function eqMin() { return eqSet && eqSet.equipMin > 0 ? eqSet.equipMin : 550; }
 function eqAuto(i) { return i.type !== 'labour' && i.type !== 'bundle' && i.id !== 'discount' && (parseFloat(i.cost) || 0) >= eqMin() - 1e-9; }
 function eqIsSet(i) { return i.id !== 'discount' && (i.equip === true || (i.equip !== false && eqAuto(i))); }
-async function eqLoad() { if (!eqOn()) return; try { const j = await authFetch('/gp-settings'); if (j && j.equipMin) { eqSet = j; renderGP(); } } catch (e) {} }
+async function eqLoad() { if (!eqOn()) return; try { const j = await authFetch('/gp-settings'); if (j && j.equipMin) { eqSet = j; if (j.floor) Object.assign(GP_SETTINGS.targets, j.floor); renderGP(); } } catch (e) {} }   // the technician floor is the GP target
+const gpClientLimit = t => (eqSet && eqSet.clientLimit && eqSet.clientLimit[t]) || ({ maintenance: 0.60, construction: 0.50 })[t];
+async function eqLimits() {
+  if (!eqSet || !eqSet.canChange) return;
+  const f = eqSet.floor, c = eqSet.clientLimit, ask = (q, v) => { const a = prompt(q, String(Math.round(v * 100))); return a == null ? null : parseFloat(a); };
+  const v = [ask('Technician floor, maintenance (%):', f.maintenance), ask('Technician floor, building / reno / hot water (%):', f.construction), ask('Client-side GP limit, maintenance (%):', c.maintenance), ask('Client-side GP limit, building / reno / hot water (%):', c.construction)];
+  if (v.some(x => x == null || !(x >= 10 && x <= 90))) return showToast('Not changed: use a GP from 10% to 90%');
+  try { eqSet = await authFetch('/gp-settings', { method: 'POST', body: JSON.stringify({ floor: { maintenance: v[0], construction: v[1] }, clientLimit: { maintenance: v[2], construction: v[3] } }) }); Object.assign(GP_SETTINGS.targets, eqSet.floor); showToast('GP limits saved'); updateQuoteUI(); renderGP(); } catch (e) { showToast('Not saved: ' + e.message); }
+}
 async function eqChange() {
   if (!eqSet || !eqSet.canChange) return;
   const v = prompt('Major equipment: items costing this much or more (per item, ex GST) are set aside from the Job GP.', String(eqMin()));
@@ -3194,6 +3208,8 @@ function eqPanelHtml(g) {
   if (all.length) out.push('<details class="eq-list"><summary>Major equipment: ' + money(eqMin()) + ' or more each (cost ex GST), set aside by itself' + (eqSet && eqSet.canChange ? '' : ' · set by the owners') + '</summary>'
     + all.map(r => '<label class="eq-row"><input type="checkbox" data-eqid="' + escHtml(r.id) + '"' + (r.on ? ' checked' : '') + '> <span>' + escHtml(r.name.slice(0, 90)) + (r.cost > 0 ? ' <small>cost $' + r.cost.toFixed(0) + '</small>' : '') + '</span></label>').join('')
     + (eqSet && eqSet.canChange ? '<button type="button" class="eq-chg" onclick="eqChange()">Change the $' + eqMin().toFixed(0) + ' (owners)</button>' : '') + '</details>');
+  if (eqSet && eqSet.floor) out.push('<details class="eq-list"><summary>GP limits: floor ' + Math.round(eqSet.floor.maintenance * 100) + '% / ' + Math.round(eqSet.floor.construction * 100) + '% · client-side ' + Math.round(gpClientLimit('maintenance') * 100) + '% / ' + Math.round(gpClientLimit('construction') * 100) + '% (maintenance / building)</summary>'
+    + '<div class="eq-small">Technician floor: the lowest Job GP your own discount can reach. Client-side limit: the discount ladder the client sees never goes below it.</div>' + (eqSet.canChange ? '<button type="button" class="eq-chg" onclick="eqLimits()">Change the GP limits (owners)</button>' : '') + '</details>');
   return out.join('');
 }
 document.addEventListener('change', e => { const c = e.target.closest && e.target.closest('[data-eqid]'); if (c) eqToggle(c.dataset.eqid); });
@@ -3239,7 +3255,7 @@ function setQuoteDiscount(pct) {
 function onCustomDiscount(box) {
   let v = parseFloat(box.value);
   if (v > 50) { v = 50; box.value = 50; showToast('Discount is capped at 50%'); }
-  if (typeof eqOn === 'function' && eqOn() && v > 0) { const m = dsMax(); if (m != null && v / 100 > m + 1e-9) { v = Math.floor(m * 1000) / 10; box.value = v || ''; showToast(v ? 'The most that keeps the GP target is ' + v + '%' + (quote.some(i => i.optional) ? ' (for every choice the client can make)' : '') : 'No room to discount'); } }
+  if (typeof eqOn === 'function' && eqOn() && v > 0) { const m = dsMax(); if (m != null && v / 100 > m + 1e-9) { v = Math.floor(m * 1000) / 10; box.value = v || ''; showToast(v ? 'Blocked below the ' + Math.round(GP_SETTINGS.targets[quoteJobType] * 100) + '% floor: the most is ' + v + '%' + (quote.some(i => i.optional) ? ' (for every choice the client can make)' : '') : 'No room to discount: the Job GP is at the ' + Math.round(GP_SETTINGS.targets[quoteJobType] * 100) + '% floor'); } }
   setQuoteDiscount(v || 0);
 }
 // Largest % that keeps GP at or above target: GP = (S(1−d) − C) / S(1−d) ≥ T  →  d ≤ 1 − C / (S(1−T))
@@ -3296,7 +3312,7 @@ function renderGP() {
   const notes = [];
   if (g.bundlesNoCost) notes.push(`GP excludes ${g.bundlesNoCost} bundle${g.bundlesNoCost === 1 ? '' : 's'} with no cost`);
   if (g.noCost) notes.push(`GP excludes ${g.noCost} item${g.noCost === 1 ? '' : 's'} with no cost price`);
-  panel.innerHTML = typeRow + body + eqPanelHtml(g) + (eqOn() && typeof gpOptionsHtml === 'function' ? gpOptionsHtml() : '') + (notes.length ? `<div class="gp-note">${notes.join(' · ')}</div>` : '');
+  panel.innerHTML = typeRow + body + eqPanelHtml(g) + (eqOn() && typeof gpOptionsHtml === 'function' ? gpOptionsHtml() + ldHtml() : '') + (notes.length ? `<div class="gp-note">${notes.join(' · ')}</div>` : '');
 }
 
 function exportQuote() {
@@ -5852,7 +5868,7 @@ function qdRead() { try { const st = JSON.parse(localStorage.getItem(qdKey()) ||
 function qdWrite(st) { try { localStorage.setItem(qdKey(), JSON.stringify(st)); return true; } catch (e) { showToast('⚠ Phone storage full — the draft could not be saved'); return false; } }
 const qdTexts = () => { const o = {}; document.querySelectorAll('[data-qtext]').forEach(t => (o[t.dataset.qtext] = t.value)); return o; };
 const qdSnap = () => ({ job: qdJob, lines: JSON.parse(JSON.stringify(quote)), jobType: quoteJobType, discountPct: quoteDiscountPct, texts: qdTexts(), swms: JSON.parse(JSON.stringify(swState)), savedAt: Date.now() });
-const qdHas = d => !!d && ((d.lines || []).length > 0 || Object.entries(d.texts || {}).some(([k, v]) => k !== 'ipd_scope_use' && k !== 'ipd_inv_mode' && v && String(v).trim()));
+const qdHas = d => !!d && ((d.lines || []).length > 0 || Object.entries(d.texts || {}).some(([k, v]) => k !== 'ipd_scope_use' && k !== 'ipd_inv_mode' && k !== 'ipd_ladder' && v && String(v).trim()));
 const qdBody = d => JSON.stringify([d.lines, d.jobType, d.discountPct, d.texts, d.swms || null]);
 const qdTotal = d => (d.lines || []).reduce((t, i) => t + (Number(i.price) || 0) * (Number(i.qty) || 0), 0);
 const qdWhen = t => new Date(t).toLocaleString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
@@ -6146,7 +6162,8 @@ async function cqSend() {
   const btn = document.getElementById('cq-send'); btn.disabled = true; btn.textContent = 'Making the link…';
   try {
     const invoiceDescription = typeof scOn === 'function' && scOn() ? (scFor('quote') || '') : (document.getElementById('q-invoice-desc')?.value || '').trim();
-    const j = await authFetch('/client-quote', { method: 'POST', body: JSON.stringify({ jobNumber: job, invoiceDescription, images, ...(client ? { client } : {}), ...(stages ? { stages } : {}), ...(swOn() ? { swms: swSummary() } : {}),
+    const ladder = typeof ldForSend === 'function' ? ldForSend() : null;
+    const j = await authFetch('/client-quote', { method: 'POST', body: JSON.stringify({ jobNumber: job, invoiceDescription, images, ...(ladder ? { ladder } : {}), ...(client ? { client } : {}), ...(stages ? { stages } : {}), ...(swOn() ? { swms: swSummary() } : {}),
       lines: quote.map(i => ({ name: (cqFeat.bundleLinks && i.type === 'bundle' && bundleCosts && bundleCosts[i.id] && bundleCosts[i.id].desc) || i.name, qty: Number(i.qty), priceInc: Number(i.price), ...(cqFeat.bundleOptions && i.id === 'discount' && quoteDiscountPct > 0 ? { discountPct: quoteDiscountPct } : {}), ...(cqFeat.options && i.optional ? { optional: true, defaultOn: !!i.defaultOn } : {}), ...(cqFeat.productLinks && (i.links || []).length ? { links: i.links.map(k => k.source === 'kc' ? { id: k.id } : { url: k.url, title: k.title, type: k.type }) } : {}) })) }) });
     const preview = j.link.replace('/quote.html#', '/quote.html?staff=1#');
     try { localStorage.setItem('ipd_cq_last_' + job, JSON.stringify({ link: j.link, expiresAt: j.expiresAt, at: Date.now() })); } catch (e) {}
@@ -7029,6 +7046,69 @@ function gpOptionsHtml() {
     + c.opts.map(o => { const g = gpOf(i => i === o); return '<div class="gpo-one">Option: ' + escHtml(o.name.slice(0, 50)) + ' · its own GP <b>' + pct(gpPct(g)) + '</b></div>'; }).join('')
     + '<div class="eq-small">Discounts are a % of what the client picks, and are capped so every choice keeps the target.</div></div>';
 }
+
+
+// ── LIVE CLIENT DISCOUNT LADDER (DISCOUNT_LADDER=on, with options) ───────────────────────────────────
+// The client is sent the full price. With "Offer discounts to the client" ticked (off by default), the more options
+// they tick, the bigger the discount they see live: levels by number of options (or by the value they choose), each a
+// %, on top of any discount the technician gave (worked on what is left, so never counted twice). Each level is capped
+// so the Job GP at that level, for EVERY choice the client could make, stays at or above the client-side GP limit.
+// The levels are fixed when the link is made; signing records exactly the choice and the discount.
+const LD_DEFAULT = { on: false, mode: 'count', levels: [{ min: 2, pct: 3 }, { min: 3, pct: 5 }, { min: 4, pct: 7 }] };
+function ldOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.ladder && eqOn()); }
+function ldGet() { try { const v = JSON.parse((document.getElementById('q-ladder') || {}).value || 'null'); if (v && Array.isArray(v.levels)) return v; } catch (e) {} return JSON.parse(JSON.stringify(LD_DEFAULT)); }
+function ldSet(v) { const h = document.getElementById('q-ladder'); if (!h) return; h.value = JSON.stringify(v); h.dispatchEvent(new Event('input', { bubbles: true })); renderGP(); }
+// each level: the % the client would get (capped), and the lowest Job GP any qualifying choice would have
+function ldLevels() {
+  const L = ldGet(), c = gpCombos(), t = quoteJobType ? gpClientLimit(quoteJobType) : null, m = discountFraction();
+  if (!c || t == null) return { L, rows: [] };
+  const metric = x => (L.mode === 'value' ? quote.filter(i => i.id !== 'discount' && (!i.optional || x.on.has(String(i.id)))).reduce((a, i) => a + (parseFloat(i.price) || 0) * i.qty, 0) : x.on.size);
+  const gpAt = (g, dT) => { const sl = g.sellExFull - dT * (g.sellExFull + (g.eSellEx || 0)); return sl > 0 ? (sl - g.cost) / sl : null; };
+  const rows = L.levels.map(lv => {
+    const q = c.list.filter(x => metric(x) >= lv.min);
+    if (!q.length) return { ...lv, eff: lv.pct, capped: false, low: null, never: true };
+    const cap = Math.min(...q.map(x => { const g = x.g, dmax = (g.sellExFull - g.cost / (1 - t)) / (g.sellExFull + (g.eSellEx || 0)); return 1 - (1 - dmax) / (1 - m); }));
+    const eff = Math.max(0, Math.min(lv.pct, Math.floor(cap * 1000) / 10)), dT = 1 - (1 - m) * (1 - eff / 100);
+    return { ...lv, eff, capped: eff < lv.pct - 1e-9, low: Math.min(...q.map(x => gpAt(x.g, dT)).filter(v => v != null)) };
+  });
+  return { L, rows, t };
+}
+function ldHtml() {
+  if (!ldOn() || !quote.some(i => i.optional && i.id !== 'discount')) return '';
+  const { L, rows, t } = ldLevels(), pct = v => (v == null ? '—' : (v * 100).toFixed(1) + '%');
+  const head = '<div class="ld"><label class="qs-same"><input type="checkbox" data-ld="on"' + (L.on ? ' checked' : '') + '> Offer discounts to the client (the more options they tick, the more they save)</label>';
+  if (!L.on) return head + '<div class="eq-small">Off: the client sees the full price and chooses options with no discount shown anywhere.</div></div>';
+  if (!rows.length) return head + '<div class="eq-small">Choose the job type and add costs to set the discounts.</div></div>';
+  const full = quote.filter(i => i.id !== 'discount' && !i.optional).reduce((a, i) => a + (parseFloat(i.price) || 0) * i.qty, 0);
+  return head + '<div class="ld-mode"><label>Discount by <select data-ld="mode"><option value="count"' + (L.mode === 'count' ? ' selected' : '') + '>number of options ticked</option><option value="value"' + (L.mode === 'value' ? ' selected' : '') + '>value chosen ($ inc GST)</option></select></label></div>'
+    + rows.map((r, k) => '<div class="ld-row' + (r.capped ? ' capped' : '') + '"><label>' + (L.mode === 'value' ? '$' : '') + '<input type="number" inputmode="decimal" min="1" data-ldmin="' + k + '" value="' + r.min + '">' + (L.mode === 'value' ? ' or more' : ' + options') + '</label>'
+      + '<label><input type="number" inputmode="decimal" min="0" max="30" step="0.5" data-ldpct="' + k + '" value="' + r.pct + '">%</label>'
+      + '<span class="ld-res">' + (r.never ? 'no choice reaches this level' : (r.capped ? '<b>capped to ' + r.eff + '%</b> · ' : '') + 'lowest Job GP ' + pct(r.low) + ' (limit ' + Math.round(t * 100) + '%)') + '</span>'
+      + '<button type="button" class="ld-x" data-ldrm="' + k + '" aria-label="Remove level">✕</button></div>').join('')
+    + (rows.length < 5 ? '<button type="button" class="eq-chg" data-ld="add">+ Add a level</button>' : '')
+    + '<div class="ld-send">The client will be sent: the full price' + (quoteDiscountPct ? ' after your ' + quoteDiscountPct + '% discount' : '') + ', then ' + rows.filter(r => !r.never && r.eff > 0).map(r => r.eff + '% off with ' + (L.mode === 'value' ? '$' + r.min + ' or more chosen' : r.min + '+ options')).join(', ') + ' (on top, never counted twice). GP is never shown to the client.</div></div>';
+}
+function ldForSend() {   // what the link fixes: the capped levels
+  if (!ldOn() || !quote.some(i => i.optional && i.id !== 'discount')) return null;
+  const { L, rows } = ldLevels(); if (!L.on) return null;
+  const levels = rows.filter(r => !r.never && r.eff > 0).map(r => ({ min: r.min, pct: r.eff }));
+  return levels.length ? { mode: L.mode, levels } : null;
+}
+document.addEventListener('change', e => {
+  const t = e.target; if (!t.closest || !t.closest('.ld')) return;
+  const L = ldGet();
+  if (t.matches('[data-ld="on"]')) L.on = t.checked;
+  else if (t.matches('[data-ld="mode"]')) { L.mode = t.value; L.levels = t.value === 'value' ? [{ min: 3000, pct: 3 }, { min: 5000, pct: 5 }, { min: 8000, pct: 7 }] : LD_DEFAULT.levels.map(x => ({ ...x })); }
+  else if (t.matches('[data-ldmin]')) L.levels[+t.dataset.ldmin].min = Math.max(1, parseFloat(t.value) || 1);
+  else if (t.matches('[data-ldpct]')) L.levels[+t.dataset.ldpct].pct = Math.max(0, Math.min(30, parseFloat(t.value) || 0));
+  L.levels.sort((a, b) => a.min - b.min); ldSet(L);
+});
+document.addEventListener('click', e => {
+  const t = e.target; if (!t.closest || !t.closest('.ld')) return;
+  const L = ldGet();
+  if (t.closest('[data-ld="add"]')) { const last = L.levels[L.levels.length - 1] || { min: 1, pct: 0 }; L.levels.push({ min: L.mode === 'value' ? last.min + 2000 : last.min + 1, pct: Math.min(30, last.pct + 2) }); ldSet(L); }
+  const rm = t.closest('[data-ldrm]'); if (rm) { L.levels.splice(+rm.dataset.ldrm, 1); ldSet(L); }
+});
 
 // ── SCOPE OF WORK (SCOPE_OF_WORK=on, logged in) ──────────────────────────────
 // One optional box for the whole job's scope, with three ticks: the quote description (client quote page and PDF),

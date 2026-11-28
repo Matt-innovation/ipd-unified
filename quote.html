@@ -22,6 +22,8 @@
   .meta { color: var(--muted); font-size: 14px; }
   .meta div { overflow-wrap: anywhere; }
   .desc { white-space: pre-wrap; margin-top: 10px; }
+  .ladder { margin: 6px 0; padding: 8px 10px; border-radius: 10px; background: #ecfdf5; color: #065f46; font-weight: 600; }
+  .tot.sav span:last-child { color: #065f46; }
   td.ln { white-space: pre-line; }
   .desc-h { margin: 14px 0 0; font-size: 16px; }
   table { width: 100%; border-collapse: collapse; }
@@ -145,19 +147,30 @@ const r2 = v => Math.round(v * 100) / 100;
 const lineOn = (l, i) => !l.optional || CHOICE.has(i);
 const baseNow = () => r2(Q.lines.reduce((t, l, i) => t + (lineOn(l, i) && !(l.discountPct > 0) ? l.qty * l.priceInc : 0), 0));
 const lineAmt = (l, i) => (l.discountPct > 0 ? -r2(baseNow() * l.discountPct / 100) : l.qty * l.priceInc);
+function ladderNow() {
+  const q = Q, ld = q.ladder; if (!ld || !(ld.levels || []).length) return { pct: 0, next: null };
+  if (q.signed) return { pct: q.signed.ladderPct || 0, next: null };
+  const metric = ld.mode === 'value' ? baseNow() : q.lines.filter((l, i) => l.optional && CHOICE.has(i)).length;
+  const got = ld.levels.filter(x => metric >= x.min).pop(), next = ld.levels.find(x => metric < x.min && x.pct > (got ? got.pct : 0));
+  return { pct: got ? got.pct : 0, next: next ? { pct: next.pct, more: ld.mode === 'value' ? r2(next.min - metric) : next.min - metric } : null, mode: ld.mode };
+}
 function totalsNow() {
-  const q = Q, total = r2(q.lines.reduce((t, l, i) => t + (lineOn(l, i) ? lineAmt(l, i) : 0), 0)), deposit = total > 1000 ? r2(total * 0.2) : 0;
+  const q = Q, before = r2(q.lines.reduce((t, l, i) => t + (lineOn(l, i) ? lineAmt(l, i) : 0), 0)), ld = ladderNow();
+  const savings = ld.pct > 0 ? r2(before * ld.pct / 100) : 0, total = r2(before - savings), deposit = total > 1000 ? r2(total * 0.2) : 0;
   let st = stages(q).map(x => ({ name: x.name, amountInc: x.amountInc }));
   if (!q.signed && stages(q).some(x => x.share > 0)) { let left = r2(total - deposit); st = stages(q).map((x, i, a) => { const v = i === a.length - 1 ? left : r2((total - deposit) * x.share); left = r2(left - v); return { name: x.name, amountInc: v }; }); }
   else if (q.signed && Array.isArray(q.signed.stages)) st = q.signed.stages;
-  return { totalInc: total, gstInc: r2(total / 11), deposit, stages: st };
+  return { totalInc: total, gstInc: r2(total / 11), deposit, stages: st, savings, ladder: ld };
 }
 const scheduleHtml = () => { const t = totalsNow(); return `<table><tbody>
         ${t.deposit ? `<tr><td>Deposit, due on acceptance</td><td class="q"></td><td class="a">${aud(t.deposit)}</td></tr>` : ''}
         ${t.stages.map((x, i) => `<tr><td>Stage ${i + 1}: ${esc(x.name)}<div class="note">Invoiced when this stage is complete</div></td><td class="q"></td><td class="a">${aud(x.amountInc)}</td></tr>`).join('')}
       </tbody></table>
       <div class="tot"><span>Total (inc GST)</span><span>${aud(t.totalInc)}</span></div>`; };
-const totalsHtml = () => { const t = totalsNow(); return `<div class="tot big"><span>Total (inc GST)</span><span id="tot-total">${aud(t.totalInc)}</span></div>
+const ladderMsg = t => { const n = t.ladder && t.ladder.next; if (Q.signed) return t.savings ? `You saved ${aud(t.savings)} (${t.ladder.pct}% for the options chosen).` : '';
+  if (!Q.ladder) return ''; const nx = n ? (t.ladder.mode === 'value' ? ` Add ${aud(n.more)} more to save ${n.pct}%.` : ` Add ${n.more === 1 ? 'one more option' : n.more + ' more options'} to save ${n.pct}%.`) : '';
+  return t.savings ? `You're saving ${aud(t.savings)} (${t.ladder.pct}%).${nx}` : nx.trim(); };
+const totalsHtml = () => { const t = totalsNow(), lm = ladderMsg(t); return `${t.savings ? `<div class="tot sav"><span>Option savings (${t.ladder.pct}%)</span><span>−${aud(t.savings)}</span></div>` : ''}${lm ? `<div class="ladder" id="ladder-msg">${esc(lm)}</div>` : ''}<div class="tot big"><span>Total (inc GST)</span><span id="tot-total">${aud(t.totalInc)}</span></div>
       <div class="tot note"><span>Includes GST of</span><span>${aud(t.gstInc)}</span></div>
       ${t.deposit ? `<div class="tot dep"><span>Deposit due on acceptance (20%)</span><span>${aud(t.deposit)}</span></div>` : ''}`; };
 const imgUrl = (x, size) => API + '/client-quote/' + id + '/image/' + x.id + '?size=' + size;
@@ -401,6 +414,7 @@ async function buildPdf(doc, logo) {
   });
   doc.line(L, y - 2, R, y - 2); y += 4; need(20);
   const TT = totalsNow();
+  if (TT.savings) { doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.text(`Option savings (${TT.ladder.pct}%)`, 120, y); doc.text('-' + aud(TT.savings), R, y, { align: 'right' }); y += 5.5; }
   doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text('Total (inc GST)', 120, y); doc.text(aud(TT.totalInc), R, y, { align: 'right' }); y += 5.5;
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.text('Includes GST of', 120, y); doc.text(aud(TT.gstInc), R, y, { align: 'right' }); y += 5;
   if (TT.deposit) { doc.setFont('helvetica', 'bold'); doc.text('Deposit due on acceptance (20%)', 120, y); doc.text(aud(TT.deposit), R, y, { align: 'right' }); y += 5; }
