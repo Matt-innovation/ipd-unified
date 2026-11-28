@@ -343,6 +343,8 @@ body.mk-open{overflow:hidden}
 .mk-hint{font-size:12px;color:#ccc;text-align:center;padding:4px 12px;min-height:22px}
 .mk-bar{padding:6px 8px calc(8px + env(safe-area-inset-bottom));background:#1a1a1a;display:flex;flex-direction:column;gap:6px}
 .mk-tools{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}.mk-tools::before,.mk-tools::after{content:"";margin:auto}
+.mk-widths{display:none;gap:6px;margin-left:6px}#mk.mk-pen .mk-widths{display:inline-flex}
+.mk-w{min-height:44px;min-width:56px;border-radius:10px;border:1px solid #444;background:#222;color:#fff;font:600 11px var(--font);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer}.mk-w i{display:block;width:26px;background:#fff;border-radius:6px}.mk-w.on{outline:2px solid #f59e0b}
 .mk-tool{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:56px;min-height:52px;border-radius:10px;border:1px solid #444;background:#222;color:#fff;font:600 18px var(--font);cursor:pointer;padding:2px 6px}
 .mk-tool small{font-size:10px;font-weight:600;color:#bbb}
 .mk-tool.on{background:#2563eb;border-color:#2563eb}.mk-tool.on small{color:#fff}
@@ -6282,7 +6284,8 @@ document.addEventListener('click', async e => {
 // Everything is movable/resizable by finger or stylus (pointer events), with undo. Save adds a marked-up COPY to
 // the quote's pictures (the original is kept); it uploads and attaches like any other picture. Nothing goes to ServiceM8.
 const MK_COLORS = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#ffffff', '#111111'];
-const MK_TOOLS = [['text', 'T', 'Text'], ['circle', '◯', 'Circle'], ['rect', '▢', 'Square'], ['arrow', '➚', 'Arrow'], ['line', '╱', 'Line'], ['measure', '📏', 'Measure'], ['product', '🛋️', 'Product']];
+const MK_TOOLS = [['pen', '✏️', 'Pen'], ['hl', '🖍', 'Highlight'], ['text', 'T', 'Text'], ['circle', '◯', 'Circle'], ['rect', '▢', 'Square'], ['arrow', '➚', 'Arrow'], ['line', '╱', 'Line'], ['measure', '📏', 'Measure'], ['product', '🛋️', 'Product']];
+const MK_PEN = ['pen', 'hl'], MK_WIDTH = { thin: 0.5, medium: 1, thick: 2 };   // freehand pen and highlighter; line thickness x the normal line
 let mk = null;
 function mkOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.markup); }
 function mkEl() {
@@ -6292,7 +6295,7 @@ function mkEl() {
     + '<div class="mk-wrap"><canvas id="mk-c"></canvas></div>'
     + '<div class="mk-hint" id="mk-hint"></div>'
     + '<div class="mk-bar"><div class="mk-tools">' + MK_TOOLS.map(t => '<button type="button" class="mk-tool" data-mktool="' + t[0] + '"><span>' + t[1] + '</span><small>' + t[2] + '</small></button>').join('') + '</div>'
-    + '<div class="mk-colors">' + MK_COLORS.map(c => '<button type="button" class="mk-col" data-mkcol="' + c + '" style="background:' + c + '" aria-label="Colour"></button>').join('') + '<button type="button" class="mk-b mk-del" data-mk="del" disabled>🗑 Delete</button></div></div>'
+    + '<div class="mk-colors">' + MK_COLORS.map(c => '<button type="button" class="mk-col" data-mkcol="' + c + '" style="background:' + c + '" aria-label="Colour"></button>').join('') + '<span class="mk-widths">' + Object.keys(MK_WIDTH).map(k => '<button type="button" class="mk-w" data-mkw="' + k + '" aria-label="' + k + ' line"><i style="height:' + (k === 'thin' ? 2 : k === 'medium' ? 5 : 10) + 'px"></i>' + k + '</button>').join('') + '</span>' + '<button type="button" class="mk-b mk-del" data-mk="del" disabled>🗑 Delete</button></div></div>'
     + '<input type="file" id="mk-prod" accept="image/*" hidden>';
   document.body.appendChild(el);
   const c = el.querySelector('#mk-c');
@@ -6313,7 +6316,7 @@ async function mkOpen(rec) {
   const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error('Could not open that picture')); i.src = src; }).catch(e => { showToast(e.message); return null; });
   if (!img) return;
   const W = img.naturalWidth, H = img.naturalHeight;
-  mk = { rec, img, W, H, objs: [], sel: -1, tool: 'arrow', color: MK_COLORS[0], hist: [], imgs: {}, lw: Math.max(4, Math.round(Math.max(W, H) / 180)), drag: null };
+  mk = { rec, img, W, H, objs: [], sel: -1, tool: 'arrow', color: MK_COLORS[0], hist: [], imgs: {}, lw: Math.max(4, Math.round(Math.max(W, H) / 180)), drag: null, pw: 'medium' };
   const c = el.querySelector('#mk-c'); c.width = W; c.height = H;
   el.hidden = false; document.body.classList.add('mk-open');
   mkTool('arrow'); mkFit(); mkDraw();
@@ -6327,13 +6330,15 @@ function mkFit() {
 function mkHint() {
   const h = document.getElementById('mk-hint'); if (!h || !mk) return;
   const ref = mk.objs.find(o => o.ref);
-  h.textContent = mk.tool === 'measure' ? (ref ? 'Drag along anything to measure it. Scale set from the ' + mkFmt(ref.mm) + ' line.' : 'Drag along something you know the length of (e.g. a door or tile). You\'ll type its length.')
+  h.textContent = mk.tool === 'pen' ? 'Draw with your finger or pencil. Tap a line to select it, then drag to move or use the corner dot to resize.' : mk.tool === 'hl' ? 'Highlight: a wide see-through line. Tap a line to select it.' : mk.tool === 'measure' ? (ref ? 'Drag along anything to measure it. Scale set from the ' + mkFmt(ref.mm) + ' line.' : 'Drag along something you know the length of (e.g. a door or tile). You\'ll type its length.')
     : mk.tool === 'text' ? 'Tap where the text goes.' : mk.tool === 'product' ? 'Pick a product picture (a PNG with a clear background works best).'
     : 'Drag to draw. Tap a mark to move it; drag its dots to resize.';
 }
 function mkTool(t) {
   if (!mk) return; mk.tool = t;
   document.querySelectorAll('#mk [data-mktool]').forEach(b => b.classList.toggle('on', b.dataset.mktool === t));
+  const el = document.getElementById('mk'); if (el) el.classList.toggle('mk-pen', MK_PEN.includes(t));
+  document.querySelectorAll('#mk [data-mkw]').forEach(b => b.classList.toggle('on', b.dataset.mkw === mk.pw));
   document.querySelectorAll('#mk [data-mkcol]').forEach(b => b.classList.toggle('on', b.dataset.mkcol === mk.color));
   mkHint();
   if (t === 'product') document.getElementById('mk-prod').click();
@@ -6347,17 +6352,19 @@ function mkFmt(mm) { return mm >= 1000 ? (mm / 1000).toFixed(mm >= 10000 ? 1 : 2
 function mkBox(o) {
   if (o.t === 'text') { const g = document.getElementById('mk-c').getContext('2d'); g.font = 'bold ' + o.s + 'px ' + 'DM Sans, -apple-system, sans-serif'; const w = Math.max(...o.text.split('\n').map(l => g.measureText(l).width)); return { x: o.x, y: o.y, w, h: o.s * 1.2 * o.text.split('\n').length }; }
   if (o.t === 'img') return { x: o.x, y: o.y, w: o.w, h: o.h };
+  if (o.t === 'pen') { const xs = o.pts.map(q => q[0]), ys = o.pts.map(q => q[1]), x = Math.min(...xs), y = Math.min(...ys); return { x, y, w: Math.max(1, Math.max(...xs) - x), h: Math.max(1, Math.max(...ys) - y) }; }
   return { x: Math.min(o.x1, o.x2), y: Math.min(o.y1, o.y2), w: Math.abs(o.x2 - o.x1), h: Math.abs(o.y2 - o.y1) };
 }
 const MK_LINES = ['line', 'arrow', 'measure'];
 function mkHandles(o) {
   if (MK_LINES.includes(o.t)) return [[o.x1, o.y1], [o.x2, o.y2]];
   const b = mkBox(o);
-  if (o.t === 'text' || o.t === 'img') return [[b.x + b.w, b.y + b.h]];
+  if (o.t === 'text' || o.t === 'img' || o.t === 'pen') return [[b.x + b.w, b.y + b.h]];
   return [[b.x, b.y], [b.x + b.w, b.y], [b.x, b.y + b.h], [b.x + b.w, b.y + b.h]];
 }
 function mkSegDist(p, o) { const dx = o.x2 - o.x1, dy = o.y2 - o.y1, L = dx * dx + dy * dy; let t = L ? ((p.x - o.x1) * dx + (p.y - o.y1) * dy) / L : 0; t = Math.max(0, Math.min(1, t)); return Math.hypot(p.x - (o.x1 + t * dx), p.y - (o.y1 + t * dy)); }
 function mkHit(o, p, tol) {
+  if (o.t === 'pen') { const t = tol + o.w / 2; if (o.pts.length === 1) return Math.hypot(p.x - o.pts[0][0], p.y - o.pts[0][1]) <= t; for (let i = 1; i < o.pts.length; i++) if (mkSegDist(p, { x1: o.pts[i - 1][0], y1: o.pts[i - 1][1], x2: o.pts[i][0], y2: o.pts[i][1] }) <= t) return true; return false; }
   if (MK_LINES.includes(o.t)) return mkSegDist(p, o) <= tol;
   const b = mkBox(o);
   if (o.t === 'text' || o.t === 'img') return p.x >= b.x - tol / 2 && p.x <= b.x + b.w + tol / 2 && p.y >= b.y - tol / 2 && p.y <= b.y + b.h + tol / 2;
@@ -6372,6 +6379,14 @@ function mkDown(e) {
   if (mk.sel >= 0) {
     const hs = mkHandles(mk.objs[mk.sel]), hi = hs.findIndex(h => Math.hypot(h[0] - p.x, h[1] - p.y) <= tol);
     if (hi >= 0) { mk.drag = { mode: 'resize', hi, p, before, o0: JSON.parse(JSON.stringify(mk.objs[mk.sel])) }; return; }
+  }
+  if (MK_PEN.includes(mk.tool)) {
+    const sel = mk.objs[mk.sel];
+    if (sel && mkHit(sel, p, tol)) { mk.drag = { mode: 'move', p, last: p, before, was: true, moved: false }; return; }   // drag the selected stroke
+    mk.sel = -1; mkSel();
+    const hl = mk.tool === 'hl', w = Math.max(2, Math.round(mk.lw * (MK_WIDTH[mk.pw] || 1) * (hl ? 3 : 1)));
+    mk.objs.push({ t: 'pen', hl, pts: [[p.x, p.y]], c: mk.color, w }); mk.sel = mk.objs.length - 1;
+    mk.drag = { mode: 'create', p, before, tol }; mkDraw(); return;
   }
   for (let i = mk.objs.length - 1; i >= 0; i--) if (mkHit(mk.objs[i], p, tol)) {
     const was = mk.sel === i; mk.sel = i; mk.drag = { mode: 'move', p, last: p, before, was, moved: false }; mkSel(); mkDraw(); return;
@@ -6389,15 +6404,16 @@ function mkDown(e) {
 function mkMove(e) {
   if (!mk || !mk.drag) return; e.preventDefault();
   const p = mkPos(e), d = mk.drag, o = mk.objs[mk.sel]; if (!o) return;
-  if (d.mode === 'create') { o.x2 = p.x; o.y2 = p.y; }
+  if (d.mode === 'create') { if (o.t === 'pen') { const l = o.pts[o.pts.length - 1]; if (Math.hypot(p.x - l[0], p.y - l[1]) >= 1.5 * p.k) o.pts.push([p.x, p.y]); } else { o.x2 = p.x; o.y2 = p.y; } }
   else if (d.mode === 'move') {
     const dx = p.x - d.last.x, dy = p.y - d.last.y; d.last = p; if (Math.hypot(p.x - d.p.x, p.y - d.p.y) > 4 * (mk.W / e.target.getBoundingClientRect().width)) d.moved = true;
-    if ('x1' in o) { o.x1 += dx; o.x2 += dx; o.y1 += dy; o.y2 += dy; } else { o.x += dx; o.y += dy; }
+    if (o.t === 'pen') o.pts = o.pts.map(q => [q[0] + dx, q[1] + dy]); else if ('x1' in o) { o.x1 += dx; o.x2 += dx; o.y1 += dy; o.y2 += dy; } else { o.x += dx; o.y += dy; }
   } else if (d.mode === 'resize') {
     const o0 = d.o0;
     if (MK_LINES.includes(o.t)) { if (d.hi === 0) { o.x1 = p.x; o.y1 = p.y; } else { o.x2 = p.x; o.y2 = p.y; } }
     else if (o.t === 'text') { const b = mkBox(o0); o.s = Math.max(10, Math.round(o0.s * Math.max(0.15, (p.y - o0.y) / Math.max(1, b.h)))); }
     else if (o.t === 'img') { const w = Math.max(20, p.x - o0.x); o.w = w; o.h = w * o0.h / o0.w; }
+    else if (o.t === 'pen') { const b = mkBox(o0), f = Math.max(0.1, Math.max((p.x - b.x) / b.w, (p.y - b.y) / b.h)); o.pts = o0.pts.map(q => [b.x + (q[0] - b.x) * f, b.y + (q[1] - b.y) * f]); }
     else { const b = mkBox(o0), fx = d.hi % 2 ? b.x : b.x + b.w, fy = d.hi > 1 ? b.y : b.y + b.h; o.x1 = fx; o.y1 = fy; o.x2 = p.x; o.y2 = p.y; }
   }
   mkDraw();
@@ -6405,6 +6421,15 @@ function mkMove(e) {
 function mkUp(e) {
   if (!mk || !mk.drag) return;
   const d = mk.drag, o = mk.objs[mk.sel]; mk.drag = null;
+  if (d.mode === 'create' && o && o.t === 'pen') {
+    const len = o.pts.reduce((t, q, i) => i ? t + Math.hypot(q[0] - o.pts[i - 1][0], q[1] - o.pts[i - 1][1]) : 0, 0);
+    if (len < d.tol * 0.6) {   // a tap, not a stroke: select the mark under the finger, if any
+      mk.objs.pop(); mk.sel = -1;
+      for (let i = mk.objs.length - 1; i >= 0; i--) if (mkHit(mk.objs[i], d.p, d.tol)) { mk.sel = i; break; }
+      mkSel(); mkDraw(); return;
+    }
+    mkPush(d.before); mk.sel = -1; mkSel(); mkDraw(); return;
+  }
   if (d.mode === 'create') {
     if (mkLen(o) < d.tol * 0.6) { mk.objs.pop(); mk.sel = -1; mkSel(); mkDraw(); return; }
     if (o.t === 'measure' && !mk.objs.some(x => x.ref)) {
@@ -6427,7 +6452,14 @@ function mkDraw(final) {
   g.clearRect(0, 0, mk.W, mk.H); g.drawImage(mk.img, 0, 0, mk.W, mk.H);
   for (const o of mk.objs) {
     g.save(); g.strokeStyle = g.fillStyle = o.c; g.lineCap = g.lineJoin = 'round';
-    if (o.t === 'img') { const im = mk.imgs[o.src]; if (im) g.drawImage(im, o.x, o.y, o.w, o.h); }
+    if (o.t === 'pen') {
+      g.save(); g.strokeStyle = o.c; g.fillStyle = o.c; g.lineWidth = o.w; g.lineCap = 'round'; g.lineJoin = 'round'; if (o.hl) g.globalAlpha = 0.38;
+      const q = o.pts; g.beginPath(); g.moveTo(q[0][0], q[0][1]);
+      if (q.length === 1) { g.arc(q[0][0], q[0][1], o.w / 2, 0, Math.PI * 2); g.fill(); }
+      else { for (let i = 1; i < q.length - 1; i++) g.quadraticCurveTo(q[i][0], q[i][1], (q[i][0] + q[i + 1][0]) / 2, (q[i][1] + q[i + 1][1]) / 2); g.lineTo(q[q.length - 1][0], q[q.length - 1][1]); g.stroke(); }
+      g.restore();
+    }
+    else if (o.t === 'img') { const im = mk.imgs[o.src]; if (im) g.drawImage(im, o.x, o.y, o.w, o.h); }
     else if (o.t === 'text') {
       g.font = 'bold ' + o.s + 'px DM Sans, -apple-system, sans-serif'; g.textBaseline = 'top'; g.lineWidth = Math.max(2, o.s / 7);
       g.strokeStyle = o.c === '#111111' ? '#ffffff' : 'rgba(0,0,0,.75)';
@@ -6471,6 +6503,7 @@ async function mkProduct(e) {
 async function mkClick(e) {
   if (!mk) return;
   const t = e.target.closest('[data-mktool]'); if (t) { mk.sel = -1; mkSel(); mkDraw(); return mkTool(t.dataset.mktool); }
+  const pw = e.target.closest('[data-mkw]'); if (pw) { mk.pw = pw.dataset.mkw; const o = mk.objs[mk.sel]; if (o && o.t === 'pen') { mkPush(mkSnap()); o.w = Math.max(2, Math.round(mk.lw * MK_WIDTH[mk.pw] * (o.hl ? 3 : 1))); } return mkTool(mk.tool); }
   const col = e.target.closest('[data-mkcol]');
   if (col) { mk.color = col.dataset.mkcol; const o = mk.objs[mk.sel]; if (o && o.t !== 'img') { mkPush(mkSnap()); o.c = mk.color; } mkTool(mk.tool === 'product' ? 'arrow' : mk.tool); mkDraw(); return; }
   const b = e.target.closest('[data-mk]'); if (!b) return;
