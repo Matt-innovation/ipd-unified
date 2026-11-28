@@ -29,9 +29,9 @@
  "quote": {
   "file": "training/videos/04-quote.mp4",
   "poster": "training/videos/04-quote.jpg",
-  "v": "202611280343",
+  "v": "202611280414",
   "voice": "bm_george",
-  "seconds": 217,
+  "seconds": 251,
   "w": 1296,
   "h": 3072
  },
@@ -56,9 +56,9 @@
  "sendclient": {
   "file": "training/videos/07-sendclient.mp4",
   "poster": "training/videos/07-sendclient.jpg",
-  "v": "202611280323",
+  "v": "202611280417",
   "voice": "bm_george",
-  "seconds": 144,
+  "seconds": 151,
   "w": 1296,
   "h": 3072
  },
