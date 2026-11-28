@@ -6651,9 +6651,11 @@ document.addEventListener('input', e => {
 document.addEventListener('change', e => { if (e.target && e.target.id === 'bb-cat') { bbReadForm(); bbCalc(); } });
 
 // ── AI SCOPE FOR BUNDLE JOBS (SCOPE_AI=on) and PAST-TENSE INVOICE DESCRIPTION (INVOICE_PAST=on) ───────────
-// ✨ Suggest a scope: Old Mate (the live /ai-ask route the app already uses) drafts a client-friendly scope from the
-// bundles and products on the quote only. The draft lands in the Scope of work box with "Use this scope" OFF, so
-// nothing goes out until a person has read it and ticked it. If Old Mate can't answer, a plain list is made instead.
+// ✨ Suggest a scope: our server's own scope writer (/scope/write, NOT Old Mate's question route, whose rules refuse
+// regulation-style questions) drafts a client-friendly scope from the descriptions, parts and quantities of the bundles
+// and products on the quote only. The draft lands in the Scope of work box with "Use this scope" OFF, so nothing goes
+// out until a person has read it and ticked it. A refusal or failure is never put in the box: a plain list made from
+// the bundle descriptions is used instead, with a small note.
 // ✍️ Write invoice description: the approved scope (or the quote lines) in past tense, edited by the person, then
 // written to the ServiceM8 invoice description only (old text archived first). Practice: nothing is written.
 const SC_AI_URL = 'https://ipd-proxy-server.onrender.com/ai-ask';
@@ -6662,33 +6664,41 @@ function ipOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undef
 function scItems() {   // what is on the quote: bundles (with their own description) and products; labour is not work to describe
   return quote.filter(i => i.id !== 'discount' && (i.type === 'bundle' || i.type === 'reece')).map(i => {
     const b = i.type === 'bundle' ? bundles.find(x => x.uuid === i.id || (x.code && x.code === i.code)) : null;
-    return { qty: Number(i.qty) || 1, name: String(i.name || '').replace(/\s+/g, ' ').trim(), desc: b && b.notes ? String(b.notes).replace(/\s+/g, ' ').trim() : '', bundle: i.type === 'bundle' };
+    return { qty: Number(i.qty) || 1, name: String(i.name || '').replace(/\s+/g, ' ').trim(), desc: b && b.notes ? String(b.notes).replace(/\s+/g, ' ').trim() : '', bundle: i.type === 'bundle', bundleUuid: i.type === 'bundle' ? String(i.id) : '' };
   });
 }
 function scAiClean(t) {
   return String(t || '').split('\n').filter(l => !/^\s*(sources?|references?)\s*:?/i.test(l) && !/^\s*\[\d+\]/.test(l) && !/^\s*(here('|’)s|here is|sure)\b.*:\s*$/i.test(l))
     .join(' ').replace(/\[(\d+|source[^\]]*)\]/gi, '').replace(/https?:\/\/\S+/g, '').replace(/[*#_`>]+/g, '').replace(/\s+/g, ' ').trim().slice(0, 2000);
 }
+const SC_REFUSAL = /\b(I (can('|’)?t|cannot|could(n('|’)?t| not)|won('|’)?t|will not|am unable|'m unable|do(n('|’)?t| not) have)|official source|from memory|as an AI|I('|’)m sorry|sorry,|unable to (help|provide|write)|please (check|consult|ask)|I would (recommend|suggest))/i;
+function scRefusal(t, input) { if (!t || t.length < 20 || SC_REFUSAL.test(t)) return true; return ['AS/NZS', 'AS 3500', 'AS3500', 'QBCC'].some(w => t.toUpperCase().includes(w) && !String(input || '').toUpperCase().includes(w)); }
+async function scWrite(body, input) {   // our scope writer; throws on failure or a refusal-style answer (never returned)
+  const j = await authFetch('/scope/write', { method: 'POST', body: JSON.stringify(body) });
+  const t = scAiClean(j.text);
+  if (scRefusal(t, input)) throw Object.assign(new Error('refusal'), { notes: j.notes || [] });
+  return { text: t, notes: j.notes || [] };
+}
 async function scAiAsk(question) {
   const r = await fetch(SC_AI_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deviceId: askDeviceId(), question: question.slice(0, 1000) }), signal: AbortSignal.timeout(60000) });
   const j = await r.json().catch(() => ({})); if (!r.ok || !j.answer) throw new Error(j.error || 'Old Mate did not answer');
   const t = scAiClean(j.answer); if (t.length < 20) throw new Error('Old Mate did not answer'); return t;
 }
-function scPlain(items) {   // no AI: the bundles and products, as they are
-  return 'Supply and install: ' + items.map(x => (x.qty !== 1 ? x.qty + ' × ' : '') + x.name.toLowerCase() + (x.desc ? ' (' + x.desc + ')' : '')).join('; ') + '.';
+function scPlain(items) {   // no AI: one line per bundle (its own description, else its name) and product, as a list
+  return items.map(x => '- ' + (x.qty !== 1 ? x.qty + ' × ' : '') + (x.desc ? x.desc.replace(/\s*\/\s*/g, ', ').replace(/[.\s]+$/, '') : x.name.charAt(0) + x.name.slice(1).toLowerCase()) + '.').join('\n');
 }
 async function scAiDraft() {
   const items = scItems(), box = document.getElementById('q-scope'), msg = document.getElementById('sc-aimsg');
   if (!items.length) return showToast('Add bundles or products first');
-  const list = items.map(x => '- ' + x.qty + ' x ' + x.name.slice(0, 70) + (x.desc ? ': ' + x.desc.slice(0, 110) : '')).join('\n');
-  const q = 'Write the scope of work for a client quote. Plain, client-friendly Australian English, one short paragraph, sentences that start with verbs (e.g. "Supply and install ..., remove and dispose of ..."). Use ONLY the work and products listed below. Do not add any work, products, brands, sizes, warranties, compliance claims or prices that are not listed. No heading, no bullet points, no sources, no prices.\nItems:\n' + list;
-  msg.textContent = '✨ Old Mate is writing a draft…';
-  let t, ai = true;
-  try { t = await scAiAsk(q); } catch (e) { t = scPlain(items); ai = false; }
+  const input = items.map(x => x.name + ' ' + x.desc).join(' ');
+  msg.textContent = '✨ Writing a draft…';
+  let t, ai = true, notes = [];
+  try { const r = await scWrite({ mode: 'scope', items }, input); t = r.text; notes = r.notes; } catch (e) { t = scPlain(items); ai = false; notes = e.notes || []; }
+  if (!ai) notes = notes.concat(items.filter(x => x.bundle && !x.desc).map(x => '“' + x.name + '” has no description, so its name was used.')).filter((v, i, a) => a.indexOf(v) === i);
   box.value = t; box.dispatchEvent(new Event('input', { bubbles: true }));
   const h = document.getElementById('q-scope-use'), u = scUse(); u.delete('quote');   // a draft never goes out until a person ticks "Use this scope"
   h.value = ['quote', 'invoice', 'job'].filter(k => u.has(k)).join(','); h.dispatchEvent(new Event('input', { bubbles: true }));
-  msg.textContent = (ai ? '✨ Draft from Old Mate, made only from the bundles and products on this quote.' : 'Old Mate could not answer just now, so this lists the bundles and products as they are.') + ' Read it, change anything, then tick "Use this scope".';
+  msg.textContent = (ai ? '✨ AI draft, made only from the bundles and products on this quote.' : 'The AI draft wasn\u2019t available, so this lists the bundles from their own descriptions.') + ' Read it, change anything, then tick "Use this scope".' + (notes.length ? ' For the owner: ' + notes.join(' ') : '');
   scSync();
 }
 function scAiClear() {
@@ -6699,7 +6709,7 @@ function scAiClear() {
 // past tense without AI: the common verbs at the start of each clause
 const IP_VERBS = { supply: 'supplied', install: 'installed', remove: 'removed', dispose: 'disposed', reconnect: 'reconnected', connect: 'connected', disconnect: 'disconnected', test: 'tested', commission: 'commissioned', replace: 'replaced', fit: 'fitted', repair: 'repaired', unblock: 'unblocked', clear: 'cleared', check: 'checked', seal: 'sealed', cap: 'capped', run: 'ran', lay: 'laid', set: 'set', make: 'made', clean: 'cleaned', flush: 'flushed', adjust: 'adjusted', provide: 'provided', relocate: 'relocated', extend: 'extended', upgrade: 'upgraded', inspect: 'inspected', jet: 'jetted', excavate: 'excavated', backfill: 'backfilled', tidy: 'tidied', reinstate: 'reinstated', drain: 'drained', fill: 'filled', mount: 'mounted', attach: 'attached', secure: 'secured', pressure: 'pressure', leave: 'left' };
 function ipPastPlain(t) {
-  return String(t || '').replace(/(^|[.;,:]\s*|\band\s+|\bthen\s+)([A-Za-z]+)/g, (m, pre, w) => { const p = IP_VERBS[w.toLowerCase()]; return p ? pre + (w[0] === w[0].toUpperCase() ? p[0].toUpperCase() + p.slice(1) : p) : m; });
+  return String(t || '').replace(/(^|[.;,:]\s*|\band\s+|\bthen\s+|^-\s*|\n-\s*)([A-Za-z]+)/gm, (m, pre, w) => { const p = IP_VERBS[w.toLowerCase()]; return p ? pre + (w[0] === w[0].toUpperCase() ? p[0].toUpperCase() + p.slice(1) : p) : m; });
 }
 function ipSource() {
   const scope = typeof scFor === 'function' ? scFor('quote') : null, lines = quote.filter(i => i.id !== 'discount' && i.type !== 'labour').map(i => (Number(i.qty) !== 1 ? i.qty + ' x ' : '') + i.name);
@@ -6728,12 +6738,11 @@ async function ipOpen() {
 }
 async function ipDraft(src) {
   const ta = document.getElementById('ip-text'), msg = document.getElementById('ip-msg'); if (!ta) return;
-  ta.value = ''; msg.textContent = '✨ Old Mate is putting it in past tense…';
-  const q = 'Rewrite this scope of work in the past tense for an invoice, to show what was completed (e.g. "Supplied and installed ..., removed and disposed of ..."). Keep exactly the same work; do not add or remove anything, no prices, no heading, no sources. One plain paragraph.\nScope: ' + src.text.slice(0, 640) + (src.scope && src.lines.length ? '\nQuote lines: ' + src.lines.join(', ').slice(0, 200) : '');
+  ta.value = ''; msg.textContent = '✨ Putting it in past tense…';
   let t, ai = true;
-  try { t = await scAiAsk(q); } catch (e) { t = ipPastPlain(src.text); ai = false; }
+  try { t = (await scWrite({ mode: 'past', text: src.text }, src.text)).text; } catch (e) { t = ipPastPlain(src.text); ai = false; }
   if (!document.getElementById('ip-text')) return;
-  ta.value = t; msg.textContent = (ai ? 'Draft from Old Mate.' : 'Old Mate could not answer just now, so the verbs were changed to past tense here.') + ' Check it before writing.';
+  ta.value = t; msg.textContent = (ai ? 'AI draft.' : 'The AI draft wasn\u2019t available, so the verbs were changed to past tense here.') + ' Check it before writing.';
 }
 async function ipWrite(job) {
   const text = (document.getElementById('ip-text').value || '').trim(), msg = document.getElementById('ip-msg');
@@ -7267,7 +7276,7 @@ function trPracticeOn() { const k = trPracticeKey(); if (!k || !PILOT_UI) return
 (function () {
   const realFetch = window.fetch.bind(window);
   const reply = (o, status = 200) => Promise.resolve(new Response(JSON.stringify(o), { status, headers: { 'Content-Type': 'application/json' } }));
-  const ALLOW = [/^\/auth\//, /^\/training\//, /^\/ai-(ask|search|review)$/, /^\/client-quote$/, /^\/client-quote\/(images|product-links)$/, /^\/kiosk\/notices\/[^/]+\/read$/, /^\/social\/captions\/check$/];
+  const ALLOW = [/^\/auth\//, /^\/training\//, /^\/ai-(ask|search|review)$/, /^\/scope\/write$/, /^\/client-quote$/, /^\/client-quote\/(images|product-links)$/, /^\/kiosk\/notices\/[^/]+\/read$/, /^\/social\/captions\/check$/];
   window.fetch = function (input, init) {
     const url = typeof input === 'string' ? input : (input && input.url) || '', method = String((init && init.method) || (input && input.method) || 'GET').toUpperCase();
     let path = null; if (url.startsWith(PROXY)) path = url.slice(PROXY.length).split('?')[0];
