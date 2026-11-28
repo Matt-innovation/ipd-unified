@@ -288,6 +288,8 @@ a.pl-btn.rl-tech{text-decoration:none;display:inline-flex;align-items:center;min
 .eq-list{margin-top:6px;font-size:13px}.eq-list summary{min-height:40px;display:flex;align-items:center;cursor:pointer;color:var(--text-mid);font-weight:600}
 .eq-row{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px}.eq-row input{width:22px;height:22px;flex-shrink:0}.eq-row small{color:var(--text-mid)}
 .eq-chg{min-height:40px;margin-top:4px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:600 13px var(--font);padding:0 12px;cursor:pointer}
+/* PHOTOS_ONE=on */
+.ph-client{font-size:14px}#cq-list .cq-item[data-cq] > img{cursor:pointer}.ph-old img{opacity:.9}.cq-st.warn{color:#b45309}
 /* SCOPE_OF_WORK=on: one Scope of Work box */
 .qt-inv[hidden],.qs-same[hidden],.so-tools[hidden],.so-sm8[hidden],#so-invai[hidden],#so-ai[hidden]{display:none!important}
 .so-tools{display:flex;flex-direction:column;gap:6px}
@@ -1273,6 +1275,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
               </div>
               <div class="cq-jobpick" id="cq-jobpick" hidden></div>
               <div id="cq-list"></div>
+              <div class="qt-inv-hint" id="ph-hint" hidden>Tap a photo to mark it up (a marked-up copy is added; the original is kept). Every photo also goes to the ServiceM8 job diary for this job. Tick “Show to client” to put it on the client quote page and PDF; the rest stay internal.</div>
               <div class="qt-inv-hint">Shrunk on the phone and kept on our server only (not ServiceM8). Up to 12 per quote and 4 per line. A mock-up shows "For illustration only, final layout may vary." Once a link is made, its photos are locked.</div>
               <div class="cq-stages" id="cq-stages" hidden></div>
               <button class="q-btn primary cq-send" type="button" id="cq-send">🔗 Send to client</button>
@@ -5347,7 +5350,8 @@ async function qnRender() {
   const job = qnJob();
   document.getElementById('qn-job').innerHTML = job ? 'Job <b>' + escHtml(job) + '</b>' : '<span class="qn-warn">Enter the job number on the Summary tab first</span>';
   if (job && qnServer.job !== job) { qnServer = { job, items: [] }; try { qnServer.items = (await authFetch('/quote-notes/job/' + encodeURIComponent(job))).items; } catch (e) {} }
-  const local = (await qnAll()).filter(r => r.jobNumber === job);
+  const notesOnly = typeof phOn === 'function' && phOn(), local = (await qnAll()).filter(r => r.jobNumber === job && !(notesOnly && r.kind === 'photo'));
+  if (notesOnly) qnServer.items = qnServer.items.filter(i => i.kind !== 'photo');
   const onServer = new Set(qnServer.items.map(i => i.clientId));
   const mine = local.filter(r => !onServer.has(r.clientId) || r.status === 'waiting');
   const state = r => r.status === 'saved' ? '<span class="qn-st ok">✓ In ServiceM8 diary</span>' : r.status === 'archived' ? '<span class="qn-st warn">Saved in our archive · not in ServiceM8 yet</span>' :
@@ -5996,6 +6000,7 @@ document.addEventListener('click', e => {
 // 2000 px, 480 px thumbnail), kept in the phone's own database until our server confirms them, then only the
 // thumbnail stays. They go to OUR server only — never to ServiceM8. "Send to client" makes the private link.
 const CQ_DB = 'ipd-client-quote', CQ_STORE = 'images', CQ_MAX = 12, CQ_PER_LINE = 4;
+const cqMax = () => (typeof phOn === 'function' && phOn() ? 40 : CQ_MAX);   // PHOTOS_ONE: 40 job photos; still 12 shown to the client
 let cqOn = false, cqBusy = false, cqAgain = false, cqFeat = {};
 function cqDb() { return new Promise((ok, no) => { const r = indexedDB.open(CQ_DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(CQ_STORE, { keyPath: 'clientId' }); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); }); }
 async function cqTx(mode, fn) { const db = await cqDb(); return new Promise((ok, no) => { const t = db.transaction(CQ_STORE, mode), st = t.objectStore(CQ_STORE); const out = fn(st); t.oncomplete = () => ok(out && out.result !== undefined ? out.result : out); t.onerror = () => no(t.error); }); }
@@ -6031,18 +6036,18 @@ async function cqShrink(file, max, quality) {
   if (url) URL.revokeObjectURL(url); if (src.close) src.close();
   return c.toDataURL('image/jpeg', quality);
 }
-async function cqAddFile(file, how) {
-  const job = cqJob();
-  if (!/^\d{1,8}$/.test(job)) { showToast('Enter the job number first'); return false; }
+async function cqAddFile(file, how, extra) {
+  let job = cqJob();
+  if (!/^\d{1,8}$/.test(job)) { if (!phOn()) { showToast('Enter the job number first'); return false; } job = ''; }   // kept on the phone until the job number is typed
   const mine = await cqForJob(job);
-  if (mine.length >= CQ_MAX) { showToast('Up to ' + CQ_MAX + ' photos and mock-ups per quote'); return false; }
+  if (mine.length >= cqMax()) { showToast('Up to ' + cqMax() + ' photos and mock-ups ' + (phOn() ? 'per job' : 'per quote')); return false; }
   // a picture chosen from Files, a PNG, or one named like a plan starts as a mock-up (the tech can change it)
   const kind = how === 'pick' && (/png|pdf/i.test(file.type) || /mock|layout|plan|render|design|drawing/i.test(file.name || '')) ? 'mockup' : 'photo';
   try {
     const [image, thumb] = await Promise.all([cqShrink(file, kind === 'mockup' ? 2000 : 1600, kind === 'mockup' ? 0.9 : 0.8), cqShrink(file, 480, 0.7)]);
-    await cqPut({ clientId: sUuid(), jobNumber: job, kind, caption: '', attach: '', order: Date.now() + Math.random(), image, thumb, status: 'waiting', at: Date.now() });
+    await cqPut({ clientId: sUuid(), jobNumber: job, kind, caption: '', attach: '', order: Date.now() + Math.random(), image, thumb, status: 'waiting', at: Date.now(), ...(phOn() ? { client: false } : {}), ...(extra || {}) });
   } catch (e) { showToast(e.message || 'Could not read that picture'); return false; }
-  cqRender(); cqUploadLoop(); return true;
+  cqRender(); cqUploadLoop(); if (phOn()) phDiaryLoop(); return true;
 }
 // one at a time; when the server confirms, the full-size copy is removed from the phone (thumbnail kept)
 async function cqUploadLoop() {
@@ -6051,11 +6056,12 @@ async function cqUploadLoop() {
   cqBusy = true; cqAgain = false;
   try {
     for (;;) {
-      const next = (await cqAll()).filter(r => r.status === 'waiting').sort((a, b) => a.at - b.at)[0];
+      const next = (await cqAll()).filter(r => r.status === 'waiting' && /^\d{1,8}$/.test(r.jobNumber || '')).sort((a, b) => a.at - b.at)[0];
       if (!next || !navigator.onLine) break;
       try {
         const j = await authFetch('/client-quote/images', { method: 'POST', body: JSON.stringify({ clientId: next.clientId, jobNumber: next.jobNumber, image: next.image, thumb: next.thumb }) });
-        await cqPut({ ...next, image: null, status: 'uploaded', serverId: j.id });
+        const cur = (await cqAll()).find(r => r.clientId === next.clientId) || next;
+        await cqPut({ ...cur, image: phOn() && !cur.diary ? cur.image : null, status: 'uploaded', serverId: j.id });   // PHOTOS_ONE: the diary still needs the full photo
       } catch (e) {
         if (/HTTP 4|JPEG|too big|Bad image|Not yours|only job|job number/.test(e.message)) await cqPut({ ...next, image: null, status: 'refused', error: e.message });
         else { setTimeout(cqUploadLoop, 5000); break; }                // no signal / server busy: try again in 5 s (and every 30 s)
@@ -6075,14 +6081,18 @@ async function cqRender() {
   cqClientTick();
   if (typeof stRender === 'function') stRender();
   if (typeof vrRenderBar === 'function') vrRenderBar();
-  const seq = ++cqRenderSeq, job = cqJob(), recs = job ? await cqForJob(job) : [];
+  if (phOn() && await phAdopt(cqJob())) { cqUploadLoop(); phDiaryLoop(); }
+  if (typeof phSync === 'function') phSync();
+  const seq = ++cqRenderSeq, job = cqJob(), recs = /^\d{1,8}$/.test(job) ? await cqForJob(job) : phOn() ? await cqForJob('') : [];
   if (seq !== cqRenderSeq) return;
   const lines = cqLines(), keys = new Set(lines.map(l => l.key));
-  document.getElementById('cq-count').textContent = recs.length + ' of ' + CQ_MAX;
+  document.getElementById('cq-count').textContent = phOn() ? recs.length + ' added · ' + recs.filter(phShown).length + ' of ' + CQ_MAX + ' shown to client' : recs.length + ' of ' + CQ_MAX;
   const st = r => r.status === 'uploaded' ? '<span class="cq-st ok">✓ Ready</span>' : r.status === 'refused' ? '<span class="cq-st bad">' + escHtml(r.error || 'Not accepted') + '</span>'
     : '<span class="cq-st wait">' + (navigator.onLine ? 'Uploading…' : 'Waiting for signal') + '</span>';
   const opts = r => '<option value="">Whole quote</option>' + lines.map(l => '<option value="' + escHtml(l.key) + '"' + (l.key === r.attach ? ' selected' : '') + '>Line: ' + escHtml(l.name.slice(0, 60)) + '</option>').join('');
-  document.getElementById('cq-list').innerHTML = !job ? '<div class="qt-inv-hint">Enter the job number above to add photos.</div>' : recs.map((r, i) => '<div class="cq-item" data-cq="' + r.clientId + '">'
+  const ph = phOn(), old = ph ? await phDiaryHtml(job, recs) : '';
+  if (seq !== cqRenderSeq) return;
+  document.getElementById('cq-list').innerHTML = !job && !ph ? '<div class="qt-inv-hint">Enter the job number above to add photos.</div>' : (!recs.length && ph && !old ? '<div class="qt-inv-hint">No photos yet. Take or import one' + (job ? '' : ' (it waits on the phone until the job number is typed)') + '.</div>' : '') + recs.map((r, i) => '<div class="cq-item" data-cq="' + r.clientId + '">'
     + '<img src="' + r.thumb + '" alt="">'
     + '<div class="cq-f"><input type="text" data-cqcap maxlength="300" placeholder="Caption (optional)" value="' + escHtml(r.caption || '') + '">'
     + '<select data-cqkind aria-label="Photo or mock-up"><option value="photo"' + (r.kind === 'photo' ? ' selected' : '') + '>Photo</option><option value="mockup"' + (r.kind === 'mockup' ? ' selected' : '') + '>Mock-up</option></select>'
@@ -6091,7 +6101,8 @@ async function cqRender() {
     + (r.kind === 'mockup' ? '<div class="cq-mock">Client sees: "Mock-up. For illustration only, final layout may vary."</div>' : '')
     + '<div class="cq-row"><button type="button" data-cqmove="-1" aria-label="Move up"' + (i ? '' : ' disabled') + '>↑</button><button type="button" data-cqmove="1" aria-label="Move down"' + (i < recs.length - 1 ? '' : ' disabled') + '>↓</button>'
     + (mkOn() ? '<button type="button" data-cqmark aria-label="Mark up this picture">✏️ Mark up</button>' : '')
-    + '<button type="button" data-cqdel aria-label="Remove">✕</button>' + st(r) + '</div></div></div>').join('');
+    + '<button type="button" data-cqdel aria-label="Remove">✕</button>' + (ph && !/^\d{1,8}$/.test(r.jobNumber || '') ? '' : st(r)) + '</div>'
+    + (ph ? '<label class="qs-same ph-client"><input type="checkbox" data-cqclient' + (phShown(r) ? ' checked' : '') + '> Show to client</label>' + phDiaryState(r) : '') + '</div></div>').join('') + old;
 }
 
 async function cqFromJob() {
@@ -6114,7 +6125,7 @@ async function cqSend() {
   const recs = await cqForJob(job), waiting = recs.filter(r => r.status === 'waiting').length;
   if (waiting) { cqUploadLoop(); return showToast(waiting + ' photo' + (waiting === 1 ? ' is' : 's are') + ' still uploading — try again in a moment'); }
   const lines = cqLines(), per = {};
-  const images = recs.filter(r => r.status === 'uploaded').map(r => { const n = lines.findIndex(l => l.key === r.attach); return { id: r.serverId, kind: r.kind, caption: (r.caption || '').trim(), line: n >= 0 ? n : null }; });
+  const images = recs.filter(r => r.status === 'uploaded' && (!phOn() || phShown(r))).map(r => { const n = lines.findIndex(l => l.key === r.attach); return { id: r.serverId, kind: r.kind, caption: (r.caption || '').trim(), line: n >= 0 ? n : null }; });
   for (const x of images) if (x.line !== null) per[x.line] = (per[x.line] || 0) + 1;
   if (Object.values(per).some(c => c > CQ_PER_LINE)) return showToast('Up to ' + CQ_PER_LINE + ' photos or mock-ups per line');
   const cd = cqClientGet(job);
@@ -6470,14 +6481,14 @@ async function mkClick(e) {
   if (a === 'save') {
     if (!mk.objs.length) return showToast('Draw something first, or tap Cancel');
     const rec = mk.rec, job = rec.jobNumber, mine = await cqForJob(job);
-    if (mine.length >= CQ_MAX) return showToast('Up to ' + CQ_MAX + ' photos and mock-ups per quote. Remove one first.');
+    if (mine.length >= cqMax()) return showToast('Up to ' + cqMax() + ' photos and mock-ups ' + (phOn() ? 'per job' : 'per quote') + '. Remove one first.');
     mk.sel = -1; mkDraw(true);
     const c = document.getElementById('mk-c'), image = c.toDataURL('image/jpeg', 0.85);
     const t = document.createElement('canvas'), k = Math.min(1, 480 / Math.max(mk.W, mk.H)); t.width = Math.round(mk.W * k); t.height = Math.round(mk.H * k);
     t.getContext('2d').drawImage(c, 0, 0, t.width, t.height);
     const later = mine.filter(r => r.order > rec.order).map(r => r.order), next = later.length ? Math.min(...later) : rec.order + 1;
-    await cqPut({ clientId: sUuid(), jobNumber: job, kind: rec.kind, caption: ((rec.caption || '').trim() ? rec.caption.trim().slice(0, 280) + ' (marked up)' : 'Marked up'), attach: rec.attach || '', order: (rec.order + next) / 2, image, thumb: t.toDataURL('image/jpeg', 0.7), status: 'waiting', at: Date.now(), markedUp: true });
-    mkClose(); cqRender(); cqUploadLoop(); showToast('Marked-up copy added to the quote. The original is kept.');
+    await cqPut({ clientId: sUuid(), jobNumber: job, kind: rec.kind, caption: ((rec.caption || '').trim() ? rec.caption.trim().slice(0, 280) + ' (marked up)' : 'Marked up'), attach: rec.attach || '', order: (rec.order + next) / 2, image, thumb: t.toDataURL('image/jpeg', 0.7), status: 'waiting', at: Date.now(), markedUp: true, ...(phOn() ? { client: false } : {}) });
+    mkClose(); cqRender(); cqUploadLoop(); if (phOn()) phDiaryLoop(); showToast('Marked-up copy added to the quote. The original is kept.');
   }
 }
 document.addEventListener('click', async e => {
@@ -6839,6 +6850,101 @@ document.addEventListener('click', e => {
   if (t.closest('#ip-open')) return ipOpen();
 });
 
+// ── ONE PLACE FOR PHOTOS (PHOTOS_ONE=on, logged in, with the client quote link on) ─────────────────────
+// The Photos step (the client quote photo list) is the one place: "Take photo" and "Import photo"; tap a photo to
+// mark it up (a marked-up copy is added, the original kept). EVERY photo, original and marked-up, also goes to the
+// ServiceM8 job diary through the existing Notes & photos route (our archive first; JPEG under 2 MB; test servers job
+// 7600 only). "Show to client" (off for new photos; photos already on quotes keep showing) puts it on the client page.
+// Photos taken before there is a job number wait on the phone and get the job number when it is typed. The Notes &
+// photos tab keeps its notes; its photo buttons and the separate "From this job" picker are replaced by this.
+function phOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.photosOne && cqOn); }
+const phShown = r => r.client !== false;   // photos from before this change (no tick saved) keep showing to the client
+let phBusy = false, phAgain = false, phDiary = { job: '', items: [] };
+// photos added before the job number: they get it as soon as it's typed
+async function phAdopt(job) {
+  if (!/^\d{1,8}$/.test(job)) return false;
+  const waiting = (await cqAll()).filter(r => r.jobNumber === '');
+  for (const r of waiting) await cqPut({ ...r, jobNumber: job });
+  return waiting.length > 0;
+}
+// one at a time to the job diary; the phone keeps the full photo until the diary AND our server have it
+async function phDiaryLoop() {
+  if (phBusy) { phAgain = true; return; }
+  if (!phOn() || !(qnConfig && qnConfig.enabled)) return;
+  if (typeof trPracticeOn === 'function' && trPracticeOn()) return;   // practice: nothing goes to a diary
+  phBusy = true; phAgain = false;
+  try {
+    for (;;) {
+      const next = (await cqAll()).filter(r => /^\d{1,8}$/.test(r.jobNumber || '') && !r.diary && r.status !== 'refused').sort((a, b) => a.at - b.at)[0];
+      if (!next || !navigator.onLine) break;
+      let image = next.image;
+      const did = next.diaryId || sUuid();   // the diary's own id, kept so a retry never duplicates
+      if (!next.diaryId) await cqPut({ ...next, diaryId: did });
+      try {
+        if (!image && next.serverId) {   // already on our server (the phone kept only the small copy): fetch the full one
+          const l = await authFetch('/client-quote/images/' + encodeURIComponent(next.serverId) + '/link'); const b = await (await fetch(PROXY + l.full)).blob();
+          image = await new Promise(ok => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(b); });
+        }
+        if (!image) { await cqPut({ ...next, diary: 'refused', diaryError: 'The full photo is no longer on this phone' }); continue; }
+        const { item } = await authFetch('/quote-notes/items', { method: 'POST', body: JSON.stringify({ jobNumber: next.jobNumber, clientId: did, kind: 'photo', text: (next.caption || '').trim() || (next.markedUp ? 'Marked up' : ''), image, thumb: next.thumb }) });
+        const cur = (await cqAll()).find(r => r.clientId === next.clientId) || next;
+        await cqPut({ ...cur, diaryId: did, diary: item.diary === 'saved' ? 'saved' : 'archived', ...(cur.status === 'uploaded' ? { image: null } : {}) });
+      } catch (e) {
+        if (/HTTP 4|Enter the job|JPEG|Bad item|Not yours|only job/.test(e.message)) await cqPut({ ...next, diaryId: did, diary: 'refused', diaryError: e.message });
+        else { setTimeout(phDiaryLoop, 5000); break; }
+      }
+      cqRender();
+    }
+  } finally { phBusy = false; if (phAgain) { phAgain = false; phDiaryLoop(); } }
+}
+window.addEventListener('online', () => phDiaryLoop());
+setInterval(() => { if (phOn()) phDiaryLoop(); }, 30000);
+function phDiaryState(r) {
+  if (!/^\d{1,8}$/.test(r.jobNumber || '')) return '<span class="cq-st wait">Waiting for the job number</span>';
+  if (typeof trPracticeOn === 'function' && trPracticeOn()) return '<span class="cq-st wait">Practice: not sent to the diary</span>';
+  if (!(qnConfig && qnConfig.enabled)) return '<span class="cq-st wait">Job diary switched off</span>';
+  return r.diary === 'saved' ? '<span class="cq-st ok">✓ In the job diary</span>' : r.diary === 'archived' ? '<span class="cq-st warn">In our archive · not in ServiceM8 yet</span>'
+    : r.diary === 'refused' ? '<span class="cq-st bad">Diary: ' + escHtml(r.diaryError || 'not accepted') + '</span>' : '<span class="cq-st wait">' + (navigator.onLine ? 'Sending to the diary…' : 'Waiting for signal') + '</span>';
+}
+// photos already in this job's diary (from Notes & photos before), shown here too; "Show to client" brings one in
+async function phDiaryHtml(job, recs) {
+  if (!/^\d{1,8}$/.test(job) || !(qnConfig && qnConfig.enabled)) return '';
+  if (phDiary.job !== job) { phDiary = { job, items: [] }; try { phDiary.items = (await authFetch('/quote-notes/job/' + encodeURIComponent(job))).items.filter(i => i.kind === 'photo' && i.full); } catch (e) {} }
+  const ours = new Set(recs.map(r => r.diaryId).filter(Boolean)), from = new Set(recs.map(r => r.fromDiary).filter(Boolean));
+  const list = phDiary.items.filter(i => !ours.has(i.clientId) && !from.has(i.clientId));
+  if (!list.length) return '';
+  return '<div class="qs-sub">Already in the job diary</div>' + list.map(i => '<div class="cq-item ph-old"><img src="' + PROXY + escHtml(i.thumb) + '" alt="Job photo"><div class="cq-f"><span class="cq-st ok">✓ In the job diary</span>'
+    + '<label class="qs-same"><input type="checkbox" data-phbring="' + escHtml(i.clientId) + '" data-full="' + escHtml(i.full) + '"> Show to client</label></div></div>').join('');
+}
+function phSync() {
+  const box = document.getElementById('cq-box'); if (!box) return;
+  const on = phOn(), labs = [...document.querySelectorAll('[data-cqadd]')].map(i => i.closest('label')), fj = document.getElementById('cq-fromjob');   // the buttons move into step 5 in step mode
+  const set = (el, t) => { if (!el) return; const n = [...el.childNodes].find(x => x.nodeType === 3 && x.textContent.trim()); if (n && n.textContent !== t) n.textContent = t; };
+  if (labs[0]) set(labs[0], on ? '📷 Take photo' : '📷 Take photo');
+  if (labs[1]) set(labs[1], on ? '🖼 Import photo' : '🖼 Photos or file');
+  if (fj) fj.hidden = on;
+  const sub = document.querySelector('.cq-sub'); if (sub && on && !/^Photos/.test(sub.firstChild.textContent)) sub.firstChild.textContent = 'Photos ';
+  const hint = document.getElementById('ph-hint'); if (hint) hint.hidden = !on;
+  document.querySelectorAll('[data-qnphoto]').forEach(i => { const l = i.closest('label'); if (l) l.hidden = on; });   // Notes & photos: notes only now
+}
+document.addEventListener('change', async e => {
+  const t = e.target;
+  const c = t.closest && t.closest('[data-cqclient]');
+  if (c) { const item = c.closest('[data-cq]'), all = await cqAll(), r = item && all.find(x => x.clientId === item.dataset.cq); if (!r) return;
+    if (c.checked && all.filter(x => x.jobNumber === r.jobNumber && x.clientId !== r.clientId && phShown(x)).length >= CQ_MAX) { c.checked = false; return showToast('Up to ' + CQ_MAX + ' photos shown to the client'); }
+    await cqPut({ ...r, client: c.checked }); cqRender(); return; }
+  const bring = t.closest && t.closest('[data-phbring]');
+  if (bring && bring.checked) {
+    bring.disabled = true;
+    try { const blob = await (await fetch(PROXY + bring.dataset.full)).blob(); await cqAddFile(new File([blob], 'job-photo.jpg', { type: 'image/jpeg' }), 'job', { client: true, diary: 'saved', fromDiary: bring.dataset.phbring }); }   // already in the diary: never sent again
+    catch (err) { showToast('Could not load that photo'); bring.checked = false; bring.disabled = false; }
+  }
+});
+document.addEventListener('click', async e => {   // tap a photo to mark it up
+  const img = e.target.closest && e.target.closest('#cq-list .cq-item[data-cq] > img'); if (!img || !phOn() || !mkOn()) return;
+  const r = (await cqAll()).find(x => x.clientId === img.closest('[data-cq]').dataset.cq); if (r) mkOpen(r);
+});
+
 // ── SCOPE OF WORK (SCOPE_OF_WORK=on, logged in) ──────────────────────────────
 // One optional box for the whole job's scope, with three ticks: the quote description (client quote page and PDF),
 // the invoice description (ServiceM8 Billing, work_done_description) and the job description (ServiceM8 Details,
@@ -7071,7 +7177,8 @@ function qsSummary(n) {
     case 2: { const d = job && typeof cqClientGet === 'function' ? cqClientGet(job) : null; return d && d.name ? d.name + ((d.sm8 && d.sm8.address) ? ', ' + d.sm8.address.split(',')[0] : '') : 'Not read yet'; }
     case 3: { if (!lines.length) return 'Add lines to see the GP'; if (!quoteJobType) return 'Choose the job type'; const g = calcGP(); if (!(g.sellEx > 0)) return 'No costs known yet'; const gp = (g.sellEx - g.cost) / g.sellEx; return (typeof eqOn === 'function' && eqOn() ? 'Job GP ' : 'GP ') + (gp * 100).toFixed(1) + '% · target ' + Math.round(GP_SETTINGS.targets[quoteJobType] * 100) + '%' + (quoteDiscountPct ? ' · ' + quoteDiscountPct + '% off' : ''); }
     case 4: { const t = v('q-job-desc'); return (typeof scOn === 'function' && scOn() ? 'Scope of Work: ' : 'Job description: ') + (t ? 'written' : 'empty') + (typeof scOn === 'function' && scOn() && typeof soMode === 'function' ? ' · invoice: ' + ({ none: 'not set', same: 'same', different: 'own text' })[soMode()] : ''); }
-    case 5: { const k = document.querySelectorAll('#cq-list .cq-item').length; return k ? k + ' photo' + (k === 1 ? '' : 's') + ' added' : 'No photos'; }
+    case 5: { const it = [...document.querySelectorAll('#cq-list .cq-item[data-cq]')], k = it.length, sh = it.filter(x => (x.querySelector('[data-cqclient]') || {}).checked).length, w = it.filter(x => /Waiting|Sending/.test(x.textContent)).length;
+      return k ? 'Photos: ' + k + ' added' + (phOn() ? ', ' + sh + ' shown to client' + (w ? ', ' + w + ' waiting for the diary' : '') : '') : 'No photos'; }
     case 6: return prods.length ? prods.length + ' line' + (prods.length === 1 ? '' : 's') + ', ' + money(prods.reduce((t, i) => t + (parseFloat(i.price) || 0) * i.qty, 0)) : 'No products yet';
     case 7: return lab.length ? lab.length + ' labour / materials line' + (lab.length === 1 ? '' : 's') + ', ' + money(lab.reduce((t, i) => t + (parseFloat(i.price) || 0) * i.qty, 0)) : 'No labour yet';
     case 8: { const tot = quote.reduce((t, i) => t + (parseFloat(i.price) || 0) * i.qty, 0); return lines.length ? money(tot) + ' inc GST · ' + lines.length + ' line' + (lines.length === 1 ? '' : 's') : 'Empty'; }
@@ -7095,7 +7202,7 @@ function qsMarks() {
     2: !!((document.querySelector('#cq-client [data-cqc="name"]') || {}).value || '').trim(),
     3: target != null && gp != null && !gpLow,
     4: !!val('q-job-desc') || (scOn() && (!!val('q-scope') || lines.some(i => i.type === 'bundle'))),
-    5: !!document.querySelector('#cq-list .cq-item'),
+    5: !!document.querySelector('#cq-list .cq-item[data-cq]'),
     6: lines.some(i => i.type === 'reece' || i.type === 'bundle'),
     7: lines.some(i => i.type === 'labour' || i.type === 'material' || /^mat/i.test(String(i.id))),
     8: lines.length > 0,
