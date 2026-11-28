@@ -289,7 +289,9 @@ a.pl-btn.rl-tech{text-decoration:none;display:inline-flex;align-items:center;min
 .eq-row{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px}.eq-row input{width:22px;height:22px;flex-shrink:0}.eq-row small{color:var(--text-mid)}
 .eq-chg{min-height:40px;margin-top:4px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:600 13px var(--font);padding:0 12px;cursor:pointer}
 /* Clear quote */
-#qs-top{display:flex;justify-content:flex-end;padding:6px 10px 0;background:var(--surface)}
+#qs-top{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px 0;background:var(--surface)}
+.qs-chip-gp{min-height:40px;padding:0 12px;border-radius:999px;border:0;font:800 14px var(--font);cursor:pointer;background:var(--surface2);color:var(--text);white-space:nowrap}.qs-chip-gp[hidden]{display:none}
+.qs-chip-gp.ok{background:#16a34a;color:#fff}.qs-chip-gp.mid{background:#f59e0b;color:#111}.qs-chip-gp.low{background:#dc2626;color:#fff}
 .qs-clear{min-height:40px;padding:0 12px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:600 13px var(--font);cursor:pointer}
 .qs-on .quote-actions .q-btn[onclick="clearQuote()"]{display:none}
 #clr-undo{position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:1200;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:#111;color:#fff;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.3)}#clr-undo[hidden]{display:none}#clr-undo span{flex:1}#clr-undo button{min-height:44px;min-width:72px;border:0;border-radius:10px;background:#f59e0b;color:#111;font:700 14px var(--font)}
@@ -7314,7 +7316,7 @@ function qsBuild() {
   const steps = document.createElement('div'); steps.id = 'qs-steps';
   steps.innerHTML = QS_STEPS.map(([n, t]) => '<section class="qs-step" id="qs-' + n + '"><div class="qs-hd" role="button" tabindex="0" aria-expanded="false" data-qsbar="' + n + '"><span class="qs-n">' + n + '</span><span class="qs-tt"><span class="qs-t">' + t + '</span><span class="qs-sum"></span></span><span class="qs-st"></span><span class="qs-chev" aria-hidden="true">▾</span></div><div class="qs-body"></div></section>').join('');
   wrap.insertBefore(steps, wrap.firstChild); wrap.insertBefore(nav, steps);
-  const top = document.createElement('div'); top.id = 'qs-top'; top.innerHTML = '<button type="button" class="qs-clear" id="qs-clear">🗑 Clear quote</button>'; wrap.insertBefore(top, nav);
+  const top = document.createElement('div'); top.id = 'qs-top'; top.innerHTML = '<button type="button" class="qs-chip-gp" id="qs-gpchip" aria-label="Job GP and total: tap for the GP panel" hidden></button><button type="button" class="qs-clear" id="qs-clear">🗑 Clear quote</button>'; wrap.insertBefore(top, nav);
   const body = n => steps.querySelector('#qs-' + n + ' .qs-body');
   const mv = (n, node, cq) => { if (node) { if (cq) node.setAttribute('data-qscq', ''); body(n).appendChild(node); } };
   const add = (n, html) => body(n).insertAdjacentHTML('beforeend', html);
@@ -7362,6 +7364,19 @@ function qsBuild() {
   qsOpen(qsFirstOpen(), true);
 }
 let qsRaf = 0;
+// The live GP chip at the top of every step (staff only): headline Job GP and the quote total. Green at or above the
+// client-side limit, amber between the technician floor and that limit, red below the floor. Tap: the GP panel (step 3).
+function qsChip() {
+  const c = document.getElementById('qs-gpchip'); if (!c) return;
+  const lines = quote.filter(i => i.id !== 'discount'), total = quote.reduce((t, i) => t + (parseFloat(i.price) || 0) * i.qty, 0);
+  if (!lines.length) { c.hidden = true; return; }
+  const g = calcGP(), gp = g.sellEx > 0 ? (g.sellEx - g.cost) / g.sellEx : null, ty = quoteJobType;
+  const floor = ty ? GP_SETTINGS.targets[ty] : null, lim = ty && typeof gpClientLimit === 'function' && typeof eqOn === 'function' && eqOn() ? gpClientLimit(ty) : floor;
+  const cls = gp == null || !ty ? 'none' : gp >= lim - 1e-9 ? 'ok' : gp >= floor - 1e-9 ? 'mid' : 'low';
+  const t = (gp == null ? 'GP —' : 'GP ' + Math.round(gp * 100) + '%') + ' · $' + Math.round(total).toLocaleString('en-AU');
+  c.hidden = false; if (c.textContent !== t) c.textContent = t; c.className = 'qs-chip-gp ' + cls;
+}
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#qs-gpchip')) qsOpen(3); });
 // One step open at a time: tap a bar (or a number in the step bar) to open it, tap again to shrink it.
 function qsOpen(n, quiet) {
   document.querySelectorAll('#qs-steps .qs-step').forEach(sec => { const on = sec.id === 'qs-' + n; sec.classList.toggle('open', on); const h = sec.querySelector('.qs-hd'); if (h) h.setAttribute('aria-expanded', on ? 'true' : 'false'); });
@@ -7426,6 +7441,7 @@ function qsMarks() {
 }
 function qsRender() {
   const scr = document.getElementById('screen-quote'); if (!scr || !scr.classList.contains('qs-on')) return;
+  qsChip();
   const T = stTotals(), dep = document.getElementById('qs-dep');
   if (dep) dep.innerHTML = T.total > 0 ? (T.deposit ? 'Deposit on acceptance: <b>$' + T.deposit.toFixed(2) + '</b> (20% on jobs over $1,000) · the rest: <b>$' + T.rest.toFixed(2) + '</b>' : 'No deposit (jobs of $1,000 or less).') : '';
   qsDiscRender(); qsMarks();
