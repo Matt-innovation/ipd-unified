@@ -7377,6 +7377,8 @@ function qsChip() {
   c.hidden = false; if (c.textContent !== t) c.textContent = t; c.className = 'qs-chip-gp ' + cls;
 }
 document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#qs-gpchip')) qsOpen(3); });
+// step mode: the notes in step 7 follow the job number (the old tab switch used to do this)
+document.addEventListener('change', e => { if (e.target && e.target.id === 'job-number-input' && document.getElementById('qs-steps') && typeof qnRender === 'function') qnRender(); });
 // One step open at a time: tap a bar (or a number in the step bar) to open it, tap again to shrink it.
 function qsOpen(n, quiet) {
   document.querySelectorAll('#qs-steps .qs-step').forEach(sec => { const on = sec.id === 'qs-' + n; sec.classList.toggle('open', on); const h = sec.querySelector('.qs-hd'); if (h) h.setAttribute('aria-expanded', on ? 'true' : 'false'); });
