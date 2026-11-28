@@ -288,6 +288,8 @@ a.pl-btn.rl-tech{text-decoration:none;display:inline-flex;align-items:center;min
 .eq-list{margin-top:6px;font-size:13px}.eq-list summary{min-height:40px;display:flex;align-items:center;cursor:pointer;color:var(--text-mid);font-weight:600}
 .eq-row{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px}.eq-row input{width:22px;height:22px;flex-shrink:0}.eq-row small{color:var(--text-mid)}
 .eq-chg{min-height:40px;margin-top:4px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:600 13px var(--font);padding:0 12px;cursor:pointer}
+/* GP with options */
+.gpo{margin-top:8px;padding:8px 10px;border:1px dashed var(--border2);border-radius:10px;font-size:13px;display:flex;flex-direction:column;gap:2px}.gpo-one{color:var(--text-mid)}
 /* PHOTOS_ONE=on */
 .ph-client{font-size:14px}#cq-list .cq-item[data-cq] > img{cursor:pointer}.ph-old img{opacity:.9}.cq-st.warn{color:#b45309}
 /* SCOPE_OF_WORK=on: one Scope of Work box */
@@ -2810,6 +2812,7 @@ async function loadBundleCosts() {
     bundleCosts = d && d.bundles ? d.bundles : null;
   } catch (e) { bundleCosts = null; }
   if (activeScreen === 'quote') renderGP();
+  if (typeof blSync === 'function') blSync();
 }
 async function loadQuoteData() {
   loadKnowledge(); // separate Sheet; runs alongside, a failure there doesn't affect bundles
@@ -3026,6 +3029,7 @@ function clearQuote() { if (typeof qdStash === 'function') qdStash('cleared'); q
 function updateQuoteUI() {
   syncDiscountLine();
   if (typeof spCheck === 'function') setTimeout(spCheck, 0);
+  if (typeof blSync === 'function') setTimeout(blSync, 0);
   if (typeof qsRender === 'function') setTimeout(qsRender, 0);
   if (typeof scSync === 'function') setTimeout(scSync, 0);
   if (typeof sgSchedule === 'function') sgSchedule();
@@ -3198,7 +3202,9 @@ document.addEventListener('change', e => { const c = e.target.closest && e.targe
 function dsMax() {   // largest discount (0–0.5) that keeps the Job GP at or above the target; null = no job type / no costs
   if (!quoteJobType) return null; const t = GP_SETTINGS.targets[quoteJobType], g = calcGP();
   if (!(g.sellExFull > 0)) return null;
-  return Math.max(0, Math.min(0.5, (g.sellExFull - g.cost / (1 - t)) / (g.sellExFull + (g.eSellEx || 0))));
+  const m = x => Math.max(0, Math.min(0.5, (x.sellExFull - x.cost / (1 - t)) / (x.sellExFull + (x.eSellEx || 0))));
+  const c = typeof gpCombos === 'function' ? gpCombos() : null;   // with options: whatever the client picks must still hold the target
+  return c && c.list.length ? Math.min(...c.list.map(x => m(x.g))) : m(g);
 }
 function dsGate() {
   const row = document.getElementById('gp-discount'); if (!row) return;
@@ -3233,7 +3239,7 @@ function setQuoteDiscount(pct) {
 function onCustomDiscount(box) {
   let v = parseFloat(box.value);
   if (v > 50) { v = 50; box.value = 50; showToast('Discount is capped at 50%'); }
-  if (typeof eqOn === 'function' && eqOn() && v > 0) { const m = dsMax(); if (m != null && v / 100 > m + 1e-9) { v = Math.floor(m * 1000) / 10; box.value = v || ''; showToast(v ? 'The most that keeps the GP target is ' + v + '%' : 'No room to discount'); } }
+  if (typeof eqOn === 'function' && eqOn() && v > 0) { const m = dsMax(); if (m != null && v / 100 > m + 1e-9) { v = Math.floor(m * 1000) / 10; box.value = v || ''; showToast(v ? 'The most that keeps the GP target is ' + v + '%' + (quote.some(i => i.optional) ? ' (for every choice the client can make)' : '') : 'No room to discount'); } }
   setQuoteDiscount(v || 0);
 }
 // Largest % that keeps GP at or above target: GP = (S(1−d) − C) / S(1−d) ≥ T  →  d ≤ 1 − C / (S(1−T))
@@ -3290,7 +3296,7 @@ function renderGP() {
   const notes = [];
   if (g.bundlesNoCost) notes.push(`GP excludes ${g.bundlesNoCost} bundle${g.bundlesNoCost === 1 ? '' : 's'} with no cost`);
   if (g.noCost) notes.push(`GP excludes ${g.noCost} item${g.noCost === 1 ? '' : 's'} with no cost price`);
-  panel.innerHTML = typeRow + body + eqPanelHtml(g) + (notes.length ? `<div class="gp-note">${notes.join(' · ')}</div>` : '');
+  panel.innerHTML = typeRow + body + eqPanelHtml(g) + (eqOn() && typeof gpOptionsHtml === 'function' ? gpOptionsHtml() : '') + (notes.length ? `<div class="gp-note">${notes.join(' · ')}</div>` : '');
 }
 
 function exportQuote() {
@@ -6141,7 +6147,7 @@ async function cqSend() {
   try {
     const invoiceDescription = typeof scOn === 'function' && scOn() ? (scFor('quote') || '') : (document.getElementById('q-invoice-desc')?.value || '').trim();
     const j = await authFetch('/client-quote', { method: 'POST', body: JSON.stringify({ jobNumber: job, invoiceDescription, images, ...(client ? { client } : {}), ...(stages ? { stages } : {}), ...(swOn() ? { swms: swSummary() } : {}),
-      lines: quote.map(i => ({ name: i.name, qty: Number(i.qty), priceInc: Number(i.price), ...(cqFeat.options && i.optional ? { optional: true, defaultOn: !!i.defaultOn } : {}), ...(cqFeat.productLinks && (i.links || []).length ? { links: i.links.map(k => k.source === 'kc' ? { id: k.id } : { url: k.url, title: k.title, type: k.type }) } : {}) })) }) });
+      lines: quote.map(i => ({ name: (cqFeat.bundleLinks && i.type === 'bundle' && bundleCosts && bundleCosts[i.id] && bundleCosts[i.id].desc) || i.name, qty: Number(i.qty), priceInc: Number(i.price), ...(cqFeat.bundleOptions && i.id === 'discount' && quoteDiscountPct > 0 ? { discountPct: quoteDiscountPct } : {}), ...(cqFeat.options && i.optional ? { optional: true, defaultOn: !!i.defaultOn } : {}), ...(cqFeat.productLinks && (i.links || []).length ? { links: i.links.map(k => k.source === 'kc' ? { id: k.id } : { url: k.url, title: k.title, type: k.type }) } : {}) })) }) });
     const preview = j.link.replace('/quote.html#', '/quote.html?staff=1#');
     try { localStorage.setItem('ipd_cq_last_' + job, JSON.stringify({ link: j.link, expiresAt: j.expiresAt, at: Date.now() })); } catch (e) {}
     if (typeof sgLearn === 'function') sgLearn('link');
@@ -6978,6 +6984,52 @@ document.addEventListener('click', async e => {   // tap a photo to mark it up
   const r = (await cqAll()).find(x => x.clientId === img.closest('[data-cq]').dataset.cq); if (r) mkOpen(r);
 });
 
+
+// ── BUNDLE LINKS (BUNDLE_LINKS=on, with SHOWPIECE and PRODUCT_LINKS) ─────────────────────────────────
+// A bundle is one quote line, but the hot water unit, toilet or tapware inside it is what the client wants to see.
+// The server lists each bundle's showpiece parts (the same rule as single products); their Reece product pages are
+// added to the bundle line once, automatically. They can be removed again in 📄 Product info. Links only.
+function blOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.bundleLinks && cqFeat.productLinks); }
+function blSync() {
+  if (!blOn() || !bundleCosts) return;
+  let changed = false;
+  for (const i of quote) {
+    if (i.type !== 'bundle' || i.blDone) continue;
+    const bc = bundleCosts[i.id]; if (!bc) continue;
+    i.blDone = true; changed = true;
+    for (const p of (bc.show || [])) {
+      const url = spUrl(p.code); i.links = i.links || [];
+      if (i.links.some(k => k.url === url) || i.links.length >= PL_LINE || plCount() >= PL_QUOTE) continue;
+      i.links.push({ source: 'manual', url, title: ('Photo and specification sheet: ' + p.name.replace(/\s*\((EA|LEN|SET|PR|KIT)\)\s*$/i, '')).slice(0, 120), type: 'Product information', site: 'reece.com.au', auto: true });
+    }
+  }
+  if (changed) { if (typeof qdSave === 'function') qdSave(); if (activeScreen === 'quote' && typeof renderQuote === 'function') renderQuote(); }
+}
+// ── GP WITH OPTIONS (GP_EQUIP, when lines are optional) ───────────────────────────────────────────────
+// Staff only: the Job GP for (a) the required lines only, (b) every option ticked, (c) the lowest-GP choice the
+// client could make; and each option's own GP. Discounts are a % (they scale with what is picked) and are capped so
+// that EVERY choice the client can make keeps the Job GP at or above the target.
+function gpOf(keep) { const q = quote; try { quote = q.filter(keep); return calcGP(); } finally { quote = q; } }
+const gpPct = g => (g && g.sellExFull > 0 ? (g.sellExFull - g.cost) / g.sellExFull : null);   // before the discount
+function gpCombos() {
+  const opts = quote.filter(i => i.optional && i.id !== 'discount'); if (!opts.length) return null;
+  const n = Math.min(opts.length, 10), out = [];
+  for (let m = 0; m < 1 << n; m++) { const on = new Set(opts.filter((o, k) => k >= n || m & (1 << k)).map(o => String(o.id))); out.push({ on, g: gpOf(i => !i.optional || on.has(String(i.id))) }); }
+  return { opts, list: out.filter(c => c.g.sellExFull > 0) };
+}
+function gpOptionsHtml() {
+  const c = gpCombos(); if (!c || !c.list.length) return '';
+  const pct = v => (v == null ? '—' : (v * 100).toFixed(1) + '%'), req = gpOf(i => !i.optional), all = gpOf(() => true);
+  const low = c.list.reduce((a, b) => (gpPct(b.g) < gpPct(a.g) ? b : a));
+  const lowNames = c.opts.filter(o => low.on.has(String(o.id))).map(o => o.name.slice(0, 30));
+  return '<div class="gpo"><b>With options (staff only):</b>'
+    + '<div>Required items only: <b>' + pct(gpPct(req)) + '</b></div>'
+    + '<div>All options ticked: <b>' + pct(gpPct(all)) + '</b></div>'
+    + '<div>Lowest the client could choose: <b>' + pct(gpPct(low.g)) + '</b> (' + (lowNames.length ? escHtml(lowNames.join(' + ')) : 'no options') + ')</div>'
+    + c.opts.map(o => { const g = gpOf(i => i === o); return '<div class="gpo-one">Option: ' + escHtml(o.name.slice(0, 50)) + ' · its own GP <b>' + pct(gpPct(g)) + '</b></div>'; }).join('')
+    + '<div class="eq-small">Discounts are a % of what the client picks, and are capped so every choice keeps the target.</div></div>';
+}
+
 // ── SCOPE OF WORK (SCOPE_OF_WORK=on, logged in) ──────────────────────────────
 // One optional box for the whole job's scope, with three ticks: the quote description (client quote page and PDF),
 // the invoice description (ServiceM8 Billing, work_done_description) and the job description (ServiceM8 Details,
@@ -7268,7 +7320,7 @@ function qsDiscRender() {
   const gate = typeof eqOn === 'function' && eqOn(), mx = gate ? dsMax() : null;   // GP_EQUIP: offer only what keeps the target
   const row = (label, d, key) => {
     const v = qsGp(d), ok = v != null && v >= target - 1e-9, amt = base * d;
-    if (gate && d > 0 && !ok) return '';
+    if (gate && d > 0 && (!ok || (mx != null && d > mx + 1e-9))) return '';   // with options: not past what every choice can hold
     return '<div class="qs-drow' + (ok ? '' : ' low') + (Math.abs(discountFraction() - d) < 1e-9 ? ' cur' : '') + '"><span class="qs-dl">' + label + (d > 0 ? ' <small>−$' + amt.toFixed(2) + '</small>' : '') + '</span>'
       + '<span class="qs-dg">GP ' + (v == null ? '—' : pct(v)) + (ok ? '' : ' <b>⚠ below ' + Math.round(target * 100) + '% minimum</b>') + '</span>'
       + '<button type="button" class="qs-dbtn" data-qsdisc="' + key + '">' + (Math.abs(discountFraction() - d) < 1e-9 ? 'Applied' : 'Apply') + '</button></div>';

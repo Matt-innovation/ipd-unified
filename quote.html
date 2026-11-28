@@ -22,6 +22,7 @@
   .meta { color: var(--muted); font-size: 14px; }
   .meta div { overflow-wrap: anywhere; }
   .desc { white-space: pre-wrap; margin-top: 10px; }
+  td.ln { white-space: pre-line; }
   .desc-h { margin: 14px 0 0; font-size: 16px; }
   table { width: 100%; border-collapse: collapse; }
   td { padding: 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
@@ -140,10 +141,22 @@ const MOCK_NOTE = 'For illustration only, final layout may vary.';
 let ALL = [], LINKS = [], CHOICE = null;
 // Options the client ticks: required lines + ticked options make the total (deposit 20% over $1,000, as the server works it out).
 const r2 = v => Math.round(v * 100) / 100;
+// a % discount line is worked out on what the client chose; stages kept as shares follow the choice (as the server does)
+const lineOn = (l, i) => !l.optional || CHOICE.has(i);
+const baseNow = () => r2(Q.lines.reduce((t, l, i) => t + (lineOn(l, i) && !(l.discountPct > 0) ? l.qty * l.priceInc : 0), 0));
+const lineAmt = (l, i) => (l.discountPct > 0 ? -r2(baseNow() * l.discountPct / 100) : l.qty * l.priceInc);
 function totalsNow() {
-  const q = Q, total = r2(q.lines.reduce((t, l, i) => t + (!l.optional || CHOICE.has(i) ? l.qty * l.priceInc : 0), 0));
-  return { totalInc: total, gstInc: r2(total / 11), deposit: total > 1000 ? r2(total * 0.2) : 0 };
+  const q = Q, total = r2(q.lines.reduce((t, l, i) => t + (lineOn(l, i) ? lineAmt(l, i) : 0), 0)), deposit = total > 1000 ? r2(total * 0.2) : 0;
+  let st = stages(q).map(x => ({ name: x.name, amountInc: x.amountInc }));
+  if (!q.signed && stages(q).some(x => x.share > 0)) { let left = r2(total - deposit); st = stages(q).map((x, i, a) => { const v = i === a.length - 1 ? left : r2((total - deposit) * x.share); left = r2(left - v); return { name: x.name, amountInc: v }; }); }
+  else if (q.signed && Array.isArray(q.signed.stages)) st = q.signed.stages;
+  return { totalInc: total, gstInc: r2(total / 11), deposit, stages: st };
 }
+const scheduleHtml = () => { const t = totalsNow(); return `<table><tbody>
+        ${t.deposit ? `<tr><td>Deposit, due on acceptance</td><td class="q"></td><td class="a">${aud(t.deposit)}</td></tr>` : ''}
+        ${t.stages.map((x, i) => `<tr><td>Stage ${i + 1}: ${esc(x.name)}<div class="note">Invoiced when this stage is complete</div></td><td class="q"></td><td class="a">${aud(x.amountInc)}</td></tr>`).join('')}
+      </tbody></table>
+      <div class="tot"><span>Total (inc GST)</span><span>${aud(t.totalInc)}</span></div>`; };
 const totalsHtml = () => { const t = totalsNow(); return `<div class="tot big"><span>Total (inc GST)</span><span id="tot-total">${aud(t.totalInc)}</span></div>
       <div class="tot note"><span>Includes GST of</span><span>${aud(t.gstInc)}</span></div>
       ${t.deposit ? `<div class="tot dep"><span>Deposit due on acceptance (20%)</span><span>${aud(t.deposit)}</span></div>` : ''}`; };
@@ -182,7 +195,7 @@ function render() {
   const whole = ALL.filter(x => x.line === null || x.line === undefined);
   const lineImgs = i => ALL.filter(x => x.line === i);
   const lines = q.lines.map((l, i) => { const lk = linkList(i); const cls = [lk ? 'haslinks' : '', l.optional ? 'opt' : '', l.optional && !CHOICE.has(i) ? 'off' : ''].filter(Boolean).join(' ');
-    return `<tr data-line="${i}"${cls ? ` class="${cls}"` : ''}><td>${l.optional ? `<label class="optl"><input type="checkbox" data-opt="${i}"${CHOICE.has(i) ? ' checked' : ''}${lockOpt ? ' disabled' : ''}><span>Optional</span></label>` : ''}${esc(l.name)}${lineImgs(i).length ? `<div class="lthumbs">${lineImgs(i).map(x => thumbBtn(x)).join('')}</div>` : ''}</td><td class="q">${l.qty === 1 ? '' : esc(l.qty)}</td><td class="a">${aud(l.qty * l.priceInc)}</td></tr>` + (lk ? `<tr class="plrow" data-linkrow="${i}"><td colspan="3">${lk}</td></tr>` : ''); }).join('');
+    return `<tr data-line="${i}"${cls ? ` class="${cls}"` : ''}><td class="ln">${l.optional ? `<label class="optl"><input type="checkbox" data-opt="${i}"${CHOICE.has(i) ? ' checked' : ''}${lockOpt ? ' disabled' : ''}><span>Optional</span></label>` : ''}${esc(l.name)}${lineImgs(i).length ? `<div class="lthumbs">${lineImgs(i).map(x => thumbBtn(x)).join('')}</div>` : ''}</td><td class="q">${l.qty === 1 ? '' : esc(l.qty)}</td><td class="a" data-amt="${i}">${aud(lineAmt(l, i))}</td></tr>` + (lk ? `<tr class="plrow" data-linkrow="${i}"><td colspan="3">${lk}</td></tr>` : ''); }).join('');
   const s = q.signed;
   $('#app').innerHTML = `${q.practice ? '<div class="practice">🎓 PRACTICE QUOTE: for staff training only. This is not a real quote.</div>' : ''}
     <header class="card">
@@ -211,11 +224,7 @@ function render() {
     </section>
     ${stages(q).length ? `<section class="card" id="schedule">
       <h2>Payment schedule</h2>
-      <table><tbody>
-        ${q.deposit ? `<tr><td>Deposit, due on acceptance</td><td class="q"></td><td class="a">${aud(q.deposit)}</td></tr>` : ''}
-        ${stages(q).map((x, i) => `<tr><td>Stage ${i + 1}: ${esc(x.name)}<div class="note">Invoiced when this stage is complete</div></td><td class="q"></td><td class="a">${aud(x.amountInc)}</td></tr>`).join('')}
-      </tbody></table>
-      <div class="tot"><span>Total (inc GST)</span><span>${aud(q.totalInc)}</span></div>
+      <div id="sched">${scheduleHtml()}</div>
     </section>` : ''}
     <section class="card">
       <h2>Key terms</h2>
@@ -244,6 +253,8 @@ function render() {
     const i = +c.dataset.opt; c.checked ? CHOICE.add(i) : CHOICE.delete(i);
     c.closest('tr').classList.toggle('off', !c.checked);
     document.getElementById('totals').innerHTML = totalsHtml();
+    document.querySelectorAll('[data-amt]').forEach(td => { const k = +td.dataset.amt; td.textContent = aud(lineAmt(Q.lines[k], k)); });   // a % discount follows the choice
+    const sc = document.getElementById('sched'); if (sc) sc.innerHTML = scheduleHtml();
   }));
   // a product link opens in a new tab; this page records it (the client's page stays open)
   document.querySelectorAll('[data-link]').forEach(a => a.addEventListener('click', () => {
@@ -379,7 +390,7 @@ async function buildPdf(doc, logo) {
     const parts = doc.splitTextToSize(l.name, 128); need(parts.length * 4.5 + 2);
     const off = l.optional && !CHOICE.has(i);
     if (off) doc.setTextColor(140);
-    doc.text(parts, L, y); doc.text(String(l.qty), 160, y, { align: 'right' }); doc.text(aud(l.qty * l.priceInc).replace('−', '-'), R, y, { align: 'right' });
+    doc.text(parts, L, y); doc.text(String(l.qty), 160, y, { align: 'right' }); doc.text(aud(lineAmt(l, i)).replace('−', '-'), R, y, { align: 'right' });
     y += parts.length * 4.5 + 2;
     if (l.optional) { doc.setFontSize(8.5); doc.text(off ? 'Optional — not included' : 'Optional — included', L + 4, y - 1); doc.setFontSize(10); y += 3.5; }
     doc.setTextColor(0);
@@ -399,9 +410,9 @@ async function buildPdf(doc, logo) {
     const row = (label, amt, sub) => { const parts = doc.splitTextToSize(label, 140); need(parts.length * 4.5 + (sub ? 4 : 0) + 2); doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
       doc.text(parts, L, y); doc.text(aud(amt), R, y, { align: 'right' }); y += parts.length * 4.5;
       if (sub) { doc.setFontSize(8.5); doc.setTextColor(110); doc.text(sub, L, y); doc.setTextColor(0); y += 4; } y += 2; };
-    if (q.deposit) row('Deposit, due on acceptance', q.deposit);
-    stages(q).forEach((x, i) => row(`Stage ${i + 1}: ${x.name}`, x.amountInc, 'Invoiced when this stage is complete'));
-    doc.line(L, y - 2, R, y - 2); y += 3; doc.setFont('helvetica', 'bold'); doc.text('Total (inc GST)', L, y); doc.text(aud(q.totalInc), R, y, { align: 'right' }); y += 8;
+    if (TT.deposit) row('Deposit, due on acceptance', TT.deposit);
+    TT.stages.forEach((x, i) => row(`Stage ${i + 1}: ${x.name}`, x.amountInc, 'Invoiced when this stage is complete'));
+    doc.line(L, y - 2, R, y - 2); y += 3; doc.setFont('helvetica', 'bold'); doc.text('Total (inc GST)', L, y); doc.text(aud(TT.totalInc), R, y, { align: 'right' }); y += 8;
   }
   para('Key terms', 12, 'bold'); y += 1;
   for (const k of SHOWN.keyTerms) { need(5); doc.setFontSize(9.5); doc.text('•', L + 1, y); para(k, 9.5, 'normal', 5); y += 1; }
