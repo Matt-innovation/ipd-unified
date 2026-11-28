@@ -281,6 +281,11 @@ a.pl-btn.rl-tech{text-decoration:none;display:inline-flex;align-items:center;min
 .eq-list{margin-top:6px;font-size:13px}.eq-list summary{min-height:40px;display:flex;align-items:center;cursor:pointer;color:var(--text-mid);font-weight:600}
 .eq-row{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px}.eq-row input{width:22px;height:22px;flex-shrink:0}.eq-row small{color:var(--text-mid)}
 .eq-chg{min-height:40px;margin-top:4px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:600 13px var(--font);padding:0 12px;cursor:pointer}
+/* SCOPE_AI / INVOICE_PAST */
+.sc-ai{display:flex;gap:8px;flex-wrap:wrap}.sc-ai[hidden],.ip-box[hidden]{display:none!important}.sc-ai .q-btn{min-height:44px;flex:1 1 140px}
+.sc-master{font-weight:800}.sc-sub{padding-left:14px}.sc-sub input:disabled+*{opacity:.5}
+.ip-box{display:flex;flex-direction:column;gap:4px}.ip-box .q-btn{min-height:44px}
+#ip-text{width:100%;box-sizing:border-box;font-size:16px;padding:8px 10px;border:1px solid var(--border2);border-radius:10px;background:var(--surface2);color:var(--text);font-family:var(--font)}
 /* SCOPE_OF_WORK=on: the scope box */
 .sc-box{display:flex;flex-direction:column;gap:4px;padding:10px;border:1px solid var(--border2);border-radius:12px;background:var(--surface2)}
 .sc-box[hidden],.sc-bundle[hidden]{display:none!important}
@@ -1206,10 +1211,12 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
                 </label>
                 <input type="hidden" id="q-scope-use" data-qtext="ipd_scope_use">
                 <div class="sc-ticks">
-                  <label class="qs-same"><input type="checkbox" data-scuse="quote"> Use as the quote description (client quote page and PDF)</label>
-                  <label class="qs-same"><input type="checkbox" data-scuse="invoice"> Use as the invoice description (ServiceM8 Billing)</label>
-                  <label class="qs-same"><input type="checkbox" data-scuse="job"> Use as the job description (ServiceM8 Details)</label>
+                  <label class="qs-same sc-master"><input type="checkbox" data-scuse="quote"> Use this scope (client quote page and PDF)</label>
+                  <label class="qs-same sc-sub"><input type="checkbox" data-scuse="invoice"> …and as the invoice description (ServiceM8 Billing)</label>
+                  <label class="qs-same sc-sub"><input type="checkbox" data-scuse="job"> …and as the job description (ServiceM8 Details)</label>
                 </div>
+                <div class="sc-ai" id="sc-ai" hidden><button type="button" class="q-btn" id="sc-aidraft">✨ Suggest a scope from the bundles</button><button type="button" class="q-btn" id="sc-aiclear">Clear</button></div>
+                <div class="qt-inv-hint" id="sc-aimsg"></div>
                 <div class="qt-inv-hint" id="sc-hint"></div>
               </div>
               <div class="qt-inv-hint sc-bundle" id="sc-bundle" hidden>This quote has bundles. Each bundle carries its own description into ServiceM8 and onto the client quote page, so the job and invoice description can stay empty.</div>
@@ -1221,6 +1228,7 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
                 <textarea id="q-invoice-desc" data-qtext="ipd_invoice_desc" rows="4" maxlength="2000" placeholder="e.g. Supply and install new 250L heat pump hot water system, remove and dispose of old unit."></textarea>
                 <span class="qt-inv-hint">ServiceM8 → Billing page → Invoice description. Shown on the invoice with the total.</span>
               </label>
+              <div class="ip-box" id="ip-box" hidden><button type="button" class="q-btn" id="ip-open">✍️ Write invoice description (after the job)</button><span class="qt-inv-hint">What was done, in past tense, from the approved scope. You check it, then it goes to ServiceM8 → Billing.</span></div>
               <label class="qt-inv">Notes / concerns for the diary
                 <textarea id="q-diary-note" data-qtext="ipd_diary_note" rows="3" maxlength="4000" placeholder="For the technicians, e.g. Gas meter close to the unit — check clearance."></textarea>
                 <span class="qt-inv-hint">ServiceM8 → Details page → Diary (a new note each time you send). Not shown to the client.</span>
@@ -6642,6 +6650,114 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('change', e => { if (e.target && e.target.id === 'bb-cat') { bbReadForm(); bbCalc(); } });
 
+// ── AI SCOPE FOR BUNDLE JOBS (SCOPE_AI=on) and PAST-TENSE INVOICE DESCRIPTION (INVOICE_PAST=on) ───────────
+// ✨ Suggest a scope: Old Mate (the live /ai-ask route the app already uses) drafts a client-friendly scope from the
+// bundles and products on the quote only. The draft lands in the Scope of work box with "Use this scope" OFF, so
+// nothing goes out until a person has read it and ticked it. If Old Mate can't answer, a plain list is made instead.
+// ✍️ Write invoice description: the approved scope (or the quote lines) in past tense, edited by the person, then
+// written to the ServiceM8 invoice description only (old text archived first). Practice: nothing is written.
+const SC_AI_URL = 'https://ipd-proxy-server.onrender.com/ai-ask';
+function scAiOn() { return scOn() && !!cqFeat.scopeAi; }
+function ipOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.invoicePast); }
+function scItems() {   // what is on the quote: bundles (with their own description) and products; labour is not work to describe
+  return quote.filter(i => i.id !== 'discount' && (i.type === 'bundle' || i.type === 'reece')).map(i => {
+    const b = i.type === 'bundle' ? bundles.find(x => x.uuid === i.id || (x.code && x.code === i.code)) : null;
+    return { qty: Number(i.qty) || 1, name: String(i.name || '').replace(/\s+/g, ' ').trim(), desc: b && b.notes ? String(b.notes).replace(/\s+/g, ' ').trim() : '', bundle: i.type === 'bundle' };
+  });
+}
+function scAiClean(t) {
+  return String(t || '').split('\n').filter(l => !/^\s*(sources?|references?)\s*:?/i.test(l) && !/^\s*\[\d+\]/.test(l) && !/^\s*(here('|’)s|here is|sure)\b.*:\s*$/i.test(l))
+    .join(' ').replace(/\[(\d+|source[^\]]*)\]/gi, '').replace(/https?:\/\/\S+/g, '').replace(/[*#_`>]+/g, '').replace(/\s+/g, ' ').trim().slice(0, 2000);
+}
+async function scAiAsk(question) {
+  const r = await fetch(SC_AI_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deviceId: askDeviceId(), question: question.slice(0, 1000) }), signal: AbortSignal.timeout(60000) });
+  const j = await r.json().catch(() => ({})); if (!r.ok || !j.answer) throw new Error(j.error || 'Old Mate did not answer');
+  const t = scAiClean(j.answer); if (t.length < 20) throw new Error('Old Mate did not answer'); return t;
+}
+function scPlain(items) {   // no AI: the bundles and products, as they are
+  return 'Supply and install: ' + items.map(x => (x.qty !== 1 ? x.qty + ' × ' : '') + x.name.toLowerCase() + (x.desc ? ' (' + x.desc + ')' : '')).join('; ') + '.';
+}
+async function scAiDraft() {
+  const items = scItems(), box = document.getElementById('q-scope'), msg = document.getElementById('sc-aimsg');
+  if (!items.length) return showToast('Add bundles or products first');
+  const list = items.map(x => '- ' + x.qty + ' x ' + x.name.slice(0, 70) + (x.desc ? ': ' + x.desc.slice(0, 110) : '')).join('\n');
+  const q = 'Write the scope of work for a client quote. Plain, client-friendly Australian English, one short paragraph, sentences that start with verbs (e.g. "Supply and install ..., remove and dispose of ..."). Use ONLY the work and products listed below. Do not add any work, products, brands, sizes, warranties, compliance claims or prices that are not listed. No heading, no bullet points, no sources, no prices.\nItems:\n' + list;
+  msg.textContent = '✨ Old Mate is writing a draft…';
+  let t, ai = true;
+  try { t = await scAiAsk(q); } catch (e) { t = scPlain(items); ai = false; }
+  box.value = t; box.dispatchEvent(new Event('input', { bubbles: true }));
+  const h = document.getElementById('q-scope-use'), u = scUse(); u.delete('quote');   // a draft never goes out until a person ticks "Use this scope"
+  h.value = ['quote', 'invoice', 'job'].filter(k => u.has(k)).join(','); h.dispatchEvent(new Event('input', { bubbles: true }));
+  msg.textContent = (ai ? '✨ Draft from Old Mate, made only from the bundles and products on this quote.' : 'Old Mate could not answer just now, so this lists the bundles and products as they are.') + ' Read it, change anything, then tick "Use this scope".';
+  scSync();
+}
+function scAiClear() {
+  const box = document.getElementById('q-scope'); box.value = ''; box.dispatchEvent(new Event('input', { bubbles: true }));
+  const h = document.getElementById('q-scope-use'), u = scUse(); u.delete('quote'); h.value = ['quote', 'invoice', 'job'].filter(k => u.has(k)).join(','); h.dispatchEvent(new Event('input', { bubbles: true }));
+  document.getElementById('sc-aimsg').textContent = ''; scSync();
+}
+// past tense without AI: the common verbs at the start of each clause
+const IP_VERBS = { supply: 'supplied', install: 'installed', remove: 'removed', dispose: 'disposed', reconnect: 'reconnected', connect: 'connected', disconnect: 'disconnected', test: 'tested', commission: 'commissioned', replace: 'replaced', fit: 'fitted', repair: 'repaired', unblock: 'unblocked', clear: 'cleared', check: 'checked', seal: 'sealed', cap: 'capped', run: 'ran', lay: 'laid', set: 'set', make: 'made', clean: 'cleaned', flush: 'flushed', adjust: 'adjusted', provide: 'provided', relocate: 'relocated', extend: 'extended', upgrade: 'upgraded', inspect: 'inspected', jet: 'jetted', excavate: 'excavated', backfill: 'backfilled', tidy: 'tidied', reinstate: 'reinstated', drain: 'drained', fill: 'filled', mount: 'mounted', attach: 'attached', secure: 'secured', pressure: 'pressure', leave: 'left' };
+function ipPastPlain(t) {
+  return String(t || '').replace(/(^|[.;,:]\s*|\band\s+|\bthen\s+)([A-Za-z]+)/g, (m, pre, w) => { const p = IP_VERBS[w.toLowerCase()]; return p ? pre + (w[0] === w[0].toUpperCase() ? p[0].toUpperCase() + p.slice(1) : p) : m; });
+}
+function ipSource() {
+  const scope = typeof scFor === 'function' ? scFor('quote') : null, lines = quote.filter(i => i.id !== 'discount' && i.type !== 'labour').map(i => (Number(i.qty) !== 1 ? i.qty + ' x ' : '') + i.name);
+  const inv = ((document.getElementById('q-invoice-desc') || {}).value || '').trim();
+  return { scope, text: scope || inv || (lines.length ? 'Supply and install ' + lines.join(', ') + '.' : ''), lines };
+}
+async function ipOpen() {
+  const job = ((document.getElementById('job-number-input') || {}).value || '').trim();
+  if (!/^\d{1,8}$/.test(job)) return showToast('Type the job number first');
+  const src = ipSource(); if (!src.text) return showToast('There is no scope or quote lines to work from');
+  const old = document.getElementById('ip-back'); if (old) old.remove();
+  const back = document.createElement('div'); back.className = 'rp-back'; back.id = 'ip-back';
+  back.innerHTML = '<div class="rp-card" role="dialog" aria-modal="true" aria-labelledby="ip-title"><h3 id="ip-title">✍️ Invoice description for job ' + escHtml(job) + '</h3>'
+    + '<div class="rp-small">What was done, in past tense, from ' + (src.scope ? 'the approved scope' : 'the quote') + '. Take out anything not done and add what changed on the day. It goes to ServiceM8 → Billing → Invoice description (the client sees it).</div>'
+    + '<div class="rp-small" id="ip-now">Reading the job’s current invoice description…</div>'
+    + '<textarea id="ip-text" rows="8" maxlength="2000" placeholder="Writing a draft…"></textarea><div class="rp-small" id="ip-msg"></div>'
+    + '<div class="rp-row"><button type="button" class="q-btn" id="ip-again">Make again</button><button type="button" class="rp-send" id="ip-write">Write to ServiceM8</button><button type="button" class="q-btn" id="ip-cancel">Cancel</button></div></div>';
+  document.body.appendChild(back);
+  back.addEventListener('click', e => { if (e.target === back) back.remove(); });
+  document.getElementById('ip-cancel').onclick = () => back.remove();
+  document.getElementById('ip-again').onclick = () => ipDraft(src);
+  document.getElementById('ip-write').onclick = () => ipWrite(job);
+  authFetch('/invoice-text?job=' + job).then(j => { const n = document.getElementById('ip-now'); if (n) n.textContent = j.invoiceDescription ? 'Now in ServiceM8: “' + j.invoiceDescription.slice(0, 300) + (j.invoiceDescription.length > 300 ? '…' : '') + '” (kept in our archive if replaced)' : 'Nothing in the ServiceM8 invoice description yet.'; })
+    .catch(e => { const n = document.getElementById('ip-now'); if (n) n.textContent = trPracticeOn() ? 'Practice: job 7600 is not read or written.' : 'Could not read the job: ' + e.message; });
+  ipDraft(src);
+}
+async function ipDraft(src) {
+  const ta = document.getElementById('ip-text'), msg = document.getElementById('ip-msg'); if (!ta) return;
+  ta.value = ''; msg.textContent = '✨ Old Mate is putting it in past tense…';
+  const q = 'Rewrite this scope of work in the past tense for an invoice, to show what was completed (e.g. "Supplied and installed ..., removed and disposed of ..."). Keep exactly the same work; do not add or remove anything, no prices, no heading, no sources. One plain paragraph.\nScope: ' + src.text.slice(0, 640) + (src.scope && src.lines.length ? '\nQuote lines: ' + src.lines.join(', ').slice(0, 200) : '');
+  let t, ai = true;
+  try { t = await scAiAsk(q); } catch (e) { t = ipPastPlain(src.text); ai = false; }
+  if (!document.getElementById('ip-text')) return;
+  ta.value = t; msg.textContent = (ai ? 'Draft from Old Mate.' : 'Old Mate could not answer just now, so the verbs were changed to past tense here.') + ' Check it before writing.';
+}
+async function ipWrite(job) {
+  const text = (document.getElementById('ip-text').value || '').trim(), msg = document.getElementById('ip-msg');
+  if (!text) { msg.textContent = 'The invoice description is empty'; return; }
+  if (!confirm('Write this to the invoice description of job ' + job + ' in ServiceM8?\n\nThe old text is kept in our archive.')) return;
+  const b = document.getElementById('ip-write'); b.disabled = true;
+  try {
+    const j = await authFetch('/invoice-text', { method: 'POST', body: JSON.stringify({ jobNumber: job, text }) });
+    if (j.practice) { msg.textContent = '🎓 ' + j.message; return; }
+    msg.textContent = j.result === 'saved' ? '✓ Saved to ServiceM8 → Billing → Invoice description' + (j.replaced ? ' (the old text is in our archive).' : '.') : '⚠ Not saved. Add it in ServiceM8.';
+    if (j.result === 'saved') { const inv = document.getElementById('q-invoice-desc'); if (inv && !inv.readOnly) { inv.value = text; inv.dispatchEvent(new Event('input', { bubbles: true })); } }
+  } catch (e) { msg.textContent = 'Not saved: ' + e.message; } finally { b.disabled = false; }
+}
+function ipSync() {
+  const box = document.getElementById('ip-box'); if (box) box.hidden = !ipOn();
+  const ai = document.getElementById('sc-ai'); if (ai) { ai.hidden = !scAiOn(); const has = !!((document.getElementById('q-scope') || {}).value || '').trim(); const d = document.getElementById('sc-aidraft'); if (d) d.textContent = has ? '✨ Regenerate' : '✨ Suggest a scope from the bundles'; }
+}
+document.addEventListener('click', e => {
+  const t = e.target; if (!t.closest) return;
+  if (t.closest('#sc-aidraft')) { if (((document.getElementById('q-scope') || {}).value || '').trim() && !confirm('Replace the scope in the box with a new draft?')) return; return scAiDraft(); }
+  if (t.closest('#sc-aiclear')) { if (((document.getElementById('q-scope') || {}).value || '').trim() && !confirm('Clear the scope of work?')) return; return scAiClear(); }
+  if (t.closest('#ip-open')) return ipOpen();
+});
+
 // ── SCOPE OF WORK (SCOPE_OF_WORK=on, logged in) ──────────────────────────────
 // One optional box for the whole job's scope, with three ticks: the quote description (client quote page and PDF),
 // the invoice description (ServiceM8 Billing, work_done_description) and the job description (ServiceM8 Details,
@@ -6651,23 +6767,26 @@ document.addEventListener('change', e => { if (e.target && e.target.id === 'bb-c
 function scOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.scope); }
 function scUse() { return new Set(((document.getElementById('q-scope-use') || {}).value || '').split(',').filter(Boolean)); }
 function scText() { return scOn() ? ((document.getElementById('q-scope') || {}).value || '').trim() : ''; }
-function scFor(where) { const t = scText(); return t && scUse().has(where) ? t : null; }
+function scFor(where) { const t = scText(), u = scUse(); return t && u.has('quote') && (where === 'quote' || u.has(where)) ? t : null; }   // nothing goes anywhere unless "Use this scope" is ticked
 function scSync() {
   const $ = id => document.getElementById(id), on = scOn(), box = $('sc-box'), sc = $('q-scope'), u = scUse();
   const jd = $('q-job-desc'), inv = $('q-invoice-desc'), same = $('qs-same');
   if (box) { box.hidden = !on; box.querySelectorAll('[data-scuse]').forEach(c => { c.checked = u.has(c.dataset.scuse); }); }
   const hasB = on && quote.some(i => i.type === 'bundle'), bh = $('sc-bundle'); if (bh) bh.hidden = !hasB;
-  const scv = on && sc && sc.value.trim() ? sc.value : null;
+  const master = u.has('quote'), scv = on && master && sc && sc.value.trim() ? sc.value : null;   // unticked: the draft stays in the box, nothing follows it
+  if (box) box.querySelectorAll('.sc-sub input').forEach(c => { c.disabled = !master; });
   const follow = (el, src) => { if (!el) return; const ro = src != null; el.readOnly = ro; el.classList.toggle('qs-ro', ro); if (ro && el.value !== src) { el.value = src; el.dispatchEvent(new Event('input', { bubbles: true })); } };
   follow(jd, scv != null && u.has('job') ? scv : null);
   follow(inv, scv != null && u.has('invoice') ? scv : (same && same.checked && jd ? jd.value : null));
   const h = $('sc-hint');
   if (h && on) {
     const names = { quote: 'the client quote page and PDF', invoice: 'the invoice description', job: 'the job description' }, w = ['quote', 'invoice', 'job'].filter(k => u.has(k));
-    const t = !scv ? 'Type the scope to use it. Empty: nothing changes.' : !w.length ? 'Not used anywhere yet: tick where it goes.' : 'Used for ' + w.map(k => names[k]).join(', ').replace(/, ([^,]*)$/, ' and $1') + '. The ticked boxes below follow it.' + (u.has('invoice') || u.has('job') ? ' Sending to ServiceM8 writes it there (the old text is kept in our archive).' : '');
+    const typed = !!(sc && sc.value.trim());
+    const t = !typed ? 'Type the scope to use it. Empty: nothing changes.' : !master ? 'Not used: nothing from this scope shows on the quote or goes to ServiceM8 until you tick "Use this scope". It stays saved here.' : !w.length ? 'Not used anywhere yet: tick where it goes.' : 'Used for ' + w.map(k => names[k]).join(', ').replace(/, ([^,]*)$/, ' and $1') + '. The ticked boxes below follow it.' + (u.has('invoice') || u.has('job') ? ' Sending to ServiceM8 writes it there (the old text is kept in our archive).' : '');
     if (h.textContent !== t) h.textContent = t;
   }
   const same3 = $('qs-same'); if (same3) { same3.disabled = !!(scv != null && u.has('invoice')); }
+  if (typeof ipSync === 'function') ipSync();
 }
 document.addEventListener('change', e => {
   const c = e.target.closest && e.target.closest('[data-scuse]'); if (!c) return;
@@ -6708,7 +6827,7 @@ function qsBuild() {
   // 3 job description (+ use it as the invoice description)
   mv(3, $('sc-box')); mv(3, $('sc-bundle')); mv(3, lab('q-job-desc'));
   add(3, '<label class="qs-same"><input type="checkbox" id="qs-same"> Also use this as the invoice description (the client sees it)</label>');
-  mv(3, lab('q-invoice-desc')); mv(3, sum.querySelector('.qt-job > .qt-inv-hint'));
+  mv(3, lab('q-invoice-desc')); mv(3, $('ip-box')); mv(3, sum.querySelector('.qt-job > .qt-inv-hint'));
   // 4 photos and markup
   mv(4, cq.querySelector(':scope > .cq-sub'), true); mv(4, cq.querySelector(':scope > .qn-btns'), true); mv(4, $('cq-jobpick'), true); mv(4, $('cq-list'), true); mv(4, cq.querySelector(':scope > .qt-inv-hint'), true);
   add(4, '<div class="qs-off">Photos for the client come with the client quote link, which is switched off here. Job diary photos are in step 6.</div>');
@@ -7156,6 +7275,7 @@ function trPracticeOn() { const k = trPracticeKey(); if (!k || !PILOT_UI) return
     if (method !== 'GET' && trPracticeOn()) {
       if (path === '/send-quote') { let n = 0; try { n = JSON.parse(init.body).quoteItems.length; } catch (e) {} setTimeout(() => trAuto('sent'), 0);
         return reply({ success: true, practice: true, message: `Practice only, nothing was sent. On a real job this adds ${n} line${n === 1 ? '' : 's'} to the job.` }); }
+      if (path === '/invoice-text') return reply({ ok: true, practice: true, message: 'Practice only, nothing was written. On a real job this replaces the invoice description in ServiceM8 (the old text is archived).' });
       if (path === '/send-order') { setTimeout(() => trAuto('order'), 0); return reply({ success: true, practice: true, message: 'PRACTICE: nothing was sent. On a real day the order goes to ServiceM8 for the office.' }); }
       if (path && (/^\/quote-versions\//.test(path) || path === '/ai-feedback')) return reply({ ok: true, practice: true });
       if (path === '/client-quote') { try { const b = JSON.parse(init.body); b.practice = true; b.jobNumber = '7600'; init = { ...init, body: JSON.stringify(b) }; } catch (e) {}
