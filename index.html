@@ -288,6 +288,51 @@ a.pl-btn.rl-tech{text-decoration:none;display:inline-flex;align-items:center;min
 .eq-list{margin-top:6px;font-size:13px}.eq-list summary{min-height:40px;display:flex;align-items:center;cursor:pointer;color:var(--text-mid);font-weight:600}
 .eq-row{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px}.eq-row input{width:22px;height:22px;flex-shrink:0}.eq-row small{color:var(--text-mid)}
 .eq-chg{min-height:40px;margin-top:4px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:600 13px var(--font);padding:0 12px;cursor:pointer}
+/* TASKS_MODE=on: IPD Tasks (orange, black, navy, white) */
+body.tk-open{overflow:hidden}
+.tk-back{position:fixed;inset:0;z-index:960;background:#f5f6f8;color:#111;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
+.tk-back[hidden]{display:none}
+.tk-top{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#14284B;color:#fff;flex-wrap:wrap}
+.tk-top b{font-size:17px}.tk-sp{flex:1}.tk-x{min-width:44px;min-height:44px;border:0;background:transparent;color:#fff;font-size:20px;cursor:pointer}
+.tk-tb{min-height:40px;min-width:44px;padding:0 10px;border-radius:10px;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;font:700 14px var(--font);cursor:pointer}
+.tk-pushask{flex:1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;justify-content:flex-end}
+.tk-grid{flex:1;min-height:0;display:grid;grid-template-columns:1fr}
+.tk-col{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px calc(24px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px;min-width:0}
+.pane-lists .tk-tasks,.pane-lists .tk-detail,.pane-tasks .tk-lists,.pane-tasks .tk-detail,.pane-detail .tk-lists,.pane-detail .tk-tasks{display:none}
+@media (min-width:1000px){.tk-grid{grid-template-columns:240px minmax(320px,1fr) minmax(360px,1.2fr)}.tk-grid .tk-col{display:flex!important;border-right:1px solid #e2e5ea}.tk-back-b{display:none}.tk-lists{background:#fff}}
+.tk-h{font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px;min-height:40px}
+.tk-back-b{min-height:40px;border:0;background:transparent;color:#F26A1B;font:700 14px var(--font);cursor:pointer;padding:0 4px}
+.tk-li{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:44px;padding:0 10px;border-radius:10px;border:0;background:transparent;color:#111;font:600 14px var(--font);text-align:left;cursor:pointer}
+.tk-li.on{background:#14284B;color:#fff}.tk-badge{display:inline-flex;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#F26A1B;color:#fff;font-size:12px;align-items:center;justify-content:center}
+.tk-add-l,.tk-link{min-height:40px;border:0;background:transparent;color:#14284B;text-decoration:underline;font:600 13px var(--font);cursor:pointer;text-align:left}
+.tk-quick,.tk-name,.tk-fields select,.tk-fields input,.tk-notes textarea,.tk-f input,.tk-f textarea,.tk-sheet-b select{width:100%;box-sizing:border-box;min-height:44px;font-size:16px;padding:8px 10px;border:1px solid #d5d9e0;border-radius:10px;background:#fff;color:#111;font-family:var(--font)}
+.tk-name{font-weight:800;font-size:18px}
+.tk-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:12px;background:#fff;border:1px solid #e2e5ea;cursor:pointer}
+.tk-row.on{outline:2px solid #F26A1B}.tk-row.done .tk-rn{opacity:.55;text-decoration:line-through}.tk-row.late{border-color:#dc2626}
+.tk-tick{display:flex;align-items:center;justify-content:center;min-width:40px;min-height:40px}.tk-tick input{width:24px;height:24px;accent-color:#16a34a}
+.tk-rn{flex:1;min-width:0;display:flex;flex-direction:column;font-size:15px;font-weight:600;overflow-wrap:anywhere}.tk-rn small{font-size:12px;color:#5b6472;font-weight:500}
+.tk-due.late{color:#dc2626;font-weight:800}.tk-due.today{color:#F26A1B;font-weight:800}
+.tk-empty,.tk-wait{color:#5b6472;padding:12px}.tk-showdone{font-size:13px;color:#5b6472;display:flex;gap:6px;align-items:center;min-height:40px}
+.tk-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.tk-fields label,.tk-notes,.tk-f{display:flex;flex-direction:column;gap:3px;font-size:12px;font-weight:700;color:#5b6472}
+.tk-sec{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#14284B;margin-top:8px}
+.tk-sub{display:flex;align-items:center;gap:8px;min-height:40px;font-size:15px}.tk-sub input{width:22px;height:22px}.tk-sub .done{text-decoration:line-through;opacity:.6}
+.tk-file{display:flex;gap:6px;align-items:center;min-height:40px;color:#14284B;font-weight:600;text-decoration:none}.tk-file small{color:#5b6472}
+.tk-row2{display:flex;gap:8px;flex-wrap:wrap}
+.tk-b,.tk-b2{min-height:44px;padding:0 14px;border-radius:10px;border:0;background:#F26A1B;color:#fff;font:700 14px var(--font);cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.tk-b2{background:#14284B}
+.tk-com{background:#fff;border:1px solid #e2e5ea;border-radius:10px;padding:8px 10px;font-size:14px}.tk-com small{color:#5b6472}
+.tk-hist{font-size:13px;color:#5b6472}.tk-hist summary{min-height:40px;display:flex;align-items:center;cursor:pointer}
+.tk-home{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;margin:10px 0 0;padding:10px 14px;border-radius:14px;border:0;background:#14284B;color:#fff;text-align:left;cursor:pointer;font-family:var(--font)}
+.tk-home[hidden]{display:none}.tk-home-l{font-weight:800;font-size:15px}.tk-home-s{font-size:13px;opacity:.9}.tk-home .late{color:#fca5a5}
+.tk-om{display:flex;align-items:center;gap:6px;font-size:12.5px;margin-top:4px}.tk-om img{width:26px;height:26px}
+.tk-first{position:fixed;inset:0;z-index:970;background:rgba(20,40,75,.92);display:flex;align-items:center;justify-content:center;padding:16px}
+.tk-first-c{background:#fff;color:#111;border-radius:18px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px}
+.tk-first-c h2{margin:0 0 4px;font-size:20px;color:#14284B}
+.tk-first-r{display:flex;align-items:center;gap:8px;padding:6px;border-radius:12px;border:1px solid #e2e5ea}.tk-first-r.late{border-color:#dc2626}.tk-first-r.late small{color:#dc2626;font-weight:800}.tk-first-r.done{opacity:.5}
+.tk-first-n{flex:1;display:flex;flex-direction:column;font-weight:700;font-size:15px}.tk-first-n small{font-weight:500;color:#5b6472}
+.tk-first-x{margin-top:6px}
+.tk-kbtn{display:block;margin:8px 12px;min-height:44px;padding:0 14px;border-radius:12px;border:0;background:#14284B;color:#fff;font:800 15px var(--font);cursor:pointer}.tk-kbtn[hidden]{display:none}
+.tk-sheet-b{display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow-y:auto}
 /* Clear quote */
 #qs-top{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px 0;background:var(--surface)}
 .qs-chip-gp{min-height:40px;padding:0 12px;border-radius:999px;border:0;font:800 14px var(--font);cursor:pointer;background:var(--surface2);color:var(--text);white-space:nowrap}.qs-chip-gp[hidden]{display:none}
@@ -4717,6 +4762,7 @@ const HOME_ACTIONS = [
   { id: 'training', icon: '🎓', label: 'Learn the app', desc: 'Step-by-step guide', roles: ALL_ROLES, go: () => goScreen('training') },
   { id: 'whatsapp', icon: '💬', label: 'Message the team', desc: 'IPD BOYS WhatsApp group', roles: ALL_ROLES, href: 'https://chat.whatsapp.com/D9bDzCG7f9UK7ZhmddIuKw' },
   { id: 'bundlebuilder', icon: '🧰', label: 'Bundle builder', desc: 'See, build and edit our bundles (owners)', roles: ['owner'], needsBB: true, go: () => bbOpen() },
+  { id: 'tasks', icon: '✅', label: 'Tasks', desc: 'Your tasks, lists and reminders', roles: ALL_ROLES, needsTasks: true, go: () => tkOpen('mine') },
   { id: 'users', icon: '👥', label: 'Manage users', desc: 'Add, change or remove people', roles: ['owner'], needsManage: true, go: () => openUsers() },
   { id: 'problem', icon: '⚠️', label: 'Report a problem', desc: 'Tell Matt what went wrong — it goes straight to him', roles: ALL_ROLES, go: () => openProblem() },
   { id: 'settings', icon: '⚙️', label: 'Settings', desc: 'Your login and app settings', roles: ALL_ROLES, go: () => goScreen('settings') },
@@ -4735,6 +4781,7 @@ function homeStars() { try { return JSON.parse(localStorage.getItem(homeStarKey(
 function homeAllowed(a) {
   if (!a.roles.includes(homeRole())) return false;
   if (a.needsManage) return !!(CURRENT_USER && CURRENT_USER.canManageUsers && !homeViewAs);
+  if (a.needsTasks) return typeof tkOn === 'function' && tkOn();
   if (a.needsBB) return !homeViewAs && typeof bbOn === 'function' && bbOn();
   if (a.needsKiosk) return !!(CURRENT_USER && kSummary && kSummary.enabled);
   if (a.needsDirectory) return !!(CURRENT_USER && dirConfig && dirConfig.enabled);
@@ -6053,6 +6100,7 @@ async function cqRefresh() {
   if (typeof qsBuild === 'function') qsBuild();
   if (typeof scSync === 'function') scSync();
   if (typeof eqLoad === 'function') eqLoad();
+  if (typeof tkStart === 'function') tkStart();
   if (typeof sgSchedule === 'function') sgSchedule();
 }
 // shrink onto a white background (a see-through PNG mock-up would otherwise turn black), JPEG
@@ -7154,6 +7202,247 @@ document.addEventListener('click', e => {
   if (e.target.closest && e.target.closest('#qs-clear')) return qsClearAsk();
   if (e.target.closest && e.target.closest('#clr-undo-b')) { const bar = document.getElementById('clr-undo'); if (bar) bar.hidden = true; if (qsUndo) { qdApply(qsUndo); qsUndo = null; showToast('Quote back as it was'); } }
 });
+
+// ── IPD TASKS (TASKS_MODE=on, logged in) ──────────────────────────────────────────────────────────────
+// Lists on the left, tasks in the middle, the open task on the right (desktop); one at a time on a phone. Quick add
+// (Enter), tick off, subtasks, comments, history, photos / PDFs, repeats. "My tasks" card on Home, "Your tasks today"
+// when the app opens (only when there are overdue / due-today tasks), push (asked once) with email as the backup.
+let tkData = null, tkSel = { list: 'mine', task: null }, tkPane = 'tasks', tkItem = null, tkShowDone = false;
+function tkOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.tasks); }
+const tkToday = () => (tkData && tkData.today) || new Date(Date.now() + 10 * 3600e3).toISOString().slice(0, 10);
+const tkName = id => ((tkData && tkData.people.find(p => p.id === id)) || {}).name || '';
+const tkDue = t => (!t.due ? '' : t.due < tkToday() ? '<span class="tk-due late">Overdue · ' + escHtml(t.due) + '</span>' : t.due === tkToday() ? '<span class="tk-due today">Today</span>' : '<span class="tk-due">' + escHtml(t.due) + '</span>');
+const tkList = id => (tkData.lists.find(l => l.id === id) || {});
+const tkMine = () => tkData.tasks.filter(t => t.assignee === tkData.me.id && t.status !== 'done' && !t.archived);
+async function tkLoad() { if (!tkOn()) return null; try { tkData = await authFetch('/tasks/me'); } catch (e) { tkData = null; } tkHome(); return tkData; }
+// Home: a small "My tasks" card under the big tabs (and Old Mate's word on overdue)
+function tkHome() {
+  let el = document.getElementById('tk-home');
+  const host = document.getElementById('home-want') || document.querySelector('#screen-home');
+  if (!tkOn() || !tkData || !host) { if (el) el.hidden = true; return; }
+  if (!el) { el = document.createElement('button'); el.type = 'button'; el.id = 'tk-home'; el.className = 'tk-home'; host.parentNode.insertBefore(el, host.nextSibling); el.onclick = () => tkOpen('today'); }
+  const c = tkData.counts, n = c.overdue + c.today;
+  el.hidden = false;
+  el.innerHTML = '<span class="tk-home-l">✅ My tasks' + (n ? ' <b class="tk-badge">' + n + '</b>' : '') + '</span><span class="tk-home-s">' + (c.overdue ? '<b class="late">' + c.overdue + ' overdue</b> · ' : '') + (c.today ? c.today + ' due today' : (c.overdue ? '' : 'Nothing due today')) + '</span>'
+    + (c.overdue ? '<span class="tk-om"><img src="old-mate/old-mate-120.png" alt=""> Old Mate: you’ve got ' + c.overdue + ' overdue. Tap to see them.</span>' : '');
+}
+// on opening the app: "Your tasks today" first, only when there is something due or overdue
+function tkToday1() {
+  if (!tkOn() || !tkData) return;
+  const due = tkMine().filter(t => t.due && t.due <= tkToday()).sort((a, b) => a.due.localeCompare(b.due));
+  if (!due.length) return;
+  try { if (sessionStorage.getItem('ipd_tk_today') === tkToday()) return; sessionStorage.setItem('ipd_tk_today', tkToday()); } catch (e) {}
+  const back = document.createElement('div'); back.className = 'tk-first'; back.id = 'tk-first';
+  back.innerHTML = '<div class="tk-first-c" role="dialog" aria-modal="true" aria-labelledby="tk-first-h"><h2 id="tk-first-h">Your tasks today</h2>'
+    + due.map(t => '<div class="tk-first-r' + (t.due < tkToday() ? ' late' : '') + '"><label class="tk-tick"><input type="checkbox" data-tkdone="' + t.id + '"></label><span class="tk-first-n">' + escHtml(t.name) + '<small>' + (t.due < tkToday() ? 'Overdue · ' + escHtml(t.due) : 'Due today') + ' · ' + escHtml(tkList(t.listId).name || '') + '</small></span><button type="button" class="tk-b2" data-tkopen="' + t.id + '">Open</button></div>').join('')
+    + '<button type="button" class="tk-b tk-first-x" id="tk-first-x">Close and go to Home</button></div>';
+  document.body.appendChild(back);
+  document.getElementById('tk-first-x').onclick = () => back.remove();
+}
+// the screen
+function tkOpen(list, taskId) {
+  if (!tkOn()) return;
+  let back = document.getElementById('tk-back');
+  if (!back) { back = document.createElement('div'); back.id = 'tk-back'; back.className = 'tk-back'; document.body.appendChild(back); }
+  back.hidden = false; document.body.classList.add('tk-open');
+  if (list) tkSel.list = list; tkSel.task = taskId || null; tkPane = taskId ? 'detail' : 'tasks';
+  tkRender(); tkLoad().then(() => { tkRender(); if (taskId) tkOpenTask(taskId); });
+}
+function tkClose() { const b = document.getElementById('tk-back'); if (b) b.hidden = true; document.body.classList.remove('tk-open'); tkHome(); }
+function tkVisibleTasks() {
+  const s = tkSel.list, T = tkData.tasks.filter(t => (tkShowDone ? true : t.status !== 'done') && (s === 'archived' ? t.archived : !t.archived));
+  const sorted = x => x.sort((a, b) => (a.status === 'done') - (b.status === 'done') || (a.due || '9999').localeCompare(b.due || '9999') || a.name.localeCompare(b.name));
+  if (s === 'mine') return sorted(T.filter(t => t.assignee === tkData.me.id));
+  if (s === 'today') return sorted(T.filter(t => t.assignee === tkData.me.id && t.due && t.due <= tkToday()));
+  if (s === 'archived') return sorted(T);
+  return sorted(T.filter(t => t.listId === s));
+}
+function tkRender() {
+  const back = document.getElementById('tk-back'); if (!back || back.hidden) return;
+  if (!tkData) { back.innerHTML = '<div class="tk-top"><button type="button" class="tk-x" data-tk="close" aria-label="Close">✕</button><b>✅ Tasks</b></div><div class="tk-wait">Loading…</div>'; return; }
+  const own = tkData.me.owner, L = tkData.lists.filter(l => !l.archived), A = tkData.lists.filter(l => l.archived), c = tkData.counts;
+  const lr = (id, label, n, extra = '') => '<button type="button" class="tk-li' + (tkSel.list === id ? ' on' : '') + '" data-tklist="' + escHtml(id) + '"><span>' + label + '</span>' + (n ? '<b class="tk-badge">' + n + '</b>' : '') + extra + '</button>';
+  const vis = l => (l.visibility === 'private' ? '🔒' : l.visibility === 'owners' ? '👔' : '👥');
+  const lists = '<div class="tk-col tk-lists"><div class="tk-h">Lists</div>' + lr('mine', '🙋 My tasks', tkMine().length) + lr('today', '📅 Today & overdue', c.overdue + c.today)
+    + L.map(l => lr(l.id, vis(l) + ' ' + escHtml(l.name), tkData.tasks.filter(t => t.listId === l.id && t.status !== 'done' && !t.archived).length)).join('')
+    + (A.length || own ? lr('archived', '🗄 Archived', 0) : '') + (own ? '<button type="button" class="tk-add-l" data-tk="newlist">+ New list</button>' : '') + '</div>';
+  const T = tkVisibleTasks(), cur = tkData.lists.find(l => l.id === tkSel.list);
+  const title = tkSel.list === 'mine' ? 'My tasks' : tkSel.list === 'today' ? 'Today & overdue' : tkSel.list === 'archived' ? 'Archived' : (cur ? cur.name : '');
+  const tasks = '<div class="tk-col tk-tasks"><div class="tk-h"><button type="button" class="tk-back-b" data-tkpane="lists">‹ Lists</button>' + escHtml(title)
+    + (cur && own ? ' <button type="button" class="tk-link" data-tk="listset">⚙ List</button>' : '') + '</div>'
+    + (tkSel.list !== 'archived' ? '<input type="text" id="tk-quick" class="tk-quick" maxlength="200" placeholder="+ Add a task, then press Enter" autocomplete="off">' : '')
+    + (T.map(t => '<div class="tk-row' + (t.status === 'done' ? ' done' : '') + (t.due && t.due < tkToday() && t.status !== 'done' ? ' late' : '') + (tkSel.task === t.id ? ' on' : '') + '" data-tkrow="' + t.id + '"><label class="tk-tick"><input type="checkbox" data-tkdone="' + t.id + '"' + (t.status === 'done' ? ' checked' : '') + ' aria-label="Done"></label>'
+      + '<span class="tk-rn">' + escHtml(t.name) + '<small>' + tkDue(t) + (t.assignee && t.assignee !== tkData.me.id ? ' · ' + escHtml(tkName(t.assignee)) : '') + (t.status === 'check' ? ' · <b>New - check</b>' : '') + (t.repeat ? ' · 🔁' : '') + ((t.subtasks || []).length ? ' · ' + t.subtasks.filter(x => x.done).length + '/' + t.subtasks.length : '') + ((t.files || []).length ? ' · 📎' + t.files.length : '') + '</small></span></div>').join('') || '<div class="tk-empty">Nothing here.</div>')
+    + '<label class="tk-showdone"><input type="checkbox" data-tk="showdone"' + (tkShowDone ? ' checked' : '') + '> Show done</label></div>';
+  const detail = '<div class="tk-col tk-detail" id="tk-detail">' + tkDetailHtml() + '</div>';
+  back.innerHTML = '<div class="tk-top"><button type="button" class="tk-x" data-tk="close" aria-label="Close">✕</button><b>✅ Tasks</b>' + tkPushHtml()
+    + (own ? '<button type="button" class="tk-tb" data-tk="announce">📣 Send</button>' : '') + '<button type="button" class="tk-tb" data-tk="prefs">⚙</button></div>'
+    + '<div class="tk-grid pane-' + tkPane + '">' + lists + tasks + detail + '</div>';
+}
+function tkDetailHtml() {
+  const t = tkItem && tkItem.task; if (!t) return '<div class="tk-empty">Pick a task to see it here.</div>';
+  const own = tkData.me.owner, l = tkList(t.listId), opt = (v, lab, cur) => '<option value="' + escHtml(v) + '"' + (v === cur ? ' selected' : '') + '>' + escHtml(lab) + '</option>';
+  const rp = t.repeat ? (t.repeat.label || 'custom') : '';
+  return '<div class="tk-h"><button type="button" class="tk-back-b" data-tkpane="tasks">‹ Tasks</button>Task</div>'
+    + '<input type="text" class="tk-name" data-tkf="name" maxlength="200" value="' + escHtml(t.name) + '" aria-label="Task name">'
+    + '<div class="tk-fields">'
+    + '<label>Status<select data-tkf="status">' + opt('open', 'Open', t.status) + (l.checkStatus ? opt('check', 'New - check', t.status) : '') + opt('done', 'Done', t.status) + '</select></label>'
+    + '<label>Due<input type="date" data-tkf="due" value="' + escHtml(t.due || '') + '"></label>'
+    + '<label>For<select data-tkf="assignee"' + (own ? '' : ' disabled') + '>' + opt('', '(nobody)', t.assignee || '') + tkData.people.map(p => opt(p.id, p.name, t.assignee)).join('') + '</select></label>'
+    + (tkData.lists.some(x => x.id === t.listId) ? '<label>List<select data-tkf="listId">' + tkData.lists.filter(x => !x.archived || x.id === t.listId).map(x => opt(x.id, x.name, t.listId)).join('') + '</select></label>'
+      : '<label>List<select disabled><option>An owners’ list</option></select></label>')   // given to you from a list you don't see
+    + '<label>Repeat<select data-tkf="repeat">' + opt('', 'Does not repeat', rp) + ['weekly', 'fortnightly', 'monthly', 'quarterly', 'yearly'].map(k => opt(k, k[0].toUpperCase() + k.slice(1), rp)).join('') + opt('custom', t.repeat && !t.repeat.label ? 'Every ' + t.repeat.every + ' ' + t.repeat.unit + (t.repeat.every === 1 ? '' : 's') : 'Custom…', rp) + '</select></label>'
+    + '</div>'
+    + '<label class="tk-notes">Notes<textarea data-tkf="notes" rows="4" maxlength="5000">' + escHtml(t.notes || '') + '</textarea></label>'
+    + '<div class="tk-sec">Subtasks</div>' + (t.subtasks || []).map(s => '<label class="tk-sub"><input type="checkbox" data-tksub="' + escHtml(s.id) + '"' + (s.done ? ' checked' : '') + '> <span' + (s.done ? ' class="done"' : '') + '>' + escHtml(s.text) + '</span></label>').join('')
+    + '<input type="text" id="tk-subadd" class="tk-quick" maxlength="200" placeholder="+ Add a subtask, then press Enter" autocomplete="off">'
+    + '<div class="tk-sec">Attachments</div>' + (tkItem.files || []).map(f => '<a class="tk-file" href="' + escHtml(PROXY + f.url) + '" target="_blank" rel="noopener">' + (/^image/.test(f.mime) ? '🖼' : '📄') + ' ' + escHtml(f.name) + ' <small>' + escHtml(f.by || '') + '</small></a>').join('')
+    + '<div class="tk-row2"><label class="tk-b2 tk-filebtn"><input type="file" accept="image/*" capture="environment" data-tkfile hidden>📷 Photo</label><label class="tk-b2 tk-filebtn"><input type="file" accept="image/*,application/pdf" data-tkfile hidden>📎 File or PDF</label></div>'
+    + '<div class="tk-sec">Comments</div>' + tkItem.events.filter(e => e.type === 'comment').map(e => '<div class="tk-com"><b>' + escHtml(e.byName) + '</b> <small>' + new Date(e.at).toLocaleString('en-AU', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) + '</small><div>' + escHtml(e.text) + '</div></div>').join('')
+    + '<input type="text" id="tk-com" class="tk-quick" maxlength="2000" placeholder="Write a comment, then press Enter" autocomplete="off">'
+    + '<details class="tk-hist"><summary>History</summary>' + tkItem.events.filter(e => e.type !== 'comment').map(e => '<div><small>' + new Date(e.at).toLocaleString('en-AU', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) + '</small> ' + escHtml(e.byName) + ' ' + escHtml(e.type === 'created' ? 'made the task' : e.type === 'file' ? 'added ' + e.name : e.type === 'repeated' ? 'made the next one (repeat)' : 'changed ' + (e.changes || []).map(c => c.field).join(', ')) + '</div>').join('') + '</details>'
+    + '<button type="button" class="tk-link" data-tk="archive">' + (t.archived ? 'Restore this task' : 'Archive (kept in history)') + '</button>';
+}
+async function tkOpenTask(id) {
+  tkSel.task = id; tkPane = 'detail';
+  try { tkItem = await authFetch('/tasks/item/' + encodeURIComponent(id)); } catch (e) { tkItem = null; showToast(e.message); }
+  tkRender();
+}
+async function tkSave(patch, quiet) {
+  const t = tkItem && tkItem.task; if (!t) return;
+  try { const j = await authFetch('/tasks/item/' + t.id, { method: 'POST', body: JSON.stringify(patch) }); if (j.next) showToast('Done. The next one is due ' + j.next.due); else if (!quiet) showToast('Saved');
+    await tkLoad(); tkItem = await authFetch('/tasks/item/' + t.id); tkRender(); }
+  catch (e) { showToast(e.message); }
+}
+async function tkTick(id, done) {
+  try { const j = await authFetch('/tasks/item/' + id, { method: 'POST', body: JSON.stringify({ status: done ? 'done' : 'open' }) }); if (j.next) showToast('Done. The next one is due ' + j.next.due); await tkLoad(); if (tkItem && tkItem.task.id === id) tkItem = await authFetch('/tasks/item/' + id); tkRender(); } catch (e) { showToast(e.message); }
+}
+// push: asked once, with a clear button and a simple reason; never nags
+function tkPushHtml() {
+  const can = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window, ios = /iPhone|iPad/.test(navigator.userAgent);
+  const standalone = window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+  let said = false; try { said = localStorage.getItem('ipd_tk_push_asked') === '1'; } catch (e) {}
+  if (!can || said || Notification.permission !== 'default' || (ios && !standalone) || !(typeof kSummary !== 'undefined' && kSummary && kSummary.pushKey)) return '<span class="tk-sp"></span>';
+  return '<span class="tk-pushask">Get a ping when a task is yours or due <button type="button" class="tk-b" data-tk="pushon">Allow notifications</button><button type="button" class="tk-link" data-tk="pushno">Not now</button></span>';
+}
+async function tkPushOn() {
+  try { localStorage.setItem('ipd_tk_push_asked', '1'); } catch (e) {}
+  try {
+    const perm = await Notification.requestPermission(); if (perm !== 'granted') return tkRender();
+    const reg = await navigator.serviceWorker.register('sw.js'); await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: kKey(kSummary.pushKey) });
+    await authFetch('/kiosk/push/subscribe', { method: 'POST', body: JSON.stringify({ subscription: sub.toJSON(), device: /iPad/.test(navigator.userAgent) ? 'iPad' : /iPhone/.test(navigator.userAgent) ? 'iPhone' : 'Computer' }) });
+    showToast('Notifications are on');
+  } catch (e) { showToast('Could not turn on notifications: ' + e.message); }
+  tkRender();
+}
+function tkPrefs() {
+  const p = tkData.prefs, cats = [['assigned', 'A task is given to me'], ['due', 'The day before and on the due date'], ['overdue', 'One daily summary of overdue tasks'], ['done', 'Someone ticks done a task I gave them'], ['announce', 'Announcements from the owners']];
+  tkSheet('Notifications', '<label class="qs-same"><input type="checkbox" data-tkp="push"' + (p.push !== false ? ' checked' : '') + '> On this phone / computer (push)</label><label class="qs-same"><input type="checkbox" data-tkp="email"' + (p.email !== false ? ' checked' : '') + '> By email (the backup)</label><div class="tk-sec">Tell me when…</div>'
+    + cats.map(([k, l]) => '<label class="qs-same"><input type="checkbox" data-tkc="' + k + '"' + (p.cats[k] !== false ? ' checked' : '') + '> ' + l + '</label>').join(''), async box => {
+      const b = { push: box.querySelector('[data-tkp="push"]').checked, email: box.querySelector('[data-tkp="email"]').checked, cats: Object.fromEntries(cats.map(([k]) => [k, box.querySelector('[data-tkc="' + k + '"]').checked])) };
+      await authFetch('/tasks/prefs', { method: 'POST', body: JSON.stringify(b) }); await tkLoad(); showToast('Saved');
+    });
+}
+function tkAnnounce() {
+  tkSheet('📣 Send to staff', '<label class="tk-f">Title<input type="text" id="tk-an-t" maxlength="120" placeholder="e.g. Toolbox talk Friday 7am"></label><label class="tk-f">Message<textarea id="tk-an-b" rows="3" maxlength="2000"></textarea></label>'
+    + '<label class="qs-same"><input type="checkbox" id="tk-an-all" checked> Everyone</label>' + tkData.people.filter(p => p.id !== tkData.me.id).map(p => '<label class="qs-same tk-an-p"><input type="checkbox" data-tkto="' + p.id + '"> ' + escHtml(p.name) + '</label>').join('')
+    + '<label class="qs-same"><input type="checkbox" id="tk-an-task"> Also make it a task for each of them (in the list below)</label><select id="tk-an-list">' + tkData.lists.filter(l => !l.archived && l.visibility !== 'private').map(l => '<option value="' + l.id + '">' + escHtml(l.name) + '</option>').join('') + '</select>', async box => {
+      const title = box.querySelector('#tk-an-t').value.trim(), body = box.querySelector('#tk-an-b').value.trim(), all = box.querySelector('#tk-an-all').checked;
+      const to = all ? 'all' : [...box.querySelectorAll('[data-tkto]:checked')].map(c => c.dataset.tkto);
+      if (!title) { showToast('Type a short title'); return false; }
+      if (box.querySelector('#tk-an-task').checked) { const ids = all ? tkData.people.filter(p => p.id !== tkData.me.id).map(p => p.id) : to; for (const id of ids) await authFetch('/tasks/new', { method: 'POST', body: JSON.stringify({ listId: box.querySelector('#tk-an-list').value, name: title, notes: body, assignee: id }) }); }
+      else { const j = await authFetch('/tasks/announce', { method: 'POST', body: JSON.stringify({ title, body, to }) }); showToast('Sent to ' + j.sent.length); }
+      await tkLoad(); tkRender();
+    });
+}
+function tkListSettings() {
+  const l = tkData.lists.find(x => x.id === tkSel.list); if (!l) return;
+  tkSheet('⚙ ' + l.name, '<label class="tk-f">Name<input type="text" id="tk-ls-n" maxlength="80" value="' + escHtml(l.name) + '"></label><label class="tk-f">Who can see it<select id="tk-ls-v">'
+    + [['private', '🔒 Private: only me'], ['owners', '👔 Owners only'], ['shared', '👥 Shared with chosen staff']].map(([v, t]) => '<option value="' + v + '"' + (l.visibility === v ? ' selected' : '') + (v === 'private' && l.createdBy !== tkData.me.id ? ' disabled' : '') + '>' + t + '</option>').join('') + '</select></label>'
+    + tkData.people.filter(p => p.role !== 'owner').map(p => '<label class="qs-same"><input type="checkbox" data-tkm="' + p.id + '"' + ((l.members || []).includes(p.id) ? ' checked' : '') + '> ' + escHtml(p.name) + '</label>').join('')
+    + '<label class="qs-same"><input type="checkbox" id="tk-ls-c"' + (l.checkStatus ? ' checked' : '') + '> Use the "New - check" status (e.g. invoices)</label><label class="qs-same"><input type="checkbox" id="tk-ls-a"' + (l.archived ? ' checked' : '') + '> Archived (kept; untick to restore)</label>', async box => {
+      await authFetch('/tasks/lists/' + l.id, { method: 'POST', body: JSON.stringify({ name: box.querySelector('#tk-ls-n').value, visibility: box.querySelector('#tk-ls-v').value, members: [...box.querySelectorAll('[data-tkm]:checked')].map(c => c.dataset.tkm), checkStatus: box.querySelector('#tk-ls-c').checked, archived: box.querySelector('#tk-ls-a').checked }) });
+      await tkLoad(); tkRender();
+    });
+}
+function tkSheet(title, html, onSave) {
+  const old = document.getElementById('tk-sheet'); if (old) old.remove();
+  const back = document.createElement('div'); back.className = 'rp-back tk-sheetback'; back.id = 'tk-sheet';
+  back.innerHTML = '<div class="rp-card" role="dialog" aria-modal="true"><h3>' + escHtml(title) + '</h3><div class="tk-sheet-b">' + html + '</div><div class="rp-row"><button type="button" class="q-btn" data-tks="no">Cancel</button><button type="button" class="rp-send" data-tks="yes">Save</button></div></div>';
+  document.body.appendChild(back);
+  back.addEventListener('click', async e => { if (e.target === back || e.target.closest('[data-tks="no"]')) return back.remove(); if (e.target.closest('[data-tks="yes"]')) { try { if ((await onSave(back)) !== false) back.remove(); } catch (err) { showToast(err.message); } } });
+}
+async function tkFile(input) {
+  const f = input.files && input.files[0]; if (!f || !tkItem) return;
+  try {
+    const data = /^image/.test(f.type) ? await cqShrink(f, 1800, 0.82) : await new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = () => no(new Error('Could not read the file')); r.readAsDataURL(f); });
+    await authFetch('/tasks/item/' + tkItem.task.id + '/files', { method: 'POST', body: JSON.stringify({ name: /^image/.test(f.type) ? (f.name || 'photo').replace(/\.\w+$/, '') + '.jpg' : f.name, data }) });
+    tkItem = await authFetch('/tasks/item/' + tkItem.task.id); await tkLoad(); tkRender(); showToast('Attached');
+  } catch (e) { showToast(e.message); }
+}
+document.addEventListener('click', async e => {
+  const t = e.target; if (!t.closest) return;
+  const open = t.closest('[data-tkopen]'); if (open) { const f = document.getElementById('tk-first'); if (f) f.remove(); return tkOpen('mine', open.dataset.tkopen); }
+  if (!t.closest('#tk-back')) return;
+  const a = t.closest('[data-tk]'); const k = a && a.dataset.tk;
+  if (k === 'close') return tkClose();
+  if (k === 'pushon') return tkPushOn();
+  if (k === 'pushno') { try { localStorage.setItem('ipd_tk_push_asked', '1'); } catch (err) {} return tkRender(); }
+  if (k === 'prefs') return tkPrefs();
+  if (k === 'announce') return tkAnnounce();
+  if (k === 'listset') return tkListSettings();
+  if (k === 'newlist') { const n = (prompt('Name of the new list:') || '').trim(); if (!n) return; try { const j = await authFetch('/tasks/lists', { method: 'POST', body: JSON.stringify({ name: n, visibility: 'owners' }) }); tkSel.list = j.list.id; await tkLoad(); tkRender(); tkListSettings(); } catch (err) { showToast(err.message); } return; }
+  if (k === 'archive') return tkSave({ archived: !tkItem.task.archived });
+  const li = t.closest('[data-tklist]'); if (li) { tkSel.list = li.dataset.tklist; tkSel.task = null; tkItem = null; tkPane = 'tasks'; return tkRender(); }
+  const pn = t.closest('[data-tkpane]'); if (pn) { tkPane = pn.dataset.tkpane; return tkRender(); }
+  if (t.closest('[data-tkdone]') || t.closest('.tk-tick')) return;
+  const row = t.closest('[data-tkrow]'); if (row) return tkOpenTask(row.dataset.tkrow);
+});
+document.addEventListener('change', async e => {
+  const t = e.target; if (!t.closest) return;
+  const d = t.closest('[data-tkdone]'); if (d) { const f = document.getElementById('tk-first'); if (f) { const r = d.closest('.tk-first-r'); if (r) r.classList.add('done'); } return tkTick(d.dataset.tkdone, d.checked); }
+  if (!t.closest('#tk-back')) return;
+  if (t.matches('[data-tk="showdone"]')) { tkShowDone = t.checked; return tkRender(); }
+  if (t.matches('[data-tkfile]')) return tkFile(t);
+  const sub = t.closest('[data-tksub]'); if (sub) return tkSave({ subtasks: tkItem.task.subtasks.map(s => (s.id === sub.dataset.tksub ? { ...s, done: sub.checked } : s)) }, true);
+  const f = t.closest('[data-tkf]'); if (!f) return;
+  const k = f.dataset.tkf;
+  if (k === 'repeat') {
+    if (f.value === 'custom') { const a = prompt('Repeat every how many? Type a number and days, weeks or months, e.g. "3 weeks"', '2 weeks') || ''; const m = /^\s*(\d+)\s*(day|week|month|year)s?\s*$/i.exec(a); if (!m) { showToast('Type it like "3 weeks"'); return tkRender(); } return tkSave({ repeat: { every: +m[1], unit: m[2].toLowerCase() } }); }
+    return tkSave({ repeat: f.value || null });
+  }
+  if (k === 'name' || k === 'notes') return;   // saved on Enter / when you leave the box
+  return tkSave({ [k]: f.value });
+});
+document.addEventListener('focusout', e => { const f = e.target; if (f && f.matches && f.matches('#tk-back [data-tkf="notes"], #tk-back [data-tkf="name"]') && tkItem && f.value !== (tkItem.task[f.dataset.tkf] || '')) tkSave({ [f.dataset.tkf]: f.value }, true); });
+document.addEventListener('keydown', async e => {
+  const t = e.target; if (!t || !t.closest || !t.closest('#tk-back')) return;
+  if (e.key === 'Escape') { if (tkPane === 'detail') { tkPane = 'tasks'; tkSel.task = null; tkItem = null; tkRender(); } else tkClose(); return; }
+  if (e.key !== 'Enter' || e.shiftKey || t.tagName === 'TEXTAREA') return;
+  if (t.id === 'tk-quick') {
+    e.preventDefault(); const name = t.value.trim(); if (!name) return;
+    const list = tkData.lists.find(l => l.id === tkSel.list) || tkData.lists.find(l => !l.archived && l.visibility !== 'private' && (tkData.me.owner || (l.members || []).includes(tkData.me.id))) || tkData.lists.find(l => !l.archived);
+    if (!list) return showToast('Make a list first');
+    try { const j = await authFetch('/tasks/new', { method: 'POST', body: JSON.stringify({ listId: list.id, name, assignee: tkData.me.id, due: tkSel.list === 'today' ? tkToday() : '' }) }); t.value = ''; await tkLoad(); tkRender(); const q = document.getElementById('tk-quick'); if (q) q.focus(); } catch (err) { showToast(err.message); }
+    return;
+  }
+  if (t.id === 'tk-subadd') { e.preventDefault(); const v = t.value.trim(); if (v) await tkSave({ subtasks: [...(tkItem.task.subtasks || []), { text: v }] }, true); const n = document.getElementById('tk-subadd'); if (n) n.focus(); return; }
+  if (t.id === 'tk-com') { e.preventDefault(); const v = t.value.trim(); if (!v) return; try { await authFetch('/tasks/item/' + tkItem.task.id + '/comment', { method: 'POST', body: JSON.stringify({ text: v }) }); tkItem = await authFetch('/tasks/item/' + tkItem.task.id); tkRender(); const n = document.getElementById('tk-com'); if (n) n.focus(); } catch (err) { showToast(err.message); } return; }
+  if (t.matches('[data-tkf="name"]')) { e.preventDefault(); tkSave({ name: t.value }); }
+});
+// a notification or email link: ?task=<id> (or ?tasks=1) opens it once logged in
+function tkFromUrl() { const q = new URLSearchParams(location.search), id = q.get('task'); if (id && /^[\w-]{8,60}$/.test(id)) { tkOpen('mine', id); return true; } if (q.get('tasks') === '1') { tkOpen('today'); return true; } return false; }
+if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', e => { const u = e.data && e.data.openUrl; if (!u) return; const m = /[?&]task=([\w-]+)/.exec(u); if (m) tkOpen('mine', m[1]); else if (/tasks=1/.test(u)) tkOpen('today'); });
+// the Staff Kiosk gets a Tasks button
+function tkKiosk() {
+  const scr = document.getElementById('screen-kiosk'); if (!scr) return;
+  let b = document.getElementById('tk-kbtn');
+  if (!tkOn()) { if (b) b.hidden = true; return; }
+  if (!b) { b = document.createElement('button'); b.type = 'button'; b.id = 'tk-kbtn'; b.className = 'tk-kbtn'; b.textContent = '✅ Tasks'; b.onclick = () => tkOpen('mine'); scr.insertBefore(b, scr.firstElementChild ? scr.firstElementChild.nextSibling : null); }
+  b.hidden = false;
+}
+async function tkStart() { if (!tkOn()) { tkHome(); return; } await tkLoad(); tkKiosk(); tkFromUrl() || tkToday1(); }
 
 // ── SCOPE OF WORK (SCOPE_OF_WORK=on, logged in) ──────────────────────────────
 // One optional box for the whole job's scope, with three ticks: the quote description (client quote page and PDF),

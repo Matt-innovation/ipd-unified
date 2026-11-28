@@ -1,4 +1,4 @@
-// IPD app background worker: ONLY shows Staff Kiosk notifications (iPhone/iPad home-screen app).
+// IPD app background worker: ONLY shows notifications (Staff Kiosk and IPD Tasks; iPhone/iPad home-screen app and desktop).
 // It does not cache or change how the app loads.
 self.addEventListener('push', event => {
   let d = {};
@@ -8,7 +8,9 @@ self.addEventListener('push', event => {
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-    for (const c of list) { if ('focus' in c) { c.postMessage({ open: 'kiosk' }); return c.focus(); } }
-    return self.clients.openWindow('./?open=kiosk');
+    const url = (event.notification.data && event.notification.data.url) || '';
+    const task = /[?&](task=|tasks=1)/.test(url);   // IPD Tasks: open that task
+    for (const c of list) { if ('focus' in c) { c.postMessage(task ? { openUrl: url } : { open: 'kiosk' }); return c.focus(); } }
+    return self.clients.openWindow(task ? url : './?open=kiosk');
   }));
 });
