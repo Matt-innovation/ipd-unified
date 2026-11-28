@@ -422,6 +422,29 @@ body.mk-open{overflow:hidden}
 .pl-btn.has{border-color:#3b82f6;color:#1d4ed8}
 .op-btn{margin:6px 0 0 6px;min-height:34px;padding:4px 10px;border:1px dashed var(--border2);border-radius:999px;background:var(--surface2);color:var(--text-mid);font:600 12.5px var(--font);cursor:pointer}
 .op-btn.on{border-style:solid;border-color:#d97706;color:#b45309;background:rgba(245,158,11,.1)}
+.op-panel{margin-top:12px;padding:10px;border:1px solid var(--border2);border-radius:12px;background:var(--surface2)}
+.op-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid var(--border2)}
+.op-row:first-of-type{border-top:0}
+.op-name{flex:1;min-width:0;font-size:14px;overflow-wrap:anywhere}.op-name small{color:var(--text-mid)}
+.op-btn.op-big{margin:0;min-height:44px;padding:6px 14px;font-size:14px;border-style:solid;flex:none}
+.ld-wait{opacity:.85}
+.cq-sendsum{margin:10px 0;padding:10px 12px;border:1px solid var(--border2);border-radius:12px;background:var(--surface2);font-size:14px;line-height:1.45}
+.cq-sendsum-h{font-weight:700;margin-bottom:4px}
+.qs-jtrow{display:flex;gap:10px;flex-wrap:wrap}
+.qs-jtbtn{flex:1 1 140px;min-height:64px;padding:10px 12px;border:2px solid var(--border2);border-radius:14px;background:var(--surface2);color:var(--text);font:700 16px var(--font);display:flex;flex-direction:column;align-items:flex-start;gap:2px;cursor:pointer;text-align:left}
+.qs-jtbtn small{font-weight:500;font-size:12.5px;color:var(--text-mid)}
+.qs-jtbtn.on{border-color:#1e3a5f;background:#1e3a5f;color:#fff}.qs-jtbtn.on small{color:#dbe4ef}
+.qs-discrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0}
+.qs-discbtn{min-height:44px;padding:6px 16px;border:1.5px solid #d97706;border-radius:999px;background:rgba(245,158,11,.1);color:#b45309;font:700 15px var(--font);cursor:pointer}
+.qs-discbtn:disabled{border-color:var(--border2);background:var(--surface2);color:var(--text-mid);cursor:default}
+.qs-discnow{font-weight:700;color:#b45309;font-size:14px}
+.qs-discbox{padding:10px;border:1px solid var(--border2);border-radius:12px;margin-bottom:8px}
+.q9-tabs{display:flex;gap:6px;margin:4px 0 8px;border-bottom:2px solid var(--border2)}
+.q9-tab{flex:1;min-height:46px;padding:6px 10px;border:0;border-bottom:3px solid transparent;margin-bottom:-2px;background:none;color:var(--text-mid);font:700 15px var(--font);cursor:pointer}
+.q9-tab.on{color:var(--text);border-bottom-color:#d97706}
+.q9-panel{margin-bottom:10px}
+.op-total{margin-top:8px;font-size:14px}
+.nv-bar{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:9999;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:#1e3a5f;color:#fff;font-size:14px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
 .pl-sec{font-size:12px;font-weight:800;color:var(--text-mid);text-transform:uppercase;letter-spacing:.03em;margin-top:4px}
 .pl-opt{display:flex;gap:8px;align-items:flex-start;padding:8px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:14px}
 .pl-opt input{width:22px;height:22px;flex:none;margin:0}
@@ -3147,6 +3170,7 @@ function renderQuotePilot() {
   if (typeof qWatchImages === 'function') qWatchImages(list);
   if (typeof plDecorate === 'function') plDecorate(list);
   if (typeof opDecorate === 'function') opDecorate(list);
+  if (typeof opPanelRender === 'function') opPanelRender();
   if (typeof swRender === 'function') swRender();
 }
 
@@ -3332,16 +3356,21 @@ function renderDiscountControls() {
 function renderGP() {
   const panel = document.getElementById('gp-panel'); if (!panel) return;
   if (typeof qsDiscRender === 'function') setTimeout(qsDiscRender, 0);
+  if (typeof cqSendSum === 'function') setTimeout(cqSendSum, 0);
+  if (typeof q9Render === 'function') setTimeout(q9Render, 0);
+  const qsMode = typeof qsOn === 'function' && qsOn() && !!document.getElementById('qs-jt');
   renderDiscountControls();
   const T = GP_SETTINGS.targets, pctTxt = v => Math.round(v * 100) + '%';
+  if (!quoteJobType && qsMode) { panel.innerHTML = '<div class="gp-ask-title">Choose the job type in step 3 first.</div><button type="button" class="gp-type" onclick="qsOpen(3)">Go to step 3, Job type</button>'; return; }
   if (!quoteJobType) {
     panel.innerHTML = '<div class="gp-ask-title">What type of job is this?</div><div class="gp-ask-btns">'
       + `<button class="gp-ask-btn" onclick="setQuoteJobType('maintenance')">Maintenance<small>target ${pctTxt(T.maintenance)}</small></button>`
-      + `<button class="gp-ask-btn" onclick="setQuoteJobType('construction')">Construction / Reno / Hot water<small>target ${pctTxt(T.construction)}</small></button></div>`;
+      + `<button class="gp-ask-btn" onclick="setQuoteJobType('construction')">Construction / Reno / Hot water<small>target ${pctTxt(T.construction)}</small></button></div>`
+      + (typeof ldOn === 'function' && ldOn() && !qsMode ? '<div class="ld ld-wait"><label class="qs-same"><input type="checkbox" disabled> Offer discounts to the client</label><div class="eq-small">Pick the job type above first (the discounts are capped by its GP limit).</div></div>' : '');
     return;
   }
   const target = T[quoteJobType];
-  const typeRow = '<div class="gp-type-row">'
+  const typeRow = qsMode ? '' : '<div class="gp-type-row">'
     + `<button class="gp-type${quoteJobType==='maintenance'?' active':''}" onclick="setQuoteJobType('maintenance')">Maintenance (target ${pctTxt(T.maintenance)})</button>`
     + `<button class="gp-type${quoteJobType==='construction'?' active':''}" onclick="setQuoteJobType('construction')">Construction / Reno / Hot water (target ${pctTxt(T.construction)})</button></div>`;
   const g = calcGP();
@@ -3364,7 +3393,7 @@ function renderGP() {
   const notes = [];
   if (g.bundlesNoCost) notes.push(`GP excludes ${g.bundlesNoCost} bundle${g.bundlesNoCost === 1 ? '' : 's'} with no cost`);
   if (g.noCost) notes.push(`GP excludes ${g.noCost} item${g.noCost === 1 ? '' : 's'} with no cost price`);
-  panel.innerHTML = typeRow + body + eqPanelHtml(g) + (eqOn() && typeof gpOptionsHtml === 'function' ? gpOptionsHtml() + ldHtml() : '') + (notes.length ? `<div class="gp-note">${notes.join(' · ')}</div>` : '');
+  panel.innerHTML = typeRow + (eqOn() && typeof ldHtml === 'function' && !qsMode ? ldHtml() : '') + body + eqPanelHtml(g) + (eqOn() && typeof gpOptionsHtml === 'function' ? gpOptionsHtml() : '') + (notes.length ? `<div class="gp-note">${notes.join(' · ')}</div>` : '');
 }
 
 function exportQuote() {
@@ -5771,7 +5800,7 @@ document.addEventListener('click', async e => {
 // ── OPTIONS THE CLIENT TICKS (QUOTE_OPTIONS=on) ──────────────────────────────
 // A chip on each quote line: Required → Optional (starts unticked) → Optional (starts ticked). The client quote
 // page lets the client tick optional lines and the total updates; Send to SM8 is unchanged (all lines go).
-const OP_LABEL = it => !it.optional ? '◻ Required' : it.defaultOn ? '☑ Optional · starts ticked' : '☐ Optional · starts unticked';
+const OP_LABEL = it => !it.optional ? '◻ Required · tap to make optional' : it.defaultOn ? '☑ Optional · starts ticked' : '☐ Optional · starts unticked';
 function opDecorate(list) {
   if (!(CURRENT_USER && PILOT_UI && cqFeat && cqFeat.options)) return;
   list.querySelectorAll('.qline[data-id]').forEach(row => {
@@ -5852,7 +5881,7 @@ document.addEventListener('input', e => {
 // ── REPORT A PROBLEM ─────────────────────────────────────────────────────────
 // Logged-in staff only. Their words plus what the app knows (screen, version, phone, recent errors and — if
 // ticked — the job number and quote lines). Saved on our server and emailed to Matt. Never to ServiceM8.
-const APP_VERSION = '2026-11-24 pilot';
+const APP_VERSION = '2026-11-28b pilot';   // bump on every release: logged-in phones see the change and refresh (nvCheck)
 const RP_ERRORS = [];
 window.addEventListener('error', e => { RP_ERRORS.push(new Date().toISOString().slice(11, 19) + ' ' + String(e.message || 'error').slice(0, 200) + (e.filename ? ' @' + String(e.filename).split('/').pop() + ':' + e.lineno : '')); if (RP_ERRORS.length > 20) RP_ERRORS.shift(); });
 window.addEventListener('unhandledrejection', e => { RP_ERRORS.push(new Date().toISOString().slice(11, 19) + ' ' + String((e.reason && e.reason.message) || e.reason || 'rejected').slice(0, 200)); if (RP_ERRORS.length > 20) RP_ERRORS.shift(); });
@@ -7129,7 +7158,8 @@ function ldLevels() {
   return { L, rows, t };
 }
 function ldHtml() {
-  if (!ldOn() || !quote.some(i => i.optional && i.id !== 'discount')) return '';
+  if (!ldOn()) return '';
+  if (!quote.some(i => i.optional && i.id !== 'discount')) return '<div class="ld ld-wait"><label class="qs-same"><input type="checkbox" disabled> Offer discounts to the client (the more options they tick, the more they save)</label><div class="eq-small">First make at least one line optional' + (document.getElementById('q9-tabs') ? ' (the Optional tab).' : ': the “Make optional” chip on each line.') + '</div></div>';
   const { L, rows, t } = ldLevels(), pct = v => (v == null ? '—' : (v * 100).toFixed(1) + '%');
   const head = '<div class="ld"><label class="qs-same"><input type="checkbox" data-ld="on"' + (L.on ? ' checked' : '') + '> Offer discounts to the client (the more options they tick, the more they save)</label>';
   if (!L.on) return head + '<div class="eq-small">Off: the client sees the full price and chooses options with no discount shown anywhere.</div></div>';
@@ -7165,6 +7195,121 @@ document.addEventListener('click', e => {
   const rm = t.closest('[data-ldrm]'); if (rm) { L.levels.splice(+rm.dataset.ldrm, 1); ldSet(L); }
 });
 
+
+// ── OPTIONS AND CLIENT DISCOUNTS, EASY TO FIND (QUOTE_OPTIONS / DISCOUNT_LADDER, logged in) ───────────
+// Step 6 lists every line with a big "Make optional" button (same three states as the chip in step 8), and the
+// sending step shows what the client will see (optional lines, discount offers on or off) with the same tick.
+function opPanelRender() {
+  const box = document.getElementById('op-panel'); if (!box) return;
+  const lines = quote.filter(i => i.id !== 'discount');
+  if (!(CURRENT_USER && PILOT_UI && cqFeat && cqFeat.options) || !lines.length) { box.hidden = true; box.innerHTML = ''; return; }
+  box.hidden = false;
+  const lab = it => !it.optional ? '＋ Make optional' : it.defaultOn ? '☑ Optional · starts ticked' : '☐ Optional · starts unticked';
+  box.innerHTML = '<div class="qs-sub">Your quote lines: make any of them optional for the client</div>'
+    + lines.map(it => '<div class="op-row"><span class="op-name">' + escHtml(String(it.name || '').slice(0, 80)) + ' <small>$' + ((parseFloat(it.price) || 0) * it.qty).toFixed(2) + '</small></span>'
+      + '<button type="button" class="op-btn op-big' + (it.optional ? ' on' : '') + '" data-opt="' + escHtml(String(it.id)) + '">' + lab(it) + '</button></div>').join('')
+    + '<div class="eq-small">Tap to change: Required → Optional (starts unticked) → Optional (starts ticked) → Required. The client ticks optional lines on their quote page and the total updates live.'
+    + (typeof ldOn === 'function' && ldOn() ? ' Then the Offer a discount tab can give the client a discount for ticking more.' : '') + '</div>'
+    + (() => { const req = lines.filter(i => !i.optional).reduce((a, i) => a + (parseFloat(i.price) || 0) * i.qty, 0), all = lines.reduce((a, i) => a + (parseFloat(i.price) || 0) * i.qty, 0), d = 1 - discountFraction(), m = x => '$' + (x * d).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        return '<div class="op-total" id="op-total">Total (inc GST): <b>' + m(all) + '</b>' + (lines.some(i => i.optional) ? ' with every option · <b>' + m(req) + '</b> with none' : '') + '</div>'; })();
+}
+function cqSendSum() {
+  const send = document.getElementById('cq-send');
+  if (!send || !(CURRENT_USER && PILOT_UI && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.on)) return;
+  let el = document.getElementById('cq-sendsum');
+  if (!el) { el = document.createElement('div'); el.id = 'cq-sendsum'; el.className = 'cq-sendsum'; send.parentNode.insertBefore(el, send); }
+  const lines = quote.filter(i => i.id !== 'discount');
+  if (!lines.length) { el.hidden = true; return; }
+  el.hidden = false;
+  const opt = lines.filter(i => i.optional), ob = opt.filter(i => i.type === 'bundle').length, ticked = opt.filter(i => i.defaultOn).length;
+  const n = (k, w) => k + ' ' + w + (k === 1 ? '' : 's');
+  let optTxt = cqFeat.options ? (opt.length ? n(opt.length, 'optional line') + (ob ? ' (' + n(ob, 'bundle') + ')' : '') + (ticked ? ', ' + ticked + ' start' + (ticked === 1 ? 's' : '') + ' ticked' : ', all start unticked') : 'no optional lines' + (document.getElementById('q9-tabs') ? ' (the Optional tab above)' : '')) : '';
+  let ld = '';
+  if (typeof ldOn === 'function' && ldOn()) {
+    const L = ldGet(), send2 = opt.length ? ldForSend() : null;
+    ld = '<div><b>Discount ladder:</b> ' + (!opt.length ? 'off (needs an optional line)' : !L.on ? 'off' : send2 ? 'on · ' + send2.levels.map(r => r.pct + '% off with ' + (send2.mode === 'value' ? '$' + r.min + ' or more' : r.min + '+ options')).join(', ') : 'ticked, but no level can be offered at the GP limit') + '</div>'
+      + (opt.length ? '<div class="ld"><label class="qs-same"><input type="checkbox" data-ld="on"' + (L.on ? ' checked' : '') + '> Offer discounts to the client</label><div class="eq-small">' + (document.getElementById('q9-tabs') ? 'Levels and the GP at each level: the Offer a discount tab above.' : 'Levels and the GP at each level are in the GP panel.') + '</div></div>' : '');
+  }
+  el.innerHTML = '<div class="cq-sendsum-h">What the client will see</div>'
+    + '<div>' + n(lines.length - opt.length, 'required line') + (optTxt ? ' · ' + optTxt : '') + '</div>'
+    + (quoteDiscountPct > 0 ? '<div>Your discount: ' + quoteDiscountPct + '%</div>' : '') + ld;
+}
+
+// ── STEP 3 JOB TYPE, STEP 8 DISCOUNT BUTTON, STEP 9 OPTIONAL / OFFER A DISCOUNT TABS (QUOTE_STEPS, logged in) ──
+// Step 3 only sets the job type (the GP targets: floor 55/45, client-side limit 60/50, owners' settings); no GP shown.
+// Step 8: "Discount" straight after the Total opens the technician's discount (down to the floor; "No room to
+// discount" when the Job GP has no room). Step 9: Optional tab (Make optional on each line, live total) and Offer a
+// discount tab (the client discount ladder), with "What the client will see" above Send to client.
+function qsJtRender() {
+  const box = document.getElementById('qs-jt'); if (!box) return;
+  const b = (k, t, sub) => '<button type="button" class="qs-jtbtn' + (quoteJobType === k ? ' on' : '') + '" data-qsjt="' + k + '" aria-pressed="' + (quoteJobType === k) + '">' + t + '<small>' + sub + '</small></button>';
+  const h = '<div class="qs-jtrow">' + b('maintenance', 'Maintenance', 'repairs, leaks, blockages, service calls') + b('construction', 'Construction', 'building, renovation, hot water') + '</div><div class="qs-note">This sets the GP targets in the background.</div>';
+  if (box.innerHTML !== h) box.innerHTML = h;
+}
+document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-qsjt]'); if (!b) return; setQuoteJobType(b.dataset.qsjt); qsJtRender(); if (typeof qsRender === 'function') qsRender(); });
+function qsDiscRoom() {   // null = can't tell yet (no job type / no costs); else true/false
+  if (!quoteJobType) return null;
+  if (typeof eqOn === 'function' && eqOn()) { const m = dsMax(); return m == null ? null : m > 1e-9; }
+  const g = qsGp(0); return g == null ? null : g > GP_SETTINGS.targets[quoteJobType] + 1e-9;
+}
+function qsDiscBtn() {
+  const btn = document.getElementById('qs-discbtn'), box = document.getElementById('qs-discbox'), now = document.getElementById('qs-discnow'); if (!btn || !box) return;
+  const lines = quote.filter(i => i.id !== 'discount'), room = qsDiscRoom(), applied = quoteDiscountPct > 0;
+  btn.parentNode.hidden = !lines.length;
+  let label = '🏷 Discount', can = true;
+  if (!quoteJobType) { label = 'Discount: choose the job type in step 3'; can = false; }
+  else if (room === false && !applied) { label = 'No room to discount'; can = false; }
+  else if (room === null && !applied) { label = 'Discount: no costs known yet'; can = false; }
+  if (btn.textContent !== label) btn.textContent = label;
+  btn.disabled = !can; if (!can) { box.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
+  const t = applied ? quoteDiscountPct + '% off applied' : ''; if (now.textContent !== t) now.textContent = t;
+}
+document.addEventListener('click', e => {
+  if (!(e.target.closest && e.target.closest('#qs-discbtn'))) return;
+  const box = document.getElementById('qs-discbox'), btn = document.getElementById('qs-discbtn'); if (btn.disabled) return;
+  box.hidden = !box.hidden; btn.setAttribute('aria-expanded', String(!box.hidden)); if (!box.hidden) qsDiscRender();
+});
+let q9Tab = 'opt';
+function q9Render() {
+  const tabs = document.getElementById('q9-tabs'); if (!tabs) return;
+  const hasOpt = !!(CURRENT_USER && PILOT_UI && cqFeat && cqFeat.on && cqFeat.options), hasLd = !!(hasOpt && typeof ldOn === 'function' && ldOn());
+  tabs.hidden = !hasOpt; tabs.querySelector('[data-q9tab="ld"]').hidden = !hasLd;
+  if (!hasLd && q9Tab === 'ld') q9Tab = 'opt';
+  tabs.querySelectorAll('[data-q9tab]').forEach(b => { const on = b.dataset.q9tab === q9Tab; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); });
+  document.getElementById('q9-opt').hidden = !hasOpt || q9Tab !== 'opt';
+  document.getElementById('q9-ld').hidden = !hasLd || q9Tab !== 'ld';
+  const lb = document.getElementById('ld-box');
+  if (lb && hasLd) {
+    const h = !quoteJobType ? '<div class="ld ld-wait"><label class="qs-same"><input type="checkbox" disabled> Offer discounts to the client</label><div class="eq-small">Choose the job type in step 3 first (the discounts are capped by its GP limit).</div></div>' : ldHtml();
+    const typing = lb.contains(document.activeElement) && document.activeElement.matches('input[type=number]');
+    if (!typing) { if (lb.innerHTML !== h) lb.innerHTML = h; return; }
+    // typing in a level box: keep the boxes (and the cursor), refresh what each level gives and its GP
+    const tmp = document.createElement('div'); tmp.innerHTML = h;
+    const nr = tmp.querySelectorAll('.ld-row'), or = lb.querySelectorAll('.ld-row');
+    if (nr.length !== or.length) return;
+    or.forEach((r, k) => { r.className = nr[k].className; const a = r.querySelector('.ld-res'), b = nr[k].querySelector('.ld-res'); if (a && b && a.innerHTML !== b.innerHTML) a.innerHTML = b.innerHTML; });
+    const s1 = lb.querySelector('.ld-send'), s2 = tmp.querySelector('.ld-send'); if (s1 && s2 && s1.innerHTML !== s2.innerHTML) s1.innerHTML = s2.innerHTML;
+  }
+}
+document.addEventListener('focusout', e => { if (e.target.closest && e.target.closest('#ld-box')) setTimeout(q9Render, 0); });   // redraw the levels once the typing is done
+document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-q9tab]'); if (!b) return; q9Tab = b.dataset.q9tab; q9Render(); });
+
+// ── NEW VERSION CHECK (logged-in app only; the shared PIN app is unchanged) ──────────────────────────
+// Every 5 minutes and when the app comes back to the screen, it reads the app's version from the server. If it is
+// newer: with no quote lines on screen it refreshes by itself; otherwise a bar offers "Refresh now".
+async function nvCheck() {
+  if (!(PILOT_UI && CURRENT_USER) || document.getElementById('nv-bar')) return;
+  try {
+    const r = await fetch(location.pathname + '?nv=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
+    const m = /const APP_VERSION = '([^']+)'/.exec(await r.text()); if (!m || m[1] === APP_VERSION) return;
+    if (!quote.some(i => i.id !== 'discount') && document.visibilityState === 'visible') { location.reload(); return; }
+    const bar = document.createElement('div'); bar.id = 'nv-bar'; bar.className = 'nv-bar';
+    bar.innerHTML = 'A new version of the app is ready. <button type="button" class="q-btn primary" onclick="location.reload()">Refresh now</button> <button type="button" class="q-btn" onclick="this.parentNode.remove()">Later</button>';
+    document.body.appendChild(bar);
+  } catch (e) {}
+}
+setInterval(nvCheck, 5 * 60 * 1000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') nvCheck(); });
 
 // ── CLEAR QUOTE (QUOTE_STEPS=on, logged in) ───────────────────────────────────────────────────────────
 // One "Clear quote" at the top of the steps. It asks first; job number and client details stay unless the tick says
@@ -7591,9 +7736,9 @@ document.addEventListener('input', e => { if (e.target && (e.target.id === 'q-sc
 // steps that are done. Nothing is rebuilt: the existing parts of the screen are moved into the steps, so every
 // feature works exactly as before. Off: the tabs (Summary, Products, Bundles, Labour, Notes & photos) as today.
 const QS_STEPS = [
-  [1, 'Job number', 'Job'], [2, 'Client details', 'Client'], [3, 'Discount and GP (staff only, the client never sees this)', 'GP'],
+  [1, 'Job number', 'Job'], [2, 'Client details', 'Client'], [3, 'Job type', 'Job type'],
   [4, 'Job description', 'Description'], [5, 'Photos and markup', 'Photos'], [6, 'Products', 'Products'],
-  [7, 'Labour, materials and more', 'Labour'], [8, 'Total, GST, deposit and stages', 'Total'], [9, 'Client quote page', 'Send'],
+  [7, 'Labour, materials and more', 'Labour'], [8, 'Total, discount, deposit, stages and GP (staff only)', 'Total'], [9, 'Client quote page: optional lines, discount offer, send', 'Send'],
 ];
 function qsOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.quoteSteps); }
 function qsBuild() {
@@ -7629,11 +7774,18 @@ function qsBuild() {
   mv(7, $('qt-labour')); mv(7, lab('q-diary-note')); mv(7, $('sw-card'));
   add(7, '<div class="qs-sub">Notes &amp; photos for the job diary</div>'); mv(7, $('qt-notes')); mv(7, sum.querySelector('.quote-actions'));
   // 8 lines, totals, deposit, stages
-  mv(8, sum.querySelector('.qhint')); mv(8, $('quote-list')); mv(8, $('quote-totals')); add(8, '<div class="qs-dep" id="qs-dep"></div>'); mv(8, $('cq-stages'), true);
-  // 3 discount and GP (moved up so the GP shows early)
-  mv(3, $('gp-panel')); mv(3, $('gp-discount')); add(3, '<div id="qs-disc"></div>');
+  // 8 lines, totals, then the Discount button straight after the Total, deposit, stages, and the GP panel (staff only)
+  mv(8, sum.querySelector('.qhint')); mv(8, $('quote-list')); mv(8, $('quote-totals'));
+  add(8, '<div class="qs-discrow"><button type="button" class="qs-discbtn" id="qs-discbtn" aria-expanded="false">🏷 Discount</button><span class="qs-discnow" id="qs-discnow"></span></div><div class="qs-discbox" id="qs-discbox" hidden></div>');
+  $('qs-discbox').appendChild($('gp-discount')); $('qs-discbox').insertAdjacentHTML('beforeend', '<div id="qs-disc"></div>');
+  add(8, '<div class="qs-dep" id="qs-dep"></div>'); mv(8, $('cq-stages'), true);
+  add(8, '<div class="qs-sub">GP (staff only, the client never sees this)</div>'); mv(8, $('gp-panel'));
+  // 3 job type only (sets the GP targets in the background; no GP or discounts shown here)
+  add(3, '<div id="qs-jt" class="qs-jt"></div>');
   // 9 client quote page
-  add(9, '<div class="qs-note">Optional lines are set on each line in step 8. Product links (and the showpiece photo and spec sheet links) are on each line. The client sees the terms, the photos from step 5, the lines and the total, never the cost, GP or markup.</div>');
+  add(9, '<div class="q9-tabs" id="q9-tabs" role="tablist"><button type="button" role="tab" class="q9-tab on" data-q9tab="opt" aria-selected="true">Optional</button><button type="button" role="tab" class="q9-tab" data-q9tab="ld" aria-selected="false">Offer a discount</button></div>'
+    + '<div class="q9-panel" id="q9-opt"><div id="op-panel" class="op-panel"></div></div><div class="q9-panel" id="q9-ld" hidden><div id="ld-box"></div></div>');
+  add(9, '<div class="qs-note">Optional lines are set in the Optional tab above (or the chip on each line in step 8). Product links (and the showpiece photo and spec sheet links) are on each line. The client sees the terms, the photos from step 5, the lines and the total, never the cost, GP or markup.</div>');
   mv(9, cq, true); add(9, '<div class="qs-off">The client quote link is switched off here. Use Send to SM8 at the bottom.</div>');
   scr.classList.add('qs-on');
   // invoice description follows the job description when ticked (remembered on this phone)
@@ -7654,7 +7806,7 @@ function qsBuild() {
 }
 let qsRaf = 0;
 // The live GP chip at the top of every step (staff only): headline Job GP and the quote total. Green at or above the
-// client-side limit, amber between the technician floor and that limit, red below the floor. Tap: the GP panel (step 3).
+// client-side limit, amber between the technician floor and that limit, red below the floor. Tap: the GP panel (step 8).
 function qsChip() {
   const c = document.getElementById('qs-gpchip'); if (!c) return;
   const lines = quote.filter(i => i.id !== 'discount'), total = quote.reduce((t, i) => t + (parseFloat(i.price) || 0) * i.qty, 0);
@@ -7665,7 +7817,7 @@ function qsChip() {
   const t = (gp == null ? 'GP —' : 'GP ' + Math.round(gp * 100) + '%') + ' · $' + Math.round(total).toLocaleString('en-AU');
   c.hidden = false; if (c.textContent !== t) c.textContent = t; c.className = 'qs-chip-gp ' + cls;
 }
-document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#qs-gpchip')) qsOpen(3); });
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#qs-gpchip')) { qsOpen(8); const p = document.getElementById('gp-panel'), st = document.getElementById('qs-steps'); if (p && st) st.scrollTop = Math.max(0, p.offsetTop - 60); } });
 // step mode: the notes in step 7 follow the job number (the old tab switch used to do this)
 document.addEventListener('change', e => { if (e.target && e.target.id === 'job-number-input' && document.getElementById('qs-steps') && typeof qnRender === 'function') qnRender(); });
 // One step open at a time: tap a bar (or a number in the step bar) to open it, tap again to shrink it.
@@ -7680,7 +7832,7 @@ function qsOpen(n, quiet) {
 function qsClose(n) { const sec = document.getElementById('qs-' + n); if (sec) { sec.classList.remove('open'); const h = sec.querySelector('.qs-hd'); if (h) h.setAttribute('aria-expanded', 'false'); } }
 function qsFirstOpen() {   // the first step still to do (job number first)
   const v = id => ((document.getElementById(id) || {}).value || '').trim();
-  return /^\d{1,8}$/.test(v('job-number-input')) ? (quote.some(i => i.id !== 'discount') ? 3 : 6) : 1;
+  return /^\d{1,8}$/.test(v('job-number-input')) ? (!quoteJobType ? 3 : quote.some(i => i.id !== 'discount') ? 8 : 6) : 1;
 }
 // the one-line summary on each bar
 function qsSummary(n) {
@@ -7690,14 +7842,16 @@ function qsSummary(n) {
   switch (n) {
     case 1: return job ? 'Job ' + job : 'No job number yet';
     case 2: { const d = job && typeof cqClientGet === 'function' ? cqClientGet(job) : null; return d && d.name ? d.name + ((d.sm8 && d.sm8.address) ? ', ' + d.sm8.address.split(',')[0] : '') : 'Not read yet'; }
-    case 3: { if (!lines.length) return 'Add lines to see the GP'; if (!quoteJobType) return 'Choose the job type'; const g = calcGP(); if (!(g.sellEx > 0)) return 'No costs known yet'; const gp = (g.sellEx - g.cost) / g.sellEx; return (typeof eqOn === 'function' && eqOn() ? 'Job GP ' : 'GP ') + (gp * 100).toFixed(1) + '% · target ' + Math.round(GP_SETTINGS.targets[quoteJobType] * 100) + '%' + (quoteDiscountPct ? ' · ' + quoteDiscountPct + '% off' : ''); }
+    case 3: return quoteJobType === 'maintenance' ? 'Maintenance' : quoteJobType === 'construction' ? 'Construction' : 'Choose the job type';
     case 4: { const t = v('q-job-desc'); return (typeof scOn === 'function' && scOn() ? 'Scope of Work: ' : 'Job description: ') + (t ? 'written' : 'empty') + (typeof scOn === 'function' && scOn() && typeof soMode === 'function' ? ' · invoice: ' + ({ none: 'not set', same: 'same', different: 'own text' })[soMode()] : ''); }
     case 5: { const it = [...document.querySelectorAll('#cq-list .cq-item[data-cq]')], k = it.length, sh = it.filter(x => (x.querySelector('[data-cqclient]') || {}).checked).length, w = it.filter(x => /Waiting|Sending/.test(x.textContent)).length;
       return k ? 'Photos: ' + k + ' added' + (phOn() ? ', ' + sh + ' shown to client' + (w ? ', ' + w + ' waiting for the diary' : '') : '') : 'No photos'; }
     case 6: return prods.length ? prods.length + ' line' + (prods.length === 1 ? '' : 's') + ', ' + money(prods.reduce((t, i) => t + (parseFloat(i.price) || 0) * i.qty, 0)) : 'No products yet';
     case 7: return lab.length ? lab.length + ' labour / materials line' + (lab.length === 1 ? '' : 's') + ', ' + money(lab.reduce((t, i) => t + (parseFloat(i.price) || 0) * i.qty, 0)) : 'No labour yet';
-    case 8: { const tot = quote.reduce((t, i) => t + (parseFloat(i.price) || 0) * i.qty, 0); return lines.length ? money(tot) + ' inc GST · ' + lines.length + ' line' + (lines.length === 1 ? '' : 's') : 'Empty'; }
-    case 9: return /Link ready/.test((document.getElementById('cq-result') || {}).textContent || '') ? 'Link ready' : 'Not sent yet';
+    case 8: { const tot = quote.reduce((t, i) => t + (parseFloat(i.price) || 0) * i.qty, 0); if (!lines.length) return 'Empty'; const g = calcGP(), gp = quoteJobType && g.sellEx > 0 ? (g.sellEx - g.cost) / g.sellEx : null;
+      return money(tot) + ' inc GST · ' + lines.length + ' line' + (lines.length === 1 ? '' : 's') + (gp != null ? ' · ' + (typeof eqOn === 'function' && eqOn() ? 'Job GP ' : 'GP ') + (gp * 100).toFixed(1) + '%' : '') + (quoteDiscountPct ? ' · ' + quoteDiscountPct + '% off' : ''); }
+    case 9: { const o = lines.filter(i => i.optional).length, L = typeof ldOn === 'function' && ldOn() && o ? ldGet() : null;
+      return (/Link ready/.test((document.getElementById('cq-result') || {}).textContent || '') ? 'Link ready' : 'Not sent yet') + (o ? ' · ' + o + ' optional' : '') + (L && L.on ? ' · discount offer on' : ''); }
   }
   return '';
 }
@@ -7715,19 +7869,19 @@ function qsMarks() {
   const done = {
     1: /^\d{1,8}$/.test(val('job-number-input')),
     2: !!((document.querySelector('#cq-client [data-cqc="name"]') || {}).value || '').trim(),
-    3: target != null && gp != null && !gpLow,
+    3: !!quoteJobType,
     4: !!val('q-job-desc') || (scOn() && (!!val('q-scope') || lines.some(i => i.type === 'bundle'))),
     5: !!document.querySelector('#cq-list .cq-item[data-cq]'),
     6: lines.some(i => i.type === 'reece' || i.type === 'bundle'),
     7: lines.some(i => i.type === 'labour' || i.type === 'material' || /^mat/i.test(String(i.id))),
-    8: lines.length > 0,
+    8: lines.length > 0 && !gpLow,
     9: /Link ready/.test((document.getElementById('cq-result') || {}).textContent || ''),
   };
   for (const [n] of QS_STEPS) {
-    const st = done[n] ? '✓' : (n === 3 && gpLow ? '⚠ GP low' : '');
+    const st = done[n] ? '✓' : (n === 8 && gpLow ? '⚠ GP low' : '');
     const h = document.querySelector('#qs-' + n + ' .qs-st'); if (h && h.textContent !== st) h.textContent = st;
-    const sec = document.getElementById('qs-' + n); if (sec) { sec.classList.toggle('done', !!done[n]); sec.classList.toggle('warn', n === 3 && gpLow); const sm = sec.querySelector('.qs-sum'), tx = qsSummary(n); if (sm && sm.textContent !== tx) sm.textContent = tx; }
-    const c = document.querySelector('#qs-nav [data-qsgo="' + n + '"]'); if (c) { c.classList.toggle('done', !!done[n]); c.classList.toggle('warn', n === 3 && gpLow); }
+    const sec = document.getElementById('qs-' + n); if (sec) { sec.classList.toggle('done', !!done[n]); sec.classList.toggle('warn', n === 8 && gpLow); const sm = sec.querySelector('.qs-sum'), tx = qsSummary(n); if (sm && sm.textContent !== tx) sm.textContent = tx; }
+    const c = document.querySelector('#qs-nav [data-qsgo="' + n + '"]'); if (c) { c.classList.toggle('done', !!done[n]); c.classList.toggle('warn', n === 8 && gpLow); }
   }
 }
 function qsRender() {
@@ -7735,7 +7889,7 @@ function qsRender() {
   qsChip();
   const T = stTotals(), dep = document.getElementById('qs-dep');
   if (dep) dep.innerHTML = T.total > 0 ? (T.deposit ? 'Deposit on acceptance: <b>$' + T.deposit.toFixed(2) + '</b> (20% on jobs over $1,000) · the rest: <b>$' + T.rest.toFixed(2) + '</b>' : 'No deposit (jobs of $1,000 or less).') : '';
-  qsDiscRender(); qsMarks();
+  qsDiscRender(); if (typeof qsJtRender === 'function') { qsJtRender(); qsDiscBtn(); q9Render(); } qsMarks();
 }
 // Step 8 helper: GP now, and GP after a 5%, 10%, 15% or set-dollar discount; warns when it would go below the minimum.
 let qsDollar = '';
