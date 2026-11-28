@@ -215,10 +215,17 @@ body.pilot input:not([type=checkbox]):not([type=radio]):not([type=range]):not([t
 #qs-steps{position:relative;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 10px 28px;display:flex;flex-direction:column;gap:12px}
 .qs-step{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:12px;scroll-margin-top:6px}
 .qs-step.done{border-color:rgba(22,163,74,.55)}.qs-step.warn{border-color:#dc2626}
-.qs-hd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.qs-hd{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.qs-step.open .qs-hd{margin-bottom:10px}
+.qs-step:not(.open) .qs-body{display:none}
+.qs-step:not(.open){padding:8px 12px}
+.qs-tt{flex:1;min-width:0;display:flex;flex-direction:column}
+.qs-sum{font-size:12.5px;color:var(--text-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qs-step.open .qs-sum{display:none}
+.qs-chev{font-size:14px;color:var(--text-mid);transition:transform .15s}.qs-step.open .qs-chev{transform:rotate(180deg)}
 .qs-n{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--btn2-bg,#111);color:var(--btn2-text,#fff);font-weight:800;font-size:15px;flex-shrink:0}
 .qs-step.done .qs-n{background:#16a34a;color:#fff}
-.qs-t{font-size:16px;font-weight:800;flex:1;min-width:0;line-height:1.25}
+.qs-t{font-size:16px;font-weight:800;min-width:0;line-height:1.25}
 .qs-st{font-size:12px;font-weight:700;color:#16a34a;white-space:nowrap}.qs-step.warn .qs-st{color:#dc2626}
 .qs-body{display:flex;flex-direction:column;gap:10px}
 .qs-sub{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-mid);margin-top:4px}
@@ -3093,13 +3100,22 @@ function calcGP(opt) {
   for (const i of quote) {
     if (i.type === 'labour' && i.id !== 'discount') hours += (Number(i.hours) || (/\((\d+(?:\.\d+)?)h\)/.exec(i.name || '') || [])[1] * 1 || 0) * (Number(i.qty) || 1);
     if (i.id === 'discount') continue;                // applied below as a % of the counted sell
-    const lineInc = (parseFloat(i.price) || 0) * i.qty;
+    let lineInc = (parseFloat(i.price) || 0) * i.qty;
     let lineCost;
     if (i.type === 'bundle') {
       const bc = bundleCosts && bundleCosts[i.id];
       // A fully-costed bundle counts even at $0 (e.g. hire of our own equipment).
       if (!bc || bc.unresolved > 0 || !(bc.cost >= 0)) { hasBundle = true; bundlesNoCost++; continue; }
       lineCost = bc.cost * i.qty;
+      // GP_EQUIP: look INSIDE the bundle. Each part costing the $ setting or more (e.g. the hot water unit) is set aside
+      // by itself, at its own Reece sell price (no price known: at cost, so it moves no margin either way). The
+      // bundle's labour, fittings and smaller parts stay in the Job GP. Staff can unflag a part (i.eqOff).
+      if (eq && Array.isArray(bc.eq)) for (const p of bc.eq) {
+        if (!(p.unit >= eqMin() - 1e-9) || (i.eqOff || []).includes(p.code)) continue;
+        const pc = p.unit * p.qty * i.qty, pi = Math.min(lineInc, (p.retail > 0 ? p.retail : p.unit * 1.1) * p.qty * i.qty);
+        eSellInc += pi; eSellEx += pi / 1.1; eCost += pc; lineInc -= pi; lineCost -= pc;
+        equip.push({ name: p.name, from: i.name, id: i.id + '|' + p.code, inc: pi, cost: pc });
+      }
     }
     else if (i.type === 'labour') lineCost = (parseFloat(i.gpCost) || 0) * i.qty;
     else {
@@ -3107,7 +3123,7 @@ function calcGP(opt) {
       if (c <= 0) { noCost++; continue; }          // no cost known — leave out rather than show 100%
       lineCost = c * i.qty;
     }
-    if (eq && eqIsSet(i)) { eSellInc += lineInc; eSellEx += isGstFreeLine(i) ? lineInc : lineInc / 1.1; eCost += lineCost; equip.push({ name: i.name, id: i.id, inc: lineInc }); continue; }
+    if (eq && i.type !== 'bundle' && eqIsSet(i)) { eSellInc += lineInc; eSellEx += isGstFreeLine(i) ? lineInc : lineInc / 1.1; eCost += lineCost; equip.push({ name: i.name, id: i.id, inc: lineInc, cost: lineCost }); continue; }
     sellInc += lineInc;
     sellEx  += isGstFreeLine(i) ? lineInc : lineInc / 1.1;
     cost    += lineCost;
@@ -3137,25 +3153,59 @@ async function eqChange() {
   try { eqSet = await authFetch('/gp-settings', { method: 'POST', body: JSON.stringify({ equipMin: n }) }); showToast('Major equipment is now $' + eqMin().toFixed(0) + ' or more'); updateQuoteUI(); renderGP(); } catch (e) { showToast('Not saved: ' + e.message); }
 }
 function eqToggle(id) {
+  const bar = String(id).indexOf('|');
+  if (bar > 0) {   // a part inside a bundle: unflag / flag again
+    const i = quote.find(x => String(x.id) === String(id).slice(0, bar)), code = String(id).slice(bar + 1); if (!i) return;
+    const off = new Set(i.eqOff || []); if (off.has(code)) off.delete(code); else off.add(code);
+    if (off.size) i.eqOff = [...off]; else delete i.eqOff;
+    if (typeof qdSave === 'function') qdSave(); updateQuoteUI(); renderGP(); return;
+  }
   const i = quote.find(x => String(x.id) === String(id)); if (!i) return;
   const now = eqIsSet(i); i.equip = !now; if (i.equip === eqAuto(i)) delete i.equip;   // back to "by the cost" when it matches
   if (typeof qdSave === 'function') qdSave(); updateQuoteUI(); renderGP();
 }
 function eqPanelHtml(g) {
   if (!eqOn()) return '';
-  const money = v => '$' + Math.round(v).toLocaleString('en-AU'), lines = quote.filter(i => i.id !== 'discount' && i.type !== 'labour');
-  const ga = calcGP({ all: true }), allGp = ga.sellEx > 0 ? (ga.sellEx - ga.cost) / ga.sellEx : null;
-  const out = [];
-  if (g.equip.length) out.push('<div class="eq-set">Set aside: ' + g.equip.map(e => escHtml(e.name.slice(0, 40)) + ' ' + money(e.inc)).join(', ') + '</div>');
+  const money = v => '$' + Math.round(v).toLocaleString('en-AU'), m2 = v => '$' + v.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const ga = calcGP({ all: true }), allGp = ga.sellEx > 0 ? (ga.sellEx - ga.cost) / ga.sellEx : null, out = [];
+  if (g.equip.length) out.push('<div class="eq-set">Set aside: ' + g.equip.map(e => escHtml(e.name.slice(0, 44)) + (e.from ? ' (from ' + escHtml(e.from.length > 70 ? e.from.slice(0, 68).replace(/\s+\S*$/, '') + '…' : e.from) + ')' : '') + ' ' + money(e.inc)).join(', ') + '</div>');
+  // how this was worked out: the whole job, never one line alone
+  if (g.sellEx > 0) {
+    const tgt = quoteJobType ? GP_SETTINGS.targets[quoteJobType] : null;
+    out.push('<div class="eq-how">How this was worked out: job sell ' + m2(g.sellEx) + ' ex GST' + (discountFraction() > 0 ? ' (after the discount)' : '') + ' − job cost ' + m2(g.cost) + ' = GP ' + m2(g.sellEx - g.cost) + ' (' + ((g.sellEx - g.cost) / g.sellEx * 100).toFixed(1) + '%)'
+      + (g.equip.length ? '. Set aside: sell ' + m2(g.eSellEx) + ' ex GST, cost ' + m2(g.eCost) : '') + (tgt != null ? '. Target ' + Math.round(tgt * 100) + '% (' + (quoteJobType === 'maintenance' ? 'maintenance' : 'building / reno / hot water') + ')' : '') + '. Sell is ex GST; costs are ex GST.</div>');
+  }
   if (allGp != null) out.push('<div class="eq-small">Overall GP with everything included: ' + (allGp * 100).toFixed(1) + '%</div>');
   if (ga.hours > 0 && ga.sellEx > 0) out.push('<div class="eq-small">GP per labour hour: ' + money((ga.sellEx - ga.cost) / ga.hours) + ' an hour (' + (Math.round(ga.hours * 10) / 10) + ' h, everything included)</div>');
-  if (lines.length) out.push('<details class="eq-list"><summary>Major equipment: ' + money(eqMin()) + ' or more each (cost ex GST)' + (eqSet && eqSet.canChange ? '' : ' · set by the owners') + '</summary>'
-    + lines.map(i => '<label class="eq-row"><input type="checkbox" data-eqid="' + escHtml(String(i.id)) + '"' + (eqIsSet(i) ? ' checked' : '') + '> <span>' + escHtml(i.name.slice(0, 60)) + (i.cost > 0 ? ' <small>cost $' + Number(i.cost).toFixed(0) + '</small>' : '') + '</span></label>').join('')
+  // staff can unflag a set-aside item, or flag a product line; bundles are never chosen as a whole
+  const rows = g.equip.map(e => ({ id: e.id, name: e.name + (e.from ? ' (from ' + e.from.slice(0, 40) + ')' : ''), on: true, cost: e.cost }));
+  const offB = []; for (const i of quote) if (i.type === 'bundle' && (i.eqOff || []).length) { const bc = bundleCosts && bundleCosts[i.id]; for (const c of i.eqOff) { const p = bc && (bc.eq || []).find(x => x.code === c); if (p) offB.push({ id: i.id + '|' + c, name: p.name + ' (from ' + i.name.slice(0, 40) + ')', on: false, cost: p.unit * p.qty * i.qty }); } }
+  const prods = quote.filter(i => i.id !== 'discount' && i.type !== 'labour' && i.type !== 'bundle' && !eqIsSet(i)).map(i => ({ id: String(i.id), name: i.name, on: false, cost: (parseFloat(i.cost) || 0) * i.qty }));
+  const all = rows.concat(offB, prods);
+  if (all.length) out.push('<details class="eq-list"><summary>Major equipment: ' + money(eqMin()) + ' or more each (cost ex GST), set aside by itself' + (eqSet && eqSet.canChange ? '' : ' · set by the owners') + '</summary>'
+    + all.map(r => '<label class="eq-row"><input type="checkbox" data-eqid="' + escHtml(r.id) + '"' + (r.on ? ' checked' : '') + '> <span>' + escHtml(r.name.slice(0, 90)) + (r.cost > 0 ? ' <small>cost $' + r.cost.toFixed(0) + '</small>' : '') + '</span></label>').join('')
     + (eqSet && eqSet.canChange ? '<button type="button" class="eq-chg" onclick="eqChange()">Change the $' + eqMin().toFixed(0) + ' (owners)</button>' : '') + '</details>');
   return out.join('');
 }
 document.addEventListener('change', e => { const c = e.target.closest && e.target.closest('[data-eqid]'); if (c) eqToggle(c.dataset.eqid); });
 
+// GP_EQUIP: discount offers only when the Job GP is above the target, and only up to the amount that keeps it there
+function dsMax() {   // largest discount (0–0.5) that keeps the Job GP at or above the target; null = no job type / no costs
+  if (!quoteJobType) return null; const t = GP_SETTINGS.targets[quoteJobType], g = calcGP();
+  if (!(g.sellExFull > 0)) return null;
+  return Math.max(0, Math.min(0.5, (g.sellExFull - g.cost / (1 - t)) / (g.sellExFull + (g.eSellEx || 0))));
+}
+function dsGate() {
+  const row = document.getElementById('gp-discount'); if (!row) return;
+  let note = document.getElementById('ds-none');
+  if (!eqOn()) { if (note) note.hidden = true; [5, 10, 15].forEach(p => { const c = document.getElementById('qd-' + p); if (c) c.hidden = false; }); return; }
+  const m = dsMax(), room = m != null && m > 1e-9;
+  [5, 10, 15].forEach(p => { const c = document.getElementById('qd-' + p); if (c) c.hidden = !(m != null && p / 100 <= m + 1e-9); });
+  const cu = document.getElementById('qd-custom'); if (cu) { cu.max = m != null ? String(Math.floor(m * 1000) / 10) : '50'; cu.closest('span').hidden = !room; }
+  const mx = row.querySelector('.gp-max-btn'); if (mx) mx.hidden = !room;
+  if (!note) { note = document.createElement('div'); note.id = 'ds-none'; note.className = 'ds-none'; row.appendChild(note); }
+  note.hidden = room || m == null; note.textContent = 'No room to discount: the Job GP is at or below the ' + (quoteJobType ? Math.round(GP_SETTINGS.targets[quoteJobType] * 100) : '') + '% target.';
+}
 // ── QUOTE DISCOUNT (whole quote, %) ──────────────────────────────────────────
 function discountFraction() { return Math.min(50, Math.max(0, quoteDiscountPct || 0)) / 100; }
 function fmtPct(p) { return Number.isInteger(p) ? String(p) : p.toFixed(1); }
@@ -3178,6 +3228,7 @@ function setQuoteDiscount(pct) {
 function onCustomDiscount(box) {
   let v = parseFloat(box.value);
   if (v > 50) { v = 50; box.value = 50; showToast('Discount is capped at 50%'); }
+  if (typeof eqOn === 'function' && eqOn() && v > 0) { const m = dsMax(); if (m != null && v / 100 > m + 1e-9) { v = Math.floor(m * 1000) / 10; box.value = v || ''; showToast(v ? 'The most that keeps the GP target is ' + v + '%' : 'No room to discount'); } }
   setQuoteDiscount(v || 0);
 }
 // Largest % that keeps GP at or above target: GP = (S(1−d) − C) / S(1−d) ≥ T  →  d ≤ 1 − C / (S(1−T))
@@ -3197,6 +3248,7 @@ function renderDiscountControls() {
   const row = document.getElementById('gp-discount'); if (!row) return;
   row.style.display = (quoteJobType && quote.some(i => i.id !== 'discount')) ? 'flex' : 'none';
   [0, 5, 10, 15].forEach(p => { const c = document.getElementById('qd-' + p); if (c) c.classList.toggle('active', quoteDiscountPct === p); });
+  dsGate();
 }
 function renderGP() {
   const panel = document.getElementById('gp-panel'); if (!panel) return;
@@ -6831,8 +6883,8 @@ function scSync() {
   if (dif) dif.checked = m === 'different';
   if (ai) ai.hidden = !scAiOn(); if (iai) iai.hidden = !scAiOn() || m !== 'different';
   const st = $('so-state'); if (st) { const t = m === 'same' ? 'Invoice description: the same as the Scope of Work.' : m === 'different' ? 'Invoice description: your own, below.' : 'Invoice description: not set yet. After the job, ✍️ Write invoice description puts the Scope of Work in past tense for you to check.'; if (st.textContent !== t) st.textContent = t; }
-  const t3 = document.querySelector('#qs-3 .qs-t'); if (t3 && t3.textContent !== 'Scope of Work') t3.textContent = 'Scope of Work';
-  const c3 = document.querySelector('#qs-nav [data-qsgo="3"] span'); if (c3 && c3.textContent !== 'Scope') c3.textContent = 'Scope';
+  const t3 = document.querySelector('#qs-4 .qs-t'); if (t3 && t3.textContent !== 'Scope of Work') t3.textContent = 'Scope of Work';
+  const c3 = document.querySelector('#qs-nav [data-qsgo="4"] span'); if (c3 && c3.textContent !== 'Scope') c3.textContent = 'Scope';
   soSm8Render();
   if (typeof ipSync === 'function') ipSync();
 }
@@ -6934,9 +6986,9 @@ document.addEventListener('input', e => { if (e.target && (e.target.id === 'q-sc
 // steps that are done. Nothing is rebuilt: the existing parts of the screen are moved into the steps, so every
 // feature works exactly as before. Off: the tabs (Summary, Products, Bundles, Labour, Notes & photos) as today.
 const QS_STEPS = [
-  [1, 'Job number', 'Job'], [2, 'Client details', 'Client'], [3, 'Job description', 'Description'], [4, 'Photos and markup', 'Photos'],
-  [5, 'Products', 'Products'], [6, 'Labour, materials and more', 'Labour'], [7, 'Total, GST, deposit and stages', 'Total'],
-  [8, 'Discount and GP (staff only, the client never sees this)', 'GP'], [9, 'Client quote page', 'Send'],
+  [1, 'Job number', 'Job'], [2, 'Client details', 'Client'], [3, 'Discount and GP (staff only, the client never sees this)', 'GP'],
+  [4, 'Job description', 'Description'], [5, 'Photos and markup', 'Photos'], [6, 'Products', 'Products'],
+  [7, 'Labour, materials and more', 'Labour'], [8, 'Total, GST, deposit and stages', 'Total'], [9, 'Client quote page', 'Send'],
 ];
 function qsOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.quoteSteps); }
 function qsBuild() {
@@ -6946,7 +6998,7 @@ function qsBuild() {
   const nav = document.createElement('nav'); nav.id = 'qs-nav'; nav.setAttribute('aria-label', 'Quote steps');
   nav.innerHTML = QS_STEPS.map(([n, , s]) => '<button type="button" class="qs-chip" data-qsgo="' + n + '"><b>' + n + '</b><span>' + s + '</span></button>').join('');
   const steps = document.createElement('div'); steps.id = 'qs-steps';
-  steps.innerHTML = QS_STEPS.map(([n, t]) => '<section class="qs-step" id="qs-' + n + '"><div class="qs-hd"><span class="qs-n">' + n + '</span><span class="qs-t">' + t + '</span><span class="qs-st"></span></div><div class="qs-body"></div></section>').join('');
+  steps.innerHTML = QS_STEPS.map(([n, t]) => '<section class="qs-step" id="qs-' + n + '"><div class="qs-hd" role="button" tabindex="0" aria-expanded="false" data-qsbar="' + n + '"><span class="qs-n">' + n + '</span><span class="qs-tt"><span class="qs-t">' + t + '</span><span class="qs-sum"></span></span><span class="qs-st"></span><span class="qs-chev" aria-hidden="true">▾</span></div><div class="qs-body"></div></section>').join('');
   wrap.insertBefore(steps, wrap.firstChild); wrap.insertBefore(nav, steps);
   const body = n => steps.querySelector('#qs-' + n + ' .qs-body');
   const mv = (n, node, cq) => { if (node) { if (cq) node.setAttribute('data-qscq', ''); body(n).appendChild(node); } };
@@ -6957,25 +7009,25 @@ function qsBuild() {
   ['qd-banner', 'qd-drafts', 'vr-warn', 'vr-bar'].forEach(id => mv(1, $(id)));
   // 2 client details
   mv(2, $('cq-client'), true); add(2, '<div class="qs-off">Client details come with the client quote link, which is switched off here.</div>');
-  // 3 job description (+ use it as the invoice description)
-  mv(3, $('sc-box')); mv(3, $('sc-bundle')); mv(3, lab('q-job-desc')); mv(3, $('so-sm8')); mv(3, $('so-tools'));
-  add(3, '<label class="qs-same"><input type="checkbox" id="qs-same"> Also use this as the invoice description (the client sees it)</label>');
-  mv(3, lab('q-invoice-desc')); mv(3, $('so-invai')); mv(3, $('ip-box')); mv(3, sum.querySelector('.qt-job > .qt-inv-hint'));
-  // 4 photos and markup
-  mv(4, cq.querySelector(':scope > .cq-sub'), true); mv(4, cq.querySelector(':scope > .qn-btns'), true); mv(4, $('cq-jobpick'), true); mv(4, $('cq-list'), true); mv(4, cq.querySelector(':scope > .qt-inv-hint'), true);
-  add(4, '<div class="qs-off">Photos for the client come with the client quote link, which is switched off here. Job diary photos are in step 6.</div>');
-  // 5 products
-  add(5, '<div class="qs-sub">Our bundles</div>'); mv(5, $('qt-bundles'));
-  add(5, '<div class="qs-sub">Reece products</div>'); mv(5, $('qt-products'));
-  // 6 labour, materials and everything else
-  mv(6, $('qt-labour')); mv(6, lab('q-diary-note')); mv(6, $('sw-card'));
-  add(6, '<div class="qs-sub">Notes &amp; photos for the job diary</div>'); mv(6, $('qt-notes')); mv(6, sum.querySelector('.quote-actions'));
-  // 7 lines, totals, deposit, stages
-  mv(7, sum.querySelector('.qhint')); mv(7, $('quote-list')); mv(7, $('quote-totals')); add(7, '<div class="qs-dep" id="qs-dep"></div>'); mv(7, $('cq-stages'), true);
-  // 8 discount and GP
-  mv(8, $('gp-panel')); mv(8, $('gp-discount')); add(8, '<div id="qs-disc"></div>');
+  // 4 job description (Scope of Work) (+ use it as the invoice description)
+  mv(4, $('sc-box')); mv(4, $('sc-bundle')); mv(4, lab('q-job-desc')); mv(4, $('so-sm8')); mv(4, $('so-tools'));
+  add(4, '<label class="qs-same"><input type="checkbox" id="qs-same"> Also use this as the invoice description (the client sees it)</label>');
+  mv(4, lab('q-invoice-desc')); mv(4, $('so-invai')); mv(4, $('ip-box')); mv(4, sum.querySelector('.qt-job > .qt-inv-hint'));
+  // 5 photos and markup
+  mv(5, cq.querySelector(':scope > .cq-sub'), true); mv(5, cq.querySelector(':scope > .qn-btns'), true); mv(5, $('cq-jobpick'), true); mv(5, $('cq-list'), true); mv(5, cq.querySelector(':scope > .qt-inv-hint'), true);
+  add(5, '<div class="qs-off">Photos for the client come with the client quote link, which is switched off here. Job diary photos are in step 7.</div>');
+  // 6 products
+  add(6, '<div class="qs-sub">Our bundles</div>'); mv(6, $('qt-bundles'));
+  add(6, '<div class="qs-sub">Reece products</div>'); mv(6, $('qt-products'));
+  // 7 labour, materials and everything else
+  mv(7, $('qt-labour')); mv(7, lab('q-diary-note')); mv(7, $('sw-card'));
+  add(7, '<div class="qs-sub">Notes &amp; photos for the job diary</div>'); mv(7, $('qt-notes')); mv(7, sum.querySelector('.quote-actions'));
+  // 8 lines, totals, deposit, stages
+  mv(8, sum.querySelector('.qhint')); mv(8, $('quote-list')); mv(8, $('quote-totals')); add(8, '<div class="qs-dep" id="qs-dep"></div>'); mv(8, $('cq-stages'), true);
+  // 3 discount and GP (moved up so the GP shows early)
+  mv(3, $('gp-panel')); mv(3, $('gp-discount')); add(3, '<div id="qs-disc"></div>');
   // 9 client quote page
-  add(9, '<div class="qs-note">Optional lines are set on each line in step 7. Product links (and the showpiece photo and spec sheet links) are on each line. The client sees the terms, the photos from step 4, the lines and the total, never the cost, GP or markup.</div>');
+  add(9, '<div class="qs-note">Optional lines are set on each line in step 8. Product links (and the showpiece photo and spec sheet links) are on each line. The client sees the terms, the photos from step 5, the lines and the total, never the cost, GP or markup.</div>');
   mv(9, cq, true); add(9, '<div class="qs-off">The client quote link is switched off here. Use Send to SM8 at the bottom.</div>');
   scr.classList.add('qs-on');
   // invoice description follows the job description when ticked (remembered on this phone)
@@ -6984,13 +7036,49 @@ function qsBuild() {
   const sync = () => scSync();   // the invoice box follows the scope (if ticked there), else the job description (if ticked here)
   same.addEventListener('change', () => { try { localStorage.setItem('ipd_qs_same', same.checked ? '1' : '0'); } catch (e) {} sync(); });
   jd.addEventListener('input', sync); sync();
-  nav.addEventListener('click', e => { const b = e.target.closest('[data-qsgo]'); if (!b) return; const s = $('qs-' + b.dataset.qsgo); steps.scrollTop = s.offsetTop - 4; qsCur(+b.dataset.qsgo); });
+  nav.addEventListener('click', e => { const b = e.target.closest('[data-qsgo]'); if (!b) return; qsOpen(+b.dataset.qsgo); });
+  steps.addEventListener('click', e => { const h = e.target.closest('[data-qsbar]'); if (!h) return; const n = +h.dataset.qsbar; if ($('qs-' + n).classList.contains('open')) qsClose(n); else qsOpen(n); });
+  steps.addEventListener('keydown', e => { const h = e.target.closest && e.target.closest('[data-qsbar]'); if (h && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); h.click(); } });
   steps.addEventListener('scroll', () => { const y = steps.scrollTop + 60; let cur = 1; for (const [n] of QS_STEPS) if ($('qs-' + n).offsetTop <= y) cur = n; qsCur(cur); }, { passive: true });
   new MutationObserver(() => { cancelAnimationFrame(qsRaf); qsRaf = requestAnimationFrame(qsMarks); }).observe(steps, { childList: true, subtree: true });
   scr.addEventListener('input', () => { cancelAnimationFrame(qsRaf); qsRaf = requestAnimationFrame(qsMarks); });
   renderQProducts(); renderQBundles(); renderQLabour(); qsRender();
+  if (typeof qnRender === 'function') qnRender();   // the job's notes in step 7 (was only drawn by the old tab switch)
+  qsOpen(qsFirstOpen(), true);
 }
 let qsRaf = 0;
+// One step open at a time: tap a bar (or a number in the step bar) to open it, tap again to shrink it.
+function qsOpen(n, quiet) {
+  document.querySelectorAll('#qs-steps .qs-step').forEach(sec => { const on = sec.id === 'qs-' + n; sec.classList.toggle('open', on); const h = sec.querySelector('.qs-hd'); if (h) h.setAttribute('aria-expanded', on ? 'true' : 'false'); });
+  const sec = document.getElementById('qs-' + n), steps = document.getElementById('qs-steps');
+  if (sec && steps && !quiet) steps.scrollTop = sec.offsetTop - 4;
+  qsCur(n);
+  if (n === 7 && typeof qnRender === 'function') qnRender();
+  if (n === 6 && typeof renderQProducts === 'function') { renderQProducts(true); renderQBundles(); }
+}
+function qsClose(n) { const sec = document.getElementById('qs-' + n); if (sec) { sec.classList.remove('open'); const h = sec.querySelector('.qs-hd'); if (h) h.setAttribute('aria-expanded', 'false'); } }
+function qsFirstOpen() {   // the first step still to do (job number first)
+  const v = id => ((document.getElementById(id) || {}).value || '').trim();
+  return /^\d{1,8}$/.test(v('job-number-input')) ? (quote.some(i => i.id !== 'discount') ? 3 : 6) : 1;
+}
+// the one-line summary on each bar
+function qsSummary(n) {
+  const v = id => ((document.getElementById(id) || {}).value || '').trim(), money = x => '$' + Math.round(x).toLocaleString('en-AU');
+  const lines = quote.filter(i => i.id !== 'discount'), prods = lines.filter(i => i.type === 'reece' || i.type === 'bundle'), lab = lines.filter(i => i.type === 'labour');
+  const job = v('job-number-input');
+  switch (n) {
+    case 1: return job ? 'Job ' + job : 'No job number yet';
+    case 2: { const d = job && typeof cqClientGet === 'function' ? cqClientGet(job) : null; return d && d.name ? d.name + ((d.sm8 && d.sm8.address) ? ', ' + d.sm8.address.split(',')[0] : '') : 'Not read yet'; }
+    case 3: { if (!lines.length) return 'Add lines to see the GP'; if (!quoteJobType) return 'Choose the job type'; const g = calcGP(); if (!(g.sellEx > 0)) return 'No costs known yet'; const gp = (g.sellEx - g.cost) / g.sellEx; return (typeof eqOn === 'function' && eqOn() ? 'Job GP ' : 'GP ') + (gp * 100).toFixed(1) + '% · target ' + Math.round(GP_SETTINGS.targets[quoteJobType] * 100) + '%' + (quoteDiscountPct ? ' · ' + quoteDiscountPct + '% off' : ''); }
+    case 4: { const t = v('q-job-desc'); return (typeof scOn === 'function' && scOn() ? 'Scope of Work: ' : 'Job description: ') + (t ? 'written' : 'empty') + (typeof scOn === 'function' && scOn() && typeof soMode === 'function' ? ' · invoice: ' + ({ none: 'not set', same: 'same', different: 'own text' })[soMode()] : ''); }
+    case 5: { const k = document.querySelectorAll('#cq-list .cq-item').length; return k ? k + ' photo' + (k === 1 ? '' : 's') + ' added' : 'No photos'; }
+    case 6: return prods.length ? prods.length + ' line' + (prods.length === 1 ? '' : 's') + ', ' + money(prods.reduce((t, i) => t + (parseFloat(i.price) || 0) * i.qty, 0)) : 'No products yet';
+    case 7: return lab.length ? lab.length + ' labour / materials line' + (lab.length === 1 ? '' : 's') + ', ' + money(lab.reduce((t, i) => t + (parseFloat(i.price) || 0) * i.qty, 0)) : 'No labour yet';
+    case 8: { const tot = quote.reduce((t, i) => t + (parseFloat(i.price) || 0) * i.qty, 0); return lines.length ? money(tot) + ' inc GST · ' + lines.length + ' line' + (lines.length === 1 ? '' : 's') : 'Empty'; }
+    case 9: return /Link ready/.test((document.getElementById('cq-result') || {}).textContent || '') ? 'Link ready' : 'Not sent yet';
+  }
+  return '';
+}
 function qsCur(n) { document.querySelectorAll('#qs-nav .qs-chip').forEach(c => c.classList.toggle('cur', +c.dataset.qsgo === n)); const c = document.querySelector('#qs-nav .qs-chip.cur'); if (c && c.scrollIntoView) { const nav = c.parentNode; if (c.offsetLeft < nav.scrollLeft || c.offsetLeft + c.offsetWidth > nav.scrollLeft + nav.clientWidth) nav.scrollTo({ left: c.offsetLeft - 12, behavior: 'smooth' }); } }
 function qsGp(d) {   // GP if the whole-quote discount were d (0–0.5), same maths as the GP panel
   const g = calcGP(); if (!(g.sellExFull > 0)) return null;
@@ -7005,19 +7093,19 @@ function qsMarks() {
   const done = {
     1: /^\d{1,8}$/.test(val('job-number-input')),
     2: !!((document.querySelector('#cq-client [data-cqc="name"]') || {}).value || '').trim(),
-    3: !!val('q-job-desc') || (scOn() && (!!val('q-scope') || lines.some(i => i.type === 'bundle'))),
-    4: !!document.querySelector('#cq-list .cq-item'),
-    5: lines.some(i => i.type === 'reece' || i.type === 'bundle'),
-    6: lines.some(i => i.type === 'labour' || i.type === 'material' || /^mat/i.test(String(i.id))),
-    7: lines.length > 0,
-    8: target != null && gp != null && !gpLow,
+    3: target != null && gp != null && !gpLow,
+    4: !!val('q-job-desc') || (scOn() && (!!val('q-scope') || lines.some(i => i.type === 'bundle'))),
+    5: !!document.querySelector('#cq-list .cq-item'),
+    6: lines.some(i => i.type === 'reece' || i.type === 'bundle'),
+    7: lines.some(i => i.type === 'labour' || i.type === 'material' || /^mat/i.test(String(i.id))),
+    8: lines.length > 0,
     9: /Link ready/.test((document.getElementById('cq-result') || {}).textContent || ''),
   };
   for (const [n] of QS_STEPS) {
-    const st = done[n] ? '✓ Done' : (n === 8 && gpLow ? '⚠ GP below minimum' : '');
+    const st = done[n] ? '✓' : (n === 3 && gpLow ? '⚠ GP low' : '');
     const h = document.querySelector('#qs-' + n + ' .qs-st'); if (h && h.textContent !== st) h.textContent = st;
-    const sec = document.getElementById('qs-' + n); if (sec) { sec.classList.toggle('done', !!done[n]); sec.classList.toggle('warn', n === 8 && gpLow); }
-    const c = document.querySelector('#qs-nav [data-qsgo="' + n + '"]'); if (c) { c.classList.toggle('done', !!done[n]); c.classList.toggle('warn', n === 8 && gpLow); }
+    const sec = document.getElementById('qs-' + n); if (sec) { sec.classList.toggle('done', !!done[n]); sec.classList.toggle('warn', n === 3 && gpLow); const sm = sec.querySelector('.qs-sum'), tx = qsSummary(n); if (sm && sm.textContent !== tx) sm.textContent = tx; }
+    const c = document.querySelector('#qs-nav [data-qsgo="' + n + '"]'); if (c) { c.classList.toggle('done', !!done[n]); c.classList.toggle('warn', n === 3 && gpLow); }
   }
 }
 function qsRender() {
@@ -7037,18 +7125,22 @@ function qsDiscRender() {
   const base = lines.reduce((s, i) => s + (parseFloat(i.price) || 0) * i.qty, 0);
   if (!(g.sellExFull > 0)) { box.innerHTML = '<div class="qs-note">No costs known for these lines yet, so GP can\'t be worked out.</div>'; return; }
   const now = qsGp(discountFraction()), full = qsGp(0);
+  const gate = typeof eqOn === 'function' && eqOn(), mx = gate ? dsMax() : null;   // GP_EQUIP: offer only what keeps the target
   const row = (label, d, key) => {
     const v = qsGp(d), ok = v != null && v >= target - 1e-9, amt = base * d;
+    if (gate && d > 0 && !ok) return '';
     return '<div class="qs-drow' + (ok ? '' : ' low') + (Math.abs(discountFraction() - d) < 1e-9 ? ' cur' : '') + '"><span class="qs-dl">' + label + (d > 0 ? ' <small>−$' + amt.toFixed(2) + '</small>' : '') + '</span>'
       + '<span class="qs-dg">GP ' + (v == null ? '—' : pct(v)) + (ok ? '' : ' <b>⚠ below ' + Math.round(target * 100) + '% minimum</b>') + '</span>'
       + '<button type="button" class="qs-dbtn" data-qsdisc="' + key + '">' + (Math.abs(discountFraction() - d) < 1e-9 ? 'Applied' : 'Apply') + '</button></div>';
   };
   const dol = parseFloat(qsDollar), dFromDol = dol > 0 && base > 0 ? Math.min(0.5, dol / base) : 0;
   box.innerHTML = '<div class="qs-dh">GP on the whole job now: <b class="' + (now != null && now < target - 1e-9 ? 'neg' : '') + '">' + (now == null ? '—' : pct(now)) + '</b> · minimum ' + Math.round(target * 100) + '% (' + (quoteJobType === 'maintenance' ? 'maintenance' : 'construction / reno / hot water') + ')' + (discountFraction() > 0 ? ' · before discount ' + pct(full) : '') + '</div>'
-    + row('No discount', 0, 'p0') + row('5% off', 0.05, 'p5') + row('10% off', 0.10, 'p10') + row('15% off', 0.15, 'p15')
+    + row('No discount', 0, 'p0')
+    + (gate && !(mx > 1e-9) ? '<div class="qs-drow low ds-none">No room to discount: the Job GP is at or below the ' + Math.round(target * 100) + '% target, so no discount is offered.</div>'
+      : row('5% off', 0.05, 'p5') + row('10% off', 0.10, 'p10') + row('15% off', 0.15, 'p15') + (gate ? '<div class="qs-note">The most you can give and keep ' + Math.round(target * 100) + '%: ' + (Math.floor(mx * 1000) / 10) + '% (about $' + Math.floor(base * mx) + ').</div>' : '')
     + '<div class="qs-drow qs-dset"><label class="qs-dl">Set amount $<input type="number" id="qs-dollar" inputmode="decimal" min="0" step="1" placeholder="e.g. 100" value="' + escHtml(qsDollar) + '"></label>'
-    + (dFromDol > 0 ? '<span class="qs-dg">= ' + (dFromDol * 100).toFixed(1) + '% · GP ' + pct(qsGp(dFromDol)) + (qsGp(dFromDol) < target - 1e-9 ? ' <b>⚠ below ' + Math.round(target * 100) + '% minimum</b>' : '') + '</span><button type="button" class="qs-dbtn" data-qsdisc="dol">Apply</button>' : '<span class="qs-dg">Type an amount (inc GST)</span>') + '</div>'
-    + '<div class="qs-note">Uses the same discount as the Discount buttons above (one "Discount" line on the quote). Set amounts are turned into a % of the quote (up to 50%).</div>';
+    + (dFromDol > 0 && gate && dFromDol > mx + 1e-9 ? '<span class="qs-dg"><b>Too much: the most is $' + Math.floor(base * mx) + ' (' + (Math.floor(mx * 1000) / 10) + '%)</b></span>' : dFromDol > 0 ? '<span class="qs-dg">= ' + (dFromDol * 100).toFixed(1) + '% · GP ' + pct(qsGp(dFromDol)) + (qsGp(dFromDol) < target - 1e-9 ? ' <b>⚠ below ' + Math.round(target * 100) + '% minimum</b>' : '') + '</span><button type="button" class="qs-dbtn" data-qsdisc="dol">Apply</button>' : '<span class="qs-dg">Type an amount (inc GST)</span>') + '</div>'
+    ) + '<div class="qs-note">Uses the same discount as the Discount buttons above (one "Discount" line on the quote). Set amounts are turned into a % of the quote (up to 50%).</div>';
 }
 document.addEventListener('click', e => {
   const b = e.target.closest && e.target.closest('[data-qsdisc]'); if (!b) return;
