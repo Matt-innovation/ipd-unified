@@ -2,88 +2,88 @@
  "login": {
   "file": "training/videos/01-login.mp4",
   "poster": "training/videos/01-login.jpg",
-  "v": "202611250653",
+  "v": "202611280210",
   "voice": "bm_george",
-  "seconds": 180,
+  "seconds": 173,
   "w": 1296,
   "h": 3072
  },
  "search": {
   "file": "training/videos/02-search.mp4",
   "poster": "training/videos/02-search.jpg",
-  "v": "202611250702",
+  "v": "202611280303",
   "voice": "bm_george",
-  "seconds": 124,
+  "seconds": 135,
   "w": 1296,
   "h": 3072
  },
  "labour": {
   "file": "training/videos/03-labour.mp4",
   "poster": "training/videos/03-labour.jpg",
-  "v": "202611250707",
+  "v": "202611280307",
   "voice": "bm_george",
-  "seconds": 134,
+  "seconds": 141,
   "w": 1296,
   "h": 3072
  },
  "quote": {
   "file": "training/videos/04-quote.mp4",
   "poster": "training/videos/04-quote.jpg",
-  "v": "202611250711",
+  "v": "202611280343",
   "voice": "bm_george",
-  "seconds": 122,
+  "seconds": 217,
   "w": 1296,
   "h": 3072
  },
  "send": {
   "file": "training/videos/05-send.mp4",
   "poster": "training/videos/05-send.jpg",
-  "v": "202611252103",
+  "v": "202611280316",
   "voice": "bm_george",
-  "seconds": 81,
+  "seconds": 102,
   "w": 1296,
   "h": 3072
  },
  "client": {
   "file": "training/videos/06-client.mp4",
   "poster": "training/videos/06-client.jpg",
-  "v": "202611250717",
+  "v": "202611280319",
   "voice": "bm_george",
-  "seconds": 89,
+  "seconds": 91,
   "w": 1296,
   "h": 3072
  },
  "sendclient": {
   "file": "training/videos/07-sendclient.mp4",
   "poster": "training/videos/07-sendclient.jpg",
-  "v": "202611250720",
+  "v": "202611280323",
   "voice": "bm_george",
-  "seconds": 98,
+  "seconds": 144,
   "w": 1296,
   "h": 3072
  },
  "swms": {
   "file": "training/videos/08-swms.mp4",
   "poster": "training/videos/08-swms.jpg",
-  "v": "202611250723",
+  "v": "202611280325",
   "voice": "bm_george",
-  "seconds": 81,
+  "seconds": 84,
   "w": 1296,
   "h": 3072
  },
  "notes": {
   "file": "training/videos/09-notes.mp4",
   "poster": "training/videos/09-notes.jpg",
-  "v": "202611250726",
+  "v": "202611280345",
   "voice": "bm_george",
-  "seconds": 83,
+  "seconds": 86,
   "w": 1296,
   "h": 3072
  },
  "stock": {
   "file": "training/videos/10-stock.mp4",
   "poster": "training/videos/10-stock.jpg",
-  "v": "202611252101",
+  "v": "202611280329",
   "voice": "bm_george",
   "seconds": 98,
   "w": 1296,
@@ -92,36 +92,36 @@
  "oldmate": {
   "file": "training/videos/11-oldmate.mp4",
   "poster": "training/videos/11-oldmate.jpg",
-  "v": "202611272032",
+  "v": "202611280332",
   "voice": "bm_george",
-  "seconds": 89,
+  "seconds": 86,
   "w": 1296,
   "h": 3072
  },
  "team": {
   "file": "training/videos/12-team.mp4",
   "poster": "training/videos/12-team.jpg",
-  "v": "202611250735",
+  "v": "202611280334",
   "voice": "bm_george",
-  "seconds": 98,
+  "seconds": 105,
   "w": 1296,
   "h": 3072
  },
  "guide": {
   "file": "training/videos/13-guide.mp4",
   "poster": "training/videos/13-guide.jpg",
-  "v": "202611250737",
+  "v": "202611280336",
   "voice": "bm_george",
-  "seconds": 63,
+  "seconds": 66,
   "w": 1296,
   "h": 3072
  },
  "help": {
   "file": "training/videos/14-help.mp4",
   "poster": "training/videos/14-help.jpg",
-  "v": "202611250739",
+  "v": "202611280338",
   "voice": "bm_george",
-  "seconds": 64,
+  "seconds": 68,
   "w": 1296,
   "h": 3072
  }
