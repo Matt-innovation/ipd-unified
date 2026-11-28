@@ -22,6 +22,7 @@
   .meta { color: var(--muted); font-size: 14px; }
   .meta div { overflow-wrap: anywhere; }
   .desc { white-space: pre-wrap; margin-top: 10px; }
+  .desc-h { margin: 14px 0 0; font-size: 16px; }
   table { width: 100%; border-collapse: collapse; }
   td { padding: 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
   td.q { width: 48px; text-align: center; color: var(--muted); }
@@ -195,7 +196,7 @@ function render() {
         ${q.client && q.client.address ? `<div>${esc(q.client.address)}</div>` : ''}
         <div>Issued ${day(q.issuedAt)} · ${q.expired ? '<b style="color:var(--warn)">Expired ' + day(q.expiresAt) + '</b>' : 'Valid until ' + day(q.expiresAt)}</div>
       </div>
-      ${q.description ? `<div class="desc">${esc(q.description)}</div>` : ''}
+      ${q.description ? (q.descTitle ? `<h3 class="desc-h">${esc(q.descTitle)}</h3>` : '') + `<div class="desc">${esc(q.description)}</div>` : ''}
     </section>
     ${whole.length ? `<section class="card" id="gallery">
       <h2>Photos and mock-ups</h2>
@@ -368,7 +369,7 @@ async function buildPdf(doc, logo) {
   if (q.client && q.client.name) para('For: ' + q.client.name, 10);
   if (q.client && q.client.address) para(q.client.address, 10);
   para(`Issued ${day(q.issuedAt)}  ·  Valid until ${day(q.expiresAt)}`, 10);
-  if (q.description) { y += 3; para(q.description, 10); }
+  if (q.description) { y += 3; if (q.descTitle) para(q.descTitle, 11, 'bold'); para(q.description, 10); }
   y += 5;
   // lines
   doc.setFont('helvetica', 'bold'); doc.setFontSize(10); need(8);

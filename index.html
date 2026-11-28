@@ -281,6 +281,14 @@ a.pl-btn.rl-tech{text-decoration:none;display:inline-flex;align-items:center;min
 .eq-list{margin-top:6px;font-size:13px}.eq-list summary{min-height:40px;display:flex;align-items:center;cursor:pointer;color:var(--text-mid);font-weight:600}
 .eq-row{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px}.eq-row input{width:22px;height:22px;flex-shrink:0}.eq-row small{color:var(--text-mid)}
 .eq-chg{min-height:40px;margin-top:4px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:600 13px var(--font);padding:0 12px;cursor:pointer}
+/* SCOPE_OF_WORK=on: one Scope of Work box */
+.qt-inv[hidden],.qs-same[hidden],.so-tools[hidden],.so-sm8[hidden],#so-invai[hidden],#so-ai[hidden]{display:none!important}
+.so-tools{display:flex;flex-direction:column;gap:6px}
+.so-btns{display:flex;gap:8px;flex-wrap:wrap}.so-btns .q-btn{min-height:44px;flex:1 1 150px}
+#so-inv.on{background:#16a34a;color:#fff;border-color:#16a34a}
+#so-invai{min-height:44px}
+.so-sm8{padding:10px;border:2px solid var(--orange);border-radius:12px;font-size:14px;display:flex;flex-direction:column;gap:6px}
+.so-old{white-space:pre-wrap;font-size:13px;color:var(--text-mid);max-height:160px;overflow:auto}
 /* SCOPE_AI / INVOICE_PAST */
 .sc-ai{display:flex;gap:8px;flex-wrap:wrap}.sc-ai[hidden],.ip-box[hidden]{display:none!important}.sc-ai .q-btn{min-height:44px;flex:1 1 140px}
 .sc-master{font-weight:800}.sc-sub{padding-left:14px}.sc-sub input:disabled+*{opacity:.5}
@@ -1224,10 +1232,18 @@ body.dark input,body.dark textarea{color:var(--text);background:var(--surface2)}
                 <textarea id="q-job-desc" data-qtext="ipd_job_desc" rows="3" maxlength="2000" placeholder="What the job is, e.g. Replace leaking 250L electric HWS with heat pump."></textarea>
                 <span class="qt-inv-hint">ServiceM8 → Details page → Job Description.</span>
               </label>
+              <div class="so-sm8" id="so-sm8" hidden></div>
+              <div class="so-tools" id="so-tools" hidden>
+                <div class="so-btns"><button type="button" class="q-btn" id="so-ai">✨ Write with AI</button><button type="button" class="q-btn" id="so-inv">Use as invoice description</button></div>
+                <label class="qs-same"><input type="checkbox" id="so-diff"> Different invoice description</label>
+                <input type="hidden" id="q-inv-mode" data-qtext="ipd_inv_mode">
+                <div class="qt-inv-hint" id="so-state"></div><div class="qt-inv-hint" id="so-note"></div>
+              </div>
               <label class="qt-inv">Invoice description (the client sees this)
                 <textarea id="q-invoice-desc" data-qtext="ipd_invoice_desc" rows="4" maxlength="2000" placeholder="e.g. Supply and install new 250L heat pump hot water system, remove and dispose of old unit."></textarea>
                 <span class="qt-inv-hint">ServiceM8 → Billing page → Invoice description. Shown on the invoice with the total.</span>
               </label>
+              <button type="button" class="q-btn" id="so-invai" hidden>✨ Write with AI (past tense)</button>
               <div class="ip-box" id="ip-box" hidden><button type="button" class="q-btn" id="ip-open">✍️ Write invoice description (after the job)</button><span class="qt-inv-hint">What was done, in past tense, from the approved scope. You check it, then it goes to ServiceM8 → Billing.</span></div>
               <label class="qt-inv">Notes / concerns for the diary
                 <textarea id="q-diary-note" data-qtext="ipd_diary_note" rows="3" maxlength="4000" placeholder="For the technicians, e.g. Gas meter close to the unit — check clearance."></textarea>
@@ -3237,7 +3253,8 @@ async function sendQuoteToSM8() {
   const totalInc=quote.reduce((s,i)=>s+i.price*i.qty,0);
   const jobNumber=(document.getElementById('job-number-input')?.value||'').trim();
   const qt=id=>(document.getElementById(id)?.value||'').trim();                            // logged-in Summary tab only
-  const jobDescription=qt('q-job-desc'), invoiceDescription=qt('q-invoice-desc'), diaryNote=qt('q-diary-note');
+  let jobDescription=qt('q-job-desc'); const invoiceDescription=(typeof soInvoice==='function'?soInvoice():qt('q-invoice-desc')), diaryNote=qt('q-diary-note');
+  if (typeof soConfirmJobDesc==='function' && jobNumber && !soConfirmJobDesc(jobNumber, jobDescription)) jobDescription='';   // keep ServiceM8's
   showToast('Sending to ServiceM8...');
   try {
     const res=await fetch(PROXY+'/send-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quoteItems:quote.map(i=>({name:i.name,qty:i.qty,price:i.price,cost:quoteLineCost(i),code:i.code||'',type:i.type||'reece',uuid:i.type==='bundle'?i.id:'',...(i.type==='labour'?{lineKind:lineKindOf(i)}:{})})),totalInc,jobNumber,...(jobDescription?{jobDescription}:{}),...(invoiceDescription?{invoiceDescription}:{}),...(diaryNote?{diaryNote}:{})})});
@@ -3245,6 +3262,7 @@ async function sendQuoteToSM8() {
     if(res.ok&&data.success){
       showToast(data.practice ? '🎓 Practice only, nothing was sent' : '✅ Quote sent to ServiceM8!');
       if (!data.practice && typeof sgLearn === 'function') sgLearn('sent');
+      if (!data.practice && jobNumber && jobDescription && typeof soSm8 !== 'undefined' && (data.texts || {}).jobDescription && data.texts.jobDescription.result === 'saved') soSm8[jobNumber] = jobDescription;
       if (typeof qdMark === 'function') qdMark('sentAt');
       if (typeof vrAfterSend === 'function') vrAfterSend('sm8');
       const banner=document.createElement('div');
@@ -5353,6 +5371,7 @@ function vrDiff(a, b) {
   for (const [k, i] of A) if (!B.has(k)) out.push('− removed: ' + i.qty + ' × ' + i.name);
   for (const [k, i] of B) { const o = A.get(k); if (!o) continue; if (o.qty !== i.qty) out.push('qty: ' + i.name + ' ' + o.qty + ' → ' + i.qty); if (Number(o.price) !== Number(i.price)) out.push('price: ' + i.name + ' ' + m2(o.price) + ' → ' + m2(i.price)); }
   const ta = tot(a), tb = tot(b); if (Math.abs(ta - tb) > 0.004) out.push('total: ' + m2(ta) + ' → ' + m2(tb));
+  if (((a.texts || {}).ipd_job_desc || '') !== ((b.texts || {}).ipd_job_desc || '')) out.push((typeof scOn === 'function' && scOn() ? 'Scope of Work' : 'job description') + ' changed');
   if ((a.texts || {}).ipd_invoice_desc !== (b.texts || {}).ipd_invoice_desc) out.push('invoice description changed');
   if (((a.texts || {}).ipd_scope || '') !== ((b.texts || {}).ipd_scope || '') || ((a.texts || {}).ipd_scope_use || '') !== ((b.texts || {}).ipd_scope_use || '')) out.push('scope of work changed');
   return out.length ? out.join('\n') : 'No differences.';
@@ -5769,7 +5788,7 @@ function qdRead() { try { const st = JSON.parse(localStorage.getItem(qdKey()) ||
 function qdWrite(st) { try { localStorage.setItem(qdKey(), JSON.stringify(st)); return true; } catch (e) { showToast('⚠ Phone storage full — the draft could not be saved'); return false; } }
 const qdTexts = () => { const o = {}; document.querySelectorAll('[data-qtext]').forEach(t => (o[t.dataset.qtext] = t.value)); return o; };
 const qdSnap = () => ({ job: qdJob, lines: JSON.parse(JSON.stringify(quote)), jobType: quoteJobType, discountPct: quoteDiscountPct, texts: qdTexts(), swms: JSON.parse(JSON.stringify(swState)), savedAt: Date.now() });
-const qdHas = d => !!d && ((d.lines || []).length > 0 || Object.entries(d.texts || {}).some(([k, v]) => k !== 'ipd_scope_use' && v && String(v).trim()));
+const qdHas = d => !!d && ((d.lines || []).length > 0 || Object.entries(d.texts || {}).some(([k, v]) => k !== 'ipd_scope_use' && k !== 'ipd_inv_mode' && v && String(v).trim()));
 const qdBody = d => JSON.stringify([d.lines, d.jobType, d.discountPct, d.texts, d.swms || null]);
 const qdTotal = d => (d.lines || []).reduce((t, i) => t + (Number(i.price) || 0) * (Number(i.qty) || 0), 0);
 const qdWhen = t => new Date(t).toLocaleString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
@@ -6055,7 +6074,7 @@ async function cqSend() {
   if (cqFeat.stages && st.on) { const chk = stCheck(st); if (chk.problem) { stRender(); return showToast(chk.problem); } stages = st.stages.map(x => ({ name: x.name.trim(), amountInc: Math.round(Number(x.amount) * 100) / 100 })); }
   const btn = document.getElementById('cq-send'); btn.disabled = true; btn.textContent = 'Making the link…';
   try {
-    const invoiceDescription = (typeof scFor === 'function' && scFor('quote')) || (document.getElementById('q-invoice-desc')?.value || '').trim();
+    const invoiceDescription = typeof scOn === 'function' && scOn() ? (scFor('quote') || '') : (document.getElementById('q-invoice-desc')?.value || '').trim();
     const j = await authFetch('/client-quote', { method: 'POST', body: JSON.stringify({ jobNumber: job, invoiceDescription, images, ...(client ? { client } : {}), ...(stages ? { stages } : {}), ...(swOn() ? { swms: swSummary() } : {}),
       lines: quote.map(i => ({ name: i.name, qty: Number(i.qty), priceInc: Number(i.price), ...(cqFeat.options && i.optional ? { optional: true, defaultOn: !!i.defaultOn } : {}), ...(cqFeat.productLinks && (i.links || []).length ? { links: i.links.map(k => k.source === 'kc' ? { id: k.id } : { url: k.url, title: k.title, type: k.type }) } : {}) })) }) });
     const preview = j.link.replace('/quote.html#', '/quote.html?staff=1#');
@@ -6090,6 +6109,7 @@ async function cqClientLoad(job, fresh) {
   try {
     const sm = await authFetch('/client-quote/job/' + encodeURIComponent(job) + '/client');
     if (cqJob() !== job) return;
+    if (typeof soImport === 'function') soImport(job, sm.jobDescription || '');
     const sm8 = { name: sm.name || '', address: sm.address || '', contacts: (sm.contacts || []).map(c => ({ name: c.name || '', phone: c.phone || '', email: c.email || '', role: c.role || 'Contact' })) };
     const old = cqClientGet(job);
     // keep the tech's changes; a fresh read only replaces them when asked ("Use ServiceM8 details")
@@ -6776,27 +6796,131 @@ document.addEventListener('click', e => {
 function scOn() { return !!(PILOT_UI && CURRENT_USER && typeof cqFeat !== 'undefined' && cqFeat && cqFeat.scope); }
 function scUse() { return new Set(((document.getElementById('q-scope-use') || {}).value || '').split(',').filter(Boolean)); }
 function scText() { return scOn() ? ((document.getElementById('q-scope') || {}).value || '').trim() : ''; }
-function scFor(where) { const t = scText(), u = scUse(); return t && u.has('quote') && (where === 'quote' || u.has(where)) ? t : null; }   // nothing goes anywhere unless "Use this scope" is ticked
+function scFor(where) { if (!scOn()) return null; const t = ((document.getElementById('q-job-desc') || {}).value || '').trim(); return where === 'quote' && t ? t : null; }   // the Scope of Work box (one box) is what the client sees
 function scSync() {
-  const $ = id => document.getElementById(id), on = scOn(), box = $('sc-box'), sc = $('q-scope'), u = scUse();
-  const jd = $('q-job-desc'), inv = $('q-invoice-desc'), same = $('qs-same');
-  if (box) { box.hidden = !on; box.querySelectorAll('[data-scuse]').forEach(c => { c.checked = u.has(c.dataset.scuse); }); }
+  // SCOPE_OF_WORK=on: ONE box, "Scope of Work" (the old Job description box, renamed). It goes to ServiceM8 → Details →
+  // Job Description when sent, and the client sees it on the quote page and PDF. The old separate scope box is retired:
+  // any text in it is moved into Scope of Work (never lost). Invoice description: nothing yet (the ✍️ button writes it
+  // in past tense later), "Use as invoice description" (follows the Scope of Work), or "Different invoice description".
+  const $ = id => document.getElementById(id), on = scOn(), box = $('sc-box'), jd = $('q-job-desc'), inv = $('q-invoice-desc'), same = $('qs-same');
+  if (box) box.hidden = true;
   const hasB = on && quote.some(i => i.type === 'bundle'), bh = $('sc-bundle'); if (bh) bh.hidden = !hasB;
-  const master = u.has('quote'), scv = on && master && sc && sc.value.trim() ? sc.value : null;   // unticked: the draft stays in the box, nothing follows it
-  if (box) box.querySelectorAll('.sc-sub input').forEach(c => { c.disabled = !master; });
   const follow = (el, src) => { if (!el) return; const ro = src != null; el.readOnly = ro; el.classList.toggle('qs-ro', ro); if (ro && el.value !== src) { el.value = src; el.dispatchEvent(new Event('input', { bubbles: true })); } };
-  follow(jd, scv != null && u.has('job') ? scv : null);
-  follow(inv, scv != null && u.has('invoice') ? scv : (same && same.checked && jd ? jd.value : null));
-  const h = $('sc-hint');
-  if (h && on) {
-    const names = { quote: 'the client quote page and PDF', invoice: 'the invoice description', job: 'the job description' }, w = ['quote', 'invoice', 'job'].filter(k => u.has(k));
-    const typed = !!(sc && sc.value.trim());
-    const t = !typed ? 'Type the scope to use it. Empty: nothing changes.' : !master ? 'Not used: nothing from this scope shows on the quote or goes to ServiceM8 until you tick "Use this scope". It stays saved here.' : !w.length ? 'Not used anywhere yet: tick where it goes.' : 'Used for ' + w.map(k => names[k]).join(', ').replace(/, ([^,]*)$/, ' and $1') + '. The ticked boxes below follow it.' + (u.has('invoice') || u.has('job') ? ' Sending to ServiceM8 writes it there (the old text is kept in our archive).' : '');
-    if (h.textContent !== t) h.textContent = t;
+  const jl = jd && jd.closest('label'), il = inv && inv.closest('label'), tools = $('so-tools'), sl = same && same.closest('label');
+  const setText = (lab, t) => { if (lab && lab.firstChild && lab.firstChild.nodeType === 3 && lab.firstChild.textContent.trim() !== t) lab.firstChild.textContent = t + '\n'; };
+  const setHint = (lab, t) => { const h = lab && lab.querySelector('.qt-inv-hint'); if (h && h.textContent !== t) h.textContent = t; };
+  if (!on) {   // today's boxes
+    if (tools) tools.hidden = true; if (il) il.hidden = false; if (sl) sl.hidden = false;
+    setText(jl, 'Job description'); setHint(jl, 'ServiceM8 → Details page → Job Description.');
+    follow(jd, null); follow(inv, same && same.checked && jd ? jd.value : null);
+    if (typeof ipSync === 'function') ipSync(); return;
   }
-  const same3 = $('qs-same'); if (same3) { same3.disabled = !!(scv != null && u.has('invoice')); }
+  soMigrate();
+  setText(jl, 'Scope of Work'); setHint(jl, 'The client sees this on the quote page and PDF. Sent to ServiceM8 → Details → Job Description.');
+  if (jd && !jd.placeholder.startsWith('Everything')) jd.placeholder = 'Everything the job includes, e.g. Remove and dispose of the old 250L electric hot water unit. Supply and install a new 270L heat pump with tempering valve. Reconnect water and power, test and commission.';
+  if (jd && jd.rows < 5) jd.rows = 5;
+  if (sl) sl.hidden = true; if (same && same.checked) same.checked = false;   // the button below does this now
+  if (tools) tools.hidden = false;
+  const m = soMode();
+  if (il) il.hidden = m !== 'different';
+  setText(il, 'Invoice description (the client sees this)');
+  follow(jd, null);
+  follow(inv, m === 'same' && jd ? jd.value : null);
+  const ib = $('so-inv'), dif = $('so-diff'), ai = $('so-ai'), iai = $('so-invai');
+  if (ib) { const t = m === 'same' ? '✓ Used as invoice description (tap to stop)' : 'Use as invoice description'; if (ib.textContent !== t) ib.textContent = t; ib.classList.toggle('on', m === 'same'); }
+  if (dif) dif.checked = m === 'different';
+  if (ai) ai.hidden = !scAiOn(); if (iai) iai.hidden = !scAiOn() || m !== 'different';
+  const st = $('so-state'); if (st) { const t = m === 'same' ? 'Invoice description: the same as the Scope of Work.' : m === 'different' ? 'Invoice description: your own, below.' : 'Invoice description: not set yet. After the job, ✍️ Write invoice description puts the Scope of Work in past tense for you to check.'; if (st.textContent !== t) st.textContent = t; }
+  const t3 = document.querySelector('#qs-3 .qs-t'); if (t3 && t3.textContent !== 'Scope of Work') t3.textContent = 'Scope of Work';
+  const c3 = document.querySelector('#qs-nav [data-qsgo="3"] span'); if (c3 && c3.textContent !== 'Scope') c3.textContent = 'Scope';
+  soSm8Render();
   if (typeof ipSync === 'function') ipSync();
 }
+// invoice description mode, saved with the quote (drafts, versions): none | same | different
+function soMode() { const v = (document.getElementById('q-inv-mode') || {}).value || ''; return v === 'same' || v === 'different' ? v : 'none'; }
+function soSetMode(m) { const h = document.getElementById('q-inv-mode'); if (!h) return; h.value = m; h.dispatchEvent(new Event('input', { bubbles: true })); }
+// what Send to SM8 puts in the invoice description: nothing unless "Use as" or "Different" is chosen
+function soInvoice() {
+  const v = id => ((document.getElementById(id) || {}).value || '').trim();
+  if (!scOn()) return v('q-invoice-desc');
+  const m = soMode(); return m === 'same' ? v('q-job-desc') : m === 'different' ? v('q-invoice-desc') : '';
+}
+// old drafts: text in the retired scope box moves into Scope of Work; the invoice mode comes from what was there
+function soMigrate() {
+  const $ = id => document.getElementById(id), sc = $('q-scope'), jd = $('q-job-desc'), inv = $('q-invoice-desc'), mode = $('q-inv-mode');
+  if (mode && !mode.value) {   // decide from the boxes as they were, before anything is moved
+    const iv = (inv && inv.value.trim()) || '', j = (jd && jd.value.trim()) || '';
+    if (iv) soSetMode(iv === j ? 'same' : 'different');
+  }
+  if (sc && jd && sc.value.trim()) {
+    const a = jd.value.trim(), b = sc.value.trim();
+    sc.value = ''; sc.dispatchEvent(new Event('input', { bubbles: true }));   // empty the old box first, so this runs once
+    const u = $('q-scope-use'); if (u && u.value) { u.value = ''; u.dispatchEvent(new Event('input', { bubbles: true })); }
+    jd.value = !a ? b : a === b || a.includes(b) ? a : a + '\n\n' + b;
+    jd.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+}
+// ServiceM8's job description for this job (read with the client details): shown, never overwritten without asking
+const soSm8 = {};
+function soImport(job, text) {
+  text = String(text || '').trim(); soSm8[job] = text;
+  const kept = document.getElementById('so-sm8'); if (kept) kept.dataset.kept = '';
+  if (!scOn() || !text) return soSm8Render();
+  const jd = document.getElementById('q-job-desc'); if (!jd || cqJob() !== job) return;
+  if (!jd.value.trim()) { jd.value = text; jd.dispatchEvent(new Event('input', { bubbles: true })); soNote('Brought in from ServiceM8 (the job description already on job ' + job + ').'); }
+  soSm8Render();
+}
+function soSm8Render() {
+  const el = document.getElementById('so-sm8'); if (!el) return;
+  const job = typeof cqJob === 'function' ? cqJob() : '', s = soSm8[job] || '', jd = ((document.getElementById('q-job-desc') || {}).value || '').trim();
+  const show = scOn() && s && jd && jd !== s && !el.dataset.kept;
+  el.hidden = !show; if (!show) return;
+  const html = '<b>ServiceM8 already has a different job description for job ' + escHtml(job) + ':</b><div class="so-old">' + escHtml(s.slice(0, 600)) + '</div><div class="so-btns"><button type="button" class="q-btn" data-so="usesm8">Use ServiceM8’s</button><button type="button" class="q-btn" data-so="keep">Keep mine (asks again when sending)</button></div>';
+  if (el.innerHTML !== html) el.innerHTML = html;
+}
+function soNote(t) { const n = document.getElementById('so-note'); if (n) n.textContent = t; }
+// Send to SM8: if ServiceM8 has a different job description, show old and new and ask first (no = leave ServiceM8's)
+function soConfirmJobDesc(job, text) {
+  if (!scOn() || !text) return true;
+  const s = soSm8[job]; if (!s || s === text.trim()) return true;
+  return confirm('Job ' + job + ' already has a job description in ServiceM8.\n\nNow in ServiceM8:\n' + s.slice(0, 500) + '\n\nYour Scope of Work:\n' + text.slice(0, 500) + '\n\nOK = replace it (the old one is kept in our archive). Cancel = leave ServiceM8’s as it is and send the rest.');
+}
+async function soWriteAi() {
+  const jd = document.getElementById('q-job-desc'), items = scItems();
+  if (!items.length) return showToast('Add bundles or products first');
+  if (jd.value.trim() && !confirm('Replace the Scope of Work you typed with an AI draft?\n\n(Cancel keeps what you typed.)')) return;
+  soNote('✨ Writing a draft…');
+  let t, okAi = true, notes = [];
+  try { const r = await scWrite({ mode: 'scope', items }, items.map(x => x.name + ' ' + x.desc).join(' ')); t = r.text; notes = r.notes; } catch (e) { t = scPlain(items); okAi = false; notes = e.notes || []; }
+  if (!okAi) notes = notes.concat(items.filter(x => x.bundle && !x.desc).map(x => '“' + x.name + '” has no description, so its name was used.')).filter((v, i, a) => a.indexOf(v) === i);
+  jd.value = t; jd.dispatchEvent(new Event('input', { bubbles: true }));
+  soNote((okAi ? '✨ AI draft, made only from the bundles and products on this quote.' : 'The AI draft wasn’t available, so this lists the bundles from their own descriptions.') + ' Read it and change anything before sending.' + (notes.length ? ' For the owner: ' + notes.join(' ') : ''));
+  scSync();
+}
+async function soInvAi() {
+  const inv = document.getElementById('q-invoice-desc'), jdv = ((document.getElementById('q-job-desc') || {}).value || '').trim();
+  const lines = quote.filter(i => i.id !== 'discount' && i.type !== 'labour').map(i => (Number(i.qty) !== 1 ? i.qty + ' x ' : '') + i.name);
+  const src = jdv || (lines.length ? 'Supply and install ' + lines.join(', ') + '.' : '');
+  if (!src) return showToast('Type the Scope of Work first');
+  if (inv.value.trim() && !confirm('Replace the invoice description you typed with an AI draft?')) return;
+  soNote('✨ Writing the invoice description in past tense…');
+  let t, okAi = true;
+  try { t = (await scWrite({ mode: 'past', text: src + (jdv && lines.length ? '\nQuote lines: ' + lines.join(', ').slice(0, 300) : '') }, src)).text; } catch (e) { t = ipPastPlain(src); okAi = false; }
+  inv.value = t; inv.dispatchEvent(new Event('input', { bubbles: true }));
+  soNote((okAi ? '✨ AI draft (past tense).' : 'The AI draft wasn’t available, so the verbs were changed to past tense here.') + ' Check it before sending.');
+}
+document.addEventListener('click', e => {
+  const t = e.target; if (!t.closest) return;
+  if (t.closest('#so-ai')) return soWriteAi();
+  if (t.closest('#so-invai')) return soInvAi();
+  if (t.closest('#so-inv')) { soSetMode(soMode() === 'same' ? 'none' : 'same'); return scSync(); }
+  const b = t.closest('[data-so]'); if (!b) return;
+  const el = document.getElementById('so-sm8'), job = cqJob();
+  if (b.dataset.so === 'usesm8') { const jd = document.getElementById('q-job-desc'); if (jd.value.trim() && !confirm('Replace your Scope of Work with ServiceM8’s job description?\n\nYours:\n' + jd.value.slice(0, 400))) return; jd.value = soSm8[job]; jd.dispatchEvent(new Event('input', { bubbles: true })); }
+  if (b.dataset.so === 'keep' && el) el.dataset.kept = '1';
+  scSync();
+});
+document.addEventListener('change', e => { if (e.target && e.target.id === 'so-diff') { soSetMode(e.target.checked ? 'different' : 'none'); scSync(); } });
 document.addEventListener('change', e => {
   const c = e.target.closest && e.target.closest('[data-scuse]'); if (!c) return;
   const u = scUse(); if (c.checked) u.add(c.dataset.scuse); else u.delete(c.dataset.scuse);
@@ -6834,9 +6958,9 @@ function qsBuild() {
   // 2 client details
   mv(2, $('cq-client'), true); add(2, '<div class="qs-off">Client details come with the client quote link, which is switched off here.</div>');
   // 3 job description (+ use it as the invoice description)
-  mv(3, $('sc-box')); mv(3, $('sc-bundle')); mv(3, lab('q-job-desc'));
+  mv(3, $('sc-box')); mv(3, $('sc-bundle')); mv(3, lab('q-job-desc')); mv(3, $('so-sm8')); mv(3, $('so-tools'));
   add(3, '<label class="qs-same"><input type="checkbox" id="qs-same"> Also use this as the invoice description (the client sees it)</label>');
-  mv(3, lab('q-invoice-desc')); mv(3, $('ip-box')); mv(3, sum.querySelector('.qt-job > .qt-inv-hint'));
+  mv(3, lab('q-invoice-desc')); mv(3, $('so-invai')); mv(3, $('ip-box')); mv(3, sum.querySelector('.qt-job > .qt-inv-hint'));
   // 4 photos and markup
   mv(4, cq.querySelector(':scope > .cq-sub'), true); mv(4, cq.querySelector(':scope > .qn-btns'), true); mv(4, $('cq-jobpick'), true); mv(4, $('cq-list'), true); mv(4, cq.querySelector(':scope > .qt-inv-hint'), true);
   add(4, '<div class="qs-off">Photos for the client come with the client quote link, which is switched off here. Job diary photos are in step 6.</div>');
