@@ -288,6 +288,11 @@ a.pl-btn.rl-tech{text-decoration:none;display:inline-flex;align-items:center;min
 .eq-list{margin-top:6px;font-size:13px}.eq-list summary{min-height:40px;display:flex;align-items:center;cursor:pointer;color:var(--text-mid);font-weight:600}
 .eq-row{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px}.eq-row input{width:22px;height:22px;flex-shrink:0}.eq-row small{color:var(--text-mid)}
 .eq-chg{min-height:40px;margin-top:4px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:600 13px var(--font);padding:0 12px;cursor:pointer}
+/* Clear quote */
+#qs-top{display:flex;justify-content:flex-end;padding:6px 10px 0;background:var(--surface)}
+.qs-clear{min-height:40px;padding:0 12px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:600 13px var(--font);cursor:pointer}
+.qs-on .quote-actions .q-btn[onclick="clearQuote()"]{display:none}
+#clr-undo{position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:1200;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:#111;color:#fff;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.3)}#clr-undo[hidden]{display:none}#clr-undo span{flex:1}#clr-undo button{min-height:44px;min-width:72px;border:0;border-radius:10px;background:#f59e0b;color:#111;font:700 14px var(--font)}
 /* DISCOUNT_LADDER */
 .ld{margin-top:8px;padding:8px 10px;border:1px solid var(--border2);border-radius:10px;display:flex;flex-direction:column;gap:6px;font-size:13px}
 .ld-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ld-row input{width:70px;min-height:40px;font-size:16px;padding:4px 6px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text)}
@@ -7110,6 +7115,44 @@ document.addEventListener('click', e => {
   const rm = t.closest('[data-ldrm]'); if (rm) { L.levels.splice(+rm.dataset.ldrm, 1); ldSet(L); }
 });
 
+
+// ── CLEAR QUOTE (QUOTE_STEPS=on, logged in) ───────────────────────────────────────────────────────────
+// One "Clear quote" at the top of the steps. It asks first; job number and client details stay unless the tick says
+// so. The quote is kept first (a draft copy, and a saved version when versions are on), and Undo puts it back. Only
+// this phone's screen is cleared: nothing sent to ServiceM8 or to a client link changes. Photos stay with the job.
+let qsUndo = null;
+function qsClearAsk() {
+  if (!quote.some(i => i.id !== 'discount') && !document.querySelectorAll('[data-qtext]').length) return;
+  const old = document.getElementById('clr-back'); if (old) old.remove();
+  const back = document.createElement('div'); back.className = 'rp-back'; back.id = 'clr-back';
+  back.innerHTML = '<div class="rp-card" role="dialog" aria-modal="true" aria-labelledby="clr-t"><h3 id="clr-t">Clear this quote and start again?</h3>'
+    + '<div class="rp-small">A copy is kept in your saved quotes, and you can Undo straight after. Nothing already sent to ServiceM8 or to the client changes.</div>'
+    + '<label class="qs-same"><input type="checkbox" id="clr-all"> Also clear job number and client details</label>'
+    + '<div class="rp-row"><button type="button" class="q-btn" id="clr-no">Cancel</button><button type="button" class="rp-send" id="clr-yes">Clear</button></div></div>';
+  document.body.appendChild(back);
+  back.addEventListener('click', e => { if (e.target === back) back.remove(); });
+  document.getElementById('clr-no').onclick = () => back.remove();
+  document.getElementById('clr-yes').onclick = async () => { const all = document.getElementById('clr-all').checked; back.remove(); await qsClear(all); };
+}
+async function qsClear(all) {
+  const snap = qdSnap(), job = (document.getElementById('job-number-input') || {}).value || '';
+  if (typeof vrOn === 'function' && vrOn() && typeof vrPush === 'function') { try { await vrPush(); } catch (e) {} }   // a saved version too
+  if (typeof qdStash === 'function') qdStash('cleared');
+  qdClearScreen();
+  if (!all && job) { const jn = document.getElementById('job-number-input'); jn.value = job; qdJob = job; jn.dispatchEvent(new Event('input', { bubbles: true })); if (typeof cqRender === 'function') cqRender(); }
+  if (typeof qdRenderList === 'function') qdRenderList();
+  qsUndo = snap;
+  let bar = document.getElementById('clr-undo');
+  if (!bar) { bar = document.createElement('div'); bar.id = 'clr-undo'; document.body.appendChild(bar); }
+  bar.innerHTML = '<span>Quote cleared. A copy is in your saved quotes.</span><button type="button" id="clr-undo-b">Undo</button>'; bar.hidden = false;
+  clearTimeout(qsClear.t); qsClear.t = setTimeout(() => { bar.hidden = true; }, 20000);
+  if (typeof qsOpen === 'function') qsOpen(1, true);
+}
+document.addEventListener('click', e => {
+  if (e.target.closest && e.target.closest('#qs-clear')) return qsClearAsk();
+  if (e.target.closest && e.target.closest('#clr-undo-b')) { const bar = document.getElementById('clr-undo'); if (bar) bar.hidden = true; if (qsUndo) { qdApply(qsUndo); qsUndo = null; showToast('Quote back as it was'); } }
+});
+
 // ── SCOPE OF WORK (SCOPE_OF_WORK=on, logged in) ──────────────────────────────
 // One optional box for the whole job's scope, with three ticks: the quote description (client quote page and PDF),
 // the invoice description (ServiceM8 Billing, work_done_description) and the job description (ServiceM8 Details,
@@ -7271,6 +7314,7 @@ function qsBuild() {
   const steps = document.createElement('div'); steps.id = 'qs-steps';
   steps.innerHTML = QS_STEPS.map(([n, t]) => '<section class="qs-step" id="qs-' + n + '"><div class="qs-hd" role="button" tabindex="0" aria-expanded="false" data-qsbar="' + n + '"><span class="qs-n">' + n + '</span><span class="qs-tt"><span class="qs-t">' + t + '</span><span class="qs-sum"></span></span><span class="qs-st"></span><span class="qs-chev" aria-hidden="true">▾</span></div><div class="qs-body"></div></section>').join('');
   wrap.insertBefore(steps, wrap.firstChild); wrap.insertBefore(nav, steps);
+  const top = document.createElement('div'); top.id = 'qs-top'; top.innerHTML = '<button type="button" class="qs-clear" id="qs-clear">🗑 Clear quote</button>'; wrap.insertBefore(top, nav);
   const body = n => steps.querySelector('#qs-' + n + ' .qs-body');
   const mv = (n, node, cq) => { if (node) { if (cq) node.setAttribute('data-qscq', ''); body(n).appendChild(node); } };
   const add = (n, html) => body(n).insertAdjacentHTML('beforeend', html);
